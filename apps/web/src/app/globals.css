@@ -7,6 +7,32 @@
         --r-sm: 8px;
         --r: 16px;
         --r-lg: 24px;
+
+        /* Light Mode Colors */
+        --color-white: #ffffff;
+        --color-ink: #1A0050;
+        --color-body: #534875;
+        --color-muted: #8E82AA;
+        --color-border: #EAE4F7;
+        --color-bg: #F7F7F9;
+
+        --color-gray-50: #F9FAFB;
+        --color-gray-100: #F3F4F6;
+        --color-violet-950: #170B3B;
+    }
+
+    .dark {
+        /* Dark Mode Colors (Black Matte Theme) */
+        --color-white: #121212;
+        --color-ink: #F7F7F9;
+        --color-body: #D1D5DB; /* Lighter body text for contrast */
+        --color-muted: #9CA3AF; /* Lighter muted text for contrast */
+        --color-border: #2A2A2A;
+        --color-bg: #000000;
+        
+        --color-gray-50: #1C1C1C; /* Replaces gray-50 on hovers/table-headers */
+        --color-gray-100: #262626; /* Replaces gray-100 */
+        --color-violet-950: #0A0A0A; /* Replaces the purple sidebar with black */
     }
 
     * {

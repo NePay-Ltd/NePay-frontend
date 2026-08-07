@@ -24,7 +24,11 @@ const config: Config = {
                     "600": "#6C2FF2",
                     "700": "#4C00B4",
                     "800": "#3A00A8",
-                    "950": "#2A0080",
+                    "950": "var(--color-violet-950)",
+                },
+                gray: {
+                    50: "var(--color-gray-50)",
+                    100: "var(--color-gray-100)",
                 },
                 green: {
                     "500": "#00B074",
@@ -35,11 +39,13 @@ const config: Config = {
                 amber: {
                     "500": "#090908ff",
                 },
-                ink: "#1A0050",
-                body: "#3D2F6E",
-                muted: "#8E82AA",
-                border: "#EAE4F7",
-                bg: "#F6F3FF",
+                white: "var(--color-white)",
+                trueWhite: "#ffffff",
+                ink: "var(--color-ink)",
+                body: "var(--color-body)",
+                muted: "var(--color-muted)",
+                border: "var(--color-border)",
+                bg: "var(--color-bg)",
             },
             fontFamily: {
                 sans: ["var(--font-sans)", "system-ui", "sans-serif"],

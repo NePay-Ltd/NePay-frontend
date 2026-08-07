@@ -1,198 +1,255 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { 
-    Tag, 
-    ShoppingCart, 
-    Smartphone, 
+    Layers, 
+    ShoppingBag, 
+    Music, 
+    Play, 
     Gamepad2, 
-    CheckCircle2, 
-    Camera, 
-    Banknote,
-    ChevronRight,
-    Loader2
+    Tag
 } from "lucide-react";
-
+import { Button } from "@/components/shared/button";
 import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/format";
-import { useGiftCardEarnings, useGiftCardRates } from "@/lib/queries/gift-cards";
 
-import { Panel, PanelHeader, PanelBody } from "@/components/shared/panel";
-import { Button } from "@/components/shared/button";
-import { RowItem } from "@/components/shared/row-item";
+// Dummy data
+const CATEGORIES = [
+    { id: "all", label: "All cards", icon: Layers, count: 4, active: true },
+    { id: "amazon", label: "Amazon", icon: ShoppingBag, count: 1 },
+    { id: "itunes", label: "iTunes", icon: Music, count: 1 },
+    { id: "google-play", label: "Google Play", icon: Play, count: 1 },
+    { id: "steam", label: "Steam", icon: Gamepad2, count: 1 },
+];
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-const BRANDS = [
-    { id: "amazon", label: "Amazon", icon: ShoppingCart, color: "text-orange-500", bg: "bg-orange-50" },
-    { id: "itunes", label: "iTunes / Apple", icon: Smartphone, color: "text-black", bg: "bg-gray-100" },
-    { id: "google-play", label: "Google Play", icon: Tag, color: "text-blue-500", bg: "bg-blue-50" },
-    { id: "steam", label: "Steam", icon: Gamepad2, color: "text-indigo-900", bg: "bg-indigo-50" },
+const GIFT_CARDS = [
+    {
+        id: "amazon",
+        name: "Amazon",
+        desc: "USA · physical & e-code",
+        rate: "Up to 92%",
+        bgColor: "bg-[#1E293B]", // Slate 900
+        icon: ShoppingBag,
+    },
+    {
+        id: "itunes",
+        name: "iTunes",
+        desc: "USA · e-code only",
+        rate: "Up to 90%",
+        bgColor: "bg-[#A855F7]", // Purple 500
+        icon: Music,
+    },
+    {
+        id: "google-play",
+        name: "Google Play",
+        desc: "USA · e-code only",
+        rate: "Up to 90%",
+        bgColor: "bg-[#22C55E]", // Green 500
+        icon: Play,
+    },
+    {
+        id: "steam",
+        name: "Steam Wallet",
+        desc: "USA · e-code only",
+        rate: "Up to 88%",
+        bgColor: "bg-[#334155]", // Slate 700
+        icon: Gamepad2,
+    },
 ];
 
 export default function GiftCardsPage() {
-    const router = useRouter();
-    const [activeFilter, setActiveFilter] = React.useState<string>("all");
-
-    // Queries
-    const { data: earnings, isLoading: earningsLoading } = useGiftCardEarnings();
-    const { data: rates = {}, isLoading: ratesLoading } = useGiftCardRates();
-
-    // Derived Data
-    const filteredBrands = React.useMemo(() => {
-        if (activeFilter === "all") return BRANDS;
-        return BRANDS.filter((b) => b.id === activeFilter);
-    }, [activeFilter]);
+    const [mode, setMode] = React.useState<"buy" | "sell">("sell");
 
     return (
-        <div className="mx-auto max-w-5xl space-y-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between text-center md:text-left">
+        <div className="">
+            
+            {/* Page Header */}
+            <div className="mb-6 flex flex-col items-start sm:mb-8 sm:flex-row sm:items-end sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-ink">Gift Cards</h1>
-                    <p className="mt-2 text-sm text-body">
-                        Sell your unused gift cards for instant cash.
+                    <h1 className="text-xl font-extrabold tracking-tight text-ink sm:text-3xl">
+                        Gift cards
+                    </h1>
+                    <p className="mt-0.5 text-sm font-medium text-body">
+                        {mode === "sell" ? "Sell cards at today's rates" : "Buy cards for your subscriptions"}
                     </p>
                 </div>
-                <Button 
-                    variant="primary" 
-                    size="lg" 
-                    onClick={() => router.push("/gift-cards/sell/amazon")}
-                    className="shrink-0"
-                >
-                    Sell a Card
-                </Button>
+                
+                {/* Buy / Sell Toggle */}
+                <div className="flex rounded-xl border border-border bg-gray-50 p-1 shadow-sm">
+                    <button
+                        onClick={() => setMode("buy")}
+                        className={cn(
+                            "rounded-lg px-6 py-2 text-sm font-bold transition-all",
+                            mode === "buy" ? "bg-white text-ink shadow-sm ring-1 ring-black/5" : "text-muted hover:text-ink"
+                        )}
+                    >
+                        Buy Cards
+                    </button>
+                    <button
+                        onClick={() => setMode("sell")}
+                        className={cn(
+                            "rounded-lg px-6 py-2 text-sm font-bold transition-all",
+                            mode === "sell" ? "bg-white text-ink shadow-sm ring-1 ring-black/5" : "text-muted hover:text-ink"
+                        )}
+                    >
+                        Sell Cards
+                    </button>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-10">
-                {/* ── Left Sidebar (Filters & Earnings) ── */}
-                <div className="space-y-6 md:col-span-4">
-                    <Panel>
-                        <PanelHeader title="Brands" />
-                        <PanelBody className="p-0">
-                            <div className="flex flex-col">
-                                <button
-                                    className={cn(
-                                        "flex items-center justify-between px-5 py-3 text-left text-sm font-medium transition-colors",
-                                        activeFilter === "all" ? "bg-violet-50 text-violet-700" : "text-ink hover:bg-gray-50"
-                                    )}
-                                    onClick={() => setActiveFilter("all")}
-                                >
-                                    All Cards
-                                    <span className="flex h-5 items-center justify-center rounded-full bg-gray-100 px-2 text-xs text-muted">
-                                        {BRANDS.length}
-                                    </span>
-                                </button>
-                                {BRANDS.map((brand) => (
+            <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-4 xl:gap-8">
+                
+                {/* Left Sidebar */}
+                <div className="space-y-6">
+                    {/* Navigation Menu */}
+                    <nav className="rounded-[24px] border border-border bg-white p-3 shadow-sm">
+                        <ul className="space-y-1">
+                            {CATEGORIES.map((cat) => (
+                                <li key={cat.id}>
                                     <button
-                                        key={brand.id}
                                         className={cn(
-                                            "flex items-center justify-between px-5 py-3 text-left text-sm font-medium transition-colors border-t border-border",
-                                            activeFilter === brand.id ? "bg-violet-50 text-violet-700" : "text-ink hover:bg-gray-50"
+                                            "flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-colors",
+                                            cat.active 
+                                                ? "bg-violet-100 text-violet-700" 
+                                                : "text-body hover:bg-violet-50 hover:text-violet-900"
                                         )}
-                                        onClick={() => setActiveFilter(brand.id)}
                                     >
-                                        <div className="flex items-center gap-2">
-                                            <brand.icon className={cn("h-4 w-4", brand.color)} />
-                                            {brand.label}
+                                        <div className="flex items-center gap-3">
+                                            <cat.icon className={cn("h-4 w-4", cat.active ? "text-violet-700" : "text-muted")} />
+                                            {cat.label}
                                         </div>
+                                        <span className={cn("text-xs font-bold", cat.active ? "text-violet-700" : "text-muted")}>
+                                            {cat.count}
+                                        </span>
                                     </button>
-                                ))}
-                            </div>
-                        </PanelBody>
-                    </Panel>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
 
-                    <Panel>
-                        <PanelBody className="p-6">
-                            <h3 className="text-sm font-medium text-muted">Earned this month</h3>
-                            {earningsLoading ? (
-                                <div className="mt-2 flex items-center gap-2 text-muted">
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    <span className="text-sm">Loading...</span>
-                                </div>
-                            ) : (
-                                <div className="mt-2">
-                                    <div className="font-mono text-3xl font-bold text-ink">
-                                        {formatNaira(earnings?.totalNgn || 0)}
-                                    </div>
-                                    <p className="mt-1 text-sm text-green-600 font-medium">
-                                        {earnings?.cardsSold || 0} cards sold
-                                    </p>
-                                </div>
-                            )}
-                        </PanelBody>
-                    </Panel>
+                    {/* Stats Card */}
+                    <div className="rounded-[24px] border border-border bg-white p-5 shadow-sm">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted">
+                            {mode === "sell" ? "Earned this month" : "Spent this month"}
+                        </p>
+                        <p className="mt-2 font-sans tabular-nums text-2xl font-extrabold text-ink tracking-tighter leading-none">
+                            {mode === "sell" ? formatNaira(45000) : formatNaira(12500)}
+                        </p>
+                        <p className="mt-4 text-xs font-medium text-body leading-relaxed">
+                            {mode === "sell" ? "From one Amazon card sold on 17 May." : "On Apple and Spotify subscriptions."}
+                        </p>
+                    </div>
                 </div>
 
-                {/* ── Main Area (Grid & Steps) ── */}
-                <div className="space-y-8 md:col-span-8">
-                    <section className="space-y-4">
-                        <h2 className="text-lg font-semibold text-ink">Today&apos;s Rates</h2>
-                        {ratesLoading ? (
-                            <div className="flex items-center justify-center p-10 text-muted">
-                                <Loader2 className="h-6 w-6 animate-spin" />
+                {/* Right Content */}
+                <div className="xl:col-span-3 space-y-8">
+                    
+                    {/* Today's Rates Section */}
+                    <div className="rounded-[24px] border border-border bg-white p-6 shadow-sm sm:p-8">
+                        {/* Header */}
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+                            <div>
+                                <h2 className="text-[18px] font-extrabold text-ink">{mode === "sell" ? "Today's rates" : "Available to buy"}</h2>
+                                <p className="text-sm font-medium text-body mt-1">
+                                    {mode === "sell" ? "Rates refresh every hour — the rate you see is the rate you get" : "Purchase digital codes delivered instantly to your email"}
+                                </p>
                             </div>
-                        ) : (
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                {filteredBrands.map((brand) => (
-                                    <button
-                                        key={brand.id}
-                                        onClick={() => router.push(`/gift-cards/sell/${brand.id}`)}
-                                        className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-border bg-white p-5 text-left shadow-sm transition-all hover:border-violet-300 hover:shadow-md"
-                                    >
-                                        <div className="flex items-start justify-between">
-                                            <div className={cn("flex h-12 w-12 items-center justify-center rounded-lg", brand.bg)}>
-                                                <brand.icon className={cn("h-6 w-6", brand.color)} />
-                                            </div>
-                                            <ChevronRight className="h-5 w-5 text-muted opacity-0 transition-opacity group-hover:opacity-100" />
-                                        </div>
-                                        <div className="mt-4">
-                                            <h3 className="font-semibold text-ink">{brand.label}</h3>
-                                            <p className="text-xs text-muted">Sell Gift Card</p>
-                                            <div className="mt-3 flex items-baseline gap-1">
-                                                <span className="text-sm font-medium text-body">Up to</span>
-                                                <span className="text-lg font-bold text-green-500">
-                                                    {formatNaira(rates[brand.id] || 0)}
-                                                </span>
-                                                <span className="text-xs font-medium text-muted">/ USD</span>
-                                            </div>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </section>
+                            <Button className="shrink-0 bg-violet-700 text-white font-bold rounded-xl px-5 py-2.5 shadow-sm hover:bg-violet-600">
+                                <Tag className="mr-2 h-4 w-4" />
+                                {mode === "sell" ? "Sell a card" : "Buy a card"}
+                            </Button>
+                        </div>
 
-                    <section>
-                        <Panel>
-                            <PanelHeader title="Selling a Card" />
-                            <PanelBody className="p-6">
-                                <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-                                    <div className="flex flex-col items-center text-center">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 text-violet-700">
-                                            <Tag className="h-6 w-6" />
-                                        </div>
-                                        <h4 className="mt-3 font-semibold text-ink">1. Pick your card</h4>
-                                        <p className="mt-1 text-xs text-muted">Select the brand and check today&apos;s rate.</p>
+                        {/* Cards Grid */}
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                            {GIFT_CARDS.map((card) => (
+                                <div key={card.id} className="overflow-hidden rounded-[20px] border border-border shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md">
+                                    <div className={cn("flex h-[120px] items-center justify-center text-white", card.bgColor)}>
+                                        <card.icon className="h-10 w-10 opacity-90" />
                                     </div>
-                                    <div className="flex flex-col items-center text-center">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 text-violet-700">
-                                            <Camera className="h-6 w-6" />
+                                    <div className="p-4 bg-white">
+                                        <h3 className="font-extrabold text-ink text-[15px]">{card.name}</h3>
+                                        <p className="text-[11px] font-medium text-muted mt-0.5">{card.desc}</p>
+                                        <div className="mt-4 inline-flex items-center rounded-lg bg-green-50 px-2 py-1 text-[11px] font-bold text-green-700">
+                                            {mode === "sell" ? card.rate : "Available now"}
                                         </div>
-                                        <h4 className="mt-3 font-semibold text-ink">2. Upload code</h4>
-                                        <p className="mt-1 text-xs text-muted">Type the code or upload a clear photo.</p>
-                                    </div>
-                                    <div className="flex flex-col items-center text-center">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 text-violet-700">
-                                            <CheckCircle2 className="h-6 w-6" />
-                                        </div>
-                                        <h4 className="mt-3 font-semibold text-ink">3. Get paid</h4>
-                                        <p className="mt-1 text-xs text-muted">Receive cash instantly once verified.</p>
+                                        <Button variant="quiet" className="mt-4 w-full bg-violet-50 text-violet-700 font-bold hover:bg-violet-100 rounded-xl h-10">
+                                            {mode === "sell" ? "Sell this card" : "Buy this card"}
+                                        </Button>
                                     </div>
                                 </div>
-                            </PanelBody>
-                        </Panel>
-                    </section>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Instructions Section */}
+                    {mode === "sell" ? (
+                        <div className="rounded-[24px] border border-border bg-white p-6 shadow-sm sm:p-8">
+                            <h2 className="text-[15px] font-extrabold text-ink mb-6">Selling a card</h2>
+                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-8">
+                                <div className="flex gap-4">
+                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-bold text-violet-700">
+                                        1
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-bold text-ink">Pick the card and amount</h3>
+                                        <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Choose the brand, country and face value you're holding.</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4">
+                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-bold text-violet-700">
+                                        2
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-bold text-ink">Upload the code or photo</h3>
+                                        <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Clear photos of the back, or paste the e-code directly.</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4">
+                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-bold text-violet-700">
+                                        3
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-bold text-ink">Get paid in naira</h3>
+                                        <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Most cards are reviewed and paid within 10 minutes.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="rounded-[24px] border border-border bg-white p-6 shadow-sm sm:p-8">
+                            <h2 className="text-[15px] font-extrabold text-ink mb-6">Buying a card</h2>
+                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-8">
+                                <div className="flex gap-4">
+                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-bold text-violet-700">
+                                        1
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-bold text-ink">Select brand and value</h3>
+                                        <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Pick the gift card you want and select the denomination.</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4">
+                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-bold text-violet-700">
+                                        2
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-bold text-ink">Pay from wallet</h3>
+                                        <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Complete the purchase instantly using your Naira balance.</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4">
+                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-bold text-violet-700">
+                                        3
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-bold text-ink">Get your code</h3>
+                                        <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Your digital code is revealed immediately and sent to your email.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

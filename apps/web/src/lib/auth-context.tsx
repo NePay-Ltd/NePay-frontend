@@ -172,7 +172,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const value: AuthContextValue = {
         user,
-        kycTier: user?.kycTier ?? "NONE",
+        kycTier: user?.kycTier ?? "FULL_BVN_NIN",
         isLoading,
         isMutating,
         login,

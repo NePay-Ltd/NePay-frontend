@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 import { useUiStore } from "@/lib/stores/ui-store";
-import { SIDEBAR_NAV } from "@/lib/navigation";
+import { SIDEBAR_GROUPS } from "@/lib/navigation";
 import { fetchSearch, type SearchHit } from "@/lib/mock-overview";
 import {
     CommandDialog,
@@ -162,7 +162,7 @@ export function CommandPalette() {
                         <CommandSeparator />
 
                         <CommandGroup heading="Navigate">
-                            {SIDEBAR_NAV.map((item) => {
+                            {SIDEBAR_GROUPS.flatMap((group) => group.items).map((item) => {
                                 const Icon = item.icon;
                                 return (
                                     <CommandItem

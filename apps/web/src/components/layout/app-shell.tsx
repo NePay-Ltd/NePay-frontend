@@ -4,16 +4,14 @@ import { Sidebar, MobileSidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/top-bar";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { CommandPalette } from "@/components/layout/command-palette";
-import { PrototypeBanner } from "@/components/shared/prototype-banner";
 
 export interface AppShellProps {
     children: React.ReactNode;
 }
 
-export function AppShell({ children }: AppShellProps) {
+export function AppShell({ children }: { children: React.ReactNode }) {
     return (
         <React.Fragment>
-            <PrototypeBanner />
             <Sidebar />
             <MobileSidebar />
 

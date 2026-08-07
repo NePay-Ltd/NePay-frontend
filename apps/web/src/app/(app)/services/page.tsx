@@ -55,13 +55,13 @@ export default function ServicesPage() {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-10">
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-12 xl:gap-10">
                 {/* ── Left Column (Service Tiles) ── */}
-                <div className="space-y-8 md:col-span-8">
+                <div className="space-y-8 xl:col-span-8">
                     
                     <section className="space-y-4">
                         <h2 className="text-lg font-semibold text-ink">Popular</h2>
-                        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4">
+                        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-4 xl:grid-cols-4">
                             <Tile 
                                 icon={Smartphone} 
                                 label="Airtime & Data" 
@@ -102,7 +102,7 @@ export default function ServicesPage() {
 
                     <section className="space-y-4">
                         <h2 className="text-lg font-semibold text-ink">More Services</h2>
-                        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4">
+                        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-4 xl:grid-cols-4">
                             <Tile icon={GraduationCap} label="Education" onClick={handleComingSoon} />
                             <Tile icon={Dices} label="Betting" onClick={handleComingSoon} />
                             <Tile icon={Shield} label="Insurance" onClick={handleComingSoon} />
@@ -116,7 +116,7 @@ export default function ServicesPage() {
                 </div>
 
                 {/* ── Right Column (Saved Billers & Promo) ── */}
-                <div className="space-y-6 md:col-span-4">
+                <div className="space-y-6 xl:col-span-4">
                     <Panel>
                         <PanelHeader title="Saved Billers" />
                         <PanelBody className="p-0">

@@ -7,33 +7,16 @@ import {
     Plus,
     Search,
     ArrowUpRight,
-    User as UserIcon,
-    ShieldCheck,
-    LogOut,
+    HelpCircle,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { format } from "date-fns";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";
 import { useUiStore } from "@/lib/stores/ui-store";
-import { useAuth } from "@/lib/auth-context";
 import { useUnreadNotificationCount } from "@/lib/queries/notifications";
 import { Button } from "@/components/shared/button";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-function getInitials(name: string): string {
-    const parts = name.trim().split(/\s+/);
-    if (parts.length === 0 || parts[0] === "") return "U";
-    const first = parts[0]?.[0] ?? "";
-    const last = parts.length > 1 ? parts[parts.length - 1]?.[0] ?? "" : "";
-    return (first + last).toUpperCase();
-}
 
 function Logo() {
     return (
@@ -46,16 +29,46 @@ function Logo() {
     );
 }
 
+function usePageHeaders() {
+    const pathname = usePathname();
+    const today = format(new Date(), "EEEE, d MMM");
+    
+    if (pathname.startsWith("/overview")) {
+        return { title: "Overview", subtitle: `${today} · Everything at a glance` };
+    }
+    if (pathname.startsWith("/wallet")) {
+        return { title: "Wallet", subtitle: "Balances, assets and limits" };
+    }
+    if (pathname.startsWith("/flights")) {
+        return { title: "Flights", subtitle: "Search and pay from your balance" };
+    }
+    if (pathname.startsWith("/transactions")) {
+        return { title: "Transactions", subtitle: "All your activity in one place" };
+    }
+    if (pathname.startsWith("/services")) {
+        return { title: "Services", subtitle: "Pay bills and buy airtime instantly" };
+    }
+    if (pathname.startsWith("/gift-cards")) {
+        return { title: "Gift Cards", subtitle: "Trade gift cards at the best rates" };
+    }
+    
+    // Default fallback
+    const title = pathname.split('/')[1] || "NePay";
+    return { 
+        title: title.charAt(0).toUpperCase() + title.slice(1).replace("-", " "), 
+        subtitle: "Manage your account" 
+    };
+}
+
 export function TopBar() {
     const toggleMobileSidebar = useUiStore((s) => s.toggleMobileSidebar);
     const setCommandOpen = useUiStore((s) => s.setCommandOpen);
-    const { user, logout, isMutating } = useAuth();
     const router = useRouter();
-    const userName = user?.name ?? "Guest";
     const { data: notificationCount = 0 } = useUnreadNotificationCount();
+    const { title, subtitle } = usePageHeaders();
 
     return (
-        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-border bg-white/90 px-4 backdrop-blur-md lg:h-16 lg:pl-6 lg:pr-8">
+        <header className="sticky top-0 z-20 flex h-[72px] items-center gap-3 border-b border-border bg-white/95 px-4 backdrop-blur-md lg:pl-10 lg:pr-8">
 
             {/* ── Mobile layout ──────────────────────────────────────────── */}
             {/* Hamburger — mobile only */}
@@ -74,15 +87,21 @@ export function TopBar() {
             </div>
 
             {/* ── Desktop layout ─────────────────────────────────────────── */}
-            {/* Search trigger — full on desktop, icon-only on mobile */}
+            {/* Page Header — desktop only */}
+            <div className="hidden lg:flex flex-col mr-8 min-w-[200px]">
+                <h1 className="text-xl font-extrabold tracking-tight text-ink">{title}</h1>
+                <p className="text-[13px] font-medium text-muted tracking-tight">{subtitle}</p>
+            </div>
+
+            {/* Search trigger */}
             <button
                 type="button"
                 onClick={() => setCommandOpen(true)}
-                className="group hidden h-10 flex-1 items-center gap-2 rounded-xl border border-border/60 bg-bg px-3 text-sm font-medium text-muted transition-all hover:bg-white hover:border-violet-300 sm:max-w-md shadow-sm hover:shadow lg:flex"
+                className="group hidden h-10 flex-1 items-center gap-2 rounded-xl border border-border bg-bg px-3 text-sm font-medium text-muted/80 transition-all hover:bg-white hover:border-violet-300 max-w-xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)] lg:flex"
             >
                 <Search className="h-4 w-4 text-muted group-hover:text-violet-500 transition-colors" />
-                <span className="flex-1 text-left">Search anything...</span>
-                <kbd className="hidden rounded bg-white px-2 py-0.5 text-[10px] font-bold text-ink sm:inline shadow-sm border border-border/50">
+                <span className="flex-1 text-left">Search transactions, services, banks...</span>
+                <kbd className="hidden rounded bg-white px-2 py-0.5 text-[10px] font-bold text-muted sm:inline shadow-sm border border-border/50">
                     &#8984;K
                 </kbd>
             </button>
@@ -100,73 +119,71 @@ export function TopBar() {
                 </button>
 
                 {/* Quick actions — desktop only */}
-                <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => router.push("/add-money")}
-                    className="hidden lg:inline-flex font-bold shadow hover:shadow-md"
-                >
-                    <Plus className="h-4 w-4" />
-                    Add Money
-                </Button>
-                <Button
-                    variant="quiet"
-                    size="sm"
-                    onClick={() => router.push("/withdraw")}
-                    className="hidden lg:inline-flex font-bold hover:bg-violet-50"
-                >
-                    <ArrowUpRight className="h-4 w-4" />
-                    Withdraw
-                </Button>
-
-                <div className="h-6 w-px bg-border/50 hidden lg:block" />
+                <div className="hidden lg:flex items-center gap-2 mr-2">
+                    <Button
+                        variant="quiet"
+                        size="sm"
+                        onClick={() => router.push("/add-money")}
+                        className="font-bold border border-border hover:bg-white shadow-sm hover:shadow text-ink h-9 px-4 rounded-lg"
+                    >
+                        <Plus className="mr-1.5 h-4 w-4" />
+                        Add money
+                    </Button>
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => router.push("/withdraw")}
+                        className="font-bold h-9 px-4 rounded-lg shadow-sm hover:shadow-md"
+                    >
+                        <ArrowUpRight className="mr-1.5 h-4 w-4" />
+                        Withdraw
+                    </Button>
+                </div>
 
                 {/* Notification bell */}
                 <button
                     type="button"
                     onClick={() => router.push("/notifications")}
-                    className="relative rounded-xl p-2 text-muted hover:bg-violet-50 hover:text-ink transition-all active:scale-95"
+                    className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-muted hover:bg-violet-50 hover:text-ink hover:border-violet-200 transition-all shadow-sm"
                     aria-label={`Notifications${notificationCount > 0 ? `, ${notificationCount} unread` : ""}`}
                 >
-                    <Bell className="h-5 w-5" />
+                    <Bell className="h-[18px] w-[18px]" />
                     {notificationCount > 0 ? (
-                        <span className="absolute right-1.5 top-1.5 flex h-2 w-2 items-center justify-center rounded-full bg-red-500 ring-2 ring-white" />
+                        <span className="absolute right-0 top-0 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-red-500 ring-2 ring-white" />
                     ) : null}
                 </button>
+                
+                {/* Theme Toggle */}
+                <button
+                    type="button"
+                    onClick={() => {
+                        const isDark = document.documentElement.classList.toggle('dark');
+                        if (isDark) {
+                            toast.success("Dark mode enabled (Preview)");
+                        } else {
+                            toast.success("Light mode enabled");
+                        }
+                    }}
+                    className="hidden lg:flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-muted hover:bg-violet-50 hover:text-ink hover:border-violet-200 transition-all shadow-sm"
+                    aria-label="Toggle theme"
+                >
+                    <svg className="h-[18px] w-[18px] dark:hidden" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                    </svg>
+                    <svg className="hidden h-[18px] w-[18px] dark:block" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                    </svg>
+                </button>
 
-                {/* Avatar menu */}
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <button
-                            type="button"
-                            className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-gradient text-xs font-bold text-white transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 lg:h-9 lg:w-9 lg:text-sm"
-                            aria-label="User menu"
-                        >
-                            {getInitials(userName)}
-                        </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56">
-                        <DropdownMenuLabel>{userName}</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => router.push("/profile")}>
-                            <UserIcon className="mr-2 h-4 w-4" />
-                            Profile
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push("/security")}>
-                            <ShieldCheck className="mr-2 h-4 w-4" />
-                            Security
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                            onClick={() => void logout()}
-                            disabled={isMutating}
-                            className="text-red-500 focus:bg-red-500/10 focus:text-red-500"
-                        >
-                            <LogOut className="mr-2 h-4 w-4" />
-                            {isMutating ? "Signing out…" : "Logout"}
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                {/* Help */}
+                <button
+                    type="button"
+                    onClick={() => router.push("/support")}
+                    className="hidden lg:flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-muted hover:bg-violet-50 hover:text-ink hover:border-violet-200 transition-all shadow-sm"
+                    aria-label="Help and Support"
+                >
+                    <HelpCircle className="h-[18px] w-[18px]" />
+                </button>
             </div>
         </header>
     );

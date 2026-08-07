@@ -149,19 +149,12 @@ export default function FlightsPage() {
     const getAirportCity = (code: string) => AIRPORTS.find(a => a.code === code)?.city || "Select Airport";
 
     return (
-        <div className="mx-auto max-w-5xl space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold text-ink">Flights</h1>
-                <p className="mt-2 text-sm text-body">
-                    Search and book flights with instant confirmation.
-                </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        <div className="space-y-8">
+            <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
                 {/* ── Main Search Area ── */}
-                <div className="space-y-6 lg:col-span-8">
-                    <Panel>
-                        <PanelBody className="p-6">
+                <div className="space-y-6 xl:col-span-8">
+                    <Panel className="rounded-[24px]">
+                        <PanelBody className="p-6 sm:p-8">
                             {/* Trip Types */}
                             <div className="flex flex-wrap items-center gap-2 mb-6">
                                 {["One-way", "Round Trip", "Multi-city"].map((type) => (
@@ -286,10 +279,10 @@ export default function FlightsPage() {
                 </div>
 
                 {/* ── Sidebar (Recent Searches) ── */}
-                <div className="lg:col-span-4">
-                    <Panel>
-                        <PanelHeader title="Recent Searches" />
-                        <PanelBody className="p-0">
+                <div className="xl:col-span-4">
+                    <Panel className="rounded-[24px]">
+                        <PanelHeader className="px-6 pt-6" title="Recent Searches" />
+                        <PanelBody className="px-2 pb-4">
                             {recentSearches.length === 0 ? (
                                 <div className="p-6 text-center text-sm text-muted">No recent searches</div>
                             ) : (
