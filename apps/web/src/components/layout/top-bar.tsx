@@ -11,9 +11,11 @@ import {
     ShieldCheck,
     LogOut,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { cn } from "@/lib/cn";
 import { useUiStore } from "@/lib/stores/ui-store";
+import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/shared/button";
 import {
     DropdownMenu,
@@ -27,13 +29,6 @@ import {
 export interface TopBarProps {
     /** Unread notification count for the bell badge. */
     notificationCount?: number;
-    /** User display name (for the avatar initials). */
-    userName?: string;
-    onAddMoney?: () => void;
-    onWithdraw?: () => void;
-    onNavigateProfile?: () => void;
-    onNavigateSecurity?: () => void;
-    onLogout?: () => void;
 }
 
 function getInitials(name: string): string {
@@ -46,15 +41,12 @@ function getInitials(name: string): string {
 
 export function TopBar({
     notificationCount = 0,
-    userName = "Chidi Okafor",
-    onAddMoney,
-    onWithdraw,
-    onNavigateProfile,
-    onNavigateSecurity,
-    onLogout,
 }: TopBarProps) {
     const toggleMobileSidebar = useUiStore((s) => s.toggleMobileSidebar);
     const setCommandOpen = useUiStore((s) => s.setCommandOpen);
+    const { user, logout, isMutating } = useAuth();
+    const router = useRouter();
+    const userName = user?.name ?? "Guest";
 
     return (
         <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-white/90 px-4 backdrop-blur-md lg:pl-6 lg:pr-8">
@@ -87,7 +79,7 @@ export function TopBar({
                 <Button
                     variant="primary"
                     size="sm"
-                    onClick={onAddMoney}
+                    onClick={() => router.push("/add-money")}
                     className="hidden sm:inline-flex"
                 >
                     <Plus className="h-4 w-4" />
@@ -96,7 +88,7 @@ export function TopBar({
                 <Button
                     variant="quiet"
                     size="sm"
-                    onClick={onWithdraw}
+                    onClick={() => router.push("/withdraw")}
                     className="hidden sm:inline-flex"
                 >
                     <ArrowUpRight className="h-4 w-4" />
@@ -132,21 +124,22 @@ export function TopBar({
                     <DropdownMenuContent align="end" className="w-56">
                         <DropdownMenuLabel>{userName}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={onNavigateProfile}>
+                        <DropdownMenuItem onClick={() => router.push("/profile")}>
                             <UserIcon className="mr-2 h-4 w-4" />
                             Profile
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={onNavigateSecurity}>
+                        <DropdownMenuItem onClick={() => router.push("/security")}>
                             <ShieldCheck className="mr-2 h-4 w-4" />
                             Security
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                            onClick={onLogout}
+                            onClick={() => void logout()}
+                            disabled={isMutating}
                             className="text-red-500 focus:bg-red-500/10 focus:text-red-500"
                         >
                             <LogOut className="mr-2 h-4 w-4" />
-                            Logout
+                            {isMutating ? "Signing out…" : "Logout"}
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

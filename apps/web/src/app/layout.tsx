@@ -3,7 +3,6 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 
 import "./globals.css";
 import { Providers } from "./providers";
-import { AppShell } from "@/components/layout/app-shell";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -35,11 +34,7 @@ export default function RootLayout({
             suppressHydrationWarning
         >
             <body className="font-sans antialiased">
-                <Providers>
-                    <AppShell notificationCount={3} userName="Chidi Okafor">
-                        {children}
-                    </AppShell>
-                </Providers>
+                <Providers>{children}</Providers>
             </body>
         </html>
     );

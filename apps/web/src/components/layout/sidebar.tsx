@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { X } from "lucide-react";
 
 import { cn } from "@/lib/cn";
@@ -29,8 +30,8 @@ function NavLink({
 }) {
     const Icon = item.icon;
     return (
-        <button
-            type="button"
+        <Link
+            href={item.href}
             onClick={onClick}
             className={cn(
                 "flex w-full items-center gap-3 rounded-sm px-3 py-2.5 text-sm font-medium transition-colors",
@@ -47,7 +48,7 @@ function NavLink({
                     {item.badge}
                 </span>
             ) : null}
-        </button>
+        </Link>
     );
 }
 

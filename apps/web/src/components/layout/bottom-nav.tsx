@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 
 import { cn } from "@/lib/cn";
 import { useUiStore } from "@/lib/stores/ui-store";
@@ -21,9 +22,9 @@ export function BottomNav() {
                 const active = activeNav === item.key;
 
                 return (
-                    <button
+                    <Link
                         key={item.key}
-                        type="button"
+                        href={item.href}
                         onClick={() => setActiveNav(item.key)}
                         className={cn(
                             "flex flex-1 flex-col items-center gap-1 py-2 transition-colors",
@@ -39,7 +40,7 @@ export function BottomNav() {
                             ) : null}
                         </span>
                         <span className="text-[10px] font-medium">{item.label}</span>
-                    </button>
+                    </Link>
                 );
             })}
         </nav>
