@@ -42,8 +42,8 @@ const config: Config = {
                 bg: "#F6F3FF",
             },
             fontFamily: {
-                sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-                mono: ["var(--font-mono)", "ui-monospace", "monospace"],
+                sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+                mono: ["ui-monospace", "monospace"],
             },
             borderRadius: {
                 sm: "var(--r-sm)",
@@ -51,8 +51,10 @@ const config: Config = {
                 lg: "var(--r-lg)",
             },
             boxShadow: {
-                sm: "0 2px 12px rgba(76,0,180,.10)",
-                lg: "0 8px 32px rgba(76,0,180,.18)",
+                sm: "0 2px 8px rgba(76,0,180,.04)",
+                md: "0 8px 24px rgba(76,0,180,.08)",
+                lg: "0 16px 40px rgba(76,0,180,.12)",
+                xl: "0 24px 64px rgba(76,0,180,.16)",
             },
             backgroundImage: {
                 "brand-gradient": "linear-gradient(135deg, #4C00B4 0%, #7C3AED 100%)",

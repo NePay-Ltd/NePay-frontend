@@ -1,5 +1,5 @@
 import * as React from "react";
-import { format } from "date-fns";
+import { format, formatDistanceToNowStrict, isToday, isYesterday } from "date-fns";
 import { TxIcon, type TxCategory } from "./tx-icon";
 import { Tag } from "./tag";
 import { formatNaira } from "@/lib/format";
@@ -31,6 +31,25 @@ function getCategoryLabel(cat: TxCategory) {
     }
 }
 
+function formatDateSmart(dateString?: string) {
+    if (!dateString) return "Just now";
+    const date = new Date(dateString);
+    const now = new Date();
+    
+    // If it's very recent (under 1 hour), show relative minutes (e.g., "18 mins ago")
+    if (now.getTime() - date.getTime() < 60 * 60 * 1000) {
+        return formatDistanceToNowStrict(date, { addSuffix: true }).replace(" minutes", " mins").replace(" minute", " min");
+    }
+    
+    if (isToday(date)) return format(date, "h:mm a"); // e.g. "2:30 PM"
+    if (isYesterday(date)) return "Yesterday";
+    
+    // If this year, show "2 Aug"
+    if (date.getFullYear() === now.getFullYear()) return format(date, "d MMM");
+    
+    return format(date, "d MMM, yyyy");
+}
+
 export function TransactionRow({ tx, variant = "compact" }: TransactionRowProps) {
     const isCredit = tx.amount > 0;
     const amountClass = isCredit ? "text-green-500" : "text-ink";
@@ -52,7 +71,7 @@ export function TransactionRow({ tx, variant = "compact" }: TransactionRowProps)
                     <Tag variant="neutral">{getCategoryLabel(tx.category)}</Tag>
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-body">
-                    {tx.date ? format(new Date(tx.date), "MMM d, yyyy") : "-"}
+                    {tx.date ? formatDateSmart(tx.date) : "-"}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4">
                     <Tag
@@ -71,7 +90,7 @@ export function TransactionRow({ tx, variant = "compact" }: TransactionRowProps)
                                 : "Failed"}
                     </Tag>
                 </td>
-                <td className={cn("whitespace-nowrap px-6 py-4 text-right font-mono text-sm font-semibold", amountClass)}>
+                <td className={cn("whitespace-nowrap px-6 py-4 text-right font-sans tabular-nums tracking-tighter text-sm font-semibold", amountClass)}>
                     {amountStr}
                 </td>
             </tr>
@@ -80,32 +99,26 @@ export function TransactionRow({ tx, variant = "compact" }: TransactionRowProps)
 
     // Compact variant (Overview)
     return (
-        <div className="flex items-center gap-3 border-b border-border py-3 last:border-0">
+        <div className="group flex items-center gap-4 rounded-xl px-2 py-3 transition-colors hover:bg-violet-50/50">
             <TxIcon category={tx.category} />
             <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-ink">{tx.label}</p>
-                <p className="truncate text-xs text-muted">{tx.meta}</p>
+                <p className="truncate text-sm font-bold text-ink">{tx.label}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                    <p className="truncate text-xs font-medium text-muted">{tx.meta}</p>
+                    <span className="text-border">•</span>
+                    <p className="text-xs font-medium text-muted">{formatDateSmart(tx.date)}</p>
+                </div>
             </div>
             <div className="shrink-0 text-right">
-                <p className={cn("font-mono text-sm font-semibold", amountClass)}>
+                <p className={cn("font-sans tabular-nums tracking-tighter text-sm font-bold", amountClass)}>
                     {amountStr}
                 </p>
-                <Tag
-                    variant={
-                        tx.status === "success"
-                            ? "ok"
-                            : tx.status === "pending"
-                                ? "warn"
-                                : "error"
-                    }
-                    className="mt-0.5"
-                >
-                    {tx.status === "success"
-                        ? "Success"
-                        : tx.status === "pending"
-                            ? "Pending"
-                            : "Failed"}
-                </Tag>
+                <p className={cn(
+                    "text-xs font-bold mt-1",
+                    tx.status === "success" ? "text-green-500" : tx.status === "pending" ? "text-amber-500" : "text-red-500"
+                )}>
+                    {tx.status === "success" ? "Completed" : tx.status === "pending" ? "Pending" : "Failed"}
+                </p>
             </div>
         </div>
     );

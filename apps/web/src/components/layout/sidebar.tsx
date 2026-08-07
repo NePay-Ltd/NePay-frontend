@@ -29,22 +29,33 @@ function NavLink({
     onClick?: () => void;
 }) {
     const Icon = item.icon;
+    
+    // Create tiny, handcrafted optical imperfections based on the label
+    const pl = 12 + (item.label.length % 3);
+    const iconSize = 18 + (item.label.charCodeAt(0) % 3);
+    const gap = 10 + (item.label.length % 2);
+
     return (
         <Link
             href={item.href}
             onClick={onClick}
+            style={{ paddingLeft: `${pl}px`, gap: `${gap}px` }}
             className={cn(
-                "flex w-full items-center gap-3 rounded-sm px-3 py-2.5 text-sm font-medium transition-colors",
+                "group flex w-full items-center rounded-xl pr-3 py-2.5 text-sm transition-all duration-200",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2 focus-visible:ring-offset-violet-950",
                 active
-                    ? "bg-violet-100 text-violet-700"
-                    : "text-violet-100 hover:bg-violet-800/60 hover:text-white",
+                    ? "bg-violet-100 text-violet-700 font-bold shadow-sm"
+                    : "text-violet-100 hover:bg-violet-800/60 hover:text-white hover:translate-x-1 font-medium",
             )}
         >
-            <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
-            <span className="flex-1 text-left">{item.label}</span>
+            <Icon 
+                style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
+                className={cn("shrink-0 transition-transform duration-200", !active && "group-hover:scale-110")} 
+                aria-hidden="true" 
+            />
+            <span className="flex-1 text-left tracking-tight">{item.label}</span>
             {item.badge ? (
-                <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
+                <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white shadow-sm transition-transform group-hover:scale-110">
                     {item.badge}
                 </span>
             ) : null}

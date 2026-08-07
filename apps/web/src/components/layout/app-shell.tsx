@@ -10,9 +10,7 @@ export interface AppShellProps {
     children: React.ReactNode;
 }
 
-export function AppShell({
-    children,
-}: AppShellProps) {
+export function AppShell({ children }: AppShellProps) {
     return (
         <React.Fragment>
             <PrototypeBanner />
@@ -21,7 +19,11 @@ export function AppShell({
 
             <div className="flex min-h-screen flex-col lg:pl-64">
                 <TopBar />
-                <main className="flex-1 px-4 pb-24 pt-6 lg:px-8 lg:pb-8">
+                {/* 
+                  Mobile: px-4 horizontal padding, pb-24 to clear the bottom nav, pt-5 top breathing room.
+                  Desktop: px-8 generous padding, pb-8 normal.
+                */}
+                <main className="flex-1 px-4 pb-28 pt-5 lg:px-8 lg:pb-8 lg:pt-8">
                     <div className="mx-auto max-w-7xl">{children}</div>
                 </main>
             </div>

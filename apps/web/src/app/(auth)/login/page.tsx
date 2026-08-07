@@ -4,13 +4,12 @@ import * as React from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Lock, AtSign } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
 import { loginSchema, type LoginValues } from "@/lib/schemas/auth";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/shared/button";
-import { Field } from "@/components/shared/field";
 import { Input } from "@/components/ui/input";
 import type { ApiError } from "@/lib/api";
 
@@ -42,14 +41,14 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="space-y-8">
+        <div className="w-full relative z-10">
             {/* Heading */}
-            <div className="space-y-1.5">
-                <h1 className="text-3xl font-bold tracking-tight text-ink">
-                    Welcome back
+            <div className="mb-8 space-y-2">
+                <h1 className="text-4xl font-extrabold tracking-tight text-ink">
+                    Sign in to NePay
                 </h1>
-                <p className="text-sm text-body">
-                    Sign in to your NePay account to continue.
+                <p className="text-base font-medium text-body">
+                    Please type in the email address linked to your NePay account.
                 </p>
             </div>
 
@@ -57,104 +56,97 @@ export default function LoginPage() {
             <form
                 id="login-form"
                 onSubmit={handleSubmit(onSubmit)}
-                className="space-y-5"
+                className="space-y-6"
                 noValidate
             >
-                <Field
-                    label="Email or Phone"
-                    htmlFor="login-identifier"
-                    error={errors.identifier?.message}
-                    trailing={
-                        <AtSign className="h-4 w-4" aria-hidden="true" />
-                    }
-                >
-                    <Input
-                        id="login-identifier"
-                        type="text"
-                        placeholder="name@example.com or 080…"
-                        autoComplete="username"
-                        inputMode="email"
-                        {...register("identifier")}
-                        aria-invalid={!!errors.identifier}
-                        className="pr-10"
-                    />
-                </Field>
+                <div className="space-y-2">
+                    <label htmlFor="login-identifier" className="text-sm font-bold text-ink">
+                        Email Address or Phone
+                    </label>
+                    <div className="relative">
+                        <Input
+                            id="login-identifier"
+                            type="text"
+                            placeholder="name@example.com"
+                            autoComplete="username"
+                            inputMode="email"
+                            {...register("identifier")}
+                            aria-invalid={!!errors.identifier}
+                            className="bg-white border-border text-ink h-14 text-base shadow-sm focus-visible:ring-violet-600 focus-visible:border-violet-600 transition-shadow"
+                        />
+                    </div>
+                    {errors.identifier && (
+                        <p className="text-xs font-bold text-red-500">
+                            {errors.identifier.message}
+                        </p>
+                    )}
+                </div>
 
-                <Field
-                    label="Password"
-                    htmlFor="login-password"
-                    error={errors.password?.message}
-                    hint={
-                        <Link
-                            href="/forgot-password"
-                            className="text-xs font-medium text-violet-600 hover:underline"
-                        >
-                            Forgot password?
-                        </Link>
-                    }
-                    trailing={
+                <div className="space-y-2">
+                    <label htmlFor="login-password" className="text-sm font-bold text-ink">
+                        Password
+                    </label>
+                    <div className="relative">
+                        <Input
+                            id="login-password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            autoComplete="current-password"
+                            {...register("password")}
+                            aria-invalid={!!errors.password}
+                            className="bg-white border-border text-ink h-14 text-base pr-12 shadow-sm focus-visible:ring-violet-600 focus-visible:border-violet-600 transition-shadow"
+                        />
                         <button
                             type="button"
                             onClick={() => setShowPassword((p) => !p)}
-                            aria-label={showPassword ? "Hide password" : "Show password"}
-                            className="text-muted hover:text-ink"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition-colors"
                         >
-                            {showPassword ? (
-                                <EyeOff className="h-4 w-4" />
-                            ) : (
-                                <Eye className="h-4 w-4" />
-                            )}
+                            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                         </button>
-                    }
-                >
-                    <Input
-                        id="login-password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
-                        autoComplete="current-password"
-                        {...register("password")}
-                        aria-invalid={!!errors.password}
-                        className="pr-10"
-                    />
-                </Field>
+                    </div>
+                    {errors.password && (
+                        <p className="text-xs font-bold text-red-500">
+                            {errors.password.message}
+                        </p>
+                    )}
+                </div>
 
-                <Button
-                    type="submit"
-                    variant="primary"
-                    size="lg"
-                    fullWidth
-                    loading={isSubmitting}
-                    className="mt-2"
-                >
-                    <Lock className="h-4 w-4" />
-                    Sign in
-                </Button>
+                <div className="pt-2 text-sm font-medium text-body">
+                    Forgot your password?{" "}
+                    <Link href="/forgot-password" className="font-bold text-violet-700 hover:text-violet-600 hover:underline transition-colors">
+                        Reset it
+                    </Link>
+                </div>
+
+                <div className="pt-4 space-y-4">
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        className="w-full h-14 text-lg font-bold shadow-md hover:shadow-lg transition-all"
+                        loading={isSubmitting}
+                    >
+                        Sign In
+                    </Button>
+
+                    <Button
+                        type="button"
+                        variant="quiet"
+                        className="w-full h-14 text-lg font-bold shadow-sm hover:shadow-md transition-all"
+                        asChild
+                    >
+                        <Link href="/register">
+                            Create an Account
+                        </Link>
+                    </Button>
+                </div>
             </form>
-
-            {/* Divider */}
-            <div className="relative flex items-center gap-3">
-                <div className="h-px flex-1 bg-border" />
-                <span className="text-xs text-muted">or</span>
-                <div className="h-px flex-1 bg-border" />
-            </div>
-
-            {/* Register link */}
-            <p className="text-center text-sm text-body">
-                Don&apos;t have an account?{" "}
-                <Link
-                    href="/register"
-                    className="font-semibold text-violet-600 hover:underline"
-                >
-                    Create one — it&apos;s free
-                </Link>
-            </p>
 
             {/* Dev hint */}
             {process.env.NEXT_PUBLIC_PROTOTYPE_MODE === "true" && (
-                <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-center text-xs text-amber-700">
+                <p className="mt-8 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-center text-xs font-medium text-amber-700">
                     Mock mode: use any email + any password to log in.
                     <br />
-                    Password <code className="font-mono">wrong</code> simulates a bad-credential error.
+                    Password <code className="font-mono font-bold">wrong</code> simulates an error.
                 </p>
             )}
         </div>

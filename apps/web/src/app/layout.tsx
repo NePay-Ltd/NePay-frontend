@@ -1,18 +1,12 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 
 import "./globals.css";
 import { Providers } from "./providers";
 
-const inter = Inter({
+const jakarta = Plus_Jakarta_Sans({
     subsets: ["latin"],
-    variable: "--font-inter",
-    display: "swap",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-    subsets: ["latin"],
-    variable: "--font-mono",
+    variable: "--font-sans",
     display: "swap",
 });
 
@@ -30,10 +24,9 @@ export default function RootLayout({
     return (
         <html
             lang="en"
-            className={`${inter.variable} ${jetbrainsMono.variable}`}
             suppressHydrationWarning
         >
-            <body className="font-sans antialiased">
+            <body className={`${jakarta.variable} font-sans text-ink bg-bg antialiased selection:bg-violet-200 selection:text-violet-900 min-h-screen flex flex-col overflow-x-hidden`}>
                 <Providers>{children}</Providers>
             </body>
         </html>
