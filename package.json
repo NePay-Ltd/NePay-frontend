@@ -1,0 +1,21 @@
+{
+    "name": "nepay-frontend",
+    "version": "0.1.0",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "dev": "turbo dev",
+        "build": "turbo build",
+        "lint": "turbo lint",
+        "dev:web": "turbo dev --filter=web",
+        "build:web": "turbo build --filter=web"
+    },
+    "devDependencies": {
+        "turbo": "^2.0.0",
+        "typescript": "^5.4.0"
+    },
+    "packageManager": "npm@10.0.0"
+}
