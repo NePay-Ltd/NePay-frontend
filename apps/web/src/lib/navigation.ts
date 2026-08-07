@@ -11,6 +11,7 @@ import {
     User,
     ShieldCheck,
     Home,
+    Users,
     type LucideIcon,
 } from "lucide-react";
 
@@ -31,6 +32,7 @@ export const SIDEBAR_NAV: NavItem[] = [
     { key: "flights", label: "Flights", icon: Plane, href: "/flights" },
     { key: "card", label: "NePay Card", icon: CreditCard, href: "/card" },
     { key: "receive", label: "Receive Crypto", icon: Download, href: "/receive-crypto" },
+    { key: "refer", label: "Refer & Earn", icon: Users, href: "/refer" },
     { key: "notifications", label: "Notifications", icon: Bell, href: "/notifications", badge: 3 },
     { key: "profile", label: "Profile", icon: User, href: "/profile" },
     { key: "security", label: "Security", icon: ShieldCheck, href: "/security" },
