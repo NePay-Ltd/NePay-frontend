@@ -12,6 +12,6 @@ export default function AppLayout({
 }: {
     children: React.ReactNode;
 }) {
-    return <AppShell notificationCount={3}>{children}</AppShell>;
+    return <AppShell>{children}</AppShell>;
 }
 

@@ -37,6 +37,7 @@ import { KpiCard } from "@/components/shared/kpi-card";
 import { Tile } from "@/components/shared/tile";
 import { TxIcon } from "@/components/shared/tx-icon";
 import { RowItem } from "@/components/shared/row-item";
+import { TransactionRow } from "@/components/shared/transaction-row";
 import { Tag } from "@/components/shared/tag";
 import { EmptyState } from "@/components/shared/empty-state";
 import { HeroCard } from "@/components/shared/hero-card";
@@ -55,49 +56,6 @@ function getGreeting(): string {
     if (hour < 12) return "Good morning";
     if (hour < 17) return "Good afternoon";
     return "Good evening";
-}
-
-// ─── Transaction row ──────────────────────────────────────────────────────────
-
-function TxRow({ tx }: { tx: Transaction }) {
-    const isCredit = tx.amount > 0;
-
-    return (
-        <div className="flex items-center gap-3 border-b border-border py-3 last:border-0">
-            <TxIcon category={tx.category} />
-            <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-ink">{tx.label}</p>
-                <p className="truncate text-xs text-muted">{tx.meta}</p>
-            </div>
-            <div className="shrink-0 text-right">
-                <p
-                    className={cn(
-                        "font-mono text-sm font-semibold",
-                        isCredit ? "text-green-500" : "text-ink",
-                    )}
-                >
-                    {isCredit ? "+" : ""}
-                    {formatNaira(tx.amount)}
-                </p>
-                <Tag
-                    variant={
-                        tx.status === "success"
-                            ? "ok"
-                            : tx.status === "pending"
-                                ? "warn"
-                                : "error"
-                    }
-                    className="mt-0.5"
-                >
-                    {tx.status === "success"
-                        ? "Success"
-                        : tx.status === "pending"
-                            ? "Pending"
-                            : "Failed"}
-                </Tag>
-            </div>
-        </div>
-    );
 }
 
 // ─── Quick Actions tiles config ───────────────────────────────────────────────
@@ -235,7 +193,7 @@ export default function OverviewPage() {
                                 <TableRowSkeleton rows={5} />
                             ) : summary?.recentTransactions?.length ? (
                                 summary.recentTransactions.map((tx) => (
-                                    <TxRow key={tx.id} tx={tx} />
+                                    <TransactionRow key={tx.id} tx={tx} variant="compact" />
                                 ))
                             ) : (
                                 <EmptyState

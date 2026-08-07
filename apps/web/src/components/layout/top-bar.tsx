@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { useUiStore } from "@/lib/stores/ui-store";
 import { useAuth } from "@/lib/auth-context";
+import { useUnreadNotificationCount } from "@/lib/queries/notifications";
 import { Button } from "@/components/shared/button";
 import {
     DropdownMenu,
@@ -26,11 +27,6 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export interface TopBarProps {
-    /** Unread notification count for the bell badge. */
-    notificationCount?: number;
-}
-
 function getInitials(name: string): string {
     const parts = name.trim().split(/\s+/);
     if (parts.length === 0 || parts[0] === "") return "U";
@@ -39,14 +35,13 @@ function getInitials(name: string): string {
     return (first + last).toUpperCase();
 }
 
-export function TopBar({
-    notificationCount = 0,
-}: TopBarProps) {
+export function TopBar() {
     const toggleMobileSidebar = useUiStore((s) => s.toggleMobileSidebar);
     const setCommandOpen = useUiStore((s) => s.setCommandOpen);
     const { user, logout, isMutating } = useAuth();
     const router = useRouter();
     const userName = user?.name ?? "Guest";
+    const { data: notificationCount = 0 } = useUnreadNotificationCount();
 
     return (
         <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-white/90 px-4 backdrop-blur-md lg:pl-6 lg:pr-8">
@@ -98,14 +93,14 @@ export function TopBar({
                 {/* Notification bell */}
                 <button
                     type="button"
+                    onClick={() => router.push("/notifications")}
                     className="relative rounded-full p-2 text-ink hover:bg-violet-100"
                     aria-label={`Notifications${notificationCount > 0 ? `, ${notificationCount} unread` : ""}`}
                 >
                     <Bell className="h-5 w-5" />
                     {notificationCount > 0 ? (
-                        <span className="absolute right-1.5 top-1.5 flex h-2 w-2">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
-                            <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
+                        <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white border-2 border-white">
+                            {notificationCount > 9 ? "9+" : notificationCount}
                         </span>
                     ) : null}
                 </button>

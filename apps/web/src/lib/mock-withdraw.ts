@@ -122,6 +122,11 @@ export async function mockSaveBankAccount(
     return newAccount;
 }
 
+export async function mockDeleteBankAccount(id: string): Promise<void> {
+    await randomDelay();
+    mockSavedAccounts = mockSavedAccounts.filter((acc) => acc.id !== id);
+}
+
 export async function mockInitiateWithdrawal(payload: WithdrawalRequest): Promise<{ id: string }> {
     await randomDelay(600, 1000);
 

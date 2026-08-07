@@ -8,6 +8,7 @@ import {
     mockGetSavedBankAccounts,
     mockResolveBankAccount,
     mockSaveBankAccount,
+    mockDeleteBankAccount,
     mockInitiateWithdrawal,
     mockGetWithdrawalStatus,
     type Bank,
@@ -48,6 +49,16 @@ export function useSaveBankAccount() {
     const queryClient = useQueryClient();
     return useMutation<SavedBankAccount, Error, { accountNumber: string; bankCode: string; accountName: string }>({
         mutationFn: ({ accountNumber, bankCode, accountName }) => mockSaveBankAccount(accountNumber, bankCode, accountName),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: withdrawKeys.savedAccounts() });
+        },
+    });
+}
+
+export function useDeleteBankAccount() {
+    const queryClient = useQueryClient();
+    return useMutation<void, Error, string>({
+        mutationFn: mockDeleteBankAccount,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: withdrawKeys.savedAccounts() });
         },

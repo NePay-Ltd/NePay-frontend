@@ -8,12 +8,10 @@ import { PrototypeBanner } from "@/components/shared/prototype-banner";
 
 export interface AppShellProps {
     children: React.ReactNode;
-    notificationCount?: number;
 }
 
 export function AppShell({
     children,
-    notificationCount = 0,
 }: AppShellProps) {
     return (
         <React.Fragment>
@@ -22,7 +20,7 @@ export function AppShell({
             <MobileSidebar />
 
             <div className="flex min-h-screen flex-col lg:pl-64">
-                <TopBar notificationCount={notificationCount} />
+                <TopBar />
                 <main className="flex-1 px-4 pb-24 pt-6 lg:px-8 lg:pb-8">
                     <div className="mx-auto max-w-7xl">{children}</div>
                 </main>
