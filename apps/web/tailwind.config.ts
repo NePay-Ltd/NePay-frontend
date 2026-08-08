@@ -46,9 +46,17 @@ const config: Config = {
                 muted: "var(--color-muted)",
                 border: "var(--color-border)",
                 bg: "var(--color-bg)",
+                marketing: {
+                    bg: "var(--marketing-bg)",
+                    surface: "var(--marketing-surface)",
+                    text: "var(--marketing-text)",
+                    secondary: "var(--marketing-secondary)",
+                    border: "var(--marketing-border)",
+                },
             },
             fontFamily: {
                 sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+                heading: ["var(--font-heading)", "system-ui", "sans-serif"],
                 mono: ["ui-monospace", "monospace"],
             },
             borderRadius: {
@@ -82,12 +90,17 @@ const config: Config = {
                     from: { transform: "translateX(-100%)" },
                     to: { transform: "translateX(0)" },
                 },
+                marquee: {
+                    from: { transform: "translateX(0)" },
+                    to: { transform: "translateX(-50%)" },
+                },
             },
             animation: {
                 "accordion-down": "accordion-down 0.2s ease-out",
                 "accordion-up": "accordion-up 0.2s ease-out",
                 "fade-in": "fade-in 0.2s ease-out",
                 "slide-in-left": "slide-in-left 0.25s ease-out",
+                marquee: "marquee 15s linear infinite",
             },
         },
     },

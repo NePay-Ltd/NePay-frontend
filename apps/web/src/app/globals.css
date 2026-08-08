@@ -19,6 +19,13 @@
         --color-gray-50: #F9FAFB;
         --color-gray-100: #F3F4F6;
         --color-violet-950: #170B3B;
+
+        /* Marketing Light Mode Colors */
+        --marketing-bg: #FFFFFF;
+        --marketing-surface: #F6F3FF;
+        --marketing-text: #1A0050;
+        --marketing-secondary: #3D2F6E;
+        --marketing-border: #EAE4F7;
     }
 
     .dark {
@@ -33,6 +40,13 @@
         --color-gray-50: #1C1C1C; /* Replaces gray-50 on hovers/table-headers */
         --color-gray-100: #262626; /* Replaces gray-100 */
         --color-violet-950: #0A0A0A; /* Replaces the purple sidebar with black */
+
+        /* Marketing Dark Mode Colors */
+        --marketing-bg: #09090B;
+        --marketing-surface: #18181B;
+        --marketing-text: #FAFAFA;
+        --marketing-secondary: #A1A1AA;
+        --marketing-border: rgba(255, 255, 255, 0.1);
     }
 
     * {

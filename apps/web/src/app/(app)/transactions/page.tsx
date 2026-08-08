@@ -13,6 +13,8 @@ import { Chip } from "@/components/shared/chip";
 import { EmptyState } from "@/components/shared/empty-state";
 import { TransactionRow } from "@/components/shared/transaction-row";
 import { Skeleton } from "@/components/shared/skeletons";
+import { useOverviewSummary } from "@/lib/queries/overview";
+import { formatNaira } from "@/lib/format";
 
 const FILTERS = ["All", "Deposits", "Withdrawals", "Payments", "Gift Cards", "Flights"] as const;
 
@@ -33,6 +35,8 @@ function TransactionsContent() {
 
     // ─── Data Fetching ────────────────────────────────────────────────────
     const { data, isLoading, isFetching } = useTransactions(currentType, currentCursor);
+    const { data: summary } = useOverviewSummary();
+    const kpiData = summary?.kpi;
 
     // ─── Handlers ─────────────────────────────────────────────────────────
     const handleFilterClick = (type: string) => {
@@ -84,6 +88,36 @@ function TransactionsContent() {
 
     return (
         <div className="mx-auto max-w-5xl space-y-6">
+            
+            {/* ── KPI Marquee ──────────────────────────────────────────────────────── */}
+            {kpiData && (
+                <div className="w-full overflow-hidden bg-violet-50 border border-violet-100 rounded-xl py-3 relative">
+                    <div className="flex animate-[marquee_15s_linear_infinite] whitespace-nowrap">
+                        {/* Duplicate the items twice to create an infinite scroll illusion */}
+                        {[1, 2].map((set) => (
+                            <div key={set} className="flex items-center gap-12 px-6">
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] uppercase font-bold text-violet-600">Money in</span>
+                                    <span className="text-sm font-bold text-ink">{formatNaira(kpiData.moneyIn)}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] uppercase font-bold text-violet-600">Money out</span>
+                                    <span className="text-sm font-bold text-ink">{formatNaira(kpiData.moneyOut)}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] uppercase font-bold text-violet-600">Net change</span>
+                                    <span className="text-sm font-bold text-ink">+{formatNaira(kpiData.netChange)}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] uppercase font-bold text-violet-600">Pending</span>
+                                    <span className="text-sm font-bold text-ink">₦0</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Header & Dev Utility */}
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>

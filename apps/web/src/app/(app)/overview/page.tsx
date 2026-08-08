@@ -42,9 +42,7 @@ const QUICK_ACTIONS = [
     { icon: Smartphone, label: "Airtime", href: "/services/airtime-data?tab=airtime" },
     { icon: Zap, label: "Data", href: "/services/airtime-data?tab=data" },
     { icon: Zap, label: "Electricity", href: "/services/pay-bills?provider=ikeja-electric" },
-    { icon: Gift, label: "Gift cards", href: "/gift-cards" },
     { icon: Plane, label: "Flights", href: "/flights" },
-    { icon: LayoutGrid, label: "All services", href: "/services" },
 ] as const;
 
 export default function OverviewPage() {
@@ -97,9 +95,9 @@ export default function OverviewPage() {
                         />
                     ) : null}
 
-                    {/* ── Financial Insights (KPIs) ────────────────────────────────── */}
+                    {/* ── Financial Insights (KPIs) - Hidden on Mobile ──────────────── */}
                     {summaryLoading ? (
-                        <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+                        <div className="hidden xl:grid grid-cols-2 gap-4 xl:grid-cols-4">
                             {[...Array(4)].map((_, i) => (
                                 <div key={i} className="rounded-[16px] border border-border bg-white p-5 shadow-sm space-y-2">
                                     <Skeleton className="h-3 w-20" />
@@ -108,7 +106,7 @@ export default function OverviewPage() {
                             ))}
                         </div>
                     ) : kpiData ? (
-                        <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+                        <div className="hidden xl:grid grid-cols-2 gap-4 xl:grid-cols-4">
                             <KpiCard
                                 label="Money in"
                                 value={formatNaira(kpiData.moneyIn)}
@@ -131,6 +129,28 @@ export default function OverviewPage() {
                             />
                         </div>
                     ) : null}
+
+                    {/* ── Quick Actions (MOBILE ONLY - directly under Hero) ────────── */}
+                    <div className="block xl:hidden space-y-4">
+                        <h2 className="text-[15px] font-extrabold text-ink px-1">Quick actions</h2>
+                        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide px-1">
+                            {summaryLoading ? (
+                                [...Array(4)].map((_, i) => (
+                                    <div key={i} className="min-w-[100px] h-[80px] bg-white border border-border rounded-[16px] animate-pulse" />
+                                ))
+                            ) : (
+                                QUICK_ACTIONS.map((action) => (
+                                    <div key={action.label} className="min-w-[100px] flex-shrink-0">
+                                        <Tile
+                                            icon={action.icon}
+                                            label={action.label}
+                                            onClick={() => router.push(action.href)}
+                                        />
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
 
                     {/* ── Recent Transactions ─────────────────────────────── */}
                     <Panel className="rounded-[24px]">
@@ -183,14 +203,14 @@ export default function OverviewPage() {
 
                 {/* Right column (1/3) - Quick Actions & Account Health */}
                 <div className="space-y-6 sm:space-y-8">
-                    {/* ── Quick Actions ───────────────────────────────────── */}
-                    <div className="space-y-4">
+                    {/* ── Quick Actions (DESKTOP ONLY) ────────────────────────────── */}
+                    <div className="hidden xl:block space-y-4">
                         <h2 className="text-[15px] font-extrabold text-ink px-1">Quick actions</h2>
                         <Panel className="rounded-[24px] p-2 bg-white border border-border shadow-sm">
                             {summaryLoading ? (
-                                <TileGridSkeleton count={6} className="grid-cols-2" />
+                                <TileGridSkeleton count={4} className="grid-cols-2" />
                             ) : (
-                                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-2">
+                                <div className="grid grid-cols-2 gap-2">
                                     {QUICK_ACTIONS.map((action) => (
                                         <Tile
                                             key={action.label}
