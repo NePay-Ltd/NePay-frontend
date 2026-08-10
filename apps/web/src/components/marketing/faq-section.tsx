@@ -15,14 +15,7 @@ const faqs = [
     question: "Is my money safe with NePay?",
     answer: "Yes. All funds are held by our regulated banking partners, and every byte of data is secured using bank-grade encryption in transit and at rest. We also require BVN verification before unlocking full transaction limits to protect the network from fraud.",
   },
-  {
-    question: "How does a Pod actually work?",
-    answer: "A Pod is a group of 5-10 people splitting the cost of a wholesale data plan. You join an open Pod or create your own, and reserve your slot. The moment the Pod fills up, the wholesale data is purchased and split automatically among everyone.",
-  },
-  {
-    question: "What happens if my Pod doesn't fill?",
-    answer: "Every Pod has a time limit. If a Pod expires before all slots are filled, the purchase is canceled, and your contribution is instantly and automatically refunded to your NePay balance in full.",
-  },
+
   {
     question: "Which banks can I link?",
     answer: "NePay connects securely with all major Nigerian banks, including Wema, Guaranty Trust Bank (GTB), Zenith, and Access Bank. You can fund your wallet directly via bank transfer or by linking a valid debit card.",

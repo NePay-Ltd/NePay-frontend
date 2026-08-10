@@ -26,11 +26,7 @@ export default function Loading() {
                 }
             `}</style>
             
-            <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-brand-gradient shadow-[0_0_60px_rgba(124,58,237,0.3)] animate-dramatic">
-                <span className="text-5xl font-black text-white tracking-tighter">
-                    N
-                </span>
-            </div>
+            <img src="/logo.png" alt="NePay Logo" className="h-16 w-16 object-contain drop-shadow-[0_0_60px_rgba(124,58,237,0.5)] animate-dramatic" />
             
             <div className="mt-8 overflow-hidden">
                 <h1 className="text-2xl font-black text-ink tracking-tight animate-fade-up">

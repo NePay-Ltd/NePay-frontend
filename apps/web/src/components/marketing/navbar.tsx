@@ -33,9 +33,7 @@ export function Navbar() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-gradient text-white font-heading font-bold text-xl shadow-sm transition-transform group-hover:scale-105">
-            N
-          </div>
+          <img src="/logo.png" alt="NePay Logo" className="h-8 w-8 object-contain transition-transform group-hover:scale-105" />
           <span className="font-heading text-xl font-bold tracking-tight text-marketing-text">
             NePay
           </span>
@@ -74,7 +72,7 @@ export function Navbar() {
               Log in
             </Link>
             <Link
-              href="/signup"
+              href="/register"
               className="px-5 py-2 text-sm font-medium text-white bg-brand-gradient rounded-full hover:opacity-90 transition-opacity shadow-sm"
             >
               Get Started

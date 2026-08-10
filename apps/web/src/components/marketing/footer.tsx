@@ -10,9 +10,7 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4 group inline-flex">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-gradient text-white font-heading font-bold text-lg shadow-sm transition-transform group-hover:scale-105">
-                N
-              </div>
+              <img src="/logo.png" alt="NePay Logo" className="h-7 w-7 object-contain transition-transform group-hover:scale-105" />
               <span className="font-heading text-xl font-bold tracking-tight text-marketing-text">
                 NePay
               </span>
@@ -40,7 +38,7 @@ export function Footer() {
           <div>
             <h4 className="font-bold text-marketing-text mb-4">Product</h4>
             <ul className="space-y-3">
-              <li><Link href="#how-it-works" className="text-sm text-marketing-secondary hover:text-marketing-text transition-colors">Pods</Link></li>
+              <li><Link href="#how-it-works" className="text-sm text-marketing-secondary hover:text-marketing-text transition-colors">Services</Link></li>
               <li><Link href="#rates" className="text-sm text-marketing-secondary hover:text-marketing-text transition-colors">Rates</Link></li>
               <li><Link href="#security" className="text-sm text-marketing-secondary hover:text-marketing-text transition-colors">Security</Link></li>
             </ul>

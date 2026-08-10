@@ -25,9 +25,7 @@ export default function AuthLayout({
 
                 {/* Logo Area — compact on mobile, generous on desktop */}
                 <div className="flex items-center gap-2.5 px-6 pt-10 pb-2 lg:gap-3 lg:px-16 lg:pt-16 lg:pb-0">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-gradient shadow-[0_4px_16px_rgba(124,58,237,0.3)] text-xl font-black text-white lg:h-12 lg:w-12 lg:rounded-2xl lg:text-2xl">
-                        N
-                    </span>
+                    <img src="/logo.png" alt="NePay Logo" className="h-8 w-8 lg:h-10 lg:w-10 object-contain drop-shadow-md" />
                     <span className="text-2xl font-black tracking-tighter text-ink uppercase lg:text-3xl">
                         NePay
                     </span>

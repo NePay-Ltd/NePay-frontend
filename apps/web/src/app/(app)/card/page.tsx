@@ -9,11 +9,14 @@ import { NePayCardVisual } from "@/components/shared/nepay-card-visual";
 import { Button } from "@/components/shared/button";
 import { Panel, PanelBody } from "@/components/shared/panel";
 import { Tag } from "@/components/shared/tag";
-import { TransactionRow } from "@/components/shared/transaction-row";
-import { mockTransactions } from "@/lib/mock-transactions";
+import { type BaseTransaction, TransactionRow } from "@/components/shared/transaction-row";
 
 export default function CardPage() {
-    const cardTransactions = mockTransactions.filter(t => t.description.includes("Spotify") || t.description.includes("Netflix") || t.description.includes("Apple") || t.description.includes("Uber"));
+    const cardTransactions: BaseTransaction[] = [
+        { id: "c1", label: "Spotify Premium", meta: "Entertainment", amount: -900, category: "payment", status: "success", date: new Date().toISOString() },
+        { id: "c2", label: "Uber", meta: "Transport", amount: -2500, category: "payment", status: "success", date: new Date().toISOString() },
+        { id: "c3", label: "Netflix", meta: "Entertainment", amount: -4000, category: "payment", status: "success", date: new Date().toISOString() },
+    ];
 
     return (
         <div className="">
@@ -91,7 +94,7 @@ export default function CardPage() {
                         <div className="divide-y divide-border/50">
                             {cardTransactions.length > 0 ? (
                                 cardTransactions.map((tx) => (
-                                    <TransactionRow key={tx.id} transaction={tx} />
+                                    <TransactionRow key={tx.id} tx={tx} />
                                 ))
                             ) : (
                                 <div className="p-8 text-center text-sm font-medium text-muted">

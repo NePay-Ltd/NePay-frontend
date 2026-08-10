@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, UserPlus, Phone, AtSign, Lock } from "lucide-react";
+import { Eye, EyeOff, UserPlus, Phone, AtSign, Lock, Check } from "lucide-react";
 import { toast } from "sonner";
 
 import { registerSchema, type RegisterValues } from "@/lib/schemas/auth";
@@ -36,9 +36,26 @@ export default function RegisterPage() {
         },
     });
 
+    const email = watch("email");
+    const isValidEmail = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
     const password = watch("password");
+    const hasLength = password.length >= 6;
     const hasNumber = /\d/.test(password);
-    const hasLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasSpecial = /[^A-Za-z0-9]/.test(password);
+    
+    let strengthScore = 0;
+    if (password.length > 0) {
+        if (hasLength) strengthScore += 1;
+        if (hasNumber) strengthScore += 1;
+        if (hasUpper) strengthScore += 1;
+        if (hasSpecial) strengthScore += 1;
+    }
+    
+    const strengthLabels = ["Weak", "Weak", "Fair", "Good", "Strong"];
+    const strengthColors = ["bg-red-500", "bg-red-500", "bg-amber-500", "bg-blue-500", "bg-green-500"];
+    const strengthColorText = ["text-red-500", "text-red-500", "text-amber-500", "text-blue-500", "text-green-500"];
 
     const onSubmit = async (values: RegisterValues) => {
         try {
@@ -98,7 +115,7 @@ export default function RegisterPage() {
                     label="Email Address"
                     htmlFor="reg-email"
                     error={errors.email?.message}
-                    trailing={<AtSign className="h-4 w-4" aria-hidden />}
+                    trailing={isValidEmail && !errors.email ? <Check className="h-4 w-4 text-green-500" /> : <AtSign className="h-4 w-4" aria-hidden />}
                 >
                     <Input
                         id="reg-email"
@@ -130,7 +147,7 @@ export default function RegisterPage() {
                     <Input
                         id="reg-password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Minimum 8 characters"
+                        placeholder="Minimum 6 characters"
                         autoComplete="new-password"
                         {...register("password")}
                         aria-invalid={!!errors.password}
@@ -140,13 +157,36 @@ export default function RegisterPage() {
 
                 {/* Password strength hints */}
                 {password.length > 0 && (
-                    <div className="flex gap-4 text-xs">
-                        <span className={hasLength ? "text-green-500" : "text-muted"}>
-                            {hasLength ? "✓" : "○"} 8+ characters
-                        </span>
-                        <span className={hasNumber ? "text-green-500" : "text-muted"}>
-                            {hasNumber ? "✓" : "○"} Contains a number
-                        </span>
+                    <div className="space-y-2 px-1">
+                        <div className="flex gap-1 h-1.5 w-full">
+                            {[1, 2, 3, 4].map((level) => (
+                                <div
+                                    key={level}
+                                    className={`h-full flex-1 rounded-full transition-colors ${
+                                        strengthScore >= level ? strengthColors[strengthScore] : "bg-border"
+                                    }`}
+                                />
+                            ))}
+                        </div>
+                        <div className="flex justify-between text-[11px] mb-2 uppercase tracking-widest">
+                            <span className={`font-bold ${strengthScore > 0 ? strengthColorText[strengthScore] : 'text-muted'}`}>
+                                {strengthLabels[strengthScore]}
+                            </span>
+                        </div>
+                        <div className="flex flex-col gap-1.5 text-xs">
+                            <span className={hasLength ? "text-green-600 font-bold" : "text-muted"}>
+                                {hasLength ? "✓" : "○"} At least 6 characters
+                            </span>
+                            <span className={hasNumber ? "text-green-600 font-bold" : "text-muted"}>
+                                {hasNumber ? "✓" : "○"} Contains a number
+                            </span>
+                            <span className={hasUpper ? "text-green-600 font-bold" : "text-muted"}>
+                                {hasUpper ? "✓" : "○"} Contains an uppercase letter
+                            </span>
+                            <span className={hasSpecial ? "text-green-600 font-bold" : "text-muted"}>
+                                {hasSpecial ? "✓" : "○"} Contains a special character
+                            </span>
+                        </div>
                     </div>
                 )}
 

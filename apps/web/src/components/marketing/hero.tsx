@@ -91,7 +91,7 @@ export function Hero() {
               className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-16"
             >
               <Link
-                href="/signup"
+                href="/register"
                 className="w-full sm:w-auto px-8 py-3.5 text-base font-medium text-white bg-brand-gradient rounded-full hover:opacity-90 transition-opacity shadow-lg flex items-center justify-center gap-2"
               >
                 Get Started free <ArrowRight className="w-4 h-4" />

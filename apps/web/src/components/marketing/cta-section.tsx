@@ -27,7 +27,7 @@ export function CtaSection() {
         </p>
         
         <Link
-          href="/signup"
+          href="/register"
           className="px-10 py-5 text-lg font-bold text-violet-950 bg-white rounded-full hover:bg-marketing-surface transition-colors shadow-2xl hover:shadow-xl mb-12 transform hover:scale-105 transition-all duration-300"
         >
           Create free account

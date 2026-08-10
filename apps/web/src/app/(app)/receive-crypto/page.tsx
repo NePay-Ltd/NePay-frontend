@@ -115,9 +115,7 @@ export default function ReceiveCryptoPage() {
                                                         ))}
                                                     </CommandGroup>
                                                 </CommandList>
-                                                <div className="bg-gray-50 p-2 text-center text-[10px] font-bold text-muted uppercase tracking-widest border-t border-border">
-                                                    Powered by NOWPayments
-                                                </div>
+
                                             </Command>
                                         </PopoverContent>
                                     </Popover>

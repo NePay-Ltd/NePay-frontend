@@ -21,9 +21,7 @@ import { Button } from "@/components/shared/button";
 function Logo() {
     return (
         <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-brand-gradient">
-                <span className="text-sm font-extrabold text-white">N</span>
-            </div>
+            <img src="/logo.png" alt="NePay Logo" className="h-6 w-6 object-contain drop-shadow-sm" />
             <span className="text-base font-extrabold text-ink tracking-tight">NePay</span>
         </div>
     );

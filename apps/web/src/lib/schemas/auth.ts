@@ -17,10 +17,10 @@ export const emailSchema = z
     .min(1, "Email is required")
     .email("Enter a valid email address");
 
-/** Password: min 8 chars, at least one number. */
+/** Password: min 6 chars, at least one number. */
 export const passwordSchema = z
     .string()
-    .min(8, "Password must be at least 8 characters")
+    .min(6, "Password must be at least 6 characters")
     .refine((val) => /\d/.test(val), "Password must contain at least one number");
 
 // ─── Login ────────────────────────────────────────────────────────────

@@ -13,9 +13,7 @@ import { useAuth } from "@/lib/auth-context";
 function Logo() {
     return (
         <div className="flex items-center gap-2.5 px-4">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-gradient shadow-sm">
-                <span className="text-lg font-bold text-white">N</span>
-            </div>
+            <img src="/logo.png" alt="NePay Logo" className="h-7 w-7 object-contain drop-shadow-sm" />
             <span className="text-lg font-bold text-white leading-tight">NePay</span>
         </div>
     );
