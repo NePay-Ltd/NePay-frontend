@@ -12,6 +12,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
 
 import { cn } from "@/lib/cn";
 import { useUiStore } from "@/lib/stores/ui-store";
@@ -64,6 +65,7 @@ export function TopBar() {
     const router = useRouter();
     const { data: notificationCount = 0 } = useUnreadNotificationCount();
     const { title, subtitle } = usePageHeaders();
+    const { theme, setTheme } = useTheme();
 
     return (
         <header className="sticky top-0 z-20 flex h-[72px] items-center gap-3 border-b border-border bg-white/95 px-4 backdrop-blur-md lg:pl-10 lg:pr-8">
@@ -155,14 +157,11 @@ export function TopBar() {
                 <button
                     type="button"
                     onClick={() => {
-                        const isDark = document.documentElement.classList.toggle('dark');
-                        if (isDark) {
-                            toast.success("Dark mode enabled (Preview)");
-                        } else {
-                            toast.success("Light mode enabled");
-                        }
+                        const newTheme = theme === 'dark' ? 'light' : 'dark';
+                        setTheme(newTheme);
+                        toast.success(`${newTheme === 'dark' ? 'Dark' : 'Light'} mode enabled`);
                     }}
-                    className="hidden lg:flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-muted hover:bg-violet-50 hover:text-ink hover:border-violet-200 transition-all shadow-sm"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-white text-muted hover:bg-violet-50 hover:text-ink hover:border-violet-200 transition-all shadow-sm"
                     aria-label="Toggle theme"
                 >
                     <svg className="h-[18px] w-[18px] dark:hidden" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">

@@ -152,7 +152,7 @@ export function MobileSidebar() {
     return (
         <div
             className={cn(
-                "fixed inset-0 z-50 lg:hidden",
+                "fixed inset-0 z-[60] lg:hidden",
                 open ? "pointer-events-auto" : "pointer-events-none",
             )}
             aria-hidden={!open}
