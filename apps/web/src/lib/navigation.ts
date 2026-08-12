@@ -13,6 +13,7 @@ import {
     ShieldCheck,
     Home,
     Users,
+    PlusCircle,
     type LucideIcon,
 } from "lucide-react";
 
@@ -35,7 +36,6 @@ export const SIDEBAR_GROUPS: NavGroup[] = [
         title: "MONEY",
         items: [
             { key: "overview", label: "Overview", icon: LayoutDashboard, href: "/overview" },
-            { key: "wallet", label: "Wallet", icon: Wallet, href: "/wallet" },
             { key: "transactions", label: "Transactions", icon: Receipt, href: "/transactions", badge: 5 },
         ],
     },
@@ -59,7 +59,7 @@ export const SIDEBAR_GROUPS: NavGroup[] = [
 
 export const BOTTOM_NAV: NavItem[] = [
     { key: "overview", label: "Home", icon: Home, href: "/overview" },
-    { key: "wallet", label: "Wallet", icon: Wallet, href: "/wallet" },
+    { key: "add-money", label: "Add Money", icon: PlusCircle, href: "/add-money" },
     { key: "services", label: "Services", icon: LayoutGrid, href: "/services" },
     { key: "transactions", label: "Activity", icon: Receipt, href: "/transactions" },
     { key: "profile", label: "Profile", icon: User, href: "/profile" },

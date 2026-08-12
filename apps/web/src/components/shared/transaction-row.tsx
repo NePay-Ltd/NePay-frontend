@@ -103,22 +103,19 @@ export function TransactionRow({ tx, variant = "compact" }: TransactionRowProps)
             <TxIcon category={tx.category} />
             <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold text-ink">{tx.label}</p>
-                <div className="flex items-center gap-2 mt-0.5">
-                    <p className="truncate text-xs font-medium text-muted">{tx.meta}</p>
-                    <span className="text-border">•</span>
-                    <p className="text-xs font-medium text-muted">{formatDateSmart(tx.date)}</p>
-                </div>
+                <p className="truncate text-xs font-medium text-muted mt-0.5">{tx.meta}</p>
             </div>
             <div className="shrink-0 text-right">
                 <p className={cn("font-sans tabular-nums tracking-tighter text-sm font-bold", amountClass)}>
                     {amountStr}
                 </p>
                 <p className={cn(
-                    "text-xs font-bold mt-1",
+                    "text-[10px] font-bold mt-0.5",
                     tx.status === "success" ? "text-green-500" : tx.status === "pending" ? "text-amber-500" : "text-red-500"
                 )}>
                     {tx.status === "success" ? "Completed" : tx.status === "pending" ? "Pending" : "Failed"}
                 </p>
+                <p className="text-[10px] font-medium text-muted mt-0.5">{formatDateSmart(tx.date)}</p>
             </div>
         </div>
     );

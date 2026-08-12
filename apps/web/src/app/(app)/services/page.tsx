@@ -60,57 +60,63 @@ export default function ServicesPage() {
                 <div className="space-y-8 xl:col-span-8">
                     
                     <section className="space-y-4">
-                        <h2 className="text-lg font-semibold text-ink">Popular</h2>
-                        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-4 xl:grid-cols-4">
+                        <h2 className="text-[15px] font-extrabold text-ink">Popular</h2>
+                        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
                             <Tile 
                                 icon={Smartphone} 
-                                label="Airtime & Data" 
-                                onClick={() => router.push("/services/airtime-data")} 
+                                label="Airtime" 
+                                iconBg="bg-violet-50" iconColor="text-violet-600"
+                                onClick={() => router.push("/services/airtime-data?tab=airtime")} 
+                            />
+                            <Tile 
+                                icon={Wifi} 
+                                label="Data" 
+                                iconBg="bg-blue-50" iconColor="text-blue-600"
+                                onClick={() => router.push("/services/airtime-data?tab=data")} 
                             />
                             <Tile 
                                 icon={Lightbulb} 
                                 label="Electricity" 
+                                iconBg="bg-amber-50" iconColor="text-amber-500"
                                 onClick={() => router.push("/services/pay-bills?provider=ikeja-electric")} 
-                            />
-                            <Tile 
-                                icon={Gift} 
-                                label="Gift Cards" 
-                                onClick={handleComingSoon} 
                             />
                             <Tile 
                                 icon={Plane} 
                                 label="Flights" 
-                                onClick={handleComingSoon} 
+                                iconBg="bg-teal-50" iconColor="text-teal-600"
+                                onClick={() => router.push("/flights")} 
                             />
                             <Tile 
-                                icon={Landmark} 
-                                label="Withdraw" 
-                                onClick={() => router.push("/withdraw")} 
+                                icon={Gift} 
+                                label="Gift Cards" 
+                                iconBg="bg-green-50" iconColor="text-green-600"
+                                onClick={() => router.push("/gift-cards")} 
                             />
                             <Tile 
                                 icon={Bitcoin} 
                                 label="Receive Crypto" 
+                                iconBg="bg-orange-50" iconColor="text-orange-500"
                                 onClick={() => router.push("/receive-crypto")} 
                             />
                             <Tile 
-                                icon={MoreHorizontal} 
-                                label="All Services" 
-                                onClick={() => {}} 
+                                icon={Landmark} 
+                                label="Withdraw" 
+                                iconBg="bg-rose-50" iconColor="text-rose-600"
+                                onClick={() => router.push("/withdraw")} 
                             />
                         </div>
                     </section>
 
                     <section className="space-y-4">
-                        <h2 className="text-lg font-semibold text-ink">More Services</h2>
-                        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-4 xl:grid-cols-4">
-                            <Tile icon={GraduationCap} label="Education" onClick={handleComingSoon} />
-                            <Tile icon={Dices} label="Betting" onClick={handleComingSoon} />
-                            <Tile icon={Shield} label="Insurance" onClick={handleComingSoon} />
-                            <Tile icon={Wifi} label="Internet" onClick={handleComingSoon} />
-                            <Tile icon={Droplet} label="Water" onClick={handleComingSoon} />
-                            <Tile icon={Car} label="Car Hire" onClick={handleComingSoon} />
-                            <Tile icon={HeartHandshake} label="Donations" onClick={handleComingSoon} />
-                            <Tile icon={MoreHorizontal} label="More" onClick={handleComingSoon} />
+                        <h2 className="text-[15px] font-extrabold text-ink">More Services</h2>
+                        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+                            <Tile icon={GraduationCap} label="Education" iconBg="bg-indigo-50" iconColor="text-indigo-600" comingSoon onClick={handleComingSoon} />
+                            <Tile icon={Dices} label="Betting" iconBg="bg-yellow-50" iconColor="text-yellow-600" comingSoon onClick={handleComingSoon} />
+                            <Tile icon={Shield} label="Insurance" iconBg="bg-cyan-50" iconColor="text-cyan-600" comingSoon onClick={handleComingSoon} />
+                            <Tile icon={Droplet} label="Water" iconBg="bg-sky-50" iconColor="text-sky-600" comingSoon onClick={handleComingSoon} />
+                            <Tile icon={Car} label="Car Hire" iconBg="bg-slate-50" iconColor="text-slate-600" comingSoon onClick={handleComingSoon} />
+                            <Tile icon={HeartHandshake} label="Donations" iconBg="bg-pink-50" iconColor="text-pink-600" comingSoon onClick={handleComingSoon} />
+                            <Tile icon={MoreHorizontal} label="More" iconBg="bg-gray-100" iconColor="text-gray-500" comingSoon onClick={handleComingSoon} />
                         </div>
                     </section>
                 </div>

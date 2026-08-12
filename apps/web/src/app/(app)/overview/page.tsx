@@ -5,17 +5,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
     Plus,
-    ArrowUpRight,
     Smartphone,
     Zap,
     Gift,
     Plane,
-    LayoutGrid,
     ShieldCheck,
-    Lock,
-    Monitor,
     ArrowRight,
     Clock,
+    Tv,
+    Wifi,
+    MoreHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,10 +38,12 @@ import {
 } from "@/components/shared/skeletons";
 
 const QUICK_ACTIONS = [
-    { icon: Smartphone, label: "Airtime", href: "/services/airtime-data?tab=airtime" },
-    { icon: Zap, label: "Data", href: "/services/airtime-data?tab=data" },
-    { icon: Zap, label: "Electricity", href: "/services/pay-bills?provider=ikeja-electric" },
-    { icon: Plane, label: "Flights", href: "/flights" },
+    { icon: Smartphone, label: "Airtime", href: "/services/airtime-data?tab=airtime", color: "text-violet-600", bg: "bg-violet-50" },
+    { icon: Wifi, label: "Data", href: "/services/airtime-data?tab=data", color: "text-blue-600", bg: "bg-blue-50" },
+    { icon: Zap, label: "Electricity", href: "/services/pay-bills?provider=ikeja-electric", color: "text-amber-500", bg: "bg-amber-50" },
+    { icon: Plane, label: "Flights", href: "/flights", color: "text-teal-600", bg: "bg-teal-50" },
+    { icon: Tv, label: "Cable TV", href: "/services/pay-bills?provider=dstv", color: "text-pink-600", bg: "bg-pink-50" },
+    { icon: Gift, label: "Gift Cards", href: "/gift-cards", color: "text-green-600", bg: "bg-green-50" },
 ] as const;
 
 export default function OverviewPage() {
@@ -78,10 +79,7 @@ export default function OverviewPage() {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-3 xl:gap-8">
-                
-                {/* Left column (2/3) - Main Dashboard (Hero, KPIs, Transactions) */}
-                <div className="xl:col-span-2 space-y-6 sm:space-y-8">
+            <div className="space-y-6 sm:space-y-8">
 
                     {/* ── Hero balance card ─────────────────────────────────────────── */}
                     {summaryLoading ? (
@@ -95,62 +93,69 @@ export default function OverviewPage() {
                         />
                     ) : null}
 
-                    {/* ── Financial Insights (KPIs) - Hidden on Mobile ──────────────── */}
-                    {summaryLoading ? (
-                        <div className="hidden xl:grid grid-cols-2 gap-4 xl:grid-cols-4">
-                            {[...Array(4)].map((_, i) => (
-                                <div key={i} className="rounded-[16px] border border-border bg-white p-5 shadow-sm space-y-2">
-                                    <Skeleton className="h-3 w-20" />
-                                    <Skeleton className="h-8 w-28" />
-                                </div>
-                            ))}
-                        </div>
-                    ) : kpiData ? (
-                        <div className="hidden xl:grid grid-cols-2 gap-4 xl:grid-cols-4">
-                            <KpiCard
-                                label="Money in"
-                                value={formatNaira(kpiData.moneyIn)}
-                                change={{ value: 2, period: "deposits this month", customDirection: "up" }}
-                            />
-                            <KpiCard
-                                label="Money out"
-                                value={formatNaira(kpiData.moneyOut)}
-                                change={{ value: -3, period: "payments this month", customDirection: "down" }}
-                            />
-                            <KpiCard
-                                label="Net change"
-                                value={`+${formatNaira(kpiData.netChange)}`}
-                                change={{ value: "Across", period: "5 transactions", customDirection: "none" }}
-                            />
-                            <KpiCard
-                                label="Pending"
-                                value="₦0"
-                                change={{ value: "Nothing", period: "waiting to clear", customDirection: "none" }}
-                            />
-                        </div>
-                    ) : null}
-
-                    {/* ── Quick Actions (MOBILE ONLY - directly under Hero) ────────── */}
-                    <div className="block xl:hidden space-y-4">
+                    {/* ── Quick Actions (ALL SCREENS) ──────────────────────── */}
+                    <div className="space-y-4">
                         <h2 className="text-[15px] font-extrabold text-ink px-1">Quick actions</h2>
-                        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide px-1">
+
+                        {/* Mobile: horizontal scroll */}
+                        <div className="flex xl:hidden gap-3 overflow-x-auto pb-1 no-scrollbar">
                             {summaryLoading ? (
-                                [...Array(4)].map((_, i) => (
-                                    <div key={i} className="min-w-[100px] h-[80px] bg-white border border-border rounded-[16px] animate-pulse" />
+                                [...Array(6)].map((_, i) => (
+                                    <div key={i} className="flex-none w-[100px] h-[96px] bg-white border border-border rounded-[16px] animate-pulse" />
                                 ))
                             ) : (
-                                QUICK_ACTIONS.map((action) => (
-                                    <div key={action.label} className="min-w-[100px] flex-shrink-0">
-                                        <Tile
-                                            icon={action.icon}
-                                            label={action.label}
+                                <>
+                                    {QUICK_ACTIONS.map((action) => (
+                                        <button
+                                            key={action.label}
                                             onClick={() => router.push(action.href)}
-                                        />
-                                    </div>
-                                ))
+                                            className="flex-none w-[100px] flex flex-col items-start gap-3 rounded-[16px] border border-border bg-white p-4 shadow-sm active:scale-95 transition-transform text-left"
+                                        >
+                                            <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${action.bg}`}>
+                                                <action.icon className={`h-5 w-5 ${action.color}`} />
+                                            </div>
+                                            <span className="text-xs font-bold text-ink leading-tight">{action.label}</span>
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={() => router.push("/services")}
+                                        className="flex-none w-[100px] flex flex-col items-start gap-3 rounded-[16px] border border-border bg-white p-4 shadow-sm active:scale-95 transition-transform text-left"
+                                    >
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100">
+                                            <MoreHorizontal className="h-5 w-5 text-gray-500" />
+                                        </div>
+                                        <span className="text-xs font-bold text-ink leading-tight">More</span>
+                                    </button>
+                                </>
                             )}
                         </div>
+
+                        {/* Desktop: 7-col grid */}
+                        <div className="hidden xl:grid grid-cols-7 gap-3">
+                            {QUICK_ACTIONS.map((action) => (
+                                <button
+                                    key={action.label}
+                                    onClick={() => router.push(action.href)}
+                                    className="flex flex-col items-start gap-3 rounded-[16px] border border-border bg-white p-4 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all text-left"
+                                >
+                                    <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${action.bg}`}>
+                                        <action.icon className={`h-5 w-5 ${action.color}`} />
+                                    </div>
+                                    <span className="text-xs font-bold text-ink leading-tight">{action.label}</span>
+                                </button>
+                            ))}
+                            <button
+                                onClick={() => router.push("/services")}
+                                className="flex flex-col items-start gap-3 rounded-[16px] border border-border bg-white p-4 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all text-left"
+                            >
+                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100">
+                                    <MoreHorizontal className="h-5 w-5 text-gray-500" />
+                                </div>
+                                <span className="text-xs font-bold text-ink leading-tight">More</span>
+                            </button>
+                        </div>
                     </div>
+
 
                     {/* ── Recent Transactions ─────────────────────────────── */}
                     <Panel className="rounded-[24px]">
@@ -199,103 +204,6 @@ export default function OverviewPage() {
                             )}
                         </PanelBody>
                     </Panel>
-                </div>
-
-                {/* Right column (1/3) - Quick Actions & Account Health */}
-                <div className="space-y-6 sm:space-y-8">
-                    {/* ── Quick Actions (DESKTOP ONLY) ────────────────────────────── */}
-                    <div className="hidden xl:block space-y-4">
-                        <h2 className="text-[15px] font-extrabold text-ink px-1">Quick actions</h2>
-                        <Panel className="rounded-[24px] p-2 bg-white border border-border shadow-sm">
-                            {summaryLoading ? (
-                                <TileGridSkeleton count={4} className="grid-cols-2" />
-                            ) : (
-                                <div className="grid grid-cols-2 gap-2">
-                                    {QUICK_ACTIONS.map((action) => (
-                                        <Tile
-                                            key={action.label}
-                                            icon={action.icon}
-                                            label={action.label}
-                                            onClick={() => router.push(action.href)}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                        </Panel>
-                    </div>
-
-                    {/* ── Account Health ───────────────────────── */}
-                    <div className="space-y-4">
-                        <h2 className="text-[15px] font-extrabold text-ink px-1">Account health</h2>
-                        <div className="rounded-[24px] border border-border bg-white shadow-sm overflow-hidden flex flex-col">
-                            {/* KYC */}
-                            <div className="flex items-center gap-4 p-4 border-b border-border/50 hover:bg-violet-50/50 transition-colors cursor-pointer" onClick={() => router.push("/kyc")}>
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50">
-                                    <ShieldCheck className="h-5 w-5 text-green-600" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-bold text-ink">KYC verification</p>
-                                    <p className="text-xs font-medium text-muted">Tier 2 · limits raised</p>
-                                </div>
-                                <Tag variant="ok">Verified</Tag>
-                            </div>
-                            
-                            {/* 2FA */}
-                            <div className="flex items-center gap-4 p-4 border-b border-border/50 hover:bg-violet-50/50 transition-colors cursor-pointer" onClick={() => router.push("/security")}>
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50">
-                                    <Lock className="h-5 w-5 text-green-600" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-bold text-ink">Two-factor authentication</p>
-                                    <p className="text-xs font-medium text-muted">Authenticator app</p>
-                                </div>
-                                <Tag variant="ok">On</Tag>
-                            </div>
-                            
-                            {/* Trusted Devices */}
-                            <div className="flex items-center gap-4 p-4 hover:bg-violet-50/50 transition-colors cursor-pointer" onClick={() => router.push("/security")}>
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-50">
-                                    <Monitor className="h-5 w-5 text-violet-600" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-bold text-ink">Trusted devices</p>
-                                    <p className="text-xs font-medium text-muted">3 devices signed in</p>
-                                </div>
-                                <ArrowRight className="h-4 w-4 text-muted" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* ── Rate Watch ───────────────────────────── */}
-                    <div className="rounded-[24px] border border-border bg-white shadow-sm p-6 sm:p-7">
-                        <div className="mb-6">
-                            <h2 className="text-[15px] font-extrabold text-ink">Rate watch</h2>
-                            <p className="text-[13px] font-medium text-muted mt-0.5">USDT → NGN, updated hourly</p>
-                        </div>
-                        
-                        <div className="flex items-center gap-3 mb-4">
-                            <span className="font-sans tabular-nums text-[28px] font-extrabold tracking-tighter text-ink leading-none">
-                                ₦1,562.50
-                            </span>
-                            <div className="inline-flex items-center gap-0.5 rounded-md bg-green-50 px-1.5 py-0.5 text-[11px] font-bold text-green-700">
-                                <ArrowUpRight className="h-3 w-3" />
-                                0.8%
-                            </div>
-                        </div>
-                        
-                        <p className="text-[13px] font-medium text-muted leading-relaxed mb-6">
-                            Deposits are converted at the rate shown when the network confirms your transfer.
-                        </p>
-                        
-                        <button
-                            onClick={() => router.push("/receive-crypto")}
-                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-50 py-3 text-sm font-bold text-violet-700 hover:bg-violet-100 transition-colors"
-                        >
-                            <LayoutGrid className="h-4 w-4" />
-                            Show deposit address
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     );
