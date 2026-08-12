@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { Smartphone, Wifi, Zap, Tv, Gift, Plane } from "lucide-react";
 import { Section } from "./section";
 
@@ -15,7 +15,7 @@ export function BillsFeature() {
     { name: "Flights", icon: Plane, color: "text-teal-500" },
   ];
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -26,7 +26,7 @@ export function BillsFeature() {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 10, scale: 0.95 },
     show: { 
       opacity: 1, 

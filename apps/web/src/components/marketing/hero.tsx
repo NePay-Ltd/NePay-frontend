@@ -3,11 +3,11 @@
 import React, { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { Users, ArrowRightLeft, Star, ArrowRight, LayoutGrid, Smartphone, Zap, Plane, Gift, ArrowUpRight, ArrowDownRight, Activity } from "lucide-react";
+import { motion, useScroll, useTransform, type Variants } from "framer-motion";
+import { ArrowRight, LayoutGrid, Smartphone, Zap, Plane, Gift, ArrowUpRight, ArrowDownRight, Activity } from "lucide-react";
 import { Section } from "./section";
 
-const staggerContainer = {
+const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -17,7 +17,7 @@ const staggerContainer = {
   },
 };
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 20 },
   show: {
     opacity: 1,
@@ -42,7 +42,7 @@ export function Hero() {
     <div ref={containerRef} className="relative min-h-screen overflow-hidden pt-24 pb-16 lg:pt-32">
       {/* Background Parallax Image */}
       <motion.div
-        className="absolute inset-0 z-0 opacity-[0.03] dark:opacity-[0.07]"
+        className="absolute inset-0 z-0 opacity-[0.15] dark:opacity-[0.07]"
         style={{ y: backgroundY }}
       >
         <Image
@@ -104,44 +104,7 @@ export function Hero() {
               </Link>
             </motion.div>
 
-            <motion.div
-              variants={fadeUp}
-              className="flex flex-wrap items-center gap-4 sm:gap-8 border-t border-marketing-border pt-8"
-            >
-              <div className="flex items-center gap-2">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">
-                  <Users className="w-4 h-4" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-marketing-text">
-                    14,300+
-                  </span>
-                  <span className="text-xs text-marketing-secondary">users</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
-                  <ArrowRightLeft className="w-4 h-4" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-marketing-text">
-                    ₦2.4B+
-                  </span>
-                  <span className="text-xs text-marketing-secondary">moved</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
-                  <Star className="w-4 h-4" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-marketing-text">
-                    4.8★
-                  </span>
-                  <span className="text-xs text-marketing-secondary">rating</span>
-                </div>
-              </div>
-            </motion.div>
+
           </motion.div>
 
           {/* Right Column (42%) - Dashboard Mockup */}

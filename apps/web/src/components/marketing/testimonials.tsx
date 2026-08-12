@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { Star } from "lucide-react";
 import { Section } from "./section";
 
@@ -33,7 +33,7 @@ const testimonials = [
   },
 ];
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -44,7 +44,7 @@ const containerVariants = {
   },
 };
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
   show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
 };
@@ -54,7 +54,7 @@ export function Testimonials() {
     <Section className="py-24 md:py-32 bg-marketing-bg overflow-hidden">
       <div className="flex flex-col items-center text-center mb-12 md:mb-20">
         <h2 className="font-heading text-4xl md:text-5xl font-bold tracking-tight text-marketing-text">
-          Don't just take our word for it.
+          Don&apos;t just take our word for it.
         </h2>
       </div>
 
@@ -80,7 +80,7 @@ export function Testimonials() {
                   ))}
                 </div>
                 <p className="text-marketing-text font-medium text-lg leading-relaxed mb-8">
-                  "{t.quote}"
+                  &quot;{t.quote}&quot;
                 </p>
               </div>
 

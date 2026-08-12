@@ -193,7 +193,7 @@ export default function GiftCardsPage() {
                                     </div>
                                     <div>
                                         <h3 className="text-sm font-bold text-ink">Pick the card and amount</h3>
-                                        <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Choose the brand, country and face value you're holding.</p>
+                                        <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Choose the brand, country and face value you&apos;re holding.</p>
                                     </div>
                                 </div>
                                 <div className="flex gap-4">
