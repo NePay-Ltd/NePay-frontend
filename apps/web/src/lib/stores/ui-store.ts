@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 /**
  * Lightweight client UI state.
@@ -24,18 +25,33 @@ interface UiState {
     commandOpen: boolean;
     setCommandOpen: (open: boolean) => void;
     toggleCommand: () => void;
+
+    /** Global balance mask (eye toggle). */
+    masked: boolean;
+    toggleMasked: () => void;
 }
 
-export const useUiStore = create<UiState>((set) => ({
-    activeNav: "overview",
-    setActiveNav: (key) => set({ activeNav: key }),
+export const useUiStore = create<UiState>()(
+    persist(
+        (set) => ({
+            activeNav: "overview",
+            setActiveNav: (key) => set({ activeNav: key }),
 
-    mobileSidebarOpen: false,
-    setMobileSidebarOpen: (open) => set({ mobileSidebarOpen: open }),
-    toggleMobileSidebar: () =>
-        set((state) => ({ mobileSidebarOpen: !state.mobileSidebarOpen })),
+            mobileSidebarOpen: false,
+            setMobileSidebarOpen: (open) => set({ mobileSidebarOpen: open }),
+            toggleMobileSidebar: () =>
+                set((state) => ({ mobileSidebarOpen: !state.mobileSidebarOpen })),
 
-    commandOpen: false,
-    setCommandOpen: (open) => set({ commandOpen: open }),
-    toggleCommand: () => set((state) => ({ commandOpen: !state.commandOpen })),
-}));
+            commandOpen: false,
+            setCommandOpen: (open) => set({ commandOpen: open }),
+            toggleCommand: () => set((state) => ({ commandOpen: !state.commandOpen })),
+
+            masked: false,
+            toggleMasked: () => set((state) => ({ masked: !state.masked })),
+        }),
+        {
+            name: "nepay-ui-storage",
+            partialize: (state) => ({ masked: state.masked }),
+        }
+    )
+);

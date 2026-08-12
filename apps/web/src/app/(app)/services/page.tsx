@@ -17,7 +17,8 @@ import {
     Car, 
     HeartHandshake, 
     MoreHorizontal,
-    Receipt
+    Receipt,
+    Tv
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,14 +36,22 @@ export default function ServicesPage() {
     const handleComingSoon = () => toast.info("This service is coming soon!");
 
     const handlePayAgain = (biller: typeof savedBillers[0]) => {
-        if (biller.serviceType === "electricity" || biller.serviceType === "cable-tv") {
+        if (biller.serviceType === "electricity") {
             const provider = biller.billerName.toLowerCase().replace(" ", "-");
-            const identifier = biller.identifier.replace(/[^0-9]/g, ''); // Extract just numbers for mock sake
-            router.push(`/services/pay-bills?provider=${provider}&meter=${identifier}`);
-        } else if (biller.serviceType === "data" || biller.serviceType === "airtime") {
+            const identifier = biller.identifier.replace(/[^0-9]/g, ''); 
+            router.push(`/services/electricity?provider=${provider}&meter=${identifier}`);
+        } else if (biller.serviceType === "cable-tv") {
+            const provider = biller.billerName.toLowerCase().replace(" ", "-");
+            const identifier = biller.identifier.replace(/[^0-9]/g, ''); 
+            router.push(`/services/tv?provider=${provider}&meter=${identifier}`);
+        } else if (biller.serviceType === "data") {
             const network = biller.billerName.split(" ")[0] || "MTN";
             const phone = biller.identifier.replace(/[^0-9]/g, '');
-            router.push(`/services/airtime-data?tab=${biller.serviceType}&network=${network}&phone=${phone}`);
+            router.push(`/services/data?network=${network}&phone=${phone}`);
+        } else if (biller.serviceType === "airtime") {
+            const network = biller.billerName.split(" ")[0] || "MTN";
+            const phone = biller.identifier.replace(/[^0-9]/g, '');
+            router.push(`/services/airtime?network=${network}&phone=${phone}`);
         }
     };
 
@@ -66,19 +75,25 @@ export default function ServicesPage() {
                                 icon={Smartphone} 
                                 label="Airtime" 
                                 iconBg="bg-violet-50" iconColor="text-violet-600"
-                                onClick={() => router.push("/services/airtime-data?tab=airtime")} 
+                                onClick={() => router.push("/services/airtime")} 
+                            />
+                            <Tile 
+                                icon={Tv} 
+                                label="Cable TV" 
+                                iconBg="bg-pink-50" iconColor="text-pink-600"
+                                onClick={() => router.push("/services/tv")} 
                             />
                             <Tile 
                                 icon={Wifi} 
                                 label="Data" 
                                 iconBg="bg-blue-50" iconColor="text-blue-600"
-                                onClick={() => router.push("/services/airtime-data?tab=data")} 
+                                onClick={() => router.push("/services/data")} 
                             />
                             <Tile 
                                 icon={Lightbulb} 
                                 label="Electricity" 
                                 iconBg="bg-amber-50" iconColor="text-amber-500"
-                                onClick={() => router.push("/services/pay-bills?provider=ikeja-electric")} 
+                                onClick={() => router.push("/services/electricity")} 
                             />
                             <Tile 
                                 icon={Plane} 

@@ -6,12 +6,13 @@ import { useRouter } from "next/navigation";
 import {
     Plus,
     Smartphone,
-    Zap,
+    Lightbulb,
     Gift,
     Plane,
     ShieldCheck,
     ArrowRight,
     Clock,
+    Dices,
     Tv,
     Wifi,
     MoreHorizontal,
@@ -38,12 +39,12 @@ import {
 } from "@/components/shared/skeletons";
 
 const QUICK_ACTIONS = [
-    { icon: Smartphone, label: "Airtime", href: "/services/airtime-data?tab=airtime", color: "text-violet-600", bg: "bg-violet-50" },
-    { icon: Wifi, label: "Data", href: "/services/airtime-data?tab=data", color: "text-blue-600", bg: "bg-blue-50" },
-    { icon: Zap, label: "Electricity", href: "/services/pay-bills?provider=ikeja-electric", color: "text-amber-500", bg: "bg-amber-50" },
-    { icon: Plane, label: "Flights", href: "/flights", color: "text-teal-600", bg: "bg-teal-50" },
-    { icon: Tv, label: "Cable TV", href: "/services/pay-bills?provider=dstv", color: "text-pink-600", bg: "bg-pink-50" },
-    { icon: Gift, label: "Gift Cards", href: "/gift-cards", color: "text-green-600", bg: "bg-green-50" },
+    { label: "Airtime", icon: Smartphone, href: "/services/airtime", bg: "bg-violet-100", color: "text-violet-700" },
+    { label: "Data", icon: Wifi, href: "/services/data", bg: "bg-blue-100", color: "text-blue-700" },
+    { label: "Flight", icon: Plane, href: "/flights", bg: "bg-teal-100", color: "text-teal-700" },
+    { label: "TV", icon: Tv, href: "/services/tv", bg: "bg-pink-100", color: "text-pink-700" },
+    { label: "Gift Card", icon: Gift, href: "/gift-cards", bg: "bg-green-100", color: "text-green-700" },
+    { label: "More", icon: MoreHorizontal, href: "/services", bg: "bg-gray-100", color: "text-gray-700" },
 ] as const;
 
 export default function OverviewPage() {
@@ -97,11 +98,10 @@ export default function OverviewPage() {
                     <div className="space-y-4">
                         <h2 className="text-[15px] font-extrabold text-ink px-1">Quick actions</h2>
 
-                        {/* Mobile: horizontal scroll */}
-                        <div className="flex xl:hidden gap-3 overflow-x-auto pb-1 no-scrollbar">
+                        <div className="grid grid-cols-3 xl:grid-cols-6 gap-3">
                             {summaryLoading ? (
                                 [...Array(6)].map((_, i) => (
-                                    <div key={i} className="flex-none w-[100px] h-[96px] bg-white border border-border rounded-[16px] animate-pulse" />
+                                    <div key={i} className="w-full h-[96px] bg-white border border-border rounded-[16px] animate-pulse" />
                                 ))
                             ) : (
                                 <>
@@ -109,7 +109,7 @@ export default function OverviewPage() {
                                         <button
                                             key={action.label}
                                             onClick={() => router.push(action.href)}
-                                            className="flex-none w-[100px] flex flex-col items-start gap-3 rounded-[16px] border border-border bg-white p-4 shadow-sm active:scale-95 transition-transform text-left"
+                                            className="w-full flex flex-col items-start gap-3 rounded-[16px] border border-border bg-white p-4 shadow-sm active:scale-95 hover:-translate-y-0.5 hover:shadow-md transition-all text-left"
                                         >
                                             <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${action.bg}`}>
                                                 <action.icon className={`h-5 w-5 ${action.color}`} />
@@ -117,42 +117,8 @@ export default function OverviewPage() {
                                             <span className="text-xs font-bold text-ink leading-tight">{action.label}</span>
                                         </button>
                                     ))}
-                                    <button
-                                        onClick={() => router.push("/services")}
-                                        className="flex-none w-[100px] flex flex-col items-start gap-3 rounded-[16px] border border-border bg-white p-4 shadow-sm active:scale-95 transition-transform text-left"
-                                    >
-                                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100">
-                                            <MoreHorizontal className="h-5 w-5 text-gray-500" />
-                                        </div>
-                                        <span className="text-xs font-bold text-ink leading-tight">More</span>
-                                    </button>
                                 </>
                             )}
-                        </div>
-
-                        {/* Desktop: 7-col grid */}
-                        <div className="hidden xl:grid grid-cols-7 gap-3">
-                            {QUICK_ACTIONS.map((action) => (
-                                <button
-                                    key={action.label}
-                                    onClick={() => router.push(action.href)}
-                                    className="flex flex-col items-start gap-3 rounded-[16px] border border-border bg-white p-4 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all text-left"
-                                >
-                                    <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${action.bg}`}>
-                                        <action.icon className={`h-5 w-5 ${action.color}`} />
-                                    </div>
-                                    <span className="text-xs font-bold text-ink leading-tight">{action.label}</span>
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => router.push("/services")}
-                                className="flex flex-col items-start gap-3 rounded-[16px] border border-border bg-white p-4 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all text-left"
-                            >
-                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100">
-                                    <MoreHorizontal className="h-5 w-5 text-gray-500" />
-                                </div>
-                                <span className="text-xs font-bold text-ink leading-tight">More</span>
-                            </button>
                         </div>
                     </div>
 

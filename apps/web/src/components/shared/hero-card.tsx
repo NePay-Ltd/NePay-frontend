@@ -5,6 +5,7 @@ import { Eye, EyeOff, Plus, Building2, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/shared/button";
 import { Sparkline } from "@/components/shared/sparkline";
 import { formatNaira } from "@/lib/format";
+import { useUiStore } from "@/lib/stores/ui-store";
 
 export interface HeroCardProps {
     balance: number;
@@ -22,7 +23,8 @@ export function HeroCard({
     sparkline,
     periodLabel = "Last 7 days",
 }: HeroCardProps) {
-    const [masked, setMasked] = React.useState(false);
+    const masked = useUiStore((s) => s.masked);
+    const toggleMasked = useUiStore((s) => s.toggleMasked);
     const router = useRouter();
 
     return (
@@ -43,7 +45,7 @@ export function HeroCard({
                         </p>
                         <button
                             type="button"
-                            onClick={() => setMasked((m) => !m)}
+                            onClick={toggleMasked}
                             aria-label={masked ? "Show balance" : "Hide balance"}
                             className="inline-flex items-center justify-center text-violet-300 transition-colors hover:text-white"
                         >
@@ -59,7 +61,7 @@ export function HeroCard({
                     {/* USD equivalent */}
                     <div className="mt-3 flex items-center gap-1.5 text-sm font-medium text-violet-200">
                         <p>
-                            {masked ? "≈ ••••" : `≈ $${balanceUsd.toFixed(2)}`}
+                            {masked ? "***" : `$${balanceUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                         </p>
                         <span className="opacity-50">·</span>
                         <p className="opacity-80">USDT auto-converted at ₦1,562.50</p>

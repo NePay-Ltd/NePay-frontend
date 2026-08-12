@@ -1,6 +1,7 @@
 import { TrendingUp, TrendingDown, Scale, History } from "lucide-react";
 
 import { cn } from "@/lib/cn";
+import { useUiStore } from "@/lib/stores/ui-store";
 
 export interface KpiCardProps {
     /** Small, muted, uppercase label. */
@@ -20,6 +21,7 @@ export interface KpiCardProps {
  * KPI stat card matching prototype
  */
 export function KpiCard({ label, value, change, className }: KpiCardProps) {
+    const masked = useUiStore((s) => s.masked);
     const isUp = change?.customDirection === "up";
     const isDown = change?.customDirection === "down";
     const isNeutral = change?.customDirection === "none";
@@ -34,7 +36,9 @@ export function KpiCard({ label, value, change, className }: KpiCardProps) {
                 <p className="text-xs font-bold text-body">{label}</p>
             </div>
             
-            <p className="font-sans tabular-nums text-[24px] font-extrabold text-ink tracking-tighter leading-none mb-4 break-words">{value}</p>
+            <p className="font-sans tabular-nums text-[24px] font-extrabold text-ink tracking-tighter leading-none mb-4 break-words">
+                {masked ? "••••••" : value}
+            </p>
             
             {change ? (
                 <div className={cn(

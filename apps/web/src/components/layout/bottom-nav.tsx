@@ -2,24 +2,20 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 import { cn } from "@/lib/cn";
 import { useUiStore } from "@/lib/stores/ui-store";
 import { BOTTOM_NAV } from "@/lib/navigation";
 
-/**
- * Bottom navigation bar — visible < lg (below 1024px).
- * 5 tabs: Home, Wallet, Services, Activity, Profile.
- * Active tab gets a pill indicator above the icon with a smooth scale animation.
- */
 export function BottomNav() {
     const activeNav = useUiStore((s) => s.activeNav);
     const setActiveNav = useUiStore((s) => s.setActiveNav);
 
     return (
         <nav
-            className="fixed inset-x-0 bottom-0 z-30 flex items-end justify-around border-t border-border bg-white lg:hidden"
-            style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+            className="fixed inset-x-4 z-50 flex items-center justify-between rounded-[32px] border border-border/50 bg-white/80 p-1.5 backdrop-blur-[20px] shadow-[0_8px_24px_rgba(0,0,0,0.12)] lg:hidden"
+            style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}
         >
             {BOTTOM_NAV.map((item) => {
                 const Icon = item.icon;
@@ -31,24 +27,24 @@ export function BottomNav() {
                         href={item.href}
                         onClick={() => setActiveNav(item.key)}
                         className={cn(
-                            "group relative flex flex-1 flex-col items-center gap-1 pb-2 pt-3 transition-colors",
-                            active ? "text-violet-700" : "text-muted",
+                            "relative flex flex-1 flex-col items-center justify-center gap-1 rounded-full py-2 px-1 transition-colors z-10",
+                            active ? "text-violet-700" : "text-muted hover:text-ink",
                         )}
                     >
-                        {/* Active pill indicator */}
-                        <span
-                            className={cn(
-                                "absolute top-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full bg-violet-600 transition-all duration-300",
-                                active ? "w-6 opacity-100" : "w-0 opacity-0",
-                            )}
-                        />
+                        {active && (
+                            <motion.div
+                                layoutId="bottom-nav-active-pill"
+                                className="absolute inset-0 rounded-full bg-violet-100"
+                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                style={{ zIndex: -1 }}
+                            />
+                        )}
 
-                        {/* Icon with scale pop on active */}
                         <span className="relative">
                             <Icon
                                 className={cn(
-                                    "h-5 w-5 transition-all duration-200",
-                                    active ? "scale-110" : "scale-100 group-active:scale-90",
+                                    "h-5 w-5 transition-transform duration-200",
+                                    active ? "scale-105" : "scale-100 group-active:scale-90",
                                 )}
                                 aria-hidden="true"
                             />
@@ -59,11 +55,10 @@ export function BottomNav() {
                             ) : null}
                         </span>
 
-                        {/* Label */}
                         <span
                             className={cn(
-                                "text-[10px] font-semibold tracking-tight transition-all",
-                                active ? "text-violet-700" : "text-muted",
+                                "text-[10px] font-bold tracking-tight transition-all",
+                                active ? "text-violet-800" : ""
                             )}
                         >
                             {item.label}

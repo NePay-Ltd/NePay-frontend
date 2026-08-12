@@ -4,6 +4,7 @@ import { TxIcon, type TxCategory } from "./tx-icon";
 import { Tag } from "./tag";
 import { formatNaira } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { useUiStore } from "@/lib/stores/ui-store";
 
 export interface BaseTransaction {
     id: string;
@@ -51,9 +52,10 @@ function formatDateSmart(dateString?: string) {
 }
 
 export function TransactionRow({ tx, variant = "compact" }: TransactionRowProps) {
+    const masked = useUiStore((s) => s.masked);
     const isCredit = tx.amount > 0;
     const amountClass = isCredit ? "text-green-500" : "text-ink";
-    const amountStr = `${isCredit ? "+" : ""}${formatNaira(tx.amount)}`;
+    const amountStr = masked ? "••••••" : `${isCredit ? "+" : ""}${formatNaira(tx.amount)}`;
 
     if (variant === "table") {
         return (
