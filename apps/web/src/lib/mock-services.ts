@@ -21,14 +21,6 @@ export interface SavedBiller {
     serviceType: "electricity" | "cable-tv" | "airtime" | "data";
 }
 
-export interface DataPlan {
-    id: string;
-    network: string;
-    name: string;
-    price: number;
-    validityDays: number;
-}
-
 export type ServiceTransactionStatus = "pending" | "processing" | "success" | "failed";
 
 export interface ServiceTransactionResponse {
@@ -58,29 +50,6 @@ const MOCK_SAVED_BILLERS: SavedBiller[] = [
     },
 ];
 
-const MOCK_DATA_PLANS: Record<string, DataPlan[]> = {
-    MTN: [
-        { id: "mtn_1", network: "MTN", name: "1GB (1 Day)", price: 350, validityDays: 1 },
-        { id: "mtn_2", network: "MTN", name: "3GB (7 Days)", price: 1500, validityDays: 7 },
-        { id: "mtn_3", network: "MTN", name: "10GB (30 Days)", price: 3500, validityDays: 30 },
-    ],
-    Glo: [
-        { id: "glo_1", network: "Glo", name: "1.5GB (1 Day)", price: 350, validityDays: 1 },
-        { id: "glo_2", network: "Glo", name: "7GB (7 Days)", price: 1500, validityDays: 7 },
-        { id: "glo_3", network: "Glo", name: "18GB (30 Days)", price: 4000, validityDays: 30 },
-    ],
-    Airtel: [
-        { id: "airtel_1", network: "Airtel", name: "1GB (1 Day)", price: 300, validityDays: 1 },
-        { id: "airtel_2", network: "Airtel", name: "6GB (7 Days)", price: 1500, validityDays: 7 },
-        { id: "airtel_3", network: "Airtel", name: "20GB (30 Days)", price: 5000, validityDays: 30 },
-    ],
-    "9mobile": [
-        { id: "9mob_1", network: "9mobile", name: "1GB (1 Day)", price: 300, validityDays: 1 },
-        { id: "9mob_2", network: "9mobile", name: "7GB (7 Days)", price: 1500, validityDays: 7 },
-        { id: "9mob_3", network: "9mobile", name: "15GB (30 Days)", price: 4000, validityDays: 30 },
-    ],
-};
-
 const activeTransactions = new Map<string, ServiceTransactionResponse>();
 
 // ─── Endpoints ────────────────────────────────────────────────────────────────
@@ -88,11 +57,6 @@ const activeTransactions = new Map<string, ServiceTransactionResponse>();
 export async function mockGetSavedBillers(): Promise<SavedBiller[]> {
     await randomDelay(300, 600);
     return MOCK_SAVED_BILLERS;
-}
-
-export async function mockGetDataPlans(network: string): Promise<DataPlan[]> {
-    await randomDelay(200, 500);
-    return MOCK_DATA_PLANS[network] || [];
 }
 
 export async function mockVerifyMeter(

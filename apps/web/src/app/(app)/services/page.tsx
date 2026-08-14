@@ -10,9 +10,8 @@ import {
     Plane, 
     Landmark, 
     Bitcoin, 
-    GraduationCap, 
-    Dices, 
-    Shield, 
+    GraduationCap,
+    Shield,
     Droplet, 
     Car, 
     HeartHandshake, 
@@ -125,8 +124,12 @@ export default function ServicesPage() {
                     <section className="space-y-4">
                         <h2 className="text-[15px] font-extrabold text-ink">More Services</h2>
                         <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-                            <Tile icon={GraduationCap} label="Education" iconBg="bg-indigo-50" iconColor="text-indigo-600" comingSoon onClick={handleComingSoon} />
-                            <Tile icon={Dices} label="Betting" iconBg="bg-yellow-50" iconColor="text-yellow-600" comingSoon onClick={handleComingSoon} />
+                            <Tile
+                                icon={GraduationCap}
+                                label="Education"
+                                iconBg="bg-indigo-50" iconColor="text-indigo-600"
+                                onClick={() => router.push("/services/education")}
+                            />
                             <Tile icon={Shield} label="Insurance" iconBg="bg-cyan-50" iconColor="text-cyan-600" comingSoon onClick={handleComingSoon} />
                             <Tile icon={Droplet} label="Water" iconBg="bg-sky-50" iconColor="text-sky-600" comingSoon onClick={handleComingSoon} />
                             <Tile icon={Car} label="Car Hire" iconBg="bg-slate-50" iconColor="text-slate-600" comingSoon onClick={handleComingSoon} />

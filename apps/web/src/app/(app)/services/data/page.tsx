@@ -6,8 +6,8 @@ import { ArrowLeft, Wifi } from "lucide-react";
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { useDataPlans, usePayData, useServiceTransactionStatus } from "@/lib/queries/services";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { usePayData, useUtilityCategories, useUtilityServices, useUtilityVariations } from "@/lib/queries/services";
+import { UtilityPurchaseResponseDto } from "@/lib/types/api";
 
 // New Shared UI Components
 import { ProviderSelector } from "@/components/services/ProviderSelector";
@@ -18,82 +18,68 @@ import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const NETWORKS = [
-    { id: "MTN", label: "MTN", color: "bg-yellow-400", logoUrl: "/images/providers/mtn.svg" },
-    { id: "Glo", label: "Glo", color: "bg-green-500", logoUrl: "/images/providers/glo.svg" },
-    { id: "Airtel", label: "Airtel", color: "bg-red-500", logoUrl: "/images/providers/airtel.svg" },
-    { id: "T2 Mobile", label: "T2 Mobile", color: "bg-blue-600", logoUrl: "/images/providers/t2.svg" },
-    { id: "Vitel", label: "Vitel", color: "bg-purple-600", logoUrl: "/images/providers/vitel.svg" },
-];
-
 const MOCK_RECENT_CONTACTS = [
     { name: "My Router", id: "08031234567" },
     { name: "Dad", id: "07069876543" },
 ];
 
+// Network-detection prefixes are matched against fetched service names,
+// since serviceIDs (e.g. "mtn") come from the backend and aren't hardcoded.
+const PREFIX_TO_NETWORK_NAME: { prefixes: string[]; match: string }[] = [
+    { prefixes: ["0803", "0703", "0813", "0906", "0810", "0814", "0916"], match: "mtn" },
+    { prefixes: ["0805", "0705", "0815", "0811", "0905", "0915"], match: "glo" },
+    { prefixes: ["0802", "0708", "0812", "0901", "0902", "0904", "0912"], match: "airtel" },
+    { prefixes: ["0809", "0818", "0817", "0909", "0908"], match: "9mobile" },
+];
+
 export default function DataPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    
-    // Support pre-filling
-    const initialNetwork = searchParams.get("network") || "MTN";
+
+    const initialNetwork = searchParams.get("network") || undefined;
     const initialPhone = searchParams.get("phone") || "";
 
-    const [network, setNetwork] = React.useState(initialNetwork);
+    const [network, setNetwork] = React.useState<string | undefined>(initialNetwork);
     const [phone, setPhone] = React.useState(initialPhone);
-    const [planId, setPlanId] = React.useState("");
-    const [validityTab, setValidityTab] = React.useState<"daily" | "weekly" | "monthly">("monthly");
+    const [variationCode, setVariationCode] = React.useState("");
+
+    // ─── Dynamic catalog ────────────────────────────────────────────────────
+    const { data: categories = [] } = useUtilityCategories();
+    const dataCategory = categories.find((c) => c.name.toLowerCase().includes("data"));
+    const { data: networks = [], isLoading: networksLoading } = useUtilityServices(dataCategory?.identifier);
+
+    React.useEffect(() => {
+        if (!network && networks.length > 0) {
+            setNetwork(networks[0]?.serviceID);
+        }
+    }, [networks, network]);
+
+    const selectedNetwork = networks.find((n) => n.serviceID === network);
+    const { data: plans = [], isLoading: plansLoading } = useUtilityVariations(selectedNetwork?.serviceID);
 
     // Queries & Mutations
-    const { data: plans = [], isLoading: plansLoading } = useDataPlans(network);
     const payData = usePayData();
-
-    // Group plans
-    const dailyPlans = plans.filter(p => p.validityDays <= 1);
-    const weeklyPlans = plans.filter(p => p.validityDays > 1 && p.validityDays <= 7);
-    const monthlyPlans = plans.filter(p => p.validityDays > 7);
-
-    // Auto switch tabs if a category has no plans
-    React.useEffect(() => {
-        if (!plansLoading && plans.length > 0) {
-            if (validityTab === "monthly" && monthlyPlans.length === 0) setValidityTab("weekly");
-            if (validityTab === "weekly" && weeklyPlans.length === 0) setValidityTab("daily");
-        }
-    }, [plans, plansLoading, validityTab]); // eslint-disable-line
 
     // Reset plan when network changes
     React.useEffect(() => {
-        setPlanId("");
+        setVariationCode("");
     }, [network]);
 
-    const selectedPlan = plans.find(p => p.id === planId);
+    const selectedPlan = plans.find((p) => p.variation_code === variationCode);
 
     // ─── Transaction State ────────────────────────────────────────────────
     const [pinModalOpen, setPinModalOpen] = React.useState(false);
     const [txState, setTxState] = React.useState<TransactionState>("pin");
-    const [txId, setTxId] = React.useState<string | null>(null);
+    const [txResult, setTxResult] = React.useState<UtilityPurchaseResponseDto | null>(null);
     const [successOpen, setSuccessOpen] = React.useState(false);
-
-    const { data: txStatus } = useServiceTransactionStatus(txId);
-
-    React.useEffect(() => {
-        if (!txStatus) return;
-        if (txStatus.status === "COMPLETED") {
-            setPinModalOpen(false);
-            setSuccessOpen(true);
-        }
-        if (txStatus.status === "FAILED") {
-            setTxState("error");
-        }
-    }, [txStatus]);
 
     // ─── Handlers ───────────────────────────────────────────────────────────────
     React.useEffect(() => {
-        if (phone.startsWith("0803") || phone.startsWith("0703") || phone.startsWith("0813")) setNetwork("MTN");
-        else if (phone.startsWith("0805") || phone.startsWith("0705") || phone.startsWith("0815")) setNetwork("Glo");
-        else if (phone.startsWith("0802") || phone.startsWith("0708") || phone.startsWith("0812")) setNetwork("Airtel");
-        else if (phone.startsWith("0809") || phone.startsWith("0818") || phone.startsWith("0909")) setNetwork("9mobile");
-    }, [phone]);
+        const rule = PREFIX_TO_NETWORK_NAME.find((r) => r.prefixes.some((p) => phone.startsWith(p)));
+        if (!rule) return;
+        const matched = networks.find((n) => n.name.toLowerCase().includes(rule.match));
+        if (matched) setNetwork(matched.serviceID);
+    }, [phone, networks]);
 
     const handlePayClick = () => {
         if (phone.length < 10) {
@@ -104,20 +90,32 @@ export default function DataPage() {
             toast.error("Please select a data plan");
             return;
         }
-        setTxId(null);
+        setTxResult(null);
         setTxState("pin");
         setPinModalOpen(true);
     };
 
     const handlePinSubmit = (pin: string) => {
-        if (!selectedPlan) return;
+        if (!selectedPlan || !selectedNetwork) return;
         setTxState("processing");
-        
+
         payData.mutate(
-            { phone, planId, amountNgn: selectedPlan.price, network, pin },
+            {
+                phone,
+                variationCode: selectedPlan.variation_code,
+                amountNgn: Number(selectedPlan.variation_amount),
+                network: selectedNetwork.serviceID,
+                pin,
+            },
             {
                 onSuccess: (res) => {
-                    setTxId(res.id);
+                    setTxResult(res);
+                    if (res.status === "FAILED") {
+                        setTxState("error");
+                        return;
+                    }
+                    setPinModalOpen(false);
+                    setSuccessOpen(true);
                 },
                 onError: (err: any) => {
                     toast.error(err.response?.data?.message || "Purchase failed");
@@ -128,17 +126,7 @@ export default function DataPage() {
     };
 
     const isValid = phone.length >= 10 && !!selectedPlan;
-
-    // Helper to format plan for PlanGrid
-    const formatPlansForGrid = (rawPlans: typeof plans) => {
-        return rawPlans.map((p, idx) => ({
-            id: p.id,
-            name: p.name,
-            validity: `${p.validityDays} Day${p.validityDays > 1 ? 's' : ''}`,
-            price: p.price,
-            recommended: idx === 1 // Mock a recommendation for the UI
-        }));
-    };
+    const selectedAmount = selectedPlan ? Number(selectedPlan.variation_amount) : 0;
 
     return (
         <>
@@ -161,11 +149,14 @@ export default function DataPage() {
 
                 <div className="px-2 sm:px-0 space-y-8">
                     {/* Provider Selection */}
-                    <ProviderSelector 
-                        providers={NETWORKS}
-                        selectedId={network}
+                    <ProviderSelector
+                        providers={networks.map((n) => ({ id: n.serviceID, label: n.name, color: "bg-blue-600", logoUrl: n.image }))}
+                        selectedId={network ?? ""}
                         onChange={setNetwork}
                     />
+                    {networksLoading && (
+                        <p className="-mt-6 px-1 text-xs font-medium text-muted">Loading networks…</p>
+                    )}
 
                     {/* Phone Number & Recent */}
                     <div className="space-y-4">
@@ -178,60 +169,33 @@ export default function DataPage() {
                                 onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                                 className="w-full h-16 rounded-2xl border-2 border-border bg-white px-5 text-xl font-bold tracking-wide outline-none focus:border-violet-600 transition-colors"
                             />
-                            {phone.length >= 4 && (
+                            {phone.length >= 4 && selectedNetwork && (
                                 <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-green-50 border border-green-200">
                                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                                    <span className="text-[10px] font-bold text-green-700 uppercase tracking-wider">{network} detected</span>
+                                    <span className="text-[10px] font-bold text-green-700 uppercase tracking-wider">{selectedNetwork.name} detected</span>
                                 </div>
                             )}
                         </div>
-                        <RecentNumbersRow 
-                            contacts={MOCK_RECENT_CONTACTS} 
-                            onSelect={(id) => setPhone(id)} 
+                        <RecentNumbersRow
+                            contacts={MOCK_RECENT_CONTACTS}
+                            onSelect={(id) => setPhone(id)}
                         />
                     </div>
 
-                    {/* Data Plans Tabs & Grid */}
-                    <div className="space-y-4">
-                        <Tabs value={validityTab} onValueChange={(v) => setValidityTab(v as any)}>
-                            <TabsList className="grid w-full grid-cols-3 mb-4 h-12 rounded-xl p-1 bg-gray-100">
-                                <TabsTrigger value="daily" className="rounded-lg font-bold">Daily</TabsTrigger>
-                                <TabsTrigger value="weekly" className="rounded-lg font-bold">Weekly</TabsTrigger>
-                                <TabsTrigger value="monthly" className="rounded-lg font-bold">Monthly</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="daily" className="mt-0 outline-none">
-                                <PlanGrid 
-                                    plans={formatPlansForGrid(dailyPlans)}
-                                    selectedId={planId}
-                                    onChange={setPlanId}
-                                    isLoading={plansLoading}
-                                />
-                            </TabsContent>
-                            <TabsContent value="weekly" className="mt-0 outline-none">
-                                <PlanGrid 
-                                    plans={formatPlansForGrid(weeklyPlans)}
-                                    selectedId={planId}
-                                    onChange={setPlanId}
-                                    isLoading={plansLoading}
-                                />
-                            </TabsContent>
-                            <TabsContent value="monthly" className="mt-0 outline-none">
-                                <PlanGrid 
-                                    plans={formatPlansForGrid(monthlyPlans)}
-                                    selectedId={planId}
-                                    onChange={setPlanId}
-                                    isLoading={plansLoading}
-                                />
-                            </TabsContent>
-                        </Tabs>
-                    </div>
+                    {/* Data Plans */}
+                    <PlanGrid
+                        plans={plans.map((p) => ({ id: p.variation_code, name: p.name, price: Number(p.variation_amount) }))}
+                        selectedId={variationCode}
+                        onChange={setVariationCode}
+                        isLoading={plansLoading}
+                    />
                 </div>
             </div>
 
-            <StickyPayBar 
-                visible={!successOpen} 
-                amount={selectedPlan?.price || 0}
-                summaryText={selectedPlan ? `${selectedPlan.name} · ${network} Data` : "Select a plan"}
+            <StickyPayBar
+                visible={!successOpen}
+                amount={selectedAmount}
+                summaryText={selectedPlan ? `${selectedPlan.name} · ${selectedNetwork?.name} Data` : "Select a plan"}
                 onPay={handlePayClick}
                 disabled={!isValid}
             />
@@ -243,15 +207,21 @@ export default function DataPage() {
                 onPinSubmit={handlePinSubmit}
                 processingText={`Sending ${selectedPlan?.name} data to ${phone}...`}
                 errorTitle="Purchase Failed"
-                errorDescription={<p>{payData.error?.message || txStatus?.failureReason || "The network provider didn't respond in time."}</p>}
+                errorDescription={<p>{payData.error?.message || txResult?.failureReason || "The network provider didn't respond in time."}</p>}
                 onErrorAction={() => setPinModalOpen(false)}
             />
 
-            <PaymentSuccessScreen 
+            <PaymentSuccessScreen
                 open={successOpen}
-                amount={selectedPlan?.price || 0}
-                title="Data Sent!"
-                description={<p>You successfully sent the <span className="font-bold">{selectedPlan?.name}</span> plan to <span className="font-bold">{phone}</span>.</p>}
+                amount={selectedAmount}
+                title={txResult?.status === "PROCESSING" ? "Data Purchase Processing" : "Data Sent!"}
+                description={
+                    txResult?.status === "PROCESSING" ? (
+                        <p>Your <span className="font-bold">{selectedPlan?.name}</span> plan for <span className="font-bold">{phone}</span> is being processed.</p>
+                    ) : (
+                        <p>You successfully sent the <span className="font-bold">{selectedPlan?.name}</span> plan to <span className="font-bold">{phone}</span>.</p>
+                    )
+                }
                 onHome={() => router.push("/overview")}
                 onReceipt={() => router.push("/transactions")}
             />

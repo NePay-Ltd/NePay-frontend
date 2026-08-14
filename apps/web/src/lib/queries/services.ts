@@ -4,24 +4,30 @@
 
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
-import { UtilityPurchaseResponseDto, ApiResponse } from "@/lib/types/api";
+import {
+    UtilityPurchaseResponseDto,
+    UtilityCategoryDto,
+    UtilityServiceDto,
+    UtilityVariationDto,
+    ApiResponse,
+} from "@/lib/types/api";
 import {
     mockGetSavedBillers,
-    mockGetDataPlans,
     mockVerifyMeter,
     mockVerifySmartcard,
     type SavedBiller,
-    type DataPlan,
 } from "@/lib/mock-services";
 
 export const servicesKeys = {
     all: ["services"] as const,
     savedBillers: () => [...servicesKeys.all, "savedBillers"] as const,
-    dataPlans: (network: string) => [...servicesKeys.all, "dataPlans", network] as const,
+    categories: () => [...servicesKeys.all, "categories"] as const,
+    utilityServices: (category: string) => [...servicesKeys.all, "utilityServices", category] as const,
+    variations: (serviceId: string) => [...servicesKeys.all, "variations", serviceId] as const,
     status: (id: string) => [...servicesKeys.all, "status", id] as const,
 };
 
-// Catalogs and billers are kept mocked as they are not provided in the API docs yet.
+// Saved billers are kept mocked as they are not provided in the API docs yet.
 export function useSavedBillers() {
     return useQuery<SavedBiller[]>({
         queryKey: servicesKeys.savedBillers(),
@@ -29,11 +35,43 @@ export function useSavedBillers() {
     });
 }
 
-export function useDataPlans(network: string) {
-    return useQuery<DataPlan[]>({
-        queryKey: servicesKeys.dataPlans(network),
-        queryFn: () => mockGetDataPlans(network),
-        enabled: !!network,
+// ─── Dynamic Catalog ──────────────────────────────────────────────────────────
+// Categories -> services (within a category) -> variations (plans/bouquets).
+// Server caches these for an hour; no need to layer extra caching on top.
+
+export function useUtilityCategories() {
+    return useQuery<UtilityCategoryDto[]>({
+        queryKey: servicesKeys.categories(),
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<UtilityCategoryDto[]>>("/utilities/categories");
+            return res.data.data;
+        },
+    });
+}
+
+export function useUtilityServices(category: string | undefined) {
+    return useQuery<UtilityServiceDto[]>({
+        queryKey: servicesKeys.utilityServices(category ?? ""),
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<UtilityServiceDto[]>>("/utilities/services", {
+                params: { category },
+            });
+            return res.data.data;
+        },
+        enabled: !!category,
+    });
+}
+
+export function useUtilityVariations(serviceId: string | undefined) {
+    return useQuery<UtilityVariationDto[]>({
+        queryKey: servicesKeys.variations(serviceId ?? ""),
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<UtilityVariationDto[]>>("/utilities/variations", {
+                params: { serviceId },
+            });
+            return res.data.data;
+        },
+        enabled: !!serviceId,
     });
 }
 
@@ -53,7 +91,7 @@ export function usePayAirtime() {
     return useMutation<UtilityPurchaseResponseDto, Error, { phone: string; amountNgn: number; network: string; pin: string }>({
         mutationFn: async ({ phone, amountNgn, network, pin }) => {
             const res = await apiClient.post<ApiResponse<UtilityPurchaseResponseDto>>("/utilities/airtime", {
-                network: network.toUpperCase(),
+                network,
                 amount: amountNgn.toString(),
                 phoneNumber: phone,
                 pin,
@@ -64,13 +102,27 @@ export function usePayAirtime() {
 }
 
 export function usePayData() {
-    return useMutation<UtilityPurchaseResponseDto, Error, { phone: string; planId: string; network: string; amountNgn: number; pin: string }>({
-        mutationFn: async ({ phone, planId, network, amountNgn, pin }) => {
+    return useMutation<UtilityPurchaseResponseDto, Error, { phone: string; variationCode: string; network: string; amountNgn: number; pin: string }>({
+        mutationFn: async ({ phone, variationCode, network, amountNgn, pin }) => {
             const res = await apiClient.post<ApiResponse<UtilityPurchaseResponseDto>>("/utilities/data", {
-                network: network.toUpperCase(),
+                network,
                 amount: amountNgn.toString(),
                 phoneNumber: phone,
-                planId,
+                variationCode,
+                pin,
+            });
+            return res.data.data;
+        },
+    });
+}
+
+export function usePayEducation() {
+    return useMutation<UtilityPurchaseResponseDto, Error, { examBody: string; variationCode: string; amountNgn: number; pin: string }>({
+        mutationFn: async ({ examBody, variationCode, amountNgn, pin }) => {
+            const res = await apiClient.post<ApiResponse<UtilityPurchaseResponseDto>>("/utilities/education", {
+                examBody,
+                variationCode,
+                amount: amountNgn.toString(),
                 pin,
             });
             return res.data.data;

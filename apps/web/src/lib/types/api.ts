@@ -6,7 +6,7 @@ export type LedgerEntryType = "DEPOSIT" | "BANK_DEPOSIT" | "WITHDRAWAL" | "ADMIN
 export type DepositStatus = "PENDING" | "CONFIRMED" | "FAILED";
 export type WithdrawalStatus = "PROCESSING" | "COMPLETED" | "FAILED";
 export type UtilityCategory = "AIRTIME" | "DATA" | "ELECTRICITY" | "CABLE" | "EDUCATION" | "BETTING";
-export type UtilityPurchaseStatus = "COMPLETED" | "FAILED";
+export type UtilityPurchaseStatus = "COMPLETED" | "PROCESSING" | "FAILED" | "REVERSED";
 export type GiftCardOrderStatus = "PENDING_REVIEW" | "APPROVED" | "REJECTED";
 export type VirtualAccountStatus = "ACTIVE" | "INACTIVE";
 
@@ -169,6 +169,29 @@ export interface UtilityPurchaseResponseDto {
     providerReference: string | null;
     failureReason: string | null;
     createdAt: string;
+}
+
+// ─── Utilities Catalog ───────────────────────────────────────────────────────
+// Dynamic catalog: categories -> services (within a category) -> variations
+// (plans/bouquets, where relevant). Cached server-side for an hour.
+
+export interface UtilityCategoryDto {
+    identifier: string;
+    name: string;
+}
+
+export interface UtilityServiceDto {
+    serviceID: string;
+    name: string;
+    minimium_amount?: string; // sic — matches VTpass's actual field spelling
+    maximum_amount?: string;
+    image?: string;
+}
+
+export interface UtilityVariationDto {
+    variation_code: string;
+    name: string;
+    variation_amount: string;
 }
 
 // ─── Gift Cards ──────────────────────────────────────────────────────────────

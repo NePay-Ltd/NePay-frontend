@@ -6,7 +6,8 @@ import { ArrowLeft, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { usePayAirtime, useServiceTransactionStatus } from "@/lib/queries/services";
+import { usePayAirtime, useUtilityCategories, useUtilityServices } from "@/lib/queries/services";
+import { UtilityPurchaseResponseDto } from "@/lib/types/api";
 
 // New Shared UI Components
 import { ProviderSelector } from "@/components/services/ProviderSelector";
@@ -17,14 +18,6 @@ import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const NETWORKS = [
-    { id: "MTN", label: "MTN", color: "bg-yellow-400", logoUrl: "/images/providers/mtn.svg" },
-    { id: "Glo", label: "Glo", color: "bg-green-500", logoUrl: "/images/providers/glo.svg" },
-    { id: "Airtel", label: "Airtel", color: "bg-red-500", logoUrl: "/images/providers/airtel.svg" },
-    { id: "T2 Mobile", label: "T2 Mobile", color: "bg-blue-600", logoUrl: "/images/providers/t2.svg" },
-    { id: "Vitel", label: "Vitel", color: "bg-purple-600", logoUrl: "/images/providers/vitel.svg" },
-];
-
 const PRESET_AMOUNTS = [50, 100, 500, 1000, 2000, 5000];
 
 // Mock recent contacts for UI refactor
@@ -34,17 +27,39 @@ const MOCK_RECENT_CONTACTS = [
     { name: "John Doe", id: "08101239876" },
 ];
 
+// Network-detection prefixes are matched against the fetched service names,
+// since serviceIDs (e.g. "mtn") come from the backend and aren't hardcoded.
+const PREFIX_TO_NETWORK_NAME: { prefixes: string[]; match: string }[] = [
+    { prefixes: ["0803", "0703", "0813", "0906", "0810", "0814", "0916"], match: "mtn" },
+    { prefixes: ["0805", "0705", "0815", "0811", "0905", "0915"], match: "glo" },
+    { prefixes: ["0802", "0708", "0812", "0901", "0902", "0904", "0912"], match: "airtel" },
+    { prefixes: ["0809", "0818", "0817", "0909", "0908"], match: "9mobile" },
+];
+
 export default function AirtimePage() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    
-    // Support pre-filling
-    const initialNetwork = searchParams.get("network") || "MTN";
+
+    const initialNetwork = searchParams.get("network") || undefined;
     const initialPhone = searchParams.get("phone") || "";
 
-    const [network, setNetwork] = React.useState(initialNetwork);
+    const [network, setNetwork] = React.useState<string | undefined>(initialNetwork);
     const [phone, setPhone] = React.useState(initialPhone);
     const [amount, setAmount] = React.useState(0);
+
+    // ─── Dynamic catalog ────────────────────────────────────────────────────
+    const { data: categories = [] } = useUtilityCategories();
+    const airtimeCategory = categories.find((c) => c.name.toLowerCase().includes("airtime"));
+    const { data: networks = [], isLoading: networksLoading } = useUtilityServices(airtimeCategory?.identifier);
+
+    // Default to the first available network once the catalog loads
+    React.useEffect(() => {
+        if (!network && networks.length > 0) {
+            setNetwork(networks[0]?.serviceID);
+        }
+    }, [networks, network]);
+
+    const selectedNetwork = networks.find((n) => n.serviceID === network);
 
     // Queries & Mutations
     const payAirtime = usePayAirtime();
@@ -52,54 +67,55 @@ export default function AirtimePage() {
     // ─── Transaction State ────────────────────────────────────────────────
     const [pinModalOpen, setPinModalOpen] = React.useState(false);
     const [txState, setTxState] = React.useState<TransactionState>("pin");
-    const [txId, setTxId] = React.useState<string | null>(null);
+    const [txResult, setTxResult] = React.useState<UtilityPurchaseResponseDto | null>(null);
     const [successOpen, setSuccessOpen] = React.useState(false);
 
-    const { data: txStatus } = useServiceTransactionStatus(txId);
-
-    React.useEffect(() => {
-        if (!txStatus) return;
-        if (txStatus.status === "COMPLETED") {
-            setPinModalOpen(false); // Close pin modal
-            setSuccessOpen(true);   // Open full screen success
-        }
-        if (txStatus.status === "FAILED") {
-            setTxState("error");
-        }
-    }, [txStatus]);
-
     // ─── Handlers ───────────────────────────────────────────────────────────────
-    
-    // Auto-detect network prefix (simple mock logic)
+
+    // Auto-detect network from phone prefix, matched against fetched service names
     React.useEffect(() => {
-        if (phone.startsWith("0803") || phone.startsWith("0703") || phone.startsWith("0813")) setNetwork("MTN");
-        else if (phone.startsWith("0805") || phone.startsWith("0705") || phone.startsWith("0815")) setNetwork("Glo");
-        else if (phone.startsWith("0802") || phone.startsWith("0708") || phone.startsWith("0812")) setNetwork("Airtel");
-        else if (phone.startsWith("0809") || phone.startsWith("0818") || phone.startsWith("0909")) setNetwork("9mobile");
-    }, [phone]);
+        const rule = PREFIX_TO_NETWORK_NAME.find((r) => r.prefixes.some((p) => phone.startsWith(p)));
+        if (!rule) return;
+        const matched = networks.find((n) => n.name.toLowerCase().includes(rule.match));
+        if (matched) setNetwork(matched.serviceID);
+    }, [phone, networks]);
+
+    const minAmount = selectedNetwork?.minimium_amount ? Number(selectedNetwork.minimium_amount) : 50;
+    const maxAmount = selectedNetwork?.maximum_amount ? Number(selectedNetwork.maximum_amount) : undefined;
 
     const handlePayClick = () => {
         if (phone.length < 10) {
             toast.error("Please enter a valid phone number");
             return;
         }
-        if (amount < 50) {
-            toast.error("Minimum amount is ₦50");
+        if (amount < minAmount) {
+            toast.error(`Minimum amount is ₦${minAmount}`);
             return;
         }
-        setTxId(null);
+        if (maxAmount && amount > maxAmount) {
+            toast.error(`Maximum amount is ₦${maxAmount}`);
+            return;
+        }
+        setTxResult(null);
         setTxState("pin");
         setPinModalOpen(true);
     };
 
     const handlePinSubmit = (pin: string) => {
+        if (!selectedNetwork) return;
         setTxState("processing");
-        
+
         payAirtime.mutate(
-            { phone, amountNgn: amount, network, pin },
+            { phone, amountNgn: amount, network: selectedNetwork.serviceID, pin },
             {
                 onSuccess: (res) => {
-                    setTxId(res.id);
+                    setTxResult(res);
+                    if (res.status === "FAILED") {
+                        setTxState("error");
+                        return;
+                    }
+                    setPinModalOpen(false);
+                    setSuccessOpen(true);
                 },
                 onError: (err: any) => {
                     toast.error(err.response?.data?.message || "Recharge failed");
@@ -109,7 +125,7 @@ export default function AirtimePage() {
         );
     };
 
-    const isValid = phone.length >= 10 && amount >= 50;
+    const isValid = phone.length >= 10 && amount >= minAmount && !!selectedNetwork;
 
     return (
         <>
@@ -132,11 +148,14 @@ export default function AirtimePage() {
 
                 <div className="px-2 sm:px-0 space-y-8">
                     {/* Provider Selection */}
-                    <ProviderSelector 
-                        providers={NETWORKS}
-                        selectedId={network}
+                    <ProviderSelector
+                        providers={networks.map((n) => ({ id: n.serviceID, label: n.name, color: "bg-violet-600", logoUrl: n.image }))}
+                        selectedId={network ?? ""}
                         onChange={setNetwork}
                     />
+                    {networksLoading && (
+                        <p className="-mt-6 px-1 text-xs font-medium text-muted">Loading networks…</p>
+                    )}
 
                     {/* Phone Number & Recent */}
                     <div className="space-y-4">
@@ -150,21 +169,21 @@ export default function AirtimePage() {
                                 className="w-full h-16 rounded-2xl border-2 border-border bg-white px-5 text-xl font-bold tracking-wide outline-none focus:border-violet-600 transition-colors"
                             />
                             {/* Auto-detected badge */}
-                            {phone.length >= 4 && (
+                            {phone.length >= 4 && selectedNetwork && (
                                 <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-green-50 border border-green-200">
                                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                                    <span className="text-[10px] font-bold text-green-700 uppercase tracking-wider">{network} detected</span>
+                                    <span className="text-[10px] font-bold text-green-700 uppercase tracking-wider">{selectedNetwork.name} detected</span>
                                 </div>
                             )}
                         </div>
-                        <RecentNumbersRow 
-                            contacts={MOCK_RECENT_CONTACTS} 
-                            onSelect={(id) => setPhone(id)} 
+                        <RecentNumbersRow
+                            contacts={MOCK_RECENT_CONTACTS}
+                            onSelect={(id) => setPhone(id)}
                         />
                     </div>
 
                     {/* Amount Calculator */}
-                    <AmountCalculator 
+                    <AmountCalculator
                         amount={amount}
                         onChange={setAmount}
                         presets={PRESET_AMOUNTS}
@@ -172,10 +191,10 @@ export default function AirtimePage() {
                 </div>
             </div>
 
-            <StickyPayBar 
+            <StickyPayBar
                 visible={!successOpen} // Hide bar if success screen is up
                 amount={amount}
-                summaryText={`${network} Airtime — ${phone || "..."}`}
+                summaryText={`${selectedNetwork?.name ?? "Select network"} Airtime — ${phone || "..."}`}
                 onPay={handlePayClick}
                 disabled={!isValid}
             />
@@ -187,15 +206,21 @@ export default function AirtimePage() {
                 onPinSubmit={handlePinSubmit}
                 processingText={`Sending ₦${amount} airtime to ${phone}...`}
                 errorTitle="Recharge Failed"
-                errorDescription={<p>{payAirtime.error?.message || txStatus?.failureReason || "The network provider didn't respond in time."}</p>}
+                errorDescription={<p>{payAirtime.error?.message || txResult?.failureReason || "The network provider didn't respond in time."}</p>}
                 onErrorAction={() => setPinModalOpen(false)}
             />
 
-            <PaymentSuccessScreen 
+            <PaymentSuccessScreen
                 open={successOpen}
                 amount={amount}
-                title="Airtime Sent!"
-                description={<p>You successfully recharged <span className="font-bold">{phone}</span> via {network}.</p>}
+                title={txResult?.status === "PROCESSING" ? "Airtime Processing" : "Airtime Sent!"}
+                description={
+                    txResult?.status === "PROCESSING" ? (
+                        <p>Your recharge to <span className="font-bold">{phone}</span> is being processed. We&apos;ll update you shortly.</p>
+                    ) : (
+                        <p>You successfully recharged <span className="font-bold">{phone}</span> via {selectedNetwork?.name}.</p>
+                    )
+                }
                 onHome={() => router.push("/overview")}
                 onReceipt={() => router.push("/transactions")}
             />
