@@ -28,7 +28,7 @@ export function HeroCard({
     const router = useRouter();
 
     return (
-        <div className="relative overflow-hidden rounded-[24px] bg-brand-gradient p-6 text-white shadow-2xl lg:p-8 border border-white/10">
+        <div className="relative overflow-hidden rounded-[24px] bg-brand-gradient p-5 sm:p-6 text-white shadow-2xl lg:p-8 border border-white/10">
             {/* Glass shine effect */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none mix-blend-overlay" />
             
@@ -40,7 +40,7 @@ export function HeroCard({
             <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
 
                 {/* Left: Balance block */}
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 w-full">
                     {/* Label + eye toggle */}
                     <div className="flex items-center gap-2">
                         <p className="text-xs font-bold text-violet-200">
@@ -69,21 +69,21 @@ export function HeroCard({
                     </div>
 
                     {/* Action buttons */}
-                    <div className="mt-8 flex flex-row gap-3 sm:gap-4">
+                    <div className="mt-7 grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:gap-4">
                         <Button
                             size="md"
                             onClick={() => router.push("/add-money")}
-                            className="flex-1 bg-white text-violet-700 hover:bg-violet-50 font-bold shadow-sm rounded-xl h-12 sm:flex-none sm:w-auto sm:px-6 active:scale-95 transition-transform"
+                            className="bg-white text-violet-700 hover:bg-violet-50 font-bold shadow-sm rounded-xl h-12 px-2 text-[13px] sm:text-sm sm:px-6 sm:w-auto active:scale-95 transition-transform min-w-0"
                         >
-                            <Plus className="mr-2 h-4 w-4 shrink-0" />
+                            <Plus className="mr-1.5 h-4 w-4 shrink-0" />
                             Add money
                         </Button>
                         <Button
                             size="md"
                             onClick={() => router.push("/withdraw")}
-                            className="flex-1 border border-white/20 bg-white/10 text-white backdrop-blur-md hover:bg-white/20 transition-all font-bold rounded-xl h-12 sm:flex-none sm:w-auto sm:px-6 active:scale-95"
+                            className="border border-white/20 bg-white/10 text-white backdrop-blur-md hover:bg-white/20 transition-all font-bold rounded-xl h-12 px-2 text-[13px] sm:text-sm sm:px-6 sm:w-auto active:scale-95 min-w-0"
                         >
-                            <Building2 className="mr-2 h-4 w-4 shrink-0" />
+                            <Building2 className="mr-1.5 h-4 w-4 shrink-0" />
                             Withdraw
                         </Button>
                     </div>

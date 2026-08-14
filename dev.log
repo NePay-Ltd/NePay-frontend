@@ -303,3 +303,4 @@ web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 13049ms
 web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 8565ms
 web:dev:  ✓ Compiled /icon.png in 2.3s (1240 modules)
 web:dev:  GET /icon.png?89c664bf7c253876 200 in 4864ms
+web:dev:  ✓ Compiled in 14.3s (3335 modules)
