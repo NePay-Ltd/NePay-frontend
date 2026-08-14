@@ -71,7 +71,7 @@ export default function SubmissionTrackerPage({ params }: { params: { id: string
                                 {submission.brand} Gift Card
                             </h2>
                             <p className="mt-1 font-mono text-3xl font-bold text-ink">
-                                ${submission.faceValueUsd.toFixed(2)}
+                                ${parseFloat(submission.faceValueUsd || "0").toFixed(2)}
                             </p>
                         </div>
 
@@ -134,7 +134,7 @@ export default function SubmissionTrackerPage({ params }: { params: { id: string
                                         
                                         {isPaid && (
                                             <p className="text-xs text-muted mt-1">
-                                                <span className="font-bold text-ink">{formatNaira(submission.payoutNgn)}</span> has been added to your wallet.
+                                                <span className="font-bold text-ink">{formatNaira(submission.payoutNgn || 0)}</span> has been added to your wallet.
                                             </p>
                                         )}
                                         {isRejected && (

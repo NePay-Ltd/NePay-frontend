@@ -19,8 +19,21 @@ export default function CardPage() {
     ];
 
     return (
-        <div className="">
-            <div className="grid grid-cols-1 gap-8 xl:grid-cols-12 xl:gap-12">
+        <div className="relative">
+            {/* Coming Soon Overlay */}
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/40 dark:bg-bg/60 backdrop-blur-[2px] rounded-3xl">
+                <div className="flex flex-col items-center bg-white dark:bg-gray-100 p-6 rounded-2xl shadow-xl ring-1 ring-border text-center max-w-sm">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 text-violet-700 mb-4">
+                        <Lock className="h-6 w-6" />
+                    </div>
+                    <h2 className="text-xl font-extrabold text-ink">Coming Soon</h2>
+                    <p className="mt-2 text-sm font-medium text-muted">
+                        We are working hard to bring you the NePay Verve Card. Stay tuned!
+                    </p>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-8 xl:grid-cols-12 xl:gap-12 opacity-40 pointer-events-none select-none filter grayscale-[30%]">
                 
                 {/* ── Left Column: Card Visual & Controls ── */}
                 <div className="flex flex-col items-center space-y-8 xl:col-span-5">

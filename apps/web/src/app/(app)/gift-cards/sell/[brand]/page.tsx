@@ -17,17 +17,18 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/format";
-import { useGiftCardRates, useSubmitGiftCard } from "@/lib/queries/gift-cards";
+import { useGiftCardRates, useGiftCardQuote, useSubmitGiftCard } from "@/lib/queries/gift-cards";
 
 import { Panel, PanelBody } from "@/components/shared/panel";
 import { Button } from "@/components/shared/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
 
 const BRAND_META: Record<string, any> = {
     amazon: { label: "Amazon", icon: ShoppingCart, color: "text-orange-500", bg: "bg-orange-50" },
-    itunes: { label: "iTunes / Apple", icon: Smartphone, color: "text-black", bg: "bg-gray-100" },
+    itunes: { label: "iTunes / Apple", icon: Smartphone, color: "text-ink", bg: "bg-gray-100" },
     "google-play": { label: "Google Play", icon: Tag, color: "text-blue-500", bg: "bg-blue-50" },
     steam: { label: "Steam", icon: Gamepad2, color: "text-indigo-900", bg: "bg-indigo-50" },
 };
@@ -38,54 +39,63 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
     const meta = BRAND_META[brandId];
 
     const { data: rates = {} } = useGiftCardRates();
+    const quoteMutation = useGiftCardQuote();
     const submitMutation = useSubmitGiftCard();
 
     const rate = rates[brandId] || 0;
 
     const [faceValueUsd, setFaceValueUsd] = React.useState<string>("");
-    const [inputType, setInputType] = React.useState<"text" | "file">("text");
     const [cardCode, setCardCode] = React.useState("");
-    const [file, setFile] = React.useState<File | null>(null);
-
-    // Dropzone setup
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        accept: {
-            "image/*": [".jpeg", ".png", ".jpg"]
-        },
-        maxFiles: 1,
-        onDrop: (acceptedFiles) => {
-            if (acceptedFiles[0]) {
-                setFile(acceptedFiles[0]);
-            }
-        },
-    });
 
     const parsedValue = parseFloat(faceValueUsd) || 0;
     const payoutNgn = parsedValue * rate;
     
     // Validation
-    const isValid = parsedValue > 0 && (inputType === "text" ? cardCode.trim().length > 0 : file !== null);
+    const isValid = parsedValue > 0 && cardCode.trim().length > 0;
+
+    // Modal State
+    const [modalOpen, setModalOpen] = React.useState(false);
+    const [txState, setTxState] = React.useState<TransactionState>("confirm");
+    const [currentQuoteId, setCurrentQuoteId] = React.useState<string | null>(null);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!isValid) return;
 
-        const formData = new FormData();
-        formData.append("brand", brandId);
-        formData.append("faceValueUsd", parsedValue.toString());
-        
-        if (inputType === "text") {
-            formData.append("cardCode", cardCode);
-        } else if (file) {
-            formData.append("file", file);
-        }
+        setTxState("processing");
+        setModalOpen(true);
 
-        submitMutation.mutate(formData, {
+        quoteMutation.mutate(
+            { cardBrand: brandId.toUpperCase(), faceValueUsd: parsedValue.toFixed(2), quantity: 1 },
+            {
+                onSuccess: (data: { quoteId: string }) => {
+                    setCurrentQuoteId(data.quoteId);
+                    setTxState("pin");
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || "Failed to get quote");
+                    setModalOpen(false);
+                }
+            }
+        );
+    };
+
+    const handlePinSubmit = (pin: string) => {
+        if (!currentQuoteId) return;
+        setTxState("processing");
+
+        submitMutation.mutate({ quoteId: currentQuoteId, cardCode, pin }, {
             onSuccess: (data) => {
-                router.push(`/gift-cards/submissions/${data.id}`);
+                setTxState("success");
+                // Wait briefly then redirect to the submission page
+                setTimeout(() => {
+                    setModalOpen(false);
+                    router.push(`/gift-cards/submissions/${data.saleId}`);
+                }, 1500);
             },
-            onError: (err) => {
-                toast.error(err.message || "Failed to submit gift card");
+            onError: (err: any) => {
+                toast.error(err.response?.data?.message || "Failed to submit gift card");
+                setTxState("error");
             }
         });
     };
@@ -165,52 +175,15 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
                             </div>
                         </div>
 
-                        {/* Card Input / Upload */}
+                        {/* Card Input */}
                         <div className="space-y-3 pt-4 border-t border-border">
-                            <div className="flex items-center justify-between">
-                                <Label>Card Details</Label>
-                                <Tabs value={inputType} onValueChange={(v) => setInputType(v as "text" | "file")} className="w-[180px]">
-                                    <TabsList className="grid w-full grid-cols-2 h-8">
-                                        <TabsTrigger value="text" className="text-xs">Type Code</TabsTrigger>
-                                        <TabsTrigger value="file" className="text-xs">Upload Image</TabsTrigger>
-                                    </TabsList>
-                                </Tabs>
-                            </div>
-
-                            {inputType === "text" ? (
-                                <textarea
-                                    placeholder="Enter your alphanumeric e-code here..."
-                                    className="min-h-[120px] w-full rounded-md border border-border bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 resize-none font-mono"
-                                    value={cardCode}
-                                    onChange={(e) => setCardCode(e.target.value)}
-                                />
-                            ) : (
-                                <div 
-                                    {...getRootProps()} 
-                                    className={cn(
-                                        "flex min-h-[120px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-gray-50/50 p-6 text-center transition-colors hover:bg-gray-50",
-                                        isDragActive ? "border-violet-500 bg-violet-50/50" : "border-border",
-                                        file ? "border-green-500 bg-green-50/50" : ""
-                                    )}
-                                >
-                                    <input {...getInputProps()} />
-                                    {file ? (
-                                        <div className="space-y-2">
-                                            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600">
-                                                <CheckCircle2 className="h-5 w-5" />
-                                            </div>
-                                            <p className="text-sm font-medium text-green-700">{file.name}</p>
-                                            <p className="text-xs text-green-600/70">Click or drag to replace</p>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-2 text-muted">
-                                            <UploadCloud className="mx-auto h-8 w-8 opacity-70" />
-                                            <p className="text-sm font-medium">Drop an image here or click to browse</p>
-                                            <p className="text-xs">JPEG, PNG up to 5MB</p>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                            <Label>Card Details (e-code)</Label>
+                            <textarea
+                                placeholder="Enter your alphanumeric e-code here..."
+                                className="min-h-[120px] w-full rounded-md border border-border bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 resize-none font-mono"
+                                value={cardCode}
+                                onChange={(e) => setCardCode(e.target.value)}
+                            />
                         </div>
 
                         <Button 
@@ -225,6 +198,32 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
                     </form>
                 </PanelBody>
             </Panel>
+
+            <TransactionModal
+                open={modalOpen}
+                onOpenChange={setModalOpen}
+                state={txState}
+                // Confirm UI (skipped, goes straight to processing quote)
+                confirmTitle=""
+                confirmContent={<></>}
+                confirmButtonLabel=""
+                onConfirm={() => {}}
+                onCancel={() => setModalOpen(false)}
+                // PIN
+                onPinSubmit={handlePinSubmit}
+                // Processing UI
+                processingText={txState === "processing" && currentQuoteId ? "Submitting gift card..." : "Getting best quote..."}
+                // Success UI
+                successTitle="Card Submitted"
+                successDescription={<p>Your gift card has been submitted successfully for verification.</p>}
+                successButtonLabel="View Submission"
+                onSuccessAction={() => setModalOpen(false)}
+                // Error UI
+                errorTitle="Submission Failed"
+                errorDescription={<p>{submitMutation.error?.message || "An unexpected error occurred."}</p>}
+                errorButtonLabel="Try Again"
+                onErrorAction={() => setModalOpen(false)}
+            />
         </div>
     );
 }

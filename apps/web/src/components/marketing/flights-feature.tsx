@@ -77,7 +77,7 @@ export function FlightsFeature() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.15 }}
                     className="flex flex-col h-full space-y-4"
                   >
                     {/* From / To */}
@@ -117,7 +117,7 @@ export function FlightsFeature() {
                     {/* Simulated Click Button */}
                     <motion.div
                       animate={{ scale: [1, 1, 0.95, 1] }}
-                      transition={{ duration: 0.5, times: [0, 0.8, 0.9, 1] }}
+                      transition={{ duration: 0.25, times: [0, 0.8, 0.9, 1] }}
                       className="w-full bg-blue-600 text-white font-bold text-sm py-4 rounded-xl flex justify-center items-center gap-2 shadow-lg shadow-blue-500/25"
                     >
                       Search Flights <ArrowRight className="w-4 h-4" />
@@ -132,7 +132,7 @@ export function FlightsFeature() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.15 }}
                     className="flex flex-col space-y-3"
                   >
                     <p className="text-xs font-bold text-marketing-secondary px-1 mb-1">Oct 12 • LOS → LHR</p>
@@ -159,7 +159,7 @@ export function FlightsFeature() {
                           boxShadow: ["none", "none", "0 0 0 1px #3b82f6", "0 0 0 1px #3b82f6"],
                           backgroundColor: ["var(--marketing-bg)", "var(--marketing-bg)", "var(--marketing-bg)", "var(--marketing-bg)"]
                        }}
-                       transition={{ duration: 4, times: [0, 0.6, 0.7, 1] }}
+                       transition={{ duration: 2, times: [0, 0.6, 0.7, 1] }}
                        className="bg-marketing-bg border border-marketing-border rounded-2xl p-4 relative"
                     >
                        <div className="flex justify-between items-start mb-3">
@@ -181,7 +181,7 @@ export function FlightsFeature() {
                        <motion.div
                           initial={{ opacity: 0, x: 50, y: 50 }}
                           animate={{ opacity: [0, 1, 1, 0], x: [50, 0, 0, 0], y: [50, 0, 0, 0] }}
-                          transition={{ duration: 4, times: [0, 0.5, 0.7, 1] }}
+                          transition={{ duration: 2, times: [0, 0.5, 0.7, 1] }}
                           className="absolute right-4 bottom-2 z-20 pointer-events-none"
                        >
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="drop-shadow-md">
@@ -200,7 +200,7 @@ export function FlightsFeature() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.15 }}
                     className="flex flex-col items-center justify-center h-full text-center px-4"
                   >
                     <motion.div

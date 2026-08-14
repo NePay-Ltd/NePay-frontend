@@ -14,7 +14,7 @@ function Logo() {
     return (
         <div className="flex items-center gap-2.5 px-4">
             <img src="/logo.png" alt="NePay Logo" className="h-7 w-7 object-contain drop-shadow-sm" />
-            <span className="text-lg font-bold text-white leading-tight">NePay</span>
+            <span className="text-lg font-bold text-trueWhite leading-tight">NePay</span>
         </div>
     );
 }
@@ -105,7 +105,7 @@ function UserProfileCard() {
     const { user, logout, isMutating } = useAuth();
     const router = useRouter();
     
-    const displayName = user?.name || "Ugochukwu Nebeani";
+    const displayName = user ? `${user.firstName} ${user.lastName}` : "Ugochukwu Nebeani";
     const status = user?.kycTier === "FULL_BVN_NIN" ? "Verified account" : "Verified account"; // Match prototype
 
     return (

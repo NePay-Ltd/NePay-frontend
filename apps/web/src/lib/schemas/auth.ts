@@ -37,6 +37,8 @@ export type LoginValues = z.infer<typeof loginSchema>;
 // ─── Register ─────────────────────────────────────────────────────────
 export const registerSchema = z
     .object({
+        firstName: z.string().min(1, "First name is required").max(80, "First name is too long"),
+        lastName: z.string().min(1, "Last name is required").max(80, "Last name is too long"),
         phone: nigerianPhoneSchema,
         email: emailSchema,
         password: passwordSchema,

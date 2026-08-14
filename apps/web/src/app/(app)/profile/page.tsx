@@ -17,11 +17,12 @@ import {
     ChevronRight,
     Bell,
     Mail,
-    AlertCircle
+    AlertCircle,
+    Receipt
 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth-context";
-import { useProfile, useUpdateProfile, useUpdatePreferences } from "@/lib/queries/profile";
+import { useProfile, useUpdateProfile } from "@/lib/queries/profile";
 import { cn } from "@/lib/cn";
 
 import { Panel, PanelBody } from "@/components/shared/panel";
@@ -54,8 +55,8 @@ import { Label } from "@/components/ui/label";
 // ─── Edit Profile Form ────────────────────────────────────────────────────────
 
 const editProfileSchema = z.object({
-    name: z.string().min(2, "Name is too short"),
-    email: z.string().email("Invalid email address"),
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
 });
 
 type EditProfileFormValues = z.infer<typeof editProfileSchema>;
@@ -69,7 +70,10 @@ export default function ProfilePage() {
     // Queries & Mutations
     const { data: profile, isLoading } = useProfile();
     const { mutate: updateProfile, isPending: isUpdatingProfile } = useUpdateProfile();
-    const { mutate: updatePreferences } = useUpdatePreferences();
+
+    // Mock local state for preferences since backend doesn't support them yet
+    const [pushEnabled, setPushEnabled] = React.useState(true);
+    const [emailEnabled, setEmailEnabled] = React.useState(true);
 
     // State
     const [editModalOpen, setEditModalOpen] = React.useState(false);
@@ -79,14 +83,14 @@ export default function ProfilePage() {
     const form = useForm<EditProfileFormValues>({
         resolver: zodResolver(editProfileSchema),
         defaultValues: {
-            name: "",
-            email: "",
+            firstName: "",
+            lastName: "",
         },
     });
 
     React.useEffect(() => {
         if (profile) {
-            form.reset({ name: profile.name, email: profile.email });
+            form.reset({ firstName: profile.firstName, lastName: profile.lastName });
         }
     }, [profile, form]);
 
@@ -123,12 +127,12 @@ export default function ProfilePage() {
                 ) : (
                     <>
                         <div className="flex h-24 w-24 items-center justify-center rounded-full bg-brand-gradient text-3xl font-bold text-white shadow-lg">
-                            {getInitials(profile.name)}
+                            {getInitials(`${profile.firstName} ${profile.lastName}`)}
                         </div>
-                        <h1 className="mt-4 text-2xl font-bold text-ink">{profile.name}</h1>
+                        <h1 className="mt-4 text-2xl font-bold text-ink">{profile.firstName} {profile.lastName}</h1>
                         
                         <div className="mt-2">
-                            {profile.kycStatus === "verified" ? (
+                            {profile.kycTier === "FULL_BVN_NIN" ? (
                                 <Tag variant="ok" dot>Verified · Tier 2</Tag>
                             ) : (
                                 <Tag variant="warn" dot>Pending Verification</Tag>
@@ -151,12 +155,12 @@ export default function ProfilePage() {
                             </div>
                             <div className="flex flex-col gap-1">
                                 <span className="text-xs text-muted">Phone</span>
-                                <span className="font-medium text-ink">{profile.phone}</span>
+                                <span className="font-medium text-ink">{profile.phoneNumber}</span>
                             </div>
                             <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
                                 <span className="text-xs text-muted">Member since</span>
                                 <span className="font-medium text-ink">
-                                    {format(new Date(profile.memberSince), "MMMM yyyy")}
+                                    {format(new Date(profile.createdAt), "MMMM yyyy")}
                                 </span>
                             </div>
                         </div>
@@ -176,6 +180,13 @@ export default function ProfilePage() {
                             className="cursor-pointer px-5 hover:bg-gray-50"
                         />
                         <RowItem
+                            icon={Receipt}
+                            title="Activity & Transactions"
+                            trailing={<ChevronRight className="h-5 w-5 text-muted" />}
+                            onClick={() => router.push("/transactions")}
+                            className="cursor-pointer px-5 hover:bg-gray-50"
+                        />
+                        <RowItem
                             icon={Landmark}
                             title="Bank Accounts"
                             trailing={<ChevronRight className="h-5 w-5 text-muted" />}
@@ -184,11 +195,11 @@ export default function ProfilePage() {
                         />
                         <RowItem
                             icon={ShieldCheck}
-                            iconTint={profile?.kycStatus === "verified" ? "green" : "violet"}
+                            iconTint={profile?.kycTier === "FULL_BVN_NIN" ? "green" : "violet"}
                             title="KYC Verification"
                             trailing={
                                 <div className="flex items-center gap-3">
-                                    {profile?.kycStatus === "verified" && (
+                                    {profile?.kycTier === "FULL_BVN_NIN" && (
                                         <Tag variant="ok" dot>Verified</Tag>
                                     )}
                                     <ChevronRight className="h-5 w-5 text-muted" />
@@ -221,9 +232,8 @@ export default function ProfilePage() {
                             subtitle="Receive alerts for incoming transfers"
                             trailing={
                                 <Switch 
-                                    disabled={isLoading}
-                                    checked={profile?.preferences.pushNotifications ?? false}
-                                    onCheckedChange={(checked) => updatePreferences({ pushNotifications: checked })}
+                                    checked={pushEnabled}
+                                    onCheckedChange={setPushEnabled}
                                 />
                             }
                             className="px-5"
@@ -234,9 +244,8 @@ export default function ProfilePage() {
                             subtitle="Get transaction receipts delivered to your inbox"
                             trailing={
                                 <Switch 
-                                    disabled={isLoading}
-                                    checked={profile?.preferences.emailReceipts ?? false}
-                                    onCheckedChange={(checked) => updatePreferences({ emailReceipts: checked })}
+                                    checked={emailEnabled}
+                                    onCheckedChange={setEmailEnabled}
                                 />
                             }
                             className="px-5"
@@ -292,30 +301,28 @@ export default function ProfilePage() {
                             Update your personal information below.
                         </DialogDescription>
                     </DialogHeader>
-                    <form onSubmit={onEditSubmit} className="space-y-4 pt-4">
+                    <form id="edit-profile-form" onSubmit={onEditSubmit} className="space-y-4 pt-4">
                         <div className="space-y-2">
-                            <Label htmlFor="name">Full Name</Label>
+                            <Label htmlFor="edit-first-name">First Name</Label>
                             <Input
-                                id="name"
-                                placeholder="Dubem Egbo"
-                                {...form.register("name")}
+                                id="edit-first-name"
+                                {...form.register("firstName")}
                             />
-                            {form.formState.errors.name && (
-                                <p className="text-xs text-red-500">{form.formState.errors.name.message}</p>
+                            {form.formState.errors.firstName && (
+                                <p className="text-xs text-red-500">{form.formState.errors.firstName.message}</p>
                             )}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="email">Email Address</Label>
+                            <Label htmlFor="edit-last-name">Last Name</Label>
                             <Input
-                                id="email"
-                                type="email"
-                                placeholder="dubem@example.com"
-                                {...form.register("email")}
+                                id="edit-last-name"
+                                {...form.register("lastName")}
                             />
-                            {form.formState.errors.email && (
-                                <p className="text-xs text-red-500">{form.formState.errors.email.message}</p>
+                            {form.formState.errors.lastName && (
+                                <p className="text-xs text-red-500">{form.formState.errors.lastName.message}</p>
                             )}
                         </div>
+
                         <div className="pt-4">
                             <Button
                                 type="submit"

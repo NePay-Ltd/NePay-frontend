@@ -61,6 +61,6 @@ export const BOTTOM_NAV: NavItem[] = [
     { key: "overview", label: "Home", icon: Home, href: "/overview" },
     { key: "add-money", label: "Add Money", icon: PlusCircle, href: "/add-money" },
     { key: "services", label: "Services", icon: LayoutGrid, href: "/services" },
-    { key: "transactions", label: "Activity", icon: Receipt, href: "/transactions" },
+    { key: "card", label: "Cards", icon: CreditCard, href: "/card" },
     { key: "profile", label: "Profile", icon: User, href: "/profile" },
 ];

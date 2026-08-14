@@ -69,7 +69,7 @@ export default function SettingsPage() {
                                     <div className="space-y-6">
                                         <div className="flex items-center gap-4">
                                             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-violet-100 text-2xl font-bold text-violet-700">
-                                                {user?.name?.charAt(0) || "U"}
+                                                {user?.firstName?.charAt(0) || "U"}
                                             </div>
                                             <div>
                                                 <Button variant="quiet" className="font-bold text-violet-700 hover:bg-violet-50">
@@ -81,7 +81,7 @@ export default function SettingsPage() {
                                         <div className="grid gap-6 sm:grid-cols-2">
                                             <div className="space-y-2">
                                                 <label className="text-[11px] font-bold uppercase tracking-widest text-muted">Full Name</label>
-                                                <input type="text" defaultValue={user?.name || "Ugochukwu Nebeani"} className="w-full rounded-xl border border-border bg-gray-50 px-4 py-3 text-sm font-bold text-ink focus:border-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-600" />
+                                                <input type="text" defaultValue={user ? `${user.firstName} ${user.lastName}` : "Ugochukwu Nebeani"} className="w-full rounded-xl border border-border bg-gray-50 px-4 py-3 text-sm font-bold text-ink focus:border-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-600" />
                                             </div>
                                             <div className="space-y-2">
                                                 <label className="text-[11px] font-bold uppercase tracking-widest text-muted">Email Address</label>

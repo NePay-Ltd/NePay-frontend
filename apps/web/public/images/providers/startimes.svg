@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#ea580c"/>
+  <polygon points="200,80 230,170 320,170 245,225 275,320 200,265 125,320 155,225 80,170 170,170" fill="#fff"/>
+  <text x="200" y="380" font-family="Arial, sans-serif" font-size="60" font-weight="bold" fill="#fff" text-anchor="middle">StarTimes</text>
+</svg>

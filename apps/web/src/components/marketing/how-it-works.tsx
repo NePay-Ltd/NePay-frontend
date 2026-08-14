@@ -36,7 +36,7 @@ const containerVariants: Variants = {
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } },
 };
 
 export function HowItWorks() {
@@ -67,7 +67,7 @@ export function HowItWorks() {
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 1.5, delay: 0.5, ease: "easeInOut" }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeInOut" }}
           style={{ width: "75%" }}
         />
 
@@ -80,7 +80,7 @@ export function HowItWorks() {
           initial={{ scaleY: 0 }}
           whileInView={{ scaleY: 1 }}
           viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 1.5, delay: 0.5, ease: "easeInOut" }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeInOut" }}
           style={{ height: "calc(100% - 48px)" }}
         />
 

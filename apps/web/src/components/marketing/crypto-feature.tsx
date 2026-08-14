@@ -15,7 +15,7 @@ export function CryptoFeature() {
           initial={{ opacity: 0, x: -40 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
           className="order-last lg:order-first flex flex-col items-start lg:pr-12"
         >
           <span className="inline-block mb-4 text-sm font-bold tracking-wider text-green-600 dark:text-green-500 uppercase">
@@ -34,7 +34,7 @@ export function CryptoFeature() {
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
           className="order-first lg:order-last relative w-full aspect-square md:aspect-[4/3] lg:aspect-square flex items-center justify-center lg:justify-end"
         >
           {/* Background Floating Coins Animation */}
@@ -45,7 +45,7 @@ export function CryptoFeature() {
             {/* Tether Coin */}
             <motion.div
               animate={{ y: [-15, 15, -15], rotateY: [0, 10, 0] }}
-              transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+              transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
               className="absolute top-[20%] left-[20%] w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 shadow-[0_10px_30px_rgba(34,197,94,0.4)] flex items-center justify-center text-white font-bold text-3xl border border-white/20 z-0"
               style={{ transformStyle: "preserve-3d" }}
             >
@@ -55,7 +55,7 @@ export function CryptoFeature() {
             {/* Bitcoin Coin */}
             <motion.div
               animate={{ y: [15, -15, 15], rotateY: [0, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut", delay: 0.5 }}
               className="absolute bottom-[20%] left-[40%] w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 shadow-[0_10px_30px_rgba(249,115,22,0.4)] flex items-center justify-center text-white font-bold text-2xl border border-white/20 z-0"
             >
               ₿
@@ -64,7 +64,7 @@ export function CryptoFeature() {
             {/* Ethereum Coin */}
             <motion.div
               animate={{ y: [-10, 10, -10], rotateX: [0, 15, 0] }}
-              transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 2 }}
+              transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut", delay: 1 }}
               className="absolute top-[30%] right-[20%] w-14 h-14 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 shadow-[0_10px_30px_rgba(99,102,241,0.4)] flex items-center justify-center text-white font-bold text-xl border border-white/20 z-0"
             >
               Ξ
@@ -76,7 +76,7 @@ export function CryptoFeature() {
             initial={{ opacity: 0, scale: 0.95, rotate: 0 }}
             whileInView={{ opacity: 1, scale: 1, rotate: 3 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+            transition={{ duration: 0.4, delay: 0.15, ease: "easeOut" }}
             className="relative z-20 bg-marketing-surface p-6 md:p-8 rounded-3xl shadow-2xl border border-marketing-border w-[90%] sm:w-[360px] right-4 sm:right-0"
           >
             <div className="flex flex-col space-y-6">

@@ -459,7 +459,7 @@ export default function KycPage() {
                     {step === "bvn" && <BvnStep onSuccess={handleBvnSuccess} />}
                     {step === "nin" && <NinStep onSuccess={handleNinSuccess} />}
                     {step === "done" && (
-                        <KycSuccess userName={user?.name ?? "there"} />
+                        <KycSuccess userName={user?.firstName ?? "there"} />
                     )}
                 </div>
 

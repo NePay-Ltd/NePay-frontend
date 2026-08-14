@@ -85,6 +85,7 @@ export default function WithdrawPage() {
     const [modalOpen, setModalOpen] = React.useState(false);
     const [txState, setTxState] = React.useState<TransactionState>("confirm");
     const [txId, setTxId] = React.useState<string | null>(null);
+    const [resolutionToken, setResolutionToken] = React.useState<string | null>(null);
 
     // Poll the status if txId exists
     const { data: txStatus } = useWithdrawalStatus(txId);
@@ -92,8 +93,8 @@ export default function WithdrawPage() {
     // Watch polling status and update modal state
     React.useEffect(() => {
         if (!txStatus) return;
-        if (txStatus.status === "success") setTxState("success");
-        if (txStatus.status === "failed") setTxState("error");
+        if (txStatus.status === "COMPLETED") setTxState("success");
+        if (txStatus.status === "FAILED") setTxState("error");
     }, [txStatus]);
 
     // ── Popover State (Bank Selector vs Add New) ──
@@ -138,16 +139,34 @@ export default function WithdrawPage() {
         );
     };
 
-    const handleConfirm = () => {
-        if (!isValidAmount || !watchBankAccountId) return;
+    const handleConfirm = async () => {
+        if (!isValidAmount || !selectedAccount) return;
+        setTxState("processing"); // Show loading briefly while resolving
+        try {
+            const data = await resolveMutation.mutateAsync({
+                accountNumber: selectedAccount.accountNumber,
+                bankCode: selectedAccount.bankCode
+            });
+            setResolutionToken(data.resolutionToken);
+            setTxState("pin");
+        } catch (err) {
+            toast.error("Failed to verify bank account for withdrawal");
+            setTxState("error");
+        }
+    };
+
+    const handlePinSubmit = (pin: string) => {
+        if (!resolutionToken) return;
         setTxState("processing");
         initiateMutation.mutate(
-            { bankAccountId: watchBankAccountId, amountNgn: watchAmount },
+            { amount: watchAmount.toString(), resolutionToken, pin },
             {
                 onSuccess: (res) => {
-                    setTxId(res.id); // Starts the polling hook automatically
+                    setTxId(res.id); // Triggers success since we mock the polling
+                    setTxState("success");
                 },
-                onError: () => {
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || "Withdrawal failed");
                     setTxState("error");
                 }
             }
@@ -465,7 +484,7 @@ export default function WithdrawPage() {
                     </div>
                 }
                 // Processing UI
-                processingText="Initiating transfer to your bank account..."
+                processingText="Processing your withdrawal..."
                 // Success UI
                 successTitle="Withdrawal Successful"
                 successDescription={
@@ -481,10 +500,12 @@ export default function WithdrawPage() {
                 // Error UI
                 errorTitle="Withdrawal Failed"
                 errorDescription={
-                    <p>{txStatus?.failureReason || "We encountered an unexpected error."}</p>
+                    <p>{txStatus?.failureReason || initiateMutation.error?.message || "We encountered an unexpected error."}</p>
                 }
                 errorButtonLabel="Edit Amount"
                 onErrorAction={() => setModalOpen(false)}
+                // PIN
+                onPinSubmit={handlePinSubmit}
             />
         </RequireKyc>
     );

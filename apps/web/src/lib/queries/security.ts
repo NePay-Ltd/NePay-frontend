@@ -3,17 +3,13 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "@/lib/api-client";
+import { ApiResponse } from "@/lib/types/api";
 import {
     mockGetSecuritySettings,
     mockToggleBiometrics,
-    mockEnable2FA,
-    mockVerify2FA,
-    mockDisable2FA,
-    mockChangePin,
-    mockChangePassword,
     mockGetLoginActivity,
     type SecuritySettings,
-    type TwoFactorSecret,
     type LoginActivity,
 } from "@/lib/mock-security";
 
@@ -23,6 +19,7 @@ export const securityKeys = {
     loginActivity: () => [...securityKeys.all, "loginActivity"] as const,
 };
 
+// Security settings and login activity remain mocked as they are not explicitly provided in the API docs.
 export function useSecuritySettings() {
     return useQuery<SecuritySettings>({
         queryKey: securityKeys.settings(),
@@ -34,7 +31,10 @@ export function useToggleBiometrics() {
     const queryClient = useQueryClient();
 
     return useMutation<SecuritySettings, Error, boolean, { previousSettings: SecuritySettings | undefined }>({
-        mutationFn: mockToggleBiometrics,
+        mutationFn: async (enabled) => {
+            const res = await apiClient.patch<ApiResponse<{ biometricsEnabled: boolean }>>("/security/biometrics", { enabled });
+            return { biometricsEnabled: res.data.data.biometricsEnabled } as SecuritySettings;
+        },
         onMutate: async (enabled) => {
             await queryClient.cancelQueries({ queryKey: securityKeys.settings() });
             const previousSettings = queryClient.getQueryData<SecuritySettings>(securityKeys.settings());
@@ -60,17 +60,24 @@ export function useToggleBiometrics() {
 }
 
 export function useEnable2FA() {
-    return useMutation<TwoFactorSecret, Error, void>({
-        mutationFn: mockEnable2FA,
+    return useMutation<{ qrCodeUri: string; secret: string }, Error, void>({
+        mutationFn: async () => {
+            const res = await apiClient.post<ApiResponse<{ otpauth_url: string; qrData: string; temporarySecret: string }>>("/security/2fa/enable");
+            return {
+                qrCodeUri: res.data.data.qrData,
+                secret: res.data.data.temporarySecret,
+            };
+        },
     });
 }
 
 export function useVerify2FA() {
     const queryClient = useQueryClient();
     return useMutation<void, Error, string>({
-        mutationFn: mockVerify2FA,
+        mutationFn: async (token) => {
+            await apiClient.post("/security/2fa/verify", { code: token });
+        },
         onSuccess: () => {
-            // Re-fetch settings so 2FA shows as enabled
             queryClient.invalidateQueries({ queryKey: securityKeys.settings() });
         },
     });
@@ -79,7 +86,9 @@ export function useVerify2FA() {
 export function useDisable2FA() {
     const queryClient = useQueryClient();
     return useMutation<void, Error, string>({
-        mutationFn: mockDisable2FA,
+        mutationFn: async (token) => {
+            await apiClient.post("/security/2fa/disable", { code: token });
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: securityKeys.settings() });
         },
@@ -88,19 +97,29 @@ export function useDisable2FA() {
 
 export function useChangePin() {
     return useMutation<void, Error, { currentPin: string; newPin: string }>({
-        mutationFn: ({ currentPin, newPin }) => mockChangePin(currentPin, newPin),
+        mutationFn: async (payload) => {
+            await apiClient.post("/security/change-pin", payload);
+        },
     });
 }
 
 export function useChangePassword() {
     return useMutation<void, Error, { currentPass: string; newPass: string }>({
-        mutationFn: ({ currentPass, newPass }) => mockChangePassword(currentPass, newPass),
+        mutationFn: async ({ currentPass, newPass }) => {
+            await apiClient.post("/auth/change-password", {
+                currentPassword: currentPass,
+                newPassword: newPass,
+            });
+        },
     });
 }
 
 export function useLoginActivity() {
     return useQuery<LoginActivity[]>({
         queryKey: securityKeys.loginActivity(),
-        queryFn: mockGetLoginActivity,
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<{ items: LoginActivity[] }>>("/security/login-activity");
+            return res.data.data.items;
+        },
     });
 }

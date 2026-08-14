@@ -2,26 +2,26 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { ArrowLeft, MonitorPlay, Loader2, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, MonitorPlay } from "lucide-react";
+import { toast } from "sonner";
 
-import { Button } from "@/components/shared/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Panel, PanelBody } from "@/components/shared/panel";
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { formatNaira } from "@/lib/format";
-
 import { useVerifySmartcard, usePayCableTv, useServiceTransactionStatus } from "@/lib/queries/services";
 
-// ─── Constants & Schemas ──────────────────────────────────────────────────────
+// New Shared UI Components
+import { ProviderSelector } from "@/components/services/ProviderSelector";
+import { RecentNumbersRow } from "@/components/services/RecentNumbersRow";
+import { PlanGrid } from "@/components/services/PlanGrid";
+import { VerificationField } from "@/components/services/VerificationField";
+import { StickyPayBar } from "@/components/services/StickyPayBar";
+import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen";
+
+// ─── Constants ──────────────────────────────────────────────────────────────
 
 const PROVIDERS = [
-    { id: "dstv", label: "DSTV", icon: "DSTV", color: "bg-blue-600" },
-    { id: "gotv", label: "GOtv", icon: "GOTV", color: "bg-green-600" },
-    { id: "startimes", label: "Startimes", icon: "ST", color: "bg-orange-600" },
+    { id: "dstv", label: "DSTV", color: "bg-blue-600", logoUrl: "/images/providers/dstv.svg" },
+    { id: "gotv", label: "GOtv", color: "bg-green-600", logoUrl: "/images/providers/gotv.svg" },
+    { id: "startimes", label: "Startimes", color: "bg-orange-600", logoUrl: "/images/providers/startimes.svg" },
 ];
 
 const MOCK_TV_PLANS: Record<string, { id: string; name: string; price: number }[]> = {
@@ -49,14 +49,10 @@ const MOCK_TV_PLANS: Record<string, { id: string; name: string; price: number }[
     ]
 };
 
-const FEE = 100;
-
-const tvSchema = z.object({
-    smartcard: z.string().min(5, "Minimum 5 digits required"),
-    planId: z.string().min(1, "Please select a plan"),
-});
-
-type TvForm = z.infer<typeof tvSchema>;
+const MOCK_RECENT_CONTACTS = [
+    { name: "Living Room DSTV", id: "1029384756" },
+    { name: "Mom's TV", id: "0987654321" },
+];
 
 export default function TvPage() {
     const router = useRouter();
@@ -64,283 +60,196 @@ export default function TvPage() {
     
     // Support pre-filling
     const initialProviderId = searchParams.get("provider") || "dstv";
-    const initialSmartcard = searchParams.get("meter") || ""; // We used "meter" historically for identifiers in URLs
+    const initialSmartcard = searchParams.get("meter") || "";
 
     const [providerId, setProviderId] = React.useState(initialProviderId);
-    const [resolvedName, setResolvedName] = React.useState<string | null>(null);
+    const [smartcard, setSmartcard] = React.useState(initialSmartcard);
+    const [planId, setPlanId] = React.useState("");
+    
+    const [resolvedName, setResolvedName] = React.useState<string | undefined>();
+    const [verifyStatus, setVerifyStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
 
     // Queries & Mutations
     const verifySmartcard = useVerifySmartcard();
     const payCableTv = usePayCableTv();
 
-    // ─── Forms ──────────────────────────────────────────────────────────────────
-    const form = useForm<TvForm>({
-        resolver: zodResolver(tvSchema),
-        defaultValues: { smartcard: initialSmartcard, planId: "" },
-    });
-
-    const watchSmartcard = form.watch("smartcard");
-    const watchPlanId = form.watch("planId");
-    
     const providerPlans = MOCK_TV_PLANS[providerId] || [];
-    const selectedPlan = providerPlans.find(p => p.id === watchPlanId);
+    const selectedPlan = providerPlans.find(p => p.id === planId);
 
     // Reset resolution and plan if user types something new or changes provider
     React.useEffect(() => {
-        setResolvedName(null);
-        form.setValue("planId", "", { shouldValidate: true });
-    }, [watchSmartcard, providerId, form]);
+        setResolvedName(undefined);
+        setVerifyStatus("idle");
+        setPlanId("");
+    }, [smartcard, providerId]);
 
-    // ─── Transaction Modal State ────────────────────────────────────────────────
-    const [modalOpen, setModalOpen] = React.useState(false);
-    const [txState, setTxState] = React.useState<TransactionState>("confirm");
+    // ─── Transaction State ────────────────────────────────────────────────
+    const [pinModalOpen, setPinModalOpen] = React.useState(false);
+    const [txState, setTxState] = React.useState<TransactionState>("pin");
     const [txId, setTxId] = React.useState<string | null>(null);
+    const [successOpen, setSuccessOpen] = React.useState(false);
 
     const { data: txStatus } = useServiceTransactionStatus(txId);
 
     React.useEffect(() => {
         if (!txStatus) return;
-        if (txStatus.status === "success") setTxState("success");
-        if (txStatus.status === "failed") setTxState("error");
+        if (txStatus.status === "COMPLETED") {
+            setPinModalOpen(false);
+            setSuccessOpen(true);
+        }
+        if (txStatus.status === "FAILED") {
+            setTxState("error");
+        }
     }, [txStatus]);
 
     // ─── Handlers ───────────────────────────────────────────────────────────────
     const handleVerify = async () => {
-        const isValid = await form.trigger("smartcard");
-        if (!isValid) return;
+        if (smartcard.length < 5) return;
+        setVerifyStatus("loading");
 
         verifySmartcard.mutate(
-            { provider: providerId, smartcardNumber: watchSmartcard },
+            { provider: providerId, smartcardNumber: smartcard },
             {
-                onSuccess: (data) => setResolvedName(data.customerName),
-                onError: () => setResolvedName(null)
+                onSuccess: (data) => {
+                    setResolvedName(data.customerName);
+                    setVerifyStatus("success");
+                },
+                onError: () => {
+                    setResolvedName(undefined);
+                    setVerifyStatus("error");
+                }
             }
         );
     };
 
-    const handleSubmit = (values: TvForm) => {
+    const handlePayClick = () => {
+        if (!selectedPlan) {
+            toast.error("Please select a subscription plan");
+            return;
+        }
         setTxId(null);
-        setTxState("confirm");
-        setModalOpen(true);
+        setTxState("pin");
+        setPinModalOpen(true);
     };
 
-    const confirmTransaction = () => {
-        setTxState("processing");
+    const handlePinSubmit = (pin: string) => {
         if (!selectedPlan) return;
-
+        setTxState("processing");
+        
         payCableTv.mutate(
-            { provider: providerId, smartcardNumber: watchSmartcard, amountNgn: selectedPlan.price },
+            { provider: providerId, smartcardNumber: smartcard, amountNgn: selectedPlan.price, pin },
             {
-                onSuccess: (res) => setTxId(res.id),
-                onError: () => setTxState("error")
+                onSuccess: (res) => {
+                    setTxId(res.id);
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || "Payment failed");
+                    setTxState("error");
+                }
             }
         );
     };
 
-    const isVerifying = verifySmartcard.isPending;
-    const isVerified = resolvedName !== null;
-    const activeProvider = PROVIDERS.find(p => p.id === providerId)!;
+    const isValid = verifyStatus === "success" && !!selectedPlan;
+
+    // Helper to format plan for PlanGrid
+    const formatPlansForGrid = (rawPlans: typeof providerPlans) => {
+        return rawPlans.map((p, idx) => ({
+            id: p.id,
+            name: p.name,
+            validity: "30 Days", // Standard for most cable tv
+            price: p.price,
+            recommended: idx === 3 // Mock a recommendation
+        }));
+    };
 
     return (
-        <div className="mx-auto max-w-xl space-y-6">
-            <div className="flex items-center gap-3 px-1">
-                <button
-                    onClick={() => router.back()}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-violet-700 hover:bg-violet-200 transition-colors"
-                >
-                    <ArrowLeft className="h-4 w-4" />
-                </button>
-                <h1 className="text-2xl font-bold text-ink">TV Subscription</h1>
+        <>
+            <div className="mx-auto max-w-xl space-y-8 pb-32">
+                {/* Header */}
+                <div className="flex items-center gap-3 px-2 sm:px-0">
+                    <button
+                        onClick={() => router.back()}
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-ink hover:bg-gray-200 transition-colors"
+                    >
+                        <ArrowLeft className="h-5 w-5" />
+                    </button>
+                    <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-100 text-pink-700">
+                            <MonitorPlay className="h-4 w-4" />
+                        </div>
+                        <h1 className="text-2xl font-black text-ink tracking-tight">TV Subscription</h1>
+                    </div>
+                </div>
+
+                <div className="px-2 sm:px-0 space-y-8">
+                    {/* Provider Selection */}
+                    <ProviderSelector 
+                        providers={PROVIDERS}
+                        selectedId={providerId}
+                        onChange={setProviderId}
+                    />
+
+                    {/* Smartcard Number & Verification */}
+                    <div className="space-y-4">
+                        <VerificationField 
+                            label="Smartcard / IUC Number"
+                            placeholder="Enter smartcard number"
+                            value={smartcard}
+                            onChange={setSmartcard}
+                            onVerify={handleVerify}
+                            status={verifyStatus}
+                            resolvedName={resolvedName}
+                            errorMessage="Failed to verify smartcard"
+                        />
+                        
+                        {/* Only show recent if we haven't typed yet or verified */}
+                        {verifyStatus !== "success" && (
+                            <RecentNumbersRow 
+                                contacts={MOCK_RECENT_CONTACTS} 
+                                onSelect={(id) => setSmartcard(id)} 
+                            />
+                        )}
+                    </div>
+
+                    {/* Subscription Plans */}
+                    <div className={`transition-all duration-300 ${verifyStatus === "success" ? "opacity-100" : "opacity-40 pointer-events-none"}`}>
+                        <PlanGrid 
+                            plans={formatPlansForGrid(providerPlans)}
+                            selectedId={planId}
+                            onChange={setPlanId}
+                        />
+                    </div>
+                </div>
             </div>
 
-            <Panel className="rounded-[24px]">
-                <PanelBody className="p-6 sm:p-8">
-                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-                        
-                        {/* Provider Selection */}
-                        <div className="space-y-3">
-                            <Label className="text-sm font-bold text-ink">Provider</Label>
-                            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                                {PROVIDERS.map(prov => (
-                                    <button
-                                        key={prov.id}
-                                        type="button"
-                                        onClick={() => setProviderId(prov.id)}
-                                        className={`flex-none px-5 py-2.5 rounded-full border-2 transition-all font-bold text-sm ${
-                                            providerId === prov.id 
-                                                ? "border-violet-600 bg-violet-50 text-violet-700" 
-                                                : "border-border bg-white text-body hover:border-violet-200 hover:bg-gray-50"
-                                        }`}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[8px] text-white ${prov.color}`}>{prov.icon}</span>
-                                            {prov.label}
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Smartcard & Verification */}
-                        <div className="space-y-3">
-                            <Label className="text-sm font-bold text-ink">Smartcard / IUC Number</Label>
-                            <div className="relative flex gap-2">
-                                <div className="relative flex-1">
-                                    <Input 
-                                        placeholder="Enter number..." 
-                                        className="h-14 rounded-2xl pl-4 pr-12 text-lg font-bold placeholder:font-medium disabled:opacity-70 disabled:bg-gray-50"
-                                        {...form.register("smartcard")}
-                                        disabled={isVerifying || isVerified}
-                                    />
-                                    <MonitorPlay className="absolute right-4 top-4 h-5 w-5 text-muted" />
-                                    {isVerified && (
-                                        <div className="absolute right-3 top-3.5 bg-white rounded-full">
-                                            <CheckCircle2 className="h-6 w-6 text-green-500" />
-                                        </div>
-                                    )}
-                                </div>
-                                {!isVerified && (
-                                    <Button 
-                                        type="button" 
-                                        variant="primary"
-                                        onClick={handleVerify}
-                                        disabled={isVerifying || watchSmartcard.length < 5}
-                                        className="h-14 rounded-2xl px-6 font-bold shrink-0"
-                                    >
-                                        {isVerifying ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify"}
-                                    </Button>
-                                )}
-                            </div>
-                            
-                            {/* Error Message */}
-                            {form.formState.errors.smartcard && (
-                                <p className="text-xs text-red-500 font-medium">{form.formState.errors.smartcard.message}</p>
-                            )}
-                            {verifySmartcard.isError && (
-                                <p className="text-xs text-red-500 font-medium">Failed to verify. Please check the number and try again.</p>
-                            )}
-
-                            {/* Verification Result Message */}
-                            {isVerified && (
-                                <div className="mt-2 flex items-center justify-between rounded-xl bg-green-50 px-4 py-3 border border-green-200">
-                                    <span className="text-sm text-green-700">Name: <span className="font-bold">{resolvedName}</span></span>
-                                    <button 
-                                        type="button" 
-                                        className="text-xs font-bold text-green-700 hover:text-green-800 transition-colors"
-                                        onClick={() => setResolvedName(null)}
-                                    >
-                                        Change
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Subscription Plans (Only show if verified) */}
-                        <div className={`space-y-3 transition-all duration-300 ${isVerified ? "opacity-100" : "opacity-40 pointer-events-none"}`}>
-                            <Label className="text-sm font-bold text-ink">Select Package</Label>
-                            
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto no-scrollbar pb-2">
-                                {providerPlans.map(plan => (
-                                    <button
-                                        key={plan.id}
-                                        type="button"
-                                        onClick={() => form.setValue("planId", plan.id, { shouldValidate: true })}
-                                        className={`flex flex-col items-start p-4 rounded-2xl border-2 text-left transition-all ${
-                                            watchPlanId === plan.id
-                                                ? "border-violet-600 bg-violet-50"
-                                                : "border-border bg-white hover:border-violet-200"
-                                        }`}
-                                    >
-                                        <span className="font-bold text-ink">{plan.name}</span>
-                                        <span className="font-sans tabular-nums text-lg font-extrabold text-violet-700 mt-1">
-                                            {formatNaira(plan.price)}
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        
-                        <div className="pt-4">
-                            <Button 
-                                type="submit" 
-                                variant="primary" 
-                                fullWidth 
-                                size="lg"
-                                className="h-14 rounded-2xl text-base font-bold shadow-md shadow-violet-500/20"
-                                disabled={!isVerified || !form.formState.isValid || !selectedPlan}
-                            >
-                                Pay {selectedPlan ? formatNaira(selectedPlan.price + FEE) : ""} (incl. ₦{FEE} fee)
-                            </Button>
-                        </div>
-                    </form>
-                </PanelBody>
-            </Panel>
+            <StickyPayBar 
+                visible={!successOpen} 
+                amount={selectedPlan?.price || 0}
+                summaryText={selectedPlan ? `${selectedPlan.name} · ${resolvedName || smartcard}` : "Select a plan"}
+                onPay={handlePayClick}
+                disabled={!isValid}
+            />
 
             <TransactionModal
-                open={modalOpen}
-                onOpenChange={setModalOpen}
+                open={pinModalOpen}
+                onOpenChange={setPinModalOpen}
                 state={txState}
-                confirmTitle="Review Subscription"
-                onConfirm={confirmTransaction}
-                onCancel={() => setModalOpen(false)}
-                confirmContent={
-                    <div className="space-y-4 pt-2 pb-4">
-                        <div className="rounded-2xl border border-border bg-gray-50 p-5 space-y-4">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted font-medium">Provider</span>
-                                <span className="font-bold text-ink">
-                                    {activeProvider.label}
-                                </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted font-medium">Customer</span>
-                                <span className="font-bold text-ink text-right truncate max-w-[150px]">
-                                    {resolvedName}
-                                </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted font-medium">Package</span>
-                                <span className="font-bold text-ink">
-                                    {selectedPlan?.name}
-                                </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted font-medium">Smartcard No.</span>
-                                <span className="font-bold text-ink">
-                                    {watchSmartcard}
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div className="space-y-2 px-2 text-sm font-medium">
-                            <div className="flex justify-between">
-                                <span className="text-body">Amount</span>
-                                <span className="font-mono text-ink">{formatNaira(selectedPlan?.price || 0)}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-body">Fee</span>
-                                <span className="font-mono text-ink">{formatNaira(FEE)}</span>
-                            </div>
-                            <div className="border-t border-dashed border-border pt-3 mt-1 flex justify-between font-extrabold text-lg">
-                                <span className="text-ink">Total</span>
-                                <span className="font-sans tabular-nums text-violet-700">{formatNaira((selectedPlan?.price || 0) + FEE)}</span>
-                            </div>
-                        </div>
-                    </div>
-                }
-                processingText={`Connecting to ${activeProvider.label}...`}
-                successTitle="Subscription Active!"
-                successDescription={
-                    <p>Your <span className="font-bold">{activeProvider.label}</span> subscription has been successfully renewed.</p>
-                }
-                onSuccessAction={() => {
-                    setModalOpen(false);
-                    router.push("/overview");
-                }}
-                errorTitle="Payment Failed"
-                errorDescription={<p>{txStatus?.failureReason || "The provider didn't respond in time."}</p>}
-                onErrorAction={() => setModalOpen(false)}
+                onPinSubmit={handlePinSubmit}
+                processingText={`Activating ${selectedPlan?.name} for ${smartcard}...`}
+                errorTitle="Purchase Failed"
+                errorDescription={<p>{payCableTv.error?.message || txStatus?.failureReason || "The provider didn't respond in time."}</p>}
+                onErrorAction={() => setPinModalOpen(false)}
             />
-        </div>
+
+            <PaymentSuccessScreen 
+                open={successOpen}
+                amount={selectedPlan?.price || 0}
+                title="Subscription Active!"
+                description={<p>You successfully renewed <span className="font-bold">{selectedPlan?.name}</span> for <span className="font-bold">{resolvedName}</span>.</p>}
+                onHome={() => router.push("/overview")}
+                onReceipt={() => router.push("/transactions")}
+            />
+        </>
     );
 }

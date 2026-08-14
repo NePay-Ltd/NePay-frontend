@@ -28,6 +28,8 @@ export default function RegisterPage() {
     } = useForm<RegisterValues>({
         resolver: zodResolver(registerSchema),
         defaultValues: {
+            firstName: "",
+            lastName: "",
             phone: "",
             email: "",
             password: "",
@@ -59,8 +61,17 @@ export default function RegisterPage() {
 
     const onSubmit = async (values: RegisterValues) => {
         try {
+            let formattedPhone = values.phone.trim();
+            if (formattedPhone.startsWith("0")) {
+                formattedPhone = "+234" + formattedPhone.substring(1);
+            } else if (!formattedPhone.startsWith("+")) {
+                formattedPhone = "+" + formattedPhone;
+            }
+
             await registerUser({
-                phone: values.phone,
+                firstName: values.firstName,
+                lastName: values.lastName,
+                phone: formattedPhone,
                 email: values.email,
                 password: values.password,
             });
@@ -93,6 +104,35 @@ export default function RegisterPage() {
                 className="space-y-4"
                 noValidate
             >
+                <div className="grid grid-cols-2 gap-4">
+                    <Field
+                        label="First Name"
+                        htmlFor="reg-first-name"
+                        error={errors.firstName?.message}
+                    >
+                        <Input
+                            id="reg-first-name"
+                            type="text"
+                            placeholder="Chinedu"
+                            {...register("firstName")}
+                            aria-invalid={!!errors.firstName}
+                        />
+                    </Field>
+                    <Field
+                        label="Last Name"
+                        htmlFor="reg-last-name"
+                        error={errors.lastName?.message}
+                    >
+                        <Input
+                            id="reg-last-name"
+                            type="text"
+                            placeholder="Okafor"
+                            {...register("lastName")}
+                            aria-invalid={!!errors.lastName}
+                        />
+                    </Field>
+                </div>
+
                 <Field
                     label="Phone Number"
                     htmlFor="reg-phone"

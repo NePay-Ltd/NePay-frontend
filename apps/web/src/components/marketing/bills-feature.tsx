@@ -45,7 +45,7 @@ export function BillsFeature() {
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
           className="relative w-full aspect-square md:aspect-[4/3] lg:aspect-square flex items-center justify-center lg:justify-start"
         >
           {/* Subtle Background Glow instead of image */}
@@ -56,7 +56,7 @@ export function BillsFeature() {
             initial={{ opacity: 0, scale: 0.95, rotate: 0 }}
             whileInView={{ opacity: 1, scale: 1, rotate: -2 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
             className="relative z-20 bg-marketing-surface p-8 md:p-10 rounded-[2.5rem] shadow-2xl border border-marketing-border w-[90%] max-w-[420px] left-4 sm:left-0"
           >
             <div className="mb-8">
@@ -79,7 +79,7 @@ export function BillsFeature() {
                   variants={itemVariants}
                   className="flex flex-col items-center gap-3 group cursor-default"
                 >
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-marketing-bg border border-marketing-border flex items-center justify-center group-hover:scale-105 group-hover:shadow-md transition-all duration-300">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-marketing-bg border border-marketing-border flex items-center justify-center group-hover:scale-105 group-hover:shadow-md transition-all duration-150">
                     <service.icon className={`w-6 h-6 sm:w-7 sm:h-7 ${service.color}`} />
                   </div>
                   <span className="text-xs font-medium text-marketing-secondary group-hover:text-marketing-text transition-colors text-center leading-tight">
@@ -96,7 +96,7 @@ export function BillsFeature() {
           initial={{ opacity: 0, x: 40 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
           className="lg:col-span-1 flex flex-col items-start lg:pl-12"
         >
           <span className="inline-block mb-4 text-sm font-bold tracking-wider text-violet-600 dark:text-violet-400 uppercase">

@@ -3,12 +3,8 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-    mockGetProfile, 
-    mockUpdateProfile, 
-    mockUpdatePreferences, 
-    type UserProfile 
-} from "@/lib/mock-profile";
+import { apiClient } from "@/lib/api-client";
+import { UserResponseDto, ApiResponse } from "@/lib/types/api";
 import { toast } from "sonner";
 
 export const profileKeys = {
@@ -17,9 +13,12 @@ export const profileKeys = {
 };
 
 export function useProfile() {
-    return useQuery<UserProfile>({
+    return useQuery<UserResponseDto>({
         queryKey: profileKeys.detail(),
-        queryFn: mockGetProfile,
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<UserResponseDto>>("/users/me");
+            return res.data.data;
+        },
     });
 }
 
@@ -27,50 +26,17 @@ export function useUpdateProfile() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: mockUpdateProfile,
+        mutationFn: async (data: { firstName?: string; lastName?: string; phoneNumber?: string }) => {
+            const res = await apiClient.patch<ApiResponse<UserResponseDto>>("/users/me", data);
+            return res.data.data;
+        },
         onSuccess: (newProfile) => {
             queryClient.setQueryData(profileKeys.detail(), newProfile);
             toast.success("Profile updated successfully");
         },
-        onError: () => {
-            toast.error("Failed to update profile. Please try again.");
-        }
-    });
-}
-
-export function useUpdatePreferences() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: mockUpdatePreferences,
-        onMutate: async (newPrefs) => {
-            // Cancel outgoing refetches
-            await queryClient.cancelQueries({ queryKey: profileKeys.detail() });
-
-            // Snapshot previous value
-            const previousProfile = queryClient.getQueryData<UserProfile>(profileKeys.detail());
-
-            // Optimistically update to the new value
-            if (previousProfile) {
-                queryClient.setQueryData<UserProfile>(profileKeys.detail(), {
-                    ...previousProfile,
-                    preferences: {
-                        ...previousProfile.preferences,
-                        ...newPrefs,
-                    }
-                });
-            }
-
-            return { previousProfile };
-        },
-        onError: (err, newPrefs, context) => {
-            if (context?.previousProfile) {
-                queryClient.setQueryData(profileKeys.detail(), context.previousProfile);
-            }
-            toast.error("Failed to save preferences. Please check your connection.");
-        },
-        onSettled: () => {
-            void queryClient.invalidateQueries({ queryKey: profileKeys.detail() });
+        onError: (err: any) => {
+            const msg = err.response?.data?.message || "Failed to update profile. Please try again.";
+            toast.error(msg);
         }
     });
 }

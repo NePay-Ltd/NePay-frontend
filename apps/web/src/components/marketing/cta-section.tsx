@@ -16,19 +16,19 @@ export function CtaSection() {
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
         className="relative z-10 flex flex-col items-center text-center max-w-3xl mx-auto px-4"
       >
         <h2 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
-          Ready to Pod up?
+          Ready to move up?
         </h2>
         <p className="text-xl md:text-2xl text-white/90 mb-10 leading-relaxed max-w-2xl">
-          Join thousands of Nigerians splitting data costs, paying bills instantly, and exchanging crypto with total transparency.
+          Join thousands of Nigerians receiving money, paying bills instantly, and exchanging crypto with total transparency.
         </p>
         
         <Link
           href="/register"
-          className="px-10 py-5 text-lg font-bold text-violet-950 bg-white rounded-full hover:bg-marketing-surface transition-colors shadow-2xl hover:shadow-xl mb-12 transform hover:scale-105 transition-all duration-300"
+          className="px-10 py-5 text-lg font-bold !text-white bg-violet-950 rounded-full hover:bg-violet-900 transition-colors shadow-2xl hover:shadow-xl mb-12 transform hover:scale-105 transition-all duration-150"
         >
           Create free account
         </Link>

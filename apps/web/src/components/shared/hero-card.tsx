@@ -28,10 +28,13 @@ export function HeroCard({
     const router = useRouter();
 
     return (
-        <div className="relative overflow-hidden rounded-[24px] bg-brand-gradient p-6 text-white shadow-xl lg:p-8">
+        <div className="relative overflow-hidden rounded-[24px] bg-brand-gradient p-6 text-white shadow-2xl lg:p-8 border border-white/10">
+            {/* Glass shine effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none mix-blend-overlay" />
+            
             {/* Ambient gradients */}
-            <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-violet-400/20 blur-[80px]" />
-            <div aria-hidden className="pointer-events-none absolute -bottom-32 left-0 h-64 w-64 rounded-full bg-indigo-900/40 blur-[80px]" />
+            <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-[80px]" />
+            <div aria-hidden className="pointer-events-none absolute -bottom-32 left-0 h-64 w-64 rounded-full bg-indigo-400/20 blur-[80px]" />
 
             {/* ── Content ──── */}
             <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
@@ -47,7 +50,7 @@ export function HeroCard({
                             type="button"
                             onClick={toggleMasked}
                             aria-label={masked ? "Show balance" : "Hide balance"}
-                            className="inline-flex items-center justify-center text-violet-300 transition-colors hover:text-white"
+                            className="inline-flex items-center justify-center text-violet-300 transition-all hover:text-white active:scale-90"
                         >
                             {masked ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
@@ -63,16 +66,14 @@ export function HeroCard({
                         <p>
                             {masked ? "***" : `$${balanceUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                         </p>
-                        <span className="opacity-50">·</span>
-                        <p className="opacity-80">USDT auto-converted at ₦1,562.50</p>
                     </div>
 
                     {/* Action buttons */}
-                    <div className="mt-8 grid grid-cols-2 gap-3 sm:flex sm:flex-row">
+                    <div className="mt-8 flex flex-row gap-3 sm:gap-4">
                         <Button
                             size="md"
                             onClick={() => router.push("/add-money")}
-                            className="bg-white text-violet-700 hover:bg-violet-50 font-bold shadow-sm rounded-xl h-12 w-full sm:w-auto sm:px-6"
+                            className="flex-1 bg-white text-violet-700 hover:bg-violet-50 font-bold shadow-sm rounded-xl h-12 sm:flex-none sm:w-auto sm:px-6 active:scale-95 transition-transform"
                         >
                             <Plus className="mr-2 h-4 w-4 shrink-0" />
                             Add money
@@ -80,7 +81,7 @@ export function HeroCard({
                         <Button
                             size="md"
                             onClick={() => router.push("/withdraw")}
-                            className="border border-white/20 bg-white/10 text-white backdrop-blur-md hover:bg-white/20 transition-all font-bold rounded-xl h-12 w-full sm:w-auto sm:px-6"
+                            className="flex-1 border border-white/20 bg-white/10 text-white backdrop-blur-md hover:bg-white/20 transition-all font-bold rounded-xl h-12 sm:flex-none sm:w-auto sm:px-6 active:scale-95"
                         >
                             <Building2 className="mr-2 h-4 w-4 shrink-0" />
                             Withdraw

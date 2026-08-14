@@ -4,7 +4,9 @@ import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { Modal } from "./modal";
 import { Button } from "./button";
 
-export type TransactionState = "confirm" | "processing" | "success" | "error";
+import { Input } from "@/components/ui/input";
+
+export type TransactionState = "confirm" | "pin" | "processing" | "success" | "error";
 
 export interface TransactionModalProps {
     open: boolean;
@@ -15,11 +17,16 @@ export interface TransactionModalProps {
 
     // ── Confirm State ──
     confirmTitle?: string;
-    confirmContent: React.ReactNode;
-    onConfirm: () => void;
-    onCancel: () => void;
+    confirmContent?: React.ReactNode;
+    onConfirm?: () => void;
+    onCancel?: () => void;
     confirmButtonLabel?: string;
     cancelButtonLabel?: string;
+
+    // ── Pin State ──
+    pinTitle?: string;
+    pinDescription?: React.ReactNode;
+    onPinSubmit?: (pin: string) => void;
 
     // ── Processing State ──
     processingTitle?: string;
@@ -28,7 +35,7 @@ export interface TransactionModalProps {
     // ── Success State ──
     successTitle?: string;
     successDescription?: React.ReactNode;
-    onSuccessAction: () => void;
+    onSuccessAction?: () => void;
     successButtonLabel?: string;
 
     // ── Error State ──
@@ -62,10 +69,21 @@ export function TransactionModal({
     errorDescription = "We encountered an issue. Please try again.",
     onErrorAction,
     errorButtonLabel = "Try Again",
+    pinTitle = "Enter PIN",
+    pinDescription = "Please enter your 4-digit transaction PIN to proceed.",
+    onPinSubmit,
 }: TransactionModalProps) {
+    const [pin, setPin] = React.useState("");
+
+    // Reset pin when modal closes
+    React.useEffect(() => {
+        if (!open) setPin("");
+    }, [open]);
+
     // Determine dynamic title based on state
     const modalTitle = 
         state === "confirm" ? confirmTitle :
+        state === "pin" ? pinTitle :
         state === "processing" ? processingTitle :
         state === "success" ? successTitle :
         errorTitle;
@@ -86,19 +104,28 @@ export function TransactionModal({
             footer={
                 state === "confirm" ? (
                     <div className="flex w-full flex-col gap-2 pt-2 sm:flex-row-reverse sm:gap-3">
-                        <Button variant="primary" fullWidth onClick={onConfirm}>
+                        <Button variant="primary" fullWidth onClick={() => onConfirm?.()}>
                             {confirmButtonLabel}
                         </Button>
-                        <Button variant="ghost" fullWidth onClick={onCancel}>
+                        <Button variant="ghost" fullWidth onClick={() => onCancel?.()}>
+                            {cancelButtonLabel}
+                        </Button>
+                    </div>
+                ) : state === "pin" ? (
+                    <div className="flex w-full flex-col gap-2 pt-2 sm:flex-row-reverse sm:gap-3">
+                        <Button variant="primary" fullWidth onClick={() => onPinSubmit?.(pin)} disabled={pin.length < 4}>
+                            Confirm
+                        </Button>
+                        <Button variant="ghost" fullWidth onClick={() => onCancel?.()}>
                             {cancelButtonLabel}
                         </Button>
                     </div>
                 ) : state === "success" ? (
-                    <Button variant="primary" fullWidth onClick={onSuccessAction} className="mt-4">
+                    <Button variant="primary" fullWidth onClick={() => onSuccessAction?.()} className="mt-4">
                         {successButtonLabel}
                     </Button>
                 ) : state === "error" ? (
-                    <Button variant="primary" fullWidth onClick={onErrorAction} className="mt-4">
+                    <Button variant="primary" fullWidth onClick={() => onErrorAction?.()} className="mt-4">
                         {errorButtonLabel}
                     </Button>
                 ) : null // No footer during processing
@@ -106,6 +133,20 @@ export function TransactionModal({
         >
             <div className="py-2">
                 {state === "confirm" && confirmContent}
+
+                {state === "pin" && (
+                    <div className="flex flex-col items-center justify-center space-y-4 py-4 text-center">
+                        <div className="text-sm text-body">{pinDescription}</div>
+                        <Input 
+                            type="password" 
+                            maxLength={4} 
+                            placeholder="••••" 
+                            className="text-center text-3xl tracking-[1em] h-14 w-40 font-mono pl-6"
+                            value={pin}
+                            onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
+                        />
+                    </div>
+                )}
 
                 {state === "processing" && (
                     <div className="flex flex-col items-center justify-center space-y-4 py-8">

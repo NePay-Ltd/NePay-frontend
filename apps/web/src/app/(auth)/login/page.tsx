@@ -29,7 +29,11 @@ export default function LoginPage() {
 
     const onSubmit = async (values: LoginValues) => {
         try {
-            await login(values);
+            let formattedIdentifier = values.identifier.trim();
+            if (/^0\d{9,10}$/.test(formattedIdentifier)) {
+                formattedIdentifier = "+234" + formattedIdentifier.substring(1);
+            }
+            await login({ ...values, identifier: formattedIdentifier });
         } catch (err) {
             const apiErr = err as ApiError;
             if (apiErr.code === "INVALID_CREDENTIALS") {

@@ -11,10 +11,10 @@ export interface TagProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantClasses: Record<TagVariant, string> = {
-    ok: "bg-green-500/10 text-green-500",
-    warn: "bg-amber-500/10 text-amber-500",
-    neutral: "bg-violet-100 text-body",
-    error: "bg-red-500/10 text-red-500",
+    ok: "bg-green-500/10 text-green-600 dark:text-green-400",
+    warn: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    neutral: "bg-gray-100 text-gray-700 dark:bg-[#262626] dark:text-gray-300",
+    error: "bg-red-500/10 text-red-600 dark:text-red-400",
 };
 
 const dotClasses: Record<TagVariant, string> = {

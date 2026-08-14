@@ -58,12 +58,11 @@ export default function AuthLayout({
 
                 {/* Text Content */}
                 <div className="absolute bottom-20 left-16 max-w-xl z-10">
-                    <h2 className="text-6xl lg:text-7xl font-black text-white leading-[1.05] tracking-tight drop-shadow-xl">
-                        Spend.<br />
-                        Save.<br />
-                        Grow.
+                    <h2 className="text-5xl lg:text-6xl font-black text-violet-500 leading-[1.1] tracking-tight drop-shadow-[0_4px_32px_rgba(124,58,237,0.4)] flex flex-col">
+                        <span>Your Money.</span>
+                        <span>Your Way.</span>
                     </h2>
-                    <p className="mt-6 text-xl text-white/90 font-medium max-w-lg drop-shadow-lg leading-relaxed">
+                    <p className="mt-6 text-xl text-trueWhite/50 font-medium max-w-lg drop-shadow-lg leading-relaxed">
                         Banking built for everyday life. Earn daily cashback, enjoy massive discounts, and get 24/7 priority support.
                     </p>
                 </div>

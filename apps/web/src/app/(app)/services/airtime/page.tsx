@@ -2,247 +2,203 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { ArrowLeft, Contact } from "lucide-react";
+import { ArrowLeft, Smartphone } from "lucide-react";
+import { toast } from "sonner";
 
-import { Button } from "@/components/shared/button";
-import { Chip } from "@/components/shared/chip";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Panel, PanelBody } from "@/components/shared/panel";
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { formatNaira } from "@/lib/format";
-
 import { usePayAirtime, useServiceTransactionStatus } from "@/lib/queries/services";
 
-// ─── Constants & Schemas ──────────────────────────────────────────────────────
+// New Shared UI Components
+import { ProviderSelector } from "@/components/services/ProviderSelector";
+import { RecentNumbersRow } from "@/components/services/RecentNumbersRow";
+import { AmountCalculator } from "@/components/services/AmountCalculator";
+import { StickyPayBar } from "@/components/services/StickyPayBar";
+import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen";
+
+// ─── Constants ──────────────────────────────────────────────────────────────
 
 const NETWORKS = [
-    { id: "MTN", label: "MTN", color: "bg-yellow-400" },
-    { id: "Glo", label: "Glo", color: "bg-green-500" },
-    { id: "Airtel", label: "Airtel", color: "bg-red-500" },
-    { id: "9mobile", label: "9mobile", color: "bg-emerald-800" },
+    { id: "MTN", label: "MTN", color: "bg-yellow-400", logoUrl: "/images/providers/mtn.svg" },
+    { id: "Glo", label: "Glo", color: "bg-green-500", logoUrl: "/images/providers/glo.svg" },
+    { id: "Airtel", label: "Airtel", color: "bg-red-500", logoUrl: "/images/providers/airtel.svg" },
+    { id: "T2 Mobile", label: "T2 Mobile", color: "bg-blue-600", logoUrl: "/images/providers/t2.svg" },
+    { id: "Vitel", label: "Vitel", color: "bg-purple-600", logoUrl: "/images/providers/vitel.svg" },
 ];
 
-const PRESET_AMOUNTS = [50, 100, 500, 1000, 2000];
+const PRESET_AMOUNTS = [50, 100, 500, 1000, 2000, 5000];
 
-const phoneRegex = /^0\d{10}$/;
-
-const airtimeSchema = z.object({
-    phone: z.string().regex(phoneRegex, "Must be a valid 11-digit number"),
-    amount: z.number().min(50, "Minimum is ₦50").max(50000, "Maximum is ₦50,000"),
-});
-
-type AirtimeForm = z.infer<typeof airtimeSchema>;
+// Mock recent contacts for UI refactor
+const MOCK_RECENT_CONTACTS = [
+    { name: "My MTN", id: "08031234567" },
+    { name: "Mom", id: "07069876543" },
+    { name: "John Doe", id: "08101239876" },
+];
 
 export default function AirtimePage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     
-    // Support pre-filling from saved billers
+    // Support pre-filling
     const initialNetwork = searchParams.get("network") || "MTN";
     const initialPhone = searchParams.get("phone") || "";
 
     const [network, setNetwork] = React.useState(initialNetwork);
+    const [phone, setPhone] = React.useState(initialPhone);
+    const [amount, setAmount] = React.useState(0);
 
     // Queries & Mutations
     const payAirtime = usePayAirtime();
 
-    // ─── Forms ──────────────────────────────────────────────────────────────────
-    const form = useForm<AirtimeForm>({
-        resolver: zodResolver(airtimeSchema),
-        defaultValues: { phone: initialPhone, amount: 0 },
-    });
-
-    const watchAmount = form.watch("amount");
-
-    // ─── Transaction Modal State ────────────────────────────────────────────────
-    const [modalOpen, setModalOpen] = React.useState(false);
-    const [txState, setTxState] = React.useState<TransactionState>("confirm");
+    // ─── Transaction State ────────────────────────────────────────────────
+    const [pinModalOpen, setPinModalOpen] = React.useState(false);
+    const [txState, setTxState] = React.useState<TransactionState>("pin");
     const [txId, setTxId] = React.useState<string | null>(null);
+    const [successOpen, setSuccessOpen] = React.useState(false);
 
     const { data: txStatus } = useServiceTransactionStatus(txId);
 
     React.useEffect(() => {
         if (!txStatus) return;
-        if (txStatus.status === "success") setTxState("success");
-        if (txStatus.status === "failed") setTxState("error");
+        if (txStatus.status === "COMPLETED") {
+            setPinModalOpen(false); // Close pin modal
+            setSuccessOpen(true);   // Open full screen success
+        }
+        if (txStatus.status === "FAILED") {
+            setTxState("error");
+        }
     }, [txStatus]);
 
     // ─── Handlers ───────────────────────────────────────────────────────────────
-    const handleSubmit = (values: AirtimeForm) => {
+    
+    // Auto-detect network prefix (simple mock logic)
+    React.useEffect(() => {
+        if (phone.startsWith("0803") || phone.startsWith("0703") || phone.startsWith("0813")) setNetwork("MTN");
+        else if (phone.startsWith("0805") || phone.startsWith("0705") || phone.startsWith("0815")) setNetwork("Glo");
+        else if (phone.startsWith("0802") || phone.startsWith("0708") || phone.startsWith("0812")) setNetwork("Airtel");
+        else if (phone.startsWith("0809") || phone.startsWith("0818") || phone.startsWith("0909")) setNetwork("9mobile");
+    }, [phone]);
+
+    const handlePayClick = () => {
+        if (phone.length < 10) {
+            toast.error("Please enter a valid phone number");
+            return;
+        }
+        if (amount < 50) {
+            toast.error("Minimum amount is ₦50");
+            return;
+        }
         setTxId(null);
-        setTxState("confirm");
-        setModalOpen(true);
+        setTxState("pin");
+        setPinModalOpen(true);
     };
 
-    const confirmTransaction = () => {
+    const handlePinSubmit = (pin: string) => {
         setTxState("processing");
-        const values = form.getValues();
         
         payAirtime.mutate(
-            { phone: values.phone, amountNgn: values.amount, network },
+            { phone, amountNgn: amount, network, pin },
             {
-                onSuccess: (res) => setTxId(res.id),
-                onError: () => setTxState("error")
+                onSuccess: (res) => {
+                    setTxId(res.id);
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || "Recharge failed");
+                    setTxState("error");
+                }
             }
         );
     };
 
+    const isValid = phone.length >= 10 && amount >= 50;
+
     return (
-        <div className="mx-auto max-w-xl space-y-6">
-            <div className="flex items-center gap-3 px-1">
-                <button
-                    onClick={() => router.back()}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-violet-700 hover:bg-violet-200 transition-colors"
-                >
-                    <ArrowLeft className="h-4 w-4" />
-                </button>
-                <h1 className="text-2xl font-bold text-ink">Buy Airtime</h1>
+        <>
+            <div className="mx-auto max-w-xl space-y-8 pb-32">
+                {/* Header */}
+                <div className="flex items-center gap-3 px-2 sm:px-0">
+                    <button
+                        onClick={() => router.back()}
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-ink hover:bg-gray-200 transition-colors"
+                    >
+                        <ArrowLeft className="h-5 w-5" />
+                    </button>
+                    <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-100 text-violet-700">
+                            <Smartphone className="h-4 w-4" />
+                        </div>
+                        <h1 className="text-2xl font-black text-ink tracking-tight">Airtime</h1>
+                    </div>
+                </div>
+
+                <div className="px-2 sm:px-0 space-y-8">
+                    {/* Provider Selection */}
+                    <ProviderSelector 
+                        providers={NETWORKS}
+                        selectedId={network}
+                        onChange={setNetwork}
+                    />
+
+                    {/* Phone Number & Recent */}
+                    <div className="space-y-4">
+                        <div className="relative">
+                            <input
+                                type="tel"
+                                placeholder="Phone Number"
+                                value={phone}
+                                maxLength={11}
+                                onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                                className="w-full h-16 rounded-2xl border-2 border-border bg-white px-5 text-xl font-bold tracking-wide outline-none focus:border-violet-600 transition-colors"
+                            />
+                            {/* Auto-detected badge */}
+                            {phone.length >= 4 && (
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-green-50 border border-green-200">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                    <span className="text-[10px] font-bold text-green-700 uppercase tracking-wider">{network} detected</span>
+                                </div>
+                            )}
+                        </div>
+                        <RecentNumbersRow 
+                            contacts={MOCK_RECENT_CONTACTS} 
+                            onSelect={(id) => setPhone(id)} 
+                        />
+                    </div>
+
+                    {/* Amount Calculator */}
+                    <AmountCalculator 
+                        amount={amount}
+                        onChange={setAmount}
+                        presets={PRESET_AMOUNTS}
+                    />
+                </div>
             </div>
 
-            <Panel className="rounded-[24px]">
-                <PanelBody className="p-6 sm:p-8">
-                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-                        
-                        {/* Network Selection */}
-                        <div className="space-y-3">
-                            <Label className="text-sm font-bold text-ink">Select Network</Label>
-                            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                                {NETWORKS.map(net => (
-                                    <button
-                                        key={net.id}
-                                        type="button"
-                                        onClick={() => setNetwork(net.id)}
-                                        className={`flex-none px-5 py-2.5 rounded-full border-2 transition-all font-bold text-sm ${
-                                            network === net.id 
-                                                ? "border-violet-600 bg-violet-50 text-violet-700" 
-                                                : "border-border bg-white text-body hover:border-violet-200 hover:bg-gray-50"
-                                        }`}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <span className={`inline-block h-2 w-2 rounded-full ${net.color}`} />
-                                            {net.label}
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Phone Number */}
-                        <div className="space-y-3">
-                            <Label className="text-sm font-bold text-ink">Phone Number</Label>
-                            <div className="relative">
-                                <Input 
-                                    placeholder="080..." 
-                                    maxLength={11}
-                                    className="h-14 rounded-2xl pl-4 pr-12 text-lg font-bold placeholder:font-medium"
-                                    {...form.register("phone")}
-                                />
-                                <button type="button" className="absolute right-3 top-3.5 text-violet-500 hover:text-violet-700">
-                                    <Contact className="h-6 w-6" />
-                                </button>
-                            </div>
-                            {form.formState.errors.phone && (
-                                <p className="text-xs text-red-500 font-medium">{form.formState.errors.phone.message}</p>
-                            )}
-                        </div>
-
-                        {/* Amount */}
-                        <div className="space-y-3">
-                            <Label className="text-sm font-bold text-ink">Amount</Label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-4 font-bold text-ink">₦</span>
-                                <Input 
-                                    type="number"
-                                    placeholder="0"
-                                    className="h-14 rounded-2xl pl-8 text-lg font-bold tabular-nums"
-                                    {...form.register("amount", { valueAsNumber: true })}
-                                />
-                            </div>
-                            {form.formState.errors.amount && (
-                                <p className="text-xs text-red-500 font-medium">{form.formState.errors.amount.message}</p>
-                            )}
-                            
-                            {/* Presets */}
-                            <div className="flex flex-wrap gap-2 pt-2">
-                                {PRESET_AMOUNTS.map(preset => (
-                                    <button
-                                        key={preset}
-                                        type="button"
-                                        onClick={() => form.setValue("amount", preset, { shouldValidate: true })}
-                                        className={`px-4 py-2 rounded-xl border text-sm font-bold transition-all tabular-nums ${
-                                            watchAmount === preset
-                                                ? "bg-violet-600 text-white border-violet-600"
-                                                : "bg-white text-ink border-border hover:bg-violet-50 hover:border-violet-200"
-                                        }`}
-                                    >
-                                        {formatNaira(preset)}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        
-                        <div className="pt-4">
-                            <Button 
-                                type="submit" 
-                                variant="primary" 
-                                fullWidth 
-                                size="lg"
-                                className="h-14 rounded-2xl text-base font-bold shadow-md shadow-violet-500/20"
-                                disabled={!form.formState.isValid}
-                            >
-                                Pay {watchAmount > 0 ? formatNaira(watchAmount) : ""}
-                            </Button>
-                        </div>
-                    </form>
-                </PanelBody>
-            </Panel>
+            <StickyPayBar 
+                visible={!successOpen} // Hide bar if success screen is up
+                amount={amount}
+                summaryText={`${network} Airtime — ${phone || "..."}`}
+                onPay={handlePayClick}
+                disabled={!isValid}
+            />
 
             <TransactionModal
-                open={modalOpen}
-                onOpenChange={setModalOpen}
+                open={pinModalOpen}
+                onOpenChange={setPinModalOpen}
                 state={txState}
-                confirmTitle="Review Airtime Purchase"
-                onConfirm={confirmTransaction}
-                onCancel={() => setModalOpen(false)}
-                confirmContent={
-                    <div className="space-y-4 pt-2 pb-4">
-                        <div className="rounded-2xl border border-border bg-gray-50 p-5 space-y-4">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted font-medium">Network</span>
-                                <span className="font-bold text-ink">
-                                    {network}
-                                </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted font-medium">Phone Number</span>
-                                <span className="font-bold text-ink">
-                                    {form.getValues().phone}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="flex justify-between font-extrabold text-lg px-2">
-                            <span>Amount</span>
-                            <span className="font-sans tabular-nums text-violet-700">{formatNaira(watchAmount)}</span>
-                        </div>
-                    </div>
-                }
-                processingText={`Sending ${formatNaira(watchAmount)} airtime...`}
-                successTitle="Recharge Successful!"
-                successDescription={
-                    <p>Your phone has been successfully recharged with <span className="font-bold">{formatNaira(watchAmount)}</span>.</p>
-                }
-                onSuccessAction={() => {
-                    setModalOpen(false);
-                    router.push("/overview");
-                }}
+                onPinSubmit={handlePinSubmit}
+                processingText={`Sending ₦${amount} airtime to ${phone}...`}
                 errorTitle="Recharge Failed"
-                errorDescription={<p>{txStatus?.failureReason || "The network provider didn't respond in time."}</p>}
-                onErrorAction={() => setModalOpen(false)}
+                errorDescription={<p>{payAirtime.error?.message || txStatus?.failureReason || "The network provider didn't respond in time."}</p>}
+                onErrorAction={() => setPinModalOpen(false)}
             />
-        </div>
+
+            <PaymentSuccessScreen 
+                open={successOpen}
+                amount={amount}
+                title="Airtime Sent!"
+                description={<p>You successfully recharged <span className="font-bold">{phone}</span> via {network}.</p>}
+                onHome={() => router.push("/overview")}
+                onReceipt={() => router.push("/transactions")}
+            />
+        </>
     );
 }

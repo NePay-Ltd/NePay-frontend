@@ -37,7 +37,7 @@ const config: Config = {
                     "500": "#E53935",
                 },
                 amber: {
-                    "500": "#090908ff",
+                    "500": "#F59E0B",
                 },
                 white: "var(--color-white)",
                 trueWhite: "#ffffff",

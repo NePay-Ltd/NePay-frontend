@@ -131,7 +131,7 @@ export default function ServicesPage() {
                             <Tile icon={Droplet} label="Water" iconBg="bg-sky-50" iconColor="text-sky-600" comingSoon onClick={handleComingSoon} />
                             <Tile icon={Car} label="Car Hire" iconBg="bg-slate-50" iconColor="text-slate-600" comingSoon onClick={handleComingSoon} />
                             <Tile icon={HeartHandshake} label="Donations" iconBg="bg-pink-50" iconColor="text-pink-600" comingSoon onClick={handleComingSoon} />
-                            <Tile icon={MoreHorizontal} label="More" iconBg="bg-gray-100" iconColor="text-gray-500" comingSoon onClick={handleComingSoon} />
+                            <Tile icon={MoreHorizontal} label="More" iconBg="bg-gray-100" iconColor="text-muted" comingSoon onClick={handleComingSoon} />
                         </div>
                     </section>
                 </div>

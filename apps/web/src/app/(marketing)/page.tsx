@@ -1,5 +1,5 @@
 import { Hero } from "@/components/marketing/hero";
-import { TrustBar } from "@/components/marketing/trust-bar";
+
 import { BillsFeature } from "@/components/marketing/bills-feature";
 import { CryptoFeature } from "@/components/marketing/crypto-feature";
 import { FlightsFeature } from "@/components/marketing/flights-feature";
@@ -13,7 +13,7 @@ export default function MarketingPage() {
   return (
     <>
       <Hero />
-      <TrustBar />
+
       <BillsFeature />
       <CryptoFeature />
       <FlightsFeature />

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -16,6 +17,7 @@ import {
     Tv,
     Wifi,
     MoreHorizontal,
+    ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,43 +41,50 @@ import {
 } from "@/components/shared/skeletons";
 
 const QUICK_ACTIONS = [
-    { label: "Airtime", icon: Smartphone, href: "/services/airtime", bg: "bg-violet-100", color: "text-violet-700" },
-    { label: "Data", icon: Wifi, href: "/services/data", bg: "bg-blue-100", color: "text-blue-700" },
-    { label: "Flight", icon: Plane, href: "/flights", bg: "bg-teal-100", color: "text-teal-700" },
-    { label: "TV", icon: Tv, href: "/services/tv", bg: "bg-pink-100", color: "text-pink-700" },
-    { label: "Gift Card", icon: Gift, href: "/gift-cards", bg: "bg-green-100", color: "text-green-700" },
-    { label: "More", icon: MoreHorizontal, href: "/services", bg: "bg-gray-100", color: "text-gray-700" },
+    { label: "Airtime", icon: Smartphone, href: "/services/airtime", bg: "bg-violet-50 hover:bg-violet-100/80 dark:bg-violet-900/20 dark:hover:bg-violet-900/40", iconBg: "bg-violet-100 dark:bg-violet-800/50", color: "text-violet-700 dark:text-violet-300" },
+    { label: "Data", icon: Wifi, href: "/services/data", bg: "bg-blue-50 hover:bg-blue-100/80 dark:bg-blue-900/20 dark:hover:bg-blue-900/40", iconBg: "bg-blue-100 dark:bg-blue-800/50", color: "text-blue-700 dark:text-blue-300" },
+    { label: "Flight", icon: Plane, href: "/flights", bg: "bg-teal-50 hover:bg-teal-100/80 dark:bg-teal-900/20 dark:hover:bg-teal-900/40", iconBg: "bg-teal-100 dark:bg-teal-800/50", color: "text-teal-700 dark:text-teal-300" },
+    { label: "TV", icon: Tv, href: "/services/tv", bg: "bg-pink-50 hover:bg-pink-100/80 dark:bg-pink-900/20 dark:hover:bg-pink-900/40", iconBg: "bg-pink-100 dark:bg-pink-800/50", color: "text-pink-700 dark:text-pink-300" },
+    { label: "Gift Card", icon: Gift, href: "/gift-cards", bg: "bg-green-50 hover:bg-green-100/80 dark:bg-green-900/20 dark:hover:bg-green-900/40", iconBg: "bg-green-100 dark:bg-green-800/50", color: "text-green-700 dark:text-green-300" },
+    { label: "More", icon: MoreHorizontal, href: "/services", bg: "bg-gray-50 hover:bg-gray-100 dark:bg-[#1A1A1A] dark:hover:bg-[#262626]", iconBg: "bg-white dark:bg-black border border-border shadow-sm", color: "text-ink" },
 ] as const;
 
 export default function OverviewPage() {
     const { kycTier } = useAuth();
     const router = useRouter();
-    const { data: summary, isLoading: summaryLoading } = useOverviewSummary();
+    const { data: summary, isLoading: queryLoading } = useOverviewSummary();
+
+    const [isMounted, setIsMounted] = React.useState(false);
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    const summaryLoading = !isMounted || queryLoading;
 
     const kpiData = summary?.kpi;
 
     return (
-        <div className="">
+        <div className="pb-32 sm:pb-8">
             
             {/* ── KYC Prompt Banner (Conditional) ──────────────────────── */}
-            {kycTier !== "FULL_BVN_NIN" && (
+            {isMounted && kycTier !== "FULL_BVN_NIN" && (
                 <div className="mb-6 sm:mb-8 flex items-center gap-3 rounded-[16px] border border-violet-200 bg-violet-50 px-4 py-3 shadow-sm sm:gap-4 sm:px-6 sm:py-5">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 sm:h-10 sm:w-10">
                         <ShieldCheck className="h-4 w-4 text-violet-700 sm:h-5 sm:w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-ink sm:text-base">
+                        <p className="text-sm font-bold text-violet-950 sm:text-base">
                             Unlock ₦5M transfer limits
                         </p>
-                        <p className="mt-0.5 hidden text-sm font-medium text-body sm:block">
+                        <p className="mt-0.5 hidden text-sm font-medium text-violet-800 sm:block">
                             You&apos;re 80% of the way there. Verify your BVN and NIN to unlock Tier 2.
                         </p>
                     </div>
                     <button
                         onClick={() => router.push("/kyc")}
-                        className="shrink-0 whitespace-nowrap font-bold text-xs bg-violet-700 text-white rounded-xl px-4 py-2 hover:bg-violet-600 transition-colors"
+                        className="shrink-0 whitespace-nowrap font-bold text-[13px] bg-violet-700 text-white rounded-full px-5 py-2.5 hover:bg-violet-600 active:scale-95 transition-all shadow-sm flex items-center gap-1.5"
                     >
-                        Verify now
+                        Verify now <ChevronRight className="h-4 w-4" />
                     </button>
                 </div>
             )}
@@ -106,16 +115,20 @@ export default function OverviewPage() {
                             ) : (
                                 <>
                                     {QUICK_ACTIONS.map((action) => (
-                                        <button
+                                        <motion.button
                                             key={action.label}
+                                            whileTap={{ scale: 0.95 }}
                                             onClick={() => router.push(action.href)}
-                                            className="w-full flex flex-col items-start gap-3 rounded-[16px] border border-border bg-white p-4 shadow-sm active:scale-95 hover:-translate-y-0.5 hover:shadow-md transition-all text-left"
+                                            className={cn(
+                                                "group w-full flex flex-col items-center justify-center gap-2 sm:gap-3 rounded-[20px] p-4 sm:p-5 transition-all border border-transparent shadow-sm",
+                                                action.bg
+                                            )}
                                         >
-                                            <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${action.bg}`}>
-                                                <action.icon className={`h-5 w-5 ${action.color}`} />
+                                            <div className={cn("flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-[16px]", action.iconBg)}>
+                                                <action.icon className={cn("h-6 w-6", action.color)} />
                                             </div>
-                                            <span className="text-xs font-bold text-ink leading-tight">{action.label}</span>
-                                        </button>
+                                            <span className={cn("text-[13px] sm:text-[15px] font-bold leading-tight", action.color)}>{action.label}</span>
+                                        </motion.button>
                                     ))}
                                 </>
                             )}
@@ -124,9 +137,9 @@ export default function OverviewPage() {
 
 
                     {/* ── Recent Transactions ─────────────────────────────── */}
-                    <Panel className="rounded-[24px]">
+                    <Panel className="rounded-[24px]" flush>
                         <PanelHeader
-                            className="px-6 pt-6"
+                            className="px-4 pt-4 sm:px-6 sm:pt-6"
                             title="Recent transactions"
                             description="Your last 5 movements"
                             action={
@@ -138,18 +151,23 @@ export default function OverviewPage() {
                                 </Link>
                             }
                         />
-                        <PanelBody className="px-6 pb-4 pt-4">
-                            {/* Table Header */}
-                            <div className="grid grid-cols-[1fr_100px_100px_100px_120px] gap-4 pb-3 border-b border-border/50 text-[10px] font-bold uppercase tracking-widest text-muted hidden sm:grid">
-                                <div>TRANSACTION</div>
-                                <div>CATEGORY</div>
-                                <div>DATE</div>
-                                <div>STATUS</div>
-                                <div className="text-right">AMOUNT</div>
-                            </div>
-                            
+                        <PanelBody className="px-4 pb-3 pt-3 sm:px-6 sm:pb-4 sm:pt-4">
                             {summaryLoading ? (
-                                <TableRowSkeleton rows={5} />
+                                <div className="space-y-1 mt-2">
+                                    {[...Array(5)].map((_, i) => (
+                                        <div key={i} className="p-3 flex items-center gap-4 bg-transparent rounded-xl">
+                                            <Skeleton className="h-10 w-10 rounded-full shrink-0" />
+                                            <div className="space-y-2 flex-1">
+                                                <Skeleton className="h-3.5 w-32" />
+                                                <Skeleton className="h-3 w-20" />
+                                            </div>
+                                            <div className="space-y-2 flex flex-col items-end shrink-0">
+                                                <Skeleton className="h-3.5 w-16" />
+                                                <Skeleton className="h-3 w-12" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             ) : summary?.recentTransactions?.length ? (
                                 <div className="space-y-1 mt-2">
                                     {summary.recentTransactions.slice(0, 5).map((tx) => (

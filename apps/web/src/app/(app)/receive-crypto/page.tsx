@@ -42,7 +42,7 @@ export default function ReceiveCryptoPage() {
     } = useGenerateDepositAddress();
 
     React.useEffect(() => {
-        generateAddress({ coin: selectedAsset.coin, network: selectedAsset.network });
+        generateAddress({ asset: selectedAsset.id });
     }, [selectedAsset, generateAddress]);
 
     const handleCopy = () => {
@@ -133,7 +133,7 @@ export default function ReceiveCryptoPage() {
                                                 description="Could not fetch deposit address."
                                                 action={{
                                                     label: "Retry",
-                                                    onClick: () => generateAddress({ coin: selectedAsset.coin, network: selectedAsset.network }),
+                                                    onClick: () => generateAddress({ asset: selectedAsset.id }),
                                                 }}
                                                 className="py-0"
                                             />

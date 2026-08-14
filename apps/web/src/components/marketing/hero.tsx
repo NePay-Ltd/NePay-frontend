@@ -23,7 +23,7 @@ const fadeUp: Variants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.6,
+      duration: 0.3,
       ease: [0.16, 1, 0.3, 1],
     },
   },
@@ -112,11 +112,11 @@ export function Hero() {
             className="lg:col-span-5 relative w-full h-[600px] lg:h-[680px] -mx-4 sm:mx-0 lg:ml-8 mt-12 lg:mt-0 order-first lg:order-last"
             initial={{ opacity: 0, x: 50, rotate: 0 }}
             animate={{ opacity: 1, x: 0, rotate: 3 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
           >
             <div className="absolute inset-0 right-[-20%] lg:right-[-40%] rounded-3xl bg-white dark:bg-[#09090B] border border-marketing-border shadow-2xl overflow-hidden flex flex-col">
               {/* Mockup Body (App Overview) */}
-              <div className="p-6 flex-1 bg-marketing-surface overflow-y-auto space-y-6">
+              <div className="p-6 flex-1 bg-marketing-surface overflow-hidden space-y-6">
                 
                 {/* Hero Balance Card */}
                 <div className="relative overflow-hidden rounded-2xl bg-brand-gradient p-6 text-white shadow-lg">

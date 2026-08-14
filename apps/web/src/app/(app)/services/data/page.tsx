@@ -2,38 +2,34 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { ArrowLeft, Contact, Loader2 } from "lucide-react";
+import { ArrowLeft, Wifi } from "lucide-react";
+import { toast } from "sonner";
 
-import { Button } from "@/components/shared/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Panel, PanelBody } from "@/components/shared/panel";
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { formatNaira } from "@/lib/format";
+import { useDataPlans, usePayData, useServiceTransactionStatus } from "@/lib/queries/services";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-import { useDataPlans, usePayData, useServiceTransactionStatus } from "@/lib/queries/services";
+// New Shared UI Components
+import { ProviderSelector } from "@/components/services/ProviderSelector";
+import { RecentNumbersRow } from "@/components/services/RecentNumbersRow";
+import { PlanGrid } from "@/components/services/PlanGrid";
+import { StickyPayBar } from "@/components/services/StickyPayBar";
+import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen";
 
-// ─── Constants & Schemas ──────────────────────────────────────────────────────
+// ─── Constants ──────────────────────────────────────────────────────────────
 
 const NETWORKS = [
-    { id: "MTN", label: "MTN", color: "bg-yellow-400" },
-    { id: "Glo", label: "Glo", color: "bg-green-500" },
-    { id: "Airtel", label: "Airtel", color: "bg-red-500" },
-    { id: "9mobile", label: "9mobile", color: "bg-emerald-800" },
+    { id: "MTN", label: "MTN", color: "bg-yellow-400", logoUrl: "/images/providers/mtn.svg" },
+    { id: "Glo", label: "Glo", color: "bg-green-500", logoUrl: "/images/providers/glo.svg" },
+    { id: "Airtel", label: "Airtel", color: "bg-red-500", logoUrl: "/images/providers/airtel.svg" },
+    { id: "T2 Mobile", label: "T2 Mobile", color: "bg-blue-600", logoUrl: "/images/providers/t2.svg" },
+    { id: "Vitel", label: "Vitel", color: "bg-purple-600", logoUrl: "/images/providers/vitel.svg" },
 ];
 
-const phoneRegex = /^0\d{10}$/;
-
-const dataSchema = z.object({
-    phone: z.string().regex(phoneRegex, "Must be a valid 11-digit number"),
-    planId: z.string().min(1, "Please select a plan"),
-});
-
-type DataForm = z.infer<typeof dataSchema>;
+const MOCK_RECENT_CONTACTS = [
+    { name: "My Router", id: "08031234567" },
+    { name: "Dad", id: "07069876543" },
+];
 
 export default function DataPage() {
     const router = useRouter();
@@ -44,6 +40,8 @@ export default function DataPage() {
     const initialPhone = searchParams.get("phone") || "";
 
     const [network, setNetwork] = React.useState(initialNetwork);
+    const [phone, setPhone] = React.useState(initialPhone);
+    const [planId, setPlanId] = React.useState("");
     const [validityTab, setValidityTab] = React.useState<"daily" | "weekly" | "monthly">("monthly");
 
     // Queries & Mutations
@@ -63,239 +61,200 @@ export default function DataPage() {
         }
     }, [plans, plansLoading, validityTab]); // eslint-disable-line
 
-    // ─── Forms ──────────────────────────────────────────────────────────────────
-    const form = useForm<DataForm>({
-        resolver: zodResolver(dataSchema),
-        defaultValues: { phone: initialPhone, planId: "" },
-    });
-
-    const watchPlanId = form.watch("planId");
-    const selectedPlan = plans.find(p => p.id === watchPlanId);
-
     // Reset plan when network changes
     React.useEffect(() => {
-        form.setValue("planId", "", { shouldValidate: true });
-    }, [network, form]);
+        setPlanId("");
+    }, [network]);
 
-    // ─── Transaction Modal State ────────────────────────────────────────────────
-    const [modalOpen, setModalOpen] = React.useState(false);
-    const [txState, setTxState] = React.useState<TransactionState>("confirm");
+    const selectedPlan = plans.find(p => p.id === planId);
+
+    // ─── Transaction State ────────────────────────────────────────────────
+    const [pinModalOpen, setPinModalOpen] = React.useState(false);
+    const [txState, setTxState] = React.useState<TransactionState>("pin");
     const [txId, setTxId] = React.useState<string | null>(null);
+    const [successOpen, setSuccessOpen] = React.useState(false);
 
     const { data: txStatus } = useServiceTransactionStatus(txId);
 
     React.useEffect(() => {
         if (!txStatus) return;
-        if (txStatus.status === "success") setTxState("success");
-        if (txStatus.status === "failed") setTxState("error");
+        if (txStatus.status === "COMPLETED") {
+            setPinModalOpen(false);
+            setSuccessOpen(true);
+        }
+        if (txStatus.status === "FAILED") {
+            setTxState("error");
+        }
     }, [txStatus]);
 
     // ─── Handlers ───────────────────────────────────────────────────────────────
-    const handleSubmit = (values: DataForm) => {
+    React.useEffect(() => {
+        if (phone.startsWith("0803") || phone.startsWith("0703") || phone.startsWith("0813")) setNetwork("MTN");
+        else if (phone.startsWith("0805") || phone.startsWith("0705") || phone.startsWith("0815")) setNetwork("Glo");
+        else if (phone.startsWith("0802") || phone.startsWith("0708") || phone.startsWith("0812")) setNetwork("Airtel");
+        else if (phone.startsWith("0809") || phone.startsWith("0818") || phone.startsWith("0909")) setNetwork("9mobile");
+    }, [phone]);
+
+    const handlePayClick = () => {
+        if (phone.length < 10) {
+            toast.error("Please enter a valid phone number");
+            return;
+        }
+        if (!selectedPlan) {
+            toast.error("Please select a data plan");
+            return;
+        }
         setTxId(null);
-        setTxState("confirm");
-        setModalOpen(true);
+        setTxState("pin");
+        setPinModalOpen(true);
     };
 
-    const confirmTransaction = () => {
-        setTxState("processing");
-        const values = form.getValues();
+    const handlePinSubmit = (pin: string) => {
         if (!selectedPlan) return;
+        setTxState("processing");
         
         payData.mutate(
-            { phone: values.phone, planId: values.planId, amountNgn: selectedPlan.price, network },
+            { phone, planId, amountNgn: selectedPlan.price, network, pin },
             {
-                onSuccess: (res) => setTxId(res.id),
-                onError: () => setTxState("error")
+                onSuccess: (res) => {
+                    setTxId(res.id);
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || "Purchase failed");
+                    setTxState("error");
+                }
             }
         );
     };
 
-    const renderPlanList = (planList: typeof plans) => {
-        if (plansLoading) {
-            return (
-                <div className="flex justify-center py-10">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted" />
-                </div>
-            );
-        }
+    const isValid = phone.length >= 10 && !!selectedPlan;
 
-        if (planList.length === 0) {
-            return <div className="text-center py-10 text-muted font-medium text-sm">No plans available for this category.</div>;
-        }
-
-        return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {planList.map(plan => (
-                    <button
-                        key={plan.id}
-                        type="button"
-                        onClick={() => form.setValue("planId", plan.id, { shouldValidate: true })}
-                        className={`flex flex-col items-start p-4 rounded-2xl border-2 text-left transition-all ${
-                            watchPlanId === plan.id
-                                ? "border-violet-600 bg-violet-50"
-                                : "border-border bg-white hover:border-violet-200"
-                        }`}
-                    >
-                        <span className="font-bold text-ink">{plan.name}</span>
-                        <div className="flex justify-between w-full mt-2 items-center">
-                            <span className="font-sans tabular-nums text-lg font-extrabold text-violet-700">
-                                {formatNaira(plan.price)}
-                            </span>
-                            <span className="text-xs font-medium text-muted bg-gray-100 px-2 py-1 rounded-md">
-                                {plan.validityDays} Day{plan.validityDays > 1 ? "s" : ""}
-                            </span>
-                        </div>
-                    </button>
-                ))}
-            </div>
-        );
+    // Helper to format plan for PlanGrid
+    const formatPlansForGrid = (rawPlans: typeof plans) => {
+        return rawPlans.map((p, idx) => ({
+            id: p.id,
+            name: p.name,
+            validity: `${p.validityDays} Day${p.validityDays > 1 ? 's' : ''}`,
+            price: p.price,
+            recommended: idx === 1 // Mock a recommendation for the UI
+        }));
     };
 
     return (
-        <div className="mx-auto max-w-xl space-y-6">
-            <div className="flex items-center gap-3 px-1">
-                <button
-                    onClick={() => router.back()}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-violet-700 hover:bg-violet-200 transition-colors"
-                >
-                    <ArrowLeft className="h-4 w-4" />
-                </button>
-                <h1 className="text-2xl font-bold text-ink">Buy Data</h1>
-            </div>
-
-            <Panel className="rounded-[24px]">
-                <PanelBody className="p-6 sm:p-8">
-                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-                        
-                        {/* Network Selection */}
-                        <div className="space-y-3">
-                            <Label className="text-sm font-bold text-ink">Select Network</Label>
-                            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                                {NETWORKS.map(net => (
-                                    <button
-                                        key={net.id}
-                                        type="button"
-                                        onClick={() => setNetwork(net.id)}
-                                        className={`flex-none px-5 py-2.5 rounded-full border-2 transition-all font-bold text-sm ${
-                                            network === net.id 
-                                                ? "border-violet-600 bg-violet-50 text-violet-700" 
-                                                : "border-border bg-white text-body hover:border-violet-200 hover:bg-gray-50"
-                                        }`}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <span className={`inline-block h-2 w-2 rounded-full ${net.color}`} />
-                                            {net.label}
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
+        <>
+            <div className="mx-auto max-w-xl space-y-8 pb-32">
+                {/* Header */}
+                <div className="flex items-center gap-3 px-2 sm:px-0">
+                    <button
+                        onClick={() => router.back()}
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-ink hover:bg-gray-200 transition-colors"
+                    >
+                        <ArrowLeft className="h-5 w-5" />
+                    </button>
+                    <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+                            <Wifi className="h-4 w-4" />
                         </div>
+                        <h1 className="text-2xl font-black text-ink tracking-tight">Buy Data</h1>
+                    </div>
+                </div>
 
-                        {/* Phone Number */}
-                        <div className="space-y-3">
-                            <Label className="text-sm font-bold text-ink">Phone Number</Label>
-                            <div className="relative">
-                                <Input 
-                                    placeholder="080..." 
-                                    maxLength={11}
-                                    className="h-14 rounded-2xl pl-4 pr-12 text-lg font-bold placeholder:font-medium"
-                                    {...form.register("phone")}
-                                />
-                                <button type="button" className="absolute right-3 top-3.5 text-violet-500 hover:text-violet-700">
-                                    <Contact className="h-6 w-6" />
-                                </button>
-                            </div>
-                            {form.formState.errors.phone && (
-                                <p className="text-xs text-red-500 font-medium">{form.formState.errors.phone.message}</p>
+                <div className="px-2 sm:px-0 space-y-8">
+                    {/* Provider Selection */}
+                    <ProviderSelector 
+                        providers={NETWORKS}
+                        selectedId={network}
+                        onChange={setNetwork}
+                    />
+
+                    {/* Phone Number & Recent */}
+                    <div className="space-y-4">
+                        <div className="relative">
+                            <input
+                                type="tel"
+                                placeholder="Phone Number"
+                                value={phone}
+                                maxLength={11}
+                                onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                                className="w-full h-16 rounded-2xl border-2 border-border bg-white px-5 text-xl font-bold tracking-wide outline-none focus:border-violet-600 transition-colors"
+                            />
+                            {phone.length >= 4 && (
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-green-50 border border-green-200">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                    <span className="text-[10px] font-bold text-green-700 uppercase tracking-wider">{network} detected</span>
+                                </div>
                             )}
                         </div>
+                        <RecentNumbersRow 
+                            contacts={MOCK_RECENT_CONTACTS} 
+                            onSelect={(id) => setPhone(id)} 
+                        />
+                    </div>
 
-                        {/* Data Plans Tabs */}
-                        <div className="space-y-4">
-                            <Label className="text-sm font-bold text-ink">Select Plan</Label>
-                            <Tabs value={validityTab} onValueChange={(v) => setValidityTab(v as any)}>
-                                <TabsList className="grid w-full grid-cols-3 mb-4 h-12 rounded-xl p-1">
-                                    <TabsTrigger value="daily" className="rounded-lg font-bold">Daily</TabsTrigger>
-                                    <TabsTrigger value="weekly" className="rounded-lg font-bold">Weekly</TabsTrigger>
-                                    <TabsTrigger value="monthly" className="rounded-lg font-bold">Monthly</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="daily" className="mt-0 outline-none">
-                                    {renderPlanList(dailyPlans)}
-                                </TabsContent>
-                                <TabsContent value="weekly" className="mt-0 outline-none">
-                                    {renderPlanList(weeklyPlans)}
-                                </TabsContent>
-                                <TabsContent value="monthly" className="mt-0 outline-none">
-                                    {renderPlanList(monthlyPlans)}
-                                </TabsContent>
-                            </Tabs>
-                        </div>
-                        
-                        <div className="pt-4">
-                            <Button 
-                                type="submit" 
-                                variant="primary" 
-                                fullWidth 
-                                size="lg"
-                                className="h-14 rounded-2xl text-base font-bold shadow-md shadow-violet-500/20"
-                                disabled={!form.formState.isValid || !selectedPlan}
-                            >
-                                Pay {selectedPlan ? formatNaira(selectedPlan.price) : ""}
-                            </Button>
-                        </div>
-                    </form>
-                </PanelBody>
-            </Panel>
+                    {/* Data Plans Tabs & Grid */}
+                    <div className="space-y-4">
+                        <Tabs value={validityTab} onValueChange={(v) => setValidityTab(v as any)}>
+                            <TabsList className="grid w-full grid-cols-3 mb-4 h-12 rounded-xl p-1 bg-gray-100">
+                                <TabsTrigger value="daily" className="rounded-lg font-bold">Daily</TabsTrigger>
+                                <TabsTrigger value="weekly" className="rounded-lg font-bold">Weekly</TabsTrigger>
+                                <TabsTrigger value="monthly" className="rounded-lg font-bold">Monthly</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="daily" className="mt-0 outline-none">
+                                <PlanGrid 
+                                    plans={formatPlansForGrid(dailyPlans)}
+                                    selectedId={planId}
+                                    onChange={setPlanId}
+                                    isLoading={plansLoading}
+                                />
+                            </TabsContent>
+                            <TabsContent value="weekly" className="mt-0 outline-none">
+                                <PlanGrid 
+                                    plans={formatPlansForGrid(weeklyPlans)}
+                                    selectedId={planId}
+                                    onChange={setPlanId}
+                                    isLoading={plansLoading}
+                                />
+                            </TabsContent>
+                            <TabsContent value="monthly" className="mt-0 outline-none">
+                                <PlanGrid 
+                                    plans={formatPlansForGrid(monthlyPlans)}
+                                    selectedId={planId}
+                                    onChange={setPlanId}
+                                    isLoading={plansLoading}
+                                />
+                            </TabsContent>
+                        </Tabs>
+                    </div>
+                </div>
+            </div>
+
+            <StickyPayBar 
+                visible={!successOpen} 
+                amount={selectedPlan?.price || 0}
+                summaryText={selectedPlan ? `${selectedPlan.name} · ${network} Data` : "Select a plan"}
+                onPay={handlePayClick}
+                disabled={!isValid}
+            />
 
             <TransactionModal
-                open={modalOpen}
-                onOpenChange={setModalOpen}
+                open={pinModalOpen}
+                onOpenChange={setPinModalOpen}
                 state={txState}
-                confirmTitle="Review Data Purchase"
-                onConfirm={confirmTransaction}
-                onCancel={() => setModalOpen(false)}
-                confirmContent={
-                    <div className="space-y-4 pt-2 pb-4">
-                        <div className="rounded-2xl border border-border bg-gray-50 p-5 space-y-4">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted font-medium">Network</span>
-                                <span className="font-bold text-ink">
-                                    {network}
-                                </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted font-medium">Phone Number</span>
-                                <span className="font-bold text-ink">
-                                    {form.getValues().phone}
-                                </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted font-medium">Plan</span>
-                                <span className="font-bold text-ink">
-                                    {selectedPlan?.name}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="flex justify-between font-extrabold text-lg px-2">
-                            <span>Amount</span>
-                            <span className="font-sans tabular-nums text-violet-700">{formatNaira(selectedPlan?.price || 0)}</span>
-                        </div>
-                    </div>
-                }
-                processingText={`Sending ${selectedPlan?.name} data...`}
-                successTitle="Data Sent Successfully!"
-                successDescription={
-                    <p>Your phone has been credited with <span className="font-bold">{selectedPlan?.name}</span> data.</p>
-                }
-                onSuccessAction={() => {
-                    setModalOpen(false);
-                    router.push("/overview");
-                }}
+                onPinSubmit={handlePinSubmit}
+                processingText={`Sending ${selectedPlan?.name} data to ${phone}...`}
                 errorTitle="Purchase Failed"
-                errorDescription={<p>{txStatus?.failureReason || "The network provider didn't respond in time."}</p>}
-                onErrorAction={() => setModalOpen(false)}
+                errorDescription={<p>{payData.error?.message || txStatus?.failureReason || "The network provider didn't respond in time."}</p>}
+                onErrorAction={() => setPinModalOpen(false)}
             />
-        </div>
+
+            <PaymentSuccessScreen 
+                open={successOpen}
+                amount={selectedPlan?.price || 0}
+                title="Data Sent!"
+                description={<p>You successfully sent the <span className="font-bold">{selectedPlan?.name}</span> plan to <span className="font-bold">{phone}</span>.</p>}
+                onHome={() => router.push("/overview")}
+                onReceipt={() => router.push("/transactions")}
+            />
+        </>
     );
 }

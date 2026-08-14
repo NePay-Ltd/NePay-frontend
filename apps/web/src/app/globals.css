@@ -58,12 +58,6 @@
         font-size: 100%;
     }
 
-    @media (min-width: 1024px) {
-        html {
-            font-size: 90%;
-        }
-    }
-
     body {
         background-color: theme("colors.bg");
         color: theme("colors.ink");
@@ -111,6 +105,10 @@
     .no-scrollbar {
         -ms-overflow-style: none;
         scrollbar-width: none;
+    }
+
+    .pb-safe {
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
     }
 }
 

@@ -1,0 +1,305 @@
+
+> nepay-frontend@0.1.0 dev
+> turbo dev
+
+• turbo 2.10.9
+
+   • Packages in scope: web
+   • Running dev in 1 packages
+   • Remote caching disabled
+
+web:dev: cache bypass, force executing cae1260477a3f15e
+web:dev: 
+web:dev: > web@0.1.0 dev
+web:dev: > next dev
+web:dev: 
+web:dev:  ⚠ Port 3000 is in use, trying 3001 instead.
+web:dev:   ▲ Next.js 14.2.35
+web:dev:   - Local:        http://localhost:3001
+web:dev: 
+web:dev:  ✓ Starting...
+web:dev:  ✓ Ready in 15.6s
+web:dev:  ○ Compiling /src/middleware ...
+web:dev:  ✓ Compiled /src/middleware in 14.8s (72 modules)
+web:dev:  ○ Compiling /login ...
+web:dev:  ✓ Compiled /login in 24.1s (955 modules)
+web:dev:  GET /login 200 in 4203ms
+web:dev:  GET /login 200 in 25897ms
+web:dev:  GET /login 200 in 2895ms
+web:dev:  GET /login?returnTo=%2F.well-known%2Fappspecific%2Fcom.chrome.devtools.json 200 in 2274ms
+web:dev:  GET /login?returnTo=%2F.well-known%2Fappspecific%2Fcom.chrome.devtools.json 200 in 1864ms
+web:dev:  ○ Compiling /icon.png ...
+web:dev:  ✓ Compiled /register in 29.1s (562 modules)
+web:dev:  ✓ Compiled in 3.5s (427 modules)
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 34057ms
+web:dev:  ✓ Compiled in 4.7s (970 modules)
+web:dev:  ✓ Compiled in 3.2s (970 modules)
+web:dev:  ○ Compiling /overview ...
+web:dev:  ✓ Compiled /overview in 13.2s (2104 modules)
+web:dev:  GET /overview 200 in 14649ms
+web:dev:  ○ Compiling /_not-found ...
+web:dev:  ✓ Compiled /_not-found in 3s (2107 modules)
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 3338ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 25ms
+web:dev:  GET /login 200 in 630ms
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 269ms
+web:dev:  GET /overview 200 in 1308ms
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 108ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 41ms
+web:dev:  ○ Compiling /withdraw ...
+web:dev:  ✓ Compiled /withdraw in 5.4s (2165 modules)
+web:dev:  ✓ Compiled in 3.3s (2176 modules)
+web:dev:  GET /withdraw 200 in 1089ms
+web:dev:  ○ Compiling /_not-found ...
+web:dev:  ✓ Compiled /_not-found in 5.4s (2165 modules)
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 7419ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 2228ms
+web:dev:  ○ Compiling /icon.png ...
+web:dev:  ✓ Compiled /icon.png in 1651ms (1184 modules)
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 2284ms
+web:dev:  ○ Compiling /kyc ...
+web:dev:  ✓ Compiled /kyc in 4.2s (2213 modules)
+web:dev:  GET /login?returnTo=%2F.well-known%2Fappspecific%2Fcom.chrome.devtools.json 200 in 1980ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 414ms
+web:dev:  GET /overview 200 in 1787ms
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 299ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 28ms
+web:dev:  GET /login 200 in 224ms
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 156ms
+web:dev:  GET /overview 200 in 592ms
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 88ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 53ms
+web:dev:  GET /overview 200 in 910ms
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 485ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 163ms
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 498ms
+web:dev:  GET /overview 200 in 554ms
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 191ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 30ms
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 74ms
+web:dev:  GET /overview 200 in 333ms
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 142ms
+web:dev:  ○ Compiling /settings ...
+web:dev:  ✓ Compiled /settings in 6.5s (2227 modules)
+web:dev:  GET /login 200 in 3394ms
+web:dev:  ○ Compiling / ...
+web:dev:  ✓ Compiled / in 10s (2373 modules)
+web:dev:  GET / 200 in 11105ms
+web:dev:  GET /overview 200 in 405ms
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 31ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 40ms
+web:dev:  ✓ Compiled in 39.7s (2314 modules)
+web:dev:  ✓ Compiled in 6.7s (2314 modules)
+web:dev:  GET / 200 in 3097ms
+web:dev:  GET / 200 in 530ms
+web:dev:  ○ Compiling /icon.png ...
+web:dev:  ✓ Compiled /icon.png in 1893ms (1254 modules)
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 2730ms
+web:dev:  ✓ Compiled in 3s (2314 modules)
+web:dev:  GET / 200 in 7475ms
+web:dev:  ○ Compiling /icon.png ...
+web:dev:  ✓ Compiled /icon.png in 4.1s (1254 modules)
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 4761ms
+web:dev:  GET / 200 in 673ms
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 54ms
+web:dev:  GET / 200 in 411ms
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 69ms
+web:dev:  GET / 200 in 328ms
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 53ms
+web:dev:  ✓ Compiled in 10.6s (2314 modules)
+web:dev:  ✓ Compiled in 4.4s (2314 modules)
+web:dev:  ✓ Compiled in 5.6s (2314 modules)
+web:dev:  GET /login 200 in 1590ms
+web:dev:  ○ Compiling /icon.png ...
+web:dev:  ✓ Compiled /icon.png in 541ms (1254 modules)
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 1027ms
+web:dev:  ✓ Compiled in 5.2s (2314 modules)
+web:dev:  ✓ Compiled in 3.8s (2314 modules)
+web:dev:  GET /login 200 in 2327ms
+web:dev:  ○ Compiling /icon.png ...
+web:dev:  ✓ Compiled /icon.png in 6.2s (1254 modules)
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 6930ms
+web:dev:  GET /login 200 in 389ms
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 26ms
+web:dev:  GET /login 200 in 778ms
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 93ms
+web:dev:  ✓ Compiled in 8s (2314 modules)
+web:dev:  GET /login 200 in 628ms
+web:dev:  ○ Compiling /icon.png ...
+web:dev:  ✓ Compiled /icon.png in 1611ms (1254 modules)
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 2285ms
+web:dev:  ✓ Compiled in 5.1s (2346 modules)
+web:dev:  GET /login 200 in 242ms
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 23ms
+web:dev:  ✓ Compiled in 3.5s (2346 modules)
+web:dev:  GET /overview 200 in 2033ms
+web:dev:  ○ Compiling /_not-found ...
+web:dev:  ✓ Compiled /_not-found in 10.2s (2303 modules)
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 5575ms
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 10921ms
+web:dev:  ✓ Compiled in 22.8s (2314 modules)
+web:dev:  ✓ Compiled in 13s (2314 modules)
+web:dev:  ○ Compiling /services/data ...
+web:dev:  ✓ Compiled /services/data in 14.2s (2324 modules)
+web:dev:  ○ Compiling /services ...
+web:dev:  ✓ Compiled /services in 9.6s (2332 modules)
+web:dev:  ○ Compiling /services/airtime ...
+web:dev:  ✓ Compiled /services/airtime in 1717ms (2340 modules)
+web:dev:  ○ Compiling /services/tv ...
+web:dev:  ✓ Compiled /services/tv in 3.7s (2272 modules)
+web:dev:  ○ Compiling /add-money ...
+web:dev:  ✓ Compiled /add-money in 12.2s (2253 modules)
+web:dev:  ○ Compiling /flights ...
+web:dev:  ✓ Compiled /flights in 85.9s (4124 modules)
+web:dev:  ✓ Compiled in 7.2s (2079 modules)
+web:dev:  ○ Compiling /_not-found ...
+web:dev:  ✓ Compiled /_not-found in 35.4s (4141 modules)
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 45140ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 43006ms
+web:dev:  ✓ Compiled in 9s (2081 modules)
+web:dev:  ✓ Compiled in 2.5s (2081 modules)
+web:dev:  ○ Compiling /transactions ...
+web:dev:  ✓ Compiled /transactions in 6s (4125 modules)
+web:dev:  ✓ Compiled in 8.1s (2085 modules)
+web:dev:  ✓ Compiled in 4.2s (2085 modules)
+web:dev:  ✓ Compiled in 3.6s (2083 modules)
+web:dev:  ○ Compiling /overview ...
+web:dev:  ✓ Compiled /overview in 8.3s (2052 modules)
+web:dev:  ✓ Compiled in 12.7s (4137 modules)
+web:dev:  ○ Compiling /_not-found ...
+web:dev:  ✓ Compiled /_not-found in 3.3s (4126 modules)
+web:dev:  GET /_next/static/webpack/app/(app)/services/airtime/LayoutGroupContext.mjs.map 404 in 4262ms
+web:dev:  ✓ Compiled in 7.4s (2093 modules)
+web:dev:  GET /_next/static/webpack/app/(app)/services/data/LayoutGroupContext.mjs.map 404 in 75ms
+web:dev:  ○ Compiling /_not-found ...
+web:dev:  ✓ Compiled /_not-found in 20.6s (4123 modules)
+web:dev:  GET /_next/static/webpack/app/(app)/services/tv/LayoutGroupContext.mjs.map 404 in 5029ms
+web:dev:  ✓ Compiled in 2.5s (2094 modules)
+web:dev:  ○ Compiling /services/airtime ...
+web:dev:  ✓ Compiled /services/airtime in 10.7s (2048 modules)
+web:dev:  ✓ Compiled in 15.9s (4130 modules)
+web:dev:  ✓ Compiled in 2.9s (2092 modules)
+web:dev:  ✓ Compiled in 5s (2092 modules)
+web:dev:  ✓ Compiled in 903ms (2092 modules)
+web:dev:  ✓ Compiled in 6.3s (4130 modules)
+web:dev:  ✓ Compiled in 19s (4130 modules)
+web:dev:  GET /services/airtime 200 in 5752ms
+web:dev:  ○ Compiling /_not-found ...
+web:dev:  ✓ Compiled /_not-found in 27.5s (4119 modules)
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 28265ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 473ms
+web:dev:  GET /_next/static/chunks/app/(app)/services/airtime/LayoutGroupContext.mjs.map 404 in 7048ms
+web:dev:  ○ Compiling /icon.png ...
+web:dev:  ✓ Compiled /icon.png in 6.4s (2071 modules)
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 6945ms
+web:dev:  ○ Compiling /services/data ...
+web:dev:  ✓ Compiled /services/data in 4.5s (2050 modules)
+web:dev:  ○ Compiling /_not-found ...
+web:dev:  ✓ Compiled /_not-found in 12.2s (4119 modules)
+web:dev:  GET /_next/static/chunks/app/(app)/services/data/LayoutGroupContext.mjs.map 404 in 13870ms
+web:dev:  ✓ Compiled in 7.2s (4130 modules)
+web:dev:  ✓ Compiled in 80s (4130 modules)
+web:dev:  ○ Compiling /add-money ...
+web:dev:  ✓ Compiled /add-money in 3.9s (2050 modules)
+web:dev:  ✓ Compiled in 5.3s (2092 modules)
+web:dev:  ✓ Compiled in 1795ms (2092 modules)
+web:dev:  ○ Compiling /_not-found ...
+web:dev:  ✓ Compiled /_not-found in 17.8s (4138 modules)
+web:dev:  GET /_next/static/webpack/app/(app)/flights/LayoutGroupContext.mjs.map 404 in 5434ms
+web:dev:  ○ Compiling /services ...
+web:dev:  ✓ Compiled /services in 6.7s (2064 modules)
+web:dev:  ✓ Compiled /profile in 62ms (2064 modules)
+web:dev:  ✓ Compiled in 19.5s (4187 modules)
+web:dev:  ○ Compiling /notifications ...
+web:dev:  ✓ Compiled /notifications in 8.6s (4212 modules)
+web:dev:  ✓ Compiled in 15.5s (4179 modules)
+web:dev:  ✓ Compiled in 22.9s (4179 modules)
+web:dev:  ✓ Compiled in 4.8s (2124 modules)
+web:dev:  ✓ Compiled in 7.8s (4179 modules)
+web:dev:  ✓ Compiled in 3.4s (2123 modules)
+web:dev:  ○ Compiling /transactions ...
+web:dev:  ✓ Compiled /transactions in 3.8s (2060 modules)
+web:dev:  ✓ Compiled in 65.9s (4162 modules)
+web:dev:  ○ Compiling /_not-found ...
+web:dev:  ✓ Compiled /_not-found in 10.7s (4151 modules)
+web:dev:  GET /_next/static/webpack/app/(app)/flights/LayoutGroupContext.mjs.map 404 in 9430ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 9938ms
+web:dev:  GET /_next/static/chunks/app/(app)/services/airtime/LayoutGroupContext.mjs.map 404 in 9943ms
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 12705ms
+web:dev:  GET /_next/static/chunks/app/(app)/services/data/LayoutGroupContext.mjs.map 404 in 9562ms
+web:dev:  ○ Compiling /_not-found ...
+web:dev:  ✓ Compiled /_not-found in 14.5s (4151 modules)
+web:dev:  GET /_next/static/webpack/app/(app)/overview/LayoutGroupContext.mjs.map 404 in 3295ms
+web:dev:  ○ Compiling /card ...
+web:dev:  ✓ Compiled /card in 6.9s (4160 modules)
+web:dev:  ○ Compiling /services ...
+web:dev:  ✓ Compiled /services in 4.1s (2061 modules)
+web:dev:  GET /overview 200 in 2364ms
+web:dev:  ○ Compiling /_not-found ...
+web:dev:  ✓ Compiled /_not-found in 14.2s (3234 modules)
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 14792ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 5557ms
+web:dev:  GET /_next/static/chunks/app/(app)/overview/LayoutGroupContext.mjs.map 404 in 6376ms
+web:dev:  ○ Compiling /icon.png ...
+web:dev:  ✓ Compiled /icon.png in 8.5s (1150 modules)
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 9236ms
+web:dev:  GET /overview 200 in 908ms
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 205ms
+web:dev:  GET /_next/static/chunks/app/(app)/overview/LayoutGroupContext.mjs.map 404 in 45ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 32ms
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 26ms
+web:dev:  ○ Compiling /login ...
+web:dev:  ✓ Compiled /login in 5.7s (1164 modules)
+web:dev:  ✓ Compiled in 12.7s (3273 modules)
+web:dev:  GET /overview 200 in 2986ms
+web:dev:  ✓ Compiled in 8.5s (3273 modules)
+web:dev:  GET /overview 200 in 4027ms
+web:dev:  ○ Compiling /icon.png ...
+web:dev:  ✓ Compiled /icon.png in 2.8s (1177 modules)
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 3934ms
+web:dev:  ○ Compiling /_not-found ...
+web:dev:  ✓ Compiled /_not-found in 2.2s (3294 modules)
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 2470ms
+web:dev:  GET /_next/static/chunks/app/(app)/overview/LayoutGroupContext.mjs.map 404 in 25ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 32ms
+web:dev:  ○ Compiling /add-money ...
+web:dev:  ✓ Compiled /add-money in 5.8s (1188 modules)
+web:dev:  GET /add-money 200 in 2093ms
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 132ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 57ms
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 192ms
+web:dev:  ○ Compiling / ...
+web:dev:  ✓ Compiled / in 10.6s (1218 modules)
+web:dev:  GET / 200 in 12999ms
+web:dev:  ⚠ Cross origin request detected from 10.190.68.3 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+web:dev: Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+web:dev:  ○ Compiling /icon.png ...
+web:dev:  ✓ Compiled /icon.png in 947ms (1250 modules)
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 1185ms
+web:dev:  ○ Compiling /register ...
+web:dev:  ✓ Compiled /register in 1305ms (1252 modules)
+web:dev:  ○ Compiling /overview ...
+web:dev:  ✓ Compiled /overview in 1748ms (1224 modules)
+web:dev:  GET /overview 200 in 2460ms
+web:dev:  ○ Compiling /_not-found ...
+web:dev:  ✓ Compiled /_not-found in 8.5s (3341 modules)
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 8876ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 5174ms
+web:dev:  GET /_next/static/chunks/app/(app)/overview/LayoutGroupContext.mjs.map 404 in 8612ms
+web:dev:  ✓ Compiled in 23s (2128 modules)
+web:dev:  ✓ Compiled in 8.5s (2128 modules)
+web:dev:  ✓ Compiled in 9.7s (2128 modules)
+web:dev:  ✓ Compiled in 3.6s (2128 modules)
+web:dev:  ✓ Compiled in 4.2s (2128 modules)
+web:dev:  ✓ Compiled in 3.4s (2128 modules)
+web:dev:  ✓ Compiled in 5.7s (2128 modules)
+web:dev:  ✓ Compiled in 1730ms (2128 modules)
+web:dev:  GET /overview 200 in 2790ms
+web:dev:  ○ Compiling /_not-found ...
+web:dev:  ✓ Compiled /_not-found in 10.4s (3324 modules)
+web:dev:  ○ Compiling /icon.png ...
+web:dev:  GET /_next/static/chunks/app/(app)/overview/LayoutGroupContext.mjs.map 404 in 9818ms
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 13049ms
+web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 8565ms
+web:dev:  ✓ Compiled /icon.png in 2.3s (1240 modules)
+web:dev:  GET /icon.png?89c664bf7c253876 200 in 4864ms

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 
 import { cn } from "@/lib/cn";
@@ -11,6 +12,12 @@ import { BOTTOM_NAV } from "@/lib/navigation";
 export function BottomNav() {
     const activeNav = useUiStore((s) => s.activeNav);
     const setActiveNav = useUiStore((s) => s.setActiveNav);
+    const pathname = usePathname();
+
+    // Hide the bottom navigation on service pages to allow the StickyPayBar to take over the screen
+    if (pathname.includes("/services/")) {
+        return null;
+    }
 
     return (
         <nav
