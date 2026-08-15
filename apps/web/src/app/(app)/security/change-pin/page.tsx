@@ -71,6 +71,11 @@ export default function ChangePinPage() {
                 : { currentPin: data.currentPin ?? "", newPin: data.newPin };
 
             await changePin(payload);
+
+            if (typeof window !== "undefined") {
+                window.localStorage.setItem("nepay-transaction-pin-status", "true");
+            }
+
             toast.success(isSetupMode ? "Transaction PIN set successfully." : "PIN changed successfully.");
             router.back();
         } catch (err: any) {

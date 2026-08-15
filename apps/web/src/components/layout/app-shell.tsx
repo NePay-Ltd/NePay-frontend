@@ -17,17 +17,50 @@ export interface AppShellProps {
     children: React.ReactNode;
 }
 
+const TRANSACTION_PIN_STATUS_KEY = "nepay-transaction-pin-status";
+
+function isProtectedPinRoute(pathname: string) {
+    const moneyRoutes = [
+        "/withdraw",
+        "/services/airtime",
+        "/services/data",
+        "/services/electricity",
+        "/services/education",
+        "/services/tv",
+        "/gift-cards",
+    ];
+
+    return moneyRoutes.some((route) => pathname === route || pathname.startsWith(route));
+}
+
 function TransactionPinSetupGate() {
     const router = useRouter();
     const pathname = usePathname();
     const { user, isLoading } = useAuth();
     const [open, setOpen] = React.useState(false);
+    const hasPromptedRef = React.useRef(false);
 
     React.useEffect(() => {
         if (isLoading || !user) return;
 
-        const ignoredRoutes = ["/security", "/security/change-pin", "/login", "/register" ];
+        const ignoredRoutes = ["/security", "/security/change-pin", "/login", "/register"];
         if (ignoredRoutes.some((route) => pathname === route || pathname.startsWith(route))) {
+            return;
+        }
+
+        if (!isProtectedPinRoute(pathname)) {
+            return;
+        }
+
+        const localPinStatus = typeof window !== "undefined"
+            ? window.localStorage.getItem(TRANSACTION_PIN_STATUS_KEY)
+            : null;
+
+        if (localPinStatus === "true") {
+            return;
+        }
+
+        if (hasPromptedRef.current) {
             return;
         }
 
@@ -38,12 +71,14 @@ function TransactionPinSetupGate() {
                 const res = await apiClient.get<ApiResponse<{ hasTransactionPin?: boolean; pinSet?: boolean }>>("/security/pin-status");
                 const hasPin = res.data.data?.hasTransactionPin ?? res.data.data?.pinSet ?? true;
 
-                if (!cancelled && !hasPin) {
+                if (!cancelled && !hasPin && !hasPromptedRef.current) {
+                    hasPromptedRef.current = true;
                     setOpen(true);
                 }
             } catch (error: any) {
                 const status = error?.response?.status;
-                if (status === 409) {
+                if (status === 409 && !hasPromptedRef.current) {
+                    hasPromptedRef.current = true;
                     if (!cancelled) setOpen(true);
                 }
             }
