@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,26 +15,48 @@ import { Panel, PanelBody } from "@/components/shared/panel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const pinSchema = z.object({
-    currentPin: z.string().length(4, "PIN must be exactly 4 digits"),
+const createPinSchema = (isSetupMode: boolean) => z.object({
+    currentPin: z.string().optional(),
     newPin: z.string().length(4, "PIN must be exactly 4 digits"),
     confirmPin: z.string().length(4, "PIN must be exactly 4 digits"),
-}).refine((data) => data.newPin !== data.currentPin, {
-    message: "New PIN must be different from current PIN",
-    path: ["newPin"],
-}).refine((data) => data.newPin === data.confirmPin, {
-    message: "PINs do not match",
-    path: ["confirmPin"],
+}).superRefine((data, ctx) => {
+    if (!isSetupMode) {
+        if (!data.currentPin || data.currentPin.length !== 4) {
+            ctx.addIssue({
+                path: ["currentPin"],
+                code: z.ZodIssueCode.custom,
+                message: "Current PIN must be exactly 4 digits",
+            });
+        }
+
+        if (data.currentPin && data.newPin === data.currentPin) {
+            ctx.addIssue({
+                path: ["newPin"],
+                code: z.ZodIssueCode.custom,
+                message: "New PIN must be different from current PIN",
+            });
+        }
+    }
+
+    if (data.newPin !== data.confirmPin) {
+        ctx.addIssue({
+            path: ["confirmPin"],
+            code: z.ZodIssueCode.custom,
+            message: "PINs do not match",
+        });
+    }
 });
 
-type PinFormValues = z.infer<typeof pinSchema>;
+type PinFormValues = z.infer<ReturnType<typeof createPinSchema>>;
 
 export default function ChangePinPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const isSetupMode = searchParams.get("mode") === "setup";
     const { mutateAsync: changePin, isPending } = useChangePin();
 
     const form = useForm<PinFormValues>({
-        resolver: zodResolver(pinSchema),
+        resolver: zodResolver(createPinSchema(isSetupMode)),
         defaultValues: {
             currentPin: "",
             newPin: "",
@@ -44,11 +66,20 @@ export default function ChangePinPage() {
 
     const onSubmit = async (data: PinFormValues) => {
         try {
-            await changePin({ currentPin: data.currentPin, newPin: data.newPin });
-            toast.success("PIN changed successfully.");
+            const payload = isSetupMode
+                ? { newPin: data.newPin }
+                : { currentPin: data.currentPin ?? "", newPin: data.newPin };
+
+            await changePin(payload);
+            toast.success(isSetupMode ? "Transaction PIN set successfully." : "PIN changed successfully.");
             router.back();
         } catch (err: any) {
-            form.setError("currentPin", { type: "manual", message: err.message || "Failed to change PIN." });
+            const message = err.response?.data?.message || err.message || "Failed to update PIN.";
+            if (message.toLowerCase().includes("current pin") || message.toLowerCase().includes("incorrect current pin")) {
+                form.setError("currentPin", { type: "manual", message });
+                return;
+            }
+            form.setError("newPin", { type: "manual", message });
         }
     };
 
@@ -70,9 +101,13 @@ export default function ChangePinPage() {
                     <ChevronLeft className="h-5 w-5" />
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold text-ink">Change PIN</h1>
+                    <h1 className="text-2xl font-bold text-ink">
+                        {isSetupMode ? "Set transaction PIN" : "Change transaction PIN"}
+                    </h1>
                     <p className="mt-0.5 text-sm text-body">
-                        Update your 4-digit security PIN for transactions.
+                        {isSetupMode
+                            ? "Create your 4-digit payment PIN for withdrawals and purchases."
+                            : "Update your 4-digit security PIN for transactions."}
                     </p>
                 </div>
             </div>
@@ -80,24 +115,26 @@ export default function ChangePinPage() {
             <Panel>
                 <PanelBody>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-                        <div className="space-y-2">
-                            <Label htmlFor="currentPin">Current PIN</Label>
-                            <Input
-                                id="currentPin"
-                                type="password"
-                                inputMode="numeric"
-                                placeholder="••••"
-                                {...form.register("currentPin")}
-                                onChange={(e) => handleNumericInput(e, "currentPin")}
-                                className="text-2xl tracking-[0.5em] font-mono h-12"
-                            />
-                            {form.formState.errors.currentPin && (
-                                <p className="text-xs text-red-500">{form.formState.errors.currentPin.message}</p>
-                            )}
-                        </div>
+                        {!isSetupMode && (
+                            <div className="space-y-2">
+                                <Label htmlFor="currentPin">Current PIN</Label>
+                                <Input
+                                    id="currentPin"
+                                    type="password"
+                                    inputMode="numeric"
+                                    placeholder="••••"
+                                    {...form.register("currentPin")}
+                                    onChange={(e) => handleNumericInput(e, "currentPin")}
+                                    className="text-2xl tracking-[0.5em] font-mono h-12"
+                                />
+                                {form.formState.errors.currentPin && (
+                                    <p className="text-xs text-red-500">{form.formState.errors.currentPin.message}</p>
+                                )}
+                            </div>
+                        )}
 
                         <div className="space-y-2">
-                            <Label htmlFor="newPin">New PIN</Label>
+                            <Label htmlFor="newPin">{isSetupMode ? "New PIN" : "New PIN"}</Label>
                             <Input
                                 id="newPin"
                                 type="password"
@@ -130,7 +167,7 @@ export default function ChangePinPage() {
 
                         <div className="pt-2">
                             <Button type="submit" variant="primary" fullWidth loading={isPending}>
-                                Save New PIN
+                                {isSetupMode ? "Set PIN" : "Save New PIN"}
                             </Button>
                         </div>
                     </form>
