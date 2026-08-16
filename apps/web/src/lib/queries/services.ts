@@ -6,6 +6,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import {
     UtilityPurchaseResponseDto,
+    UtilityVerificationResponseDto,
     UtilityCategoryDto,
     UtilityServiceDto,
     UtilityVariationDto,
@@ -13,7 +14,6 @@ import {
 } from "@/lib/types/api";
 import {
     mockGetSavedBillers,
-    mockVerifyMeter,
     mockVerifySmartcard,
     type SavedBiller,
 } from "@/lib/mock-services";
@@ -76,8 +76,13 @@ export function useUtilityVariations(serviceId: string | undefined) {
 }
 
 export function useVerifyMeter() {
-    return useMutation<{ customerName: string; address: string }, Error, { provider: string; meterNumber: string }>({
-        mutationFn: ({ provider, meterNumber }) => mockVerifyMeter(provider, meterNumber),
+    return useMutation<UtilityVerificationResponseDto, Error, { disco: string; meterNumber: string; meterType: "prepaid" | "postpaid" }>({
+        mutationFn: async ({ disco, meterNumber, meterType }) => {
+            const res = await apiClient.get<ApiResponse<UtilityVerificationResponseDto>>("/utilities/verify-meter", {
+                params: { disco, meterNumber, meterType },
+            });
+            return res.data.data;
+        },
     });
 }
 
@@ -131,12 +136,14 @@ export function usePayEducation() {
 }
 
 export function usePayElectricity() {
-    return useMutation<UtilityPurchaseResponseDto, Error, { meterNumber: string; provider: string; amountNgn: number; pin: string }>({
-        mutationFn: async ({ meterNumber, provider, amountNgn, pin }) => {
+    return useMutation<UtilityPurchaseResponseDto, Error, { meterNumber: string; disco: string; meterType: "prepaid" | "postpaid"; verificationToken: string; amountNgn: number; pin: string }>({
+        mutationFn: async ({ meterNumber, disco, meterType, verificationToken, amountNgn, pin }) => {
             const res = await apiClient.post<ApiResponse<UtilityPurchaseResponseDto>>("/utilities/electricity", {
-                provider: provider.toUpperCase(),
-                amount: amountNgn.toString(),
+                disco,
                 meterNumber,
+                meterType,
+                verificationToken,
+                amount: amountNgn.toString(),
                 pin,
             });
             return res.data.data;

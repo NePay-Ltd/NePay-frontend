@@ -203,6 +203,13 @@ export interface UtilityPurchaseResponseDto {
     createdAt: string;
 }
 
+export interface UtilityVerificationResponseDto {
+    verificationToken: string;
+    customerName: string | null;
+    renewalAmount: string | null;
+    expiresAt: string;
+}
+
 // ─── Utilities Catalog ───────────────────────────────────────────────────────
 // Dynamic catalog: categories -> services (within a category) -> variations
 // (plans/bouquets, where relevant). Cached server-side for an hour.

@@ -46,6 +46,7 @@ export default function ElectricityPage() {
     const [amount, setAmount] = React.useState(0);
 
     const [resolvedName, setResolvedName] = React.useState<string | undefined>();
+    const [verificationToken, setVerificationToken] = React.useState<string | undefined>();
     const [verifyStatus, setVerifyStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
 
     // Queries & Mutations
@@ -55,6 +56,7 @@ export default function ElectricityPage() {
     // Reset resolution if user types something new or changes provider
     React.useEffect(() => {
         setResolvedName(undefined);
+        setVerificationToken(undefined);
         setVerifyStatus("idle");
     }, [meter, providerId, meterType]);
 
@@ -83,14 +85,16 @@ export default function ElectricityPage() {
         setVerifyStatus("loading");
 
         verifyMeter.mutate(
-            { provider: providerId, meterNumber: meter },
+            { disco: providerId, meterNumber: meter, meterType },
             {
                 onSuccess: (data) => {
-                    setResolvedName(data.customerName);
+                    setResolvedName(data.customerName ?? undefined);
+                    setVerificationToken(data.verificationToken);
                     setVerifyStatus("success");
                 },
                 onError: () => {
                     setResolvedName(undefined);
+                    setVerificationToken(undefined);
                     setVerifyStatus("error");
                 }
             }
@@ -108,10 +112,15 @@ export default function ElectricityPage() {
     };
 
     const handlePinSubmit = (pin: string) => {
+        if (!verificationToken) {
+            toast.error("Please verify the meter number again");
+            setTxState("error");
+            return;
+        }
         setTxState("processing");
 
         payElectricity.mutate(
-            { provider: providerId, meterNumber: meter, amountNgn: amount, pin },
+            { disco: providerId, meterNumber: meter, meterType, verificationToken, amountNgn: amount, pin },
             {
                 onSuccess: (res) => {
                     setTxId(res.id);
@@ -124,7 +133,7 @@ export default function ElectricityPage() {
         );
     };
 
-    const isValid = verifyStatus === "success" && amount >= 500;
+    const isValid = verifyStatus === "success" && !!verificationToken && amount >= 500;
     const activeProvider = PROVIDERS.find(p => p.id === providerId)!;
 
     return (
