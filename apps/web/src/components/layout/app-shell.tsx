@@ -17,8 +17,6 @@ export interface AppShellProps {
     children: React.ReactNode;
 }
 
-const TRANSACTION_PIN_STATUS_KEY = "nepay-transaction-pin-status";
-
 function isProtectedPinRoute(pathname: string) {
     const moneyRoutes = [
         "/withdraw",
@@ -45,18 +43,12 @@ function TransactionPinSetupGate() {
 
         const ignoredRoutes = ["/security", "/security/change-pin", "/login", "/register"];
         if (ignoredRoutes.some((route) => pathname === route || pathname.startsWith(route))) {
+            setOpen(false);
             return;
         }
 
         if (!isProtectedPinRoute(pathname)) {
-            return;
-        }
-
-        const localPinStatus = typeof window !== "undefined"
-            ? window.localStorage.getItem(TRANSACTION_PIN_STATUS_KEY)
-            : null;
-
-        if (localPinStatus === "true") {
+            setOpen(false);
             return;
         }
 
@@ -74,6 +66,10 @@ function TransactionPinSetupGate() {
                 if (!cancelled && !hasPin && !hasPromptedRef.current) {
                     hasPromptedRef.current = true;
                     setOpen(true);
+                }
+
+                if (!cancelled && hasPin) {
+                    setOpen(false);
                 }
             } catch (error: any) {
                 const status = error?.response?.status;
