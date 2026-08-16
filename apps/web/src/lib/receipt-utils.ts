@@ -38,15 +38,36 @@ www.nepay.com.ng`;
 }
 
 /**
+ * Load logo and convert to base64
+ */
+async function getLogoBase64(): Promise<string> {
+    try {
+        const response = await fetch("/logo.png");
+        const blob = await response.blob();
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                resolve(reader.result as string);
+            };
+            reader.readAsDataURL(blob);
+        });
+    } catch (error) {
+        console.error("Failed to load logo:", error);
+        return ""; // Return empty string if logo can't be loaded
+    }
+}
+
+/**
  * Generate receipt HTML for PDF download
  */
-function generateReceiptHTML(receipt: ReceiptData): string {
+async function generateReceiptHTML(receipt: ReceiptData): Promise<string> {
     const dateStr = receipt.date ? new Date(receipt.date).toLocaleString() : "—";
     const amountStr = receipt.amount >= 0 ? `+${receipt.amount}` : receipt.amount.toString();
     const statusColor = 
         receipt.status === "success" ? "#10b981" :
         receipt.status === "pending" ? "#f59e0b" :
         "#ef4444";
+    const logoBase64 = await getLogoBase64();
 
     return `
 <!DOCTYPE html>
@@ -147,7 +168,7 @@ function generateReceiptHTML(receipt: ReceiptData): string {
 <body>
     <div class="receipt">
         <div class="header">
-            <div class="logo"><img src="/logo.png" alt="" />NePay</div>
+            <div class="logo">${logoBase64 ? `<img src="${logoBase64}" alt="NePay" />` : ''}<span>NePay</span></div>
             <div class="title">Transaction Receipt</div>
         </div>
         
@@ -198,7 +219,7 @@ function generateReceiptHTML(receipt: ReceiptData): string {
  */
 export async function downloadReceipt(receipt: ReceiptData): Promise<void> {
     try {
-        const html = generateReceiptHTML(receipt);
+        const html = await generateReceiptHTML(receipt);
         const blob = new Blob([html], { type: "text/html" });
         const url = URL.createObjectURL(blob);
         
@@ -256,7 +277,7 @@ export async function shareReceipt(receipt: ReceiptData): Promise<void> {
  */
 export async function downloadReceiptPDF(receipt: ReceiptData): Promise<void> {
     try {
-        const html = generateReceiptHTML(receipt);
+        const html = await generateReceiptHTML(receipt);
         
         // Create a temporary container
         const container = document.createElement("div");
@@ -297,7 +318,7 @@ export async function downloadReceiptPDF(receipt: ReceiptData): Promise<void> {
  */
 export async function downloadReceiptImage(receipt: ReceiptData): Promise<void> {
     try {
-        const html = generateReceiptHTML(receipt);
+        const html = await generateReceiptHTML(receipt);
         
         // Create a temporary container
         const container = document.createElement("div");
@@ -343,7 +364,7 @@ export async function downloadReceiptImage(receipt: ReceiptData): Promise<void> 
 export async function shareReceiptImage(receipt: ReceiptData): Promise<void> {
     let container: HTMLElement | null = null;
     try {
-        const html = generateReceiptHTML(receipt);
+        const html = await generateReceiptHTML(receipt);
         
         // Create a temporary container
         container = document.createElement("div");
