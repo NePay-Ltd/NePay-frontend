@@ -304,3 +304,17 @@ web:dev:  GET /_next/static/chunks/app/(app)/LayoutGroupContext.mjs.map 404 in 8
 web:dev:  ✓ Compiled /icon.png in 2.3s (1240 modules)
 web:dev:  GET /icon.png?89c664bf7c253876 200 in 4864ms
 web:dev:  ✓ Compiled in 14.3s (3335 modules)
+web:dev:  GET /login 200 in 4428ms
+web:dev:  ○ Compiling /_not-found ...
+web:dev:  ✓ Compiled /_not-found in 15.4s (3324 modules)
+web:dev:  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 16033ms
+web:dev:  ✓ Compiled in 47.5s (3402 modules)
+web:dev:  GET / 200 in 29330ms
+web:dev:  GET / 200 in 3198ms
+Shutting down Turborepo tasks...
+web:dev: [?25h
+
+ Tasks:    0 successful, 1 total
+Cached:    0 cached, 1 total
+  Time:    63h30m52.362s 
+
