@@ -34,7 +34,7 @@ Status: ${receipt.status.toUpperCase()}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Powered by NePay
-www.nepay.app`;
+www.nepay.com.ng`;
 }
 
 /**
@@ -177,7 +177,7 @@ function generateReceiptHTML(receipt: ReceiptData): string {
 
         <div class="footer">
             <p>This is an official NePay transaction receipt</p>
-            <p style="margin-top: 8px;">Powered by NePay • www.nepay.app</p>
+            <p style="margin-top: 8px;">Powered by NePay • www.nepay.com.ng</p>
         </div>
     </div>
 </body>
