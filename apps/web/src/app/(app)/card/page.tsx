@@ -149,8 +149,6 @@ export default function CardPage() {
                 transaction={selectedTransaction}
                 onViewFullDetail={(txId) => router.push(`/transactions/${txId}`)}
             />
-
-            </div>
         </div>
     );
 }
