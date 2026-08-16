@@ -1,8 +1,6 @@
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
-// @ts-ignore
-import html2pdf from "html2pdf.js";import html2pdf from "html2pdf.js";
-import html2canvas from "html2canvas";
+
 export interface ReceiptData {
     id: string;
     label: string;
@@ -258,18 +256,21 @@ export async function downloadReceiptPDF(receipt: ReceiptData): Promise<void> {
         container.style.display = "none";
         document.body.appendChild(container);
         
-        // Generate PDF
+        // Generate PDF using html2pdf
         const element = container.querySelector(".receipt") as HTMLElement;
         if (!element) {
             throw new Error("Receipt element not found");
         }
         
+        // Dynamically import html2pdf for better Next.js compatibility
+        const html2pdf = (await import("html2pdf.js")).default;
+        
         const opt = {
             margin: 10,
             filename: `NePay-Receipt-${receipt.id}.pdf`,
-            image: { type: "jpeg", quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { orientation: "portrait", unit: "mm", format: "a4" },
+            image: { type: "jpeg" as const, quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: "mm" as const, format: "a4", orientation: "portrait" as const },
         };
         
         await html2pdf().set(opt).from(element).save();
@@ -399,186 +400,5 @@ export async function shareReceiptImage(receipt: ReceiptData): Promise<void> {
         if (container && document.body.contains(container)) {
             document.body.removeChild(container);
         }
-    }
-}
-
-/**
- * Download receipt as PDF file
- */
-export async function downloadReceiptPDF(receipt: ReceiptData): Promise<void> {
-    try {
-        const html = generateReceiptHTML(receipt);
-        
-        // Create a temporary container to render the HTML
-        const element = document.createElement("div");
-        element.innerHTML = html;
-        element.style.position = "absolute";
-        element.style.left = "-9999px";
-        element.style.top = "-9999px";
-        document.body.appendChild(element);
-
-        // Get the receipt content div
-        const receiptDiv = element.querySelector(".receipt") as HTMLElement;
-        if (!receiptDiv) {
-            throw new Error("Receipt HTML structure not found");
-        }
-
-        // Generate PDF from HTML
-        const options = {
-            margin: 5,
-            filename: `NePay-Receipt-${receipt.id}.pdf`,
-            image: { type: "jpeg", quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        };
-
-        html2pdf().set(options).from(receiptDiv).save();
-        
-        // Cleanup
-        document.body.removeChild(element);
-        toast.success("Receipt downloaded as PDF");
-    } catch (error) {
-        console.error("PDF download failed:", error);
-        toast.error("Failed to download receipt as PDF");
-    }
-}
-
-/**
- * Download receipt as PNG/JPG image
- */
-export async function downloadReceiptImage(receipt: ReceiptData, format: "png" | "jpeg" = "png"): Promise<void> {
-    try {
-        const html = generateReceiptHTML(receipt);
-        
-        // Create a temporary container to render the HTML
-        const element = document.createElement("div");
-        element.innerHTML = html;
-        element.style.position = "absolute";
-        element.style.left = "-9999px";
-        element.style.top = "-9999px";
-        document.body.appendChild(element);
-
-        // Get the receipt content div
-        const receiptDiv = element.querySelector(".receipt") as HTMLElement;
-        if (!receiptDiv) {
-            throw new Error("Receipt HTML structure not found");
-        }
-
-        // Generate canvas from HTML
-        const canvas = await html2canvas(receiptDiv, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: "#ffffff",
-        });
-
-        // Convert canvas to blob and download
-        canvas.toBlob((blob) => {
-            if (!blob) {
-                toast.error("Failed to create image");
-                return;
-            }
-
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = `NePay-Receipt-${receipt.id}.${format}`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-
-            toast.success(`Receipt downloaded as ${format.toUpperCase()}`);
-        }, `image/${format}`);
-
-        // Cleanup
-        document.body.removeChild(element);
-    } catch (error) {
-        console.error("Image download failed:", error);
-        toast.error("Failed to download receipt as image");
-    }
-}
-
-/**
- * Share receipt as image using Web Share API
- */
-export async function shareReceiptImage(receipt: ReceiptData): Promise<void> {
-    try {
-        const html = generateReceiptHTML(receipt);
-        
-        // Create a temporary container to render the HTML
-        const element = document.createElement("div");
-        element.innerHTML = html;
-        element.style.position = "absolute";
-        element.style.left = "-9999px";
-        element.style.top = "-9999px";
-        document.body.appendChild(element);
-
-        // Get the receipt content div
-        const receiptDiv = element.querySelector(".receipt") as HTMLElement;
-        if (!receiptDiv) {
-            throw new Error("Receipt HTML structure not found");
-        }
-
-        // Generate canvas from HTML
-        const canvas = await html2canvas(receiptDiv, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: "#ffffff",
-        });
-
-        // Convert canvas to blob
-        canvas.toBlob(async (blob) => {
-            if (!blob) {
-                toast.error("Failed to create image");
-                return;
-            }
-
-            try {
-                // Create File object for sharing
-                const file = new File([blob], `NePay-Receipt-${receipt.id}.png`, { type: "image/png" });
-
-                // Check if Web Share API supports files
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: "NePay Transaction Receipt",
-                        text: `Check out my NePay transaction receipt for ${receipt.label}`,
-                    });
-                    toast.success("Receipt shared successfully");
-                } else if (navigator.share) {
-                    // Fallback: share as text with image link
-                    const receiptText = generateReceiptText(receipt);
-                    await navigator.share({
-                        title: "NePay Transaction Receipt",
-                        text: receiptText,
-                    });
-                    toast.success("Receipt shared successfully");
-                } else {
-                    // No Web Share API available
-                    toast.info("Downloading receipt as image instead");
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement("a");
-                    link.href = url;
-                    link.download = `NePay-Receipt-${receipt.id}.png`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                }
-            } catch (error: any) {
-                if (error?.name !== "AbortError") {
-                    console.error("Share failed:", error);
-                    toast.error("Failed to share receipt");
-                }
-            }
-        });
-
-        // Cleanup
-        setTimeout(() => {
-            document.body.removeChild(element);
-        }, 500);
-    } catch (error) {
-        console.error("Image share failed:", error);
-        toast.error("Failed to share receipt as image");
     }
 }
