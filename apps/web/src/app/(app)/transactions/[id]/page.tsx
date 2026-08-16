@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { ArrowLeft, Copy, Check } from "lucide-react";
+import { ArrowLeft, Copy, Check, Download, Share2, Image, ChevronDown } from "lucide-react";
 import { useInfiniteTransactions } from "@/lib/queries/transactions";
 import { Button } from "@/components/shared/button";
 import { Panel, PanelBody } from "@/components/shared/panel";
@@ -12,6 +12,7 @@ import { formatNaira } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { Skeleton } from "@/components/shared/skeletons";
 import { BaseTransaction } from "@/components/shared/transaction-row";
+import { downloadReceipt, downloadReceiptPDF, downloadReceiptImage, shareReceipt, shareReceiptImage, type ReceiptData } from "@/lib/receipt-utils";
 
 function getCategoryColor(category: string) {
     switch (category) {
@@ -48,6 +49,10 @@ export default function TransactionDetailPage() {
     // Fetch all transactions to find the one matching the ID
     const { data, isLoading } = useInfiniteTransactions(50);
     const [copied, setCopied] = React.useState(false);
+    const [isDownloading, setIsDownloading] = React.useState(false);
+    const [isSharing, setIsSharing] = React.useState(false);
+    const [showDownloadMenu, setShowDownloadMenu] = React.useState(false);
+    const [showShareMenu, setShowShareMenu] = React.useState(false);
 
     // Find the transaction in the loaded data
     const allTransactions = React.useMemo(() => {
@@ -61,6 +66,76 @@ export default function TransactionDetailPage() {
         navigator.clipboard.writeText(transactionId);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const getReceiptData = (): ReceiptData => {
+        if (!transaction) throw new Error("No transaction data");
+        return {
+            id: transaction.id,
+            label: transaction.label,
+            amount: transaction.amount,
+            status: transaction.status,
+            date: transaction.date,
+            type: transaction.meta,
+            direction: transaction.amount > 0 ? "CREDIT" : "DEBIT",
+            currency: "NGN",
+            meta: transaction.meta,
+        };
+    };
+
+    const handleDownloadHTML = async () => {
+        if (!transaction) return;
+        setIsDownloading(true);
+        try {
+            await downloadReceipt(getReceiptData());
+        } finally {
+            setIsDownloading(false);
+            setShowDownloadMenu(false);
+        }
+    };
+
+    const handleDownloadPDF = async () => {
+        if (!transaction) return;
+        setIsDownloading(true);
+        try {
+            await downloadReceiptPDF(getReceiptData());
+        } finally {
+            setIsDownloading(false);
+            setShowDownloadMenu(false);
+        }
+    };
+
+    const handleDownloadImage = async () => {
+        if (!transaction) return;
+        setIsDownloading(true);
+        try {
+            await downloadReceiptImage(getReceiptData());
+        } finally {
+            setIsDownloading(false);
+            setShowDownloadMenu(false);
+        }
+    };
+
+    const handleShareText = async () => {
+        if (!transaction) return;
+        setIsSharing(true);
+        try {
+            await shareReceipt(getReceiptData());
+        } finally {
+            setIsSharing(false);
+            setShowShareMenu(false);
+        }
+    };
+
+    const handleShareImage = async () => {
+        if (!transaction) return;
+        setIsSharing(true);
+        try {
+            await shareReceiptImage(getReceiptData());
+        } finally {
+            setIsSharing(false);
+            setShowShareMenu(false);
+        }
     };
 
     if (isLoading) {
@@ -211,13 +286,83 @@ export default function TransactionDetailPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="pt-4 border-t border-border flex flex-col gap-3 sm:flex-row">
-                        <Button variant="primary" fullWidth>
-                            Download Receipt
-                        </Button>
-                        <Button variant="ghost" fullWidth className="border border-border text-ink hover:bg-gray-50">
-                            Share Receipt
-                        </Button>
+                    <div className="pt-4 border-t border-border space-y-3">
+                        {/* Download Dropdown */}
+                        <div className="relative">
+                            <Button 
+                                variant="primary" 
+                                fullWidth
+                                onClick={() => setShowDownloadMenu(!showDownloadMenu)}
+                                disabled={isDownloading}
+                                className="justify-between"
+                            >
+                                <span className="flex items-center">
+                                    <Download className="h-4 w-4 mr-2" />
+                                    {isDownloading ? "Downloading..." : "Download Receipt"}
+                                </span>
+                                <ChevronDown className="h-4 w-4" />
+                            </Button>
+                            {showDownloadMenu && (
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-lg shadow-lg z-50">
+                                    <button
+                                        onClick={handleDownloadHTML}
+                                        disabled={isDownloading}
+                                        className="w-full px-4 py-2 text-sm text-left text-ink hover:bg-gray-50 border-b border-border disabled:opacity-50"
+                                    >
+                                        As HTML
+                                    </button>
+                                    <button
+                                        onClick={handleDownloadPDF}
+                                        disabled={isDownloading}
+                                        className="w-full px-4 py-2 text-sm text-left text-ink hover:bg-gray-50 border-b border-border disabled:opacity-50"
+                                    >
+                                        As PDF
+                                    </button>
+                                    <button
+                                        onClick={handleDownloadImage}
+                                        disabled={isDownloading}
+                                        className="w-full px-4 py-2 text-sm text-left text-ink hover:bg-gray-50 disabled:opacity-50"
+                                    >
+                                        As Image (PNG)
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Share Dropdown */}
+                        <div className="relative">
+                            <Button 
+                                variant="ghost" 
+                                fullWidth 
+                                className="border border-border text-ink hover:bg-gray-50 justify-between"
+                                onClick={() => setShowShareMenu(!showShareMenu)}
+                                disabled={isSharing}
+                            >
+                                <span className="flex items-center">
+                                    <Share2 className="h-4 w-4 mr-2" />
+                                    {isSharing ? "Sharing..." : "Share Receipt"}
+                                </span>
+                                <ChevronDown className="h-4 w-4" />
+                            </Button>
+                            {showShareMenu && (
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-lg shadow-lg z-50">
+                                    <button
+                                        onClick={handleShareText}
+                                        disabled={isSharing}
+                                        className="w-full px-4 py-2 text-sm text-left text-ink hover:bg-gray-50 border-b border-border disabled:opacity-50"
+                                    >
+                                        As Text
+                                    </button>
+                                    <button
+                                        onClick={handleShareImage}
+                                        disabled={isSharing}
+                                        className="w-full px-4 py-2 text-sm text-left text-ink hover:bg-gray-50 disabled:opacity-50"
+                                    >
+                                        As Image
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </PanelBody>
             </Panel>
