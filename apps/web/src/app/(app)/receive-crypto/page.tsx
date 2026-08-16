@@ -90,10 +90,10 @@ export default function ReceiveCryptoPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedCode]);
 
-    const remainingMs = useCountdown(depositData?.isFixedRate ? depositData.rateExpiresAt : undefined);
-    const rateExpired = depositData?.isFixedRate && remainingMs !== null && remainingMs <= 0;
+    const remainingMs = useCountdown(depositData?.expiresAt ?? undefined);
+    const addressExpired = depositData?.expiresAt !== undefined && remainingMs !== null && remainingMs <= 0;
 
-    const { data: statusData } = useCryptoDepositStatus(rateExpired ? null : depositData?.paymentId ?? null);
+    const { data: statusData } = useCryptoDepositStatus(addressExpired ? null : depositData?.paymentId ?? null);
     const status = statusData?.status;
 
     const handleCopy = (value: string, label: string) => {
@@ -148,14 +148,14 @@ export default function ReceiveCryptoPage() {
                                                             />
                                                         ) : (
                                                             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-50 text-base shadow-sm">
-                                                                {selectedCurrency?.coin?.[0] ?? "?"}
+                                                                {(selectedCurrency?.name ?? selectedCurrency?.code)?.[0]?.toUpperCase() ?? "?"}
                                                             </span>
                                                         )}
                                                         <div className="flex flex-col items-start">
-                                                            <span className="text-sm font-extrabold text-ink">{selectedCurrency?.displayName ?? "Select an asset"}</span>
+                                                            <span className="text-sm font-extrabold text-ink">{selectedCurrency?.name ?? selectedCurrency?.code.toUpperCase() ?? "Select an asset"}</span>
                                                             {selectedCurrency ? (
                                                                 <span className="text-[11px] font-bold text-muted uppercase tracking-wider">
-                                                                    {selectedCurrency.coin} · {selectedCurrency.network}
+                                                                    {selectedCurrency.code}{selectedCurrency.network ? ` · ${selectedCurrency.network}` : ""}
                                                                 </span>
                                                             ) : null}
                                                         </div>
@@ -172,7 +172,7 @@ export default function ReceiveCryptoPage() {
                                                             {currencies.map((currency) => (
                                                                 <CommandItem
                                                                     key={currency.code}
-                                                                    value={`${currency.displayName} ${currency.coin} ${currency.network}`}
+                                                                    value={`${currency.name ?? currency.code} ${currency.network ?? ""}`}
                                                                     onSelect={() => {
                                                                         setSelectedCode(currency.code);
                                                                         setOpenPicker(false);
@@ -182,11 +182,13 @@ export default function ReceiveCryptoPage() {
                                                                     <Check className={cn("mr-3 h-4 w-4", selectedCode === currency.code ? "opacity-100 text-violet-600" : "opacity-0")} />
                                                                     <div className="flex flex-1 items-center justify-between">
                                                                         <div className="flex items-center gap-2">
-                                                                            <span className="font-bold text-ink text-[13px]">{currency.displayName}</span>
+                                                                            <span className="font-bold text-ink text-[13px]">{currency.name ?? currency.code.toUpperCase()}</span>
                                                                         </div>
-                                                                        <span className="text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded-sm text-muted uppercase tracking-wider">
-                                                                            {currency.network}
-                                                                        </span>
+                                                                        {currency.network ? (
+                                                                            <span className="text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded-sm text-muted uppercase tracking-wider">
+                                                                                {currency.network}
+                                                                            </span>
+                                                                        ) : null}
                                                                     </div>
                                                                 </CommandItem>
                                                             ))}
@@ -206,8 +208,7 @@ export default function ReceiveCryptoPage() {
                                             <Skeleton className="h-4 w-56" />
                                         ) : (
                                             <p className="text-xs font-bold text-amber-900">
-                                                Minimum deposit: {minAmountData!.minAmount} {selectedCurrency?.coin ?? ""}
-                                                {minAmountData?.minAmountFiat ? ` (~₦${minAmountData.minAmountFiat.toLocaleString()})` : ""}
+                                                Minimum deposit: {minAmountData!.minAmount} {(selectedCurrency?.name ?? selectedCurrency?.code)?.toUpperCase() ?? ""}
                                                 . Sending less will not be credited.
                                             </p>
                                         )}
@@ -219,26 +220,26 @@ export default function ReceiveCryptoPage() {
                                     <div className="relative flex h-[220px] w-[220px] items-center justify-center rounded-[24px] border-2 border-dashed border-border bg-gray-50/50 p-4">
                                         {addressPending ? (
                                             <Skeleton className="h-full w-full rounded-[16px]" />
-                                        ) : addressError || rateExpired ? (
+                                        ) : addressError || addressExpired ? (
                                             <EmptyState
                                                 icon={AlertCircle}
-                                                heading={rateExpired ? "Address expired" : "Generation failed"}
-                                                description={rateExpired ? "This rate lock has expired." : "Could not fetch deposit address."}
+                                                heading={addressExpired ? "Address expired" : "Generation failed"}
+                                                description={addressExpired ? "This deposit window has closed." : "Could not fetch deposit address."}
                                                 action={{ label: "Generate new address", onClick: handleRetry }}
                                                 className="py-0"
                                             />
-                                        ) : depositData?.payAddress ? (
+                                        ) : depositData?.address ? (
                                             <div className="rounded-[16px] bg-white p-2 shadow-sm">
-                                                <AddressQrCode address={depositData.payAddress} size={180} />
+                                                <AddressQrCode address={depositData.address} size={180} />
                                             </div>
                                         ) : null}
                                     </div>
 
-                                    {/* Fixed-rate countdown */}
-                                    {depositData?.isFixedRate && !rateExpired && remainingMs !== null ? (
+                                    {/* Address-expiry countdown */}
+                                    {depositData?.expiresAt && !addressExpired && remainingMs !== null ? (
                                         <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-muted">
                                             <Clock className="h-3.5 w-3.5" />
-                                            Rate locked for {formatCountdown(remainingMs)}
+                                            Address valid for {formatCountdown(remainingMs)}
                                         </div>
                                     ) : null}
 
@@ -251,7 +252,7 @@ export default function ReceiveCryptoPage() {
                                                     <Skeleton className="h-5 w-48" />
                                                 ) : (
                                                     <span className="font-mono text-[13px] font-bold text-ink whitespace-nowrap">
-                                                        {depositData?.payAddress || "—"}
+                                                        {depositData?.address || "—"}
                                                     </span>
                                                 )}
                                             </div>
@@ -259,8 +260,8 @@ export default function ReceiveCryptoPage() {
                                                 variant="primary"
                                                 size="sm"
                                                 className="shrink-0 rounded-lg px-4 h-9 font-bold bg-violet-700 hover:bg-violet-600"
-                                                onClick={() => depositData?.payAddress && handleCopy(depositData.payAddress, "Address")}
-                                                disabled={!depositData?.payAddress || addressPending || rateExpired}
+                                                onClick={() => depositData?.address && handleCopy(depositData.address, "Address")}
+                                                disabled={!depositData?.address || addressPending || addressExpired}
                                             >
                                                 <Copy className="mr-1.5 h-3.5 w-3.5" />
                                                 Copy
@@ -280,7 +281,7 @@ export default function ReceiveCryptoPage() {
                                                         size="sm"
                                                         className="shrink-0 rounded-lg px-4 h-9 font-bold bg-red-600 hover:bg-red-500"
                                                         onClick={() => handleCopy(depositData.payMemo!, "Memo")}
-                                                        disabled={rateExpired}
+                                                        disabled={addressExpired}
                                                     >
                                                         <Copy className="mr-1.5 h-3.5 w-3.5" />
                                                         Copy
@@ -312,7 +313,7 @@ export default function ReceiveCryptoPage() {
                                 <div>
                                     <h4 className="text-sm font-bold text-amber-900">Important Network Rule</h4>
                                     <p className="text-xs font-medium text-amber-800 mt-1 leading-relaxed">
-                                        Send only <strong className="font-bold">{selectedCurrency?.coin ?? "this asset"}</strong> on the <strong className="font-bold">{selectedCurrency?.network ?? "selected"}</strong> network to this address. Sending any other asset or using a different network will result in permanent loss of funds.
+                                        Send only <strong className="font-bold">{(selectedCurrency?.name ?? selectedCurrency?.code)?.toUpperCase() ?? "this asset"}</strong>{selectedCurrency?.network ? <> on the <strong className="font-bold">{selectedCurrency.network}</strong> network</> : null} to this address. Sending any other asset or using a different network will result in permanent loss of funds.
                                     </p>
                                 </div>
                             </div>
@@ -351,7 +352,7 @@ export default function ReceiveCryptoPage() {
                             variant="quiet"
                             size="lg"
                             className="w-full bg-white border border-border shadow-sm rounded-xl font-bold text-violet-700 hover:bg-violet-50 h-14"
-                            onClick={() => router.push("/transactions?type=crypto")}
+                            onClick={() => router.push("/transactions?type=Deposits")}
                         >
                             View Deposit History
                         </Button>

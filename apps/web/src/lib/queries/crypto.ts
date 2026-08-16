@@ -37,7 +37,7 @@ export function useCryptoMinAmount(currency: string | null) {
         queryKey: cryptoKeys.minAmount(currency ?? ""),
         queryFn: async () => {
             const res = await apiClient.get<ApiResponse<CryptoMinAmountDto>>("/crypto/min-amount", {
-                params: { currency },
+                params: { asset: currency },
             });
             return res.data.data;
         },
@@ -48,7 +48,9 @@ export function useCryptoMinAmount(currency: string | null) {
 export function useGenerateDepositAddress() {
     return useMutation<CryptoDepositAddressDto, Error, { currency: string }>({
         mutationFn: async ({ currency }) => {
-            const res = await apiClient.post<ApiResponse<CryptoDepositAddressDto>>("/crypto/deposit-address", { currency });
+            const res = await apiClient.get<ApiResponse<CryptoDepositAddressDto>>("/crypto/deposits/address", {
+                params: { asset: currency },
+            });
             return res.data.data;
         },
     });

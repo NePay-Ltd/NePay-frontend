@@ -129,28 +129,24 @@ export interface VirtualAccountResponseDto {
 // ─── Crypto Deposits (NOWPayments-backed) ────────────────────────────────────
 
 export interface CryptoCurrencyDto {
-    code: string; // e.g. "usdttrc20"
-    displayName: string; // e.g. "USDT (TRC20)"
-    coin: string; // e.g. "USDT"
-    network: string; // e.g. "TRC20"
-    iconUrl: string;
+    code: string; // e.g. "usdttrc20" — the exact value to send back as `asset`
+    name: string | null;
+    network: string | null;
+    iconUrl: string | null;
+    requiresExtraId: boolean; // true for memo/tag-based coins (XRP, XLM, ...)
 }
 
 export interface CryptoMinAmountDto {
     currency: string;
     minAmount: number;
-    minAmountFiat?: number;
 }
 
 export interface CryptoDepositAddressDto {
     paymentId: string;
-    payAddress: string;
-    payMemo?: string; // only present for memo/tag-based coins (XRP, XLM, ...)
-    payCurrency: string;
-    isFixedRate: boolean;
-    rateExpiresAt?: string; // ISO timestamp, only present when isFixedRate is true
-    minAmount: number;
-    createdAt: string;
+    address: string;
+    asset: string;
+    payMemo: string | null; // only non-null for memo/tag-based coins (XRP, XLM, ...)
+    expiresAt: string | null; // ISO timestamp — a NOWPayments session is not permanent
 }
 
 export interface CryptoDepositStatusDto {
