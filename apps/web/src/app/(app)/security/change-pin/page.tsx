@@ -80,7 +80,8 @@ export default function ChangePinPage() {
             router.back();
         } catch (err: any) {
             const message = err.response?.data?.message || err.message || "Failed to update PIN.";
-            if (message.toLowerCase().includes("current pin") || message.toLowerCase().includes("incorrect current pin")) {
+            // Only set currentPin error if we're in change mode (not setup mode)
+            if (!isSetupMode && (message.toLowerCase().includes("current pin") || message.toLowerCase().includes("incorrect current pin"))) {
                 form.setError("currentPin", { type: "manual", message });
                 return;
             }

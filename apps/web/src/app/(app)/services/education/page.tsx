@@ -11,9 +11,17 @@ import { UtilityPurchaseResponseDto } from "@/lib/types/api";
 
 // Shared UI Components
 import { ProviderSelector } from "@/components/services/ProviderSelector";
+import { RecentNumbersRow } from "@/components/services/RecentNumbersRow";
 import { PlanGrid } from "@/components/services/PlanGrid";
 import { StickyPayBar } from "@/components/services/StickyPayBar";
 import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen";
+
+// ─── Constants ──────────────────────────────────────────────────────────────
+const MOCK_RECENT_CONTACTS = [
+    { name: "My Number", id: "08031234567" },
+    { name: "Mom", id: "07069876543" },
+    { name: "John Doe", id: "08101239876" },
+];
 
 export default function EducationPage() {
     const router = useRouter();
@@ -131,14 +139,20 @@ export default function EducationPage() {
                     )}
 
                     {/* Recipient Phone Number */}
-                    <input
-                        type="tel"
-                        placeholder="Phone Number"
-                        value={phone}
-                        maxLength={11}
-                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                        className="w-full h-16 rounded-2xl border-2 border-border bg-white px-5 text-xl font-bold tracking-wide outline-none focus:border-indigo-600 transition-colors"
-                    />
+                    <div className="space-y-4">
+                        <input
+                            type="tel"
+                            placeholder="Phone Number"
+                            value={phone}
+                            maxLength={11}
+                            onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                            className="w-full h-16 rounded-2xl border-2 border-border bg-white px-5 text-xl font-bold tracking-wide outline-none focus:border-indigo-600 transition-colors"
+                        />
+                        <RecentNumbersRow
+                            contacts={MOCK_RECENT_CONTACTS}
+                            onSelect={(id) => setPhone(id)}
+                        />
+                    </div>
 
                     {/* PIN Type Selection */}
                     <PlanGrid
