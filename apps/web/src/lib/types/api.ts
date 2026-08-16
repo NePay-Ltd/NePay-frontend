@@ -1,9 +1,17 @@
 export type Currency = "NGN" | "USD" | "EUR" | "GBP";
 export type KycTier = "NONE" | "PHONE_VERIFIED" | "FULL_BVN_NIN";
-export type CryptoAsset = "BTC" | "ETH" | "USDT";
 export type LedgerDirection = "CREDIT" | "DEBIT";
 export type LedgerEntryType = "DEPOSIT" | "BANK_DEPOSIT" | "WITHDRAWAL" | "ADMIN_ADJUSTMENT" | "UTILITY_PURCHASE" | "GIFT_CARD_SALE" | "FLIGHT_BOOKING" | "FEE" | "CASHBACK" | "REFERRAL_REWARD";
-export type DepositStatus = "PENDING" | "CONFIRMED" | "FAILED";
+export type CryptoDepositStatus =
+    | "waiting"
+    | "confirming"
+    | "confirmed"
+    | "sending"
+    | "partially_paid"
+    | "finished"
+    | "failed"
+    | "expired"
+    | "refunded";
 export type WithdrawalStatus = "PROCESSING" | "COMPLETED" | "FAILED";
 export type UtilityCategory = "AIRTIME" | "DATA" | "ELECTRICITY" | "CABLE" | "EDUCATION" | "BETTING";
 export type UtilityPurchaseStatus = "COMPLETED" | "PROCESSING" | "FAILED" | "REVERSED";
@@ -118,20 +126,44 @@ export interface VirtualAccountResponseDto {
     createdAt: string;
 }
 
-export interface DepositAddressResponseDto {
-    address: string;
-    asset: CryptoAsset;
+// ─── Crypto Deposits (NOWPayments-backed) ────────────────────────────────────
+
+export interface CryptoCurrencyDto {
+    code: string; // e.g. "usdttrc20"
+    displayName: string; // e.g. "USDT (TRC20)"
+    coin: string; // e.g. "USDT"
+    network: string; // e.g. "TRC20"
+    iconUrl: string;
 }
 
-export interface DepositResponseDto {
-    id: string;
-    asset: CryptoAsset;
-    amount: string;
-    status: DepositStatus;
-    transactionId: string;
-    address: string;
-    confirmedAt: string | null;
+export interface CryptoMinAmountDto {
+    currency: string;
+    minAmount: number;
+    minAmountFiat?: number;
+}
+
+export interface CryptoDepositAddressDto {
+    paymentId: string;
+    payAddress: string;
+    payMemo?: string; // only present for memo/tag-based coins (XRP, XLM, ...)
+    payCurrency: string;
+    isFixedRate: boolean;
+    rateExpiresAt?: string; // ISO timestamp, only present when isFixedRate is true
+    minAmount: number;
     createdAt: string;
+}
+
+export interface CryptoDepositStatusDto {
+    paymentId: string;
+    status: CryptoDepositStatus;
+    payAddress: string;
+    payCurrency: string;
+    expectedAmount: number;
+    actuallyPaid: number | null;
+    creditedAmount: number | null;
+    creditedCurrency: string | null;
+    createdAt: string;
+    updatedAt: string;
 }
 
 // ─── Withdrawals ─────────────────────────────────────────────────────────────

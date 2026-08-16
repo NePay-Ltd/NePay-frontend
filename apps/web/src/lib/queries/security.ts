@@ -96,9 +96,10 @@ export function useDisable2FA() {
 }
 
 export function useChangePin() {
-    return useMutation<void, Error, { currentPin: string; newPin: string }>({
+    return useMutation<void, Error, { currentPin?: string; newPin: string }>({
         mutationFn: async (payload) => {
-            await apiClient.post("/security/change-pin", payload);
+            const requestBody = payload.currentPin ? payload : { newPin: payload.newPin };
+            await apiClient.post("/security/change-pin", requestBody);
         },
     });
 }

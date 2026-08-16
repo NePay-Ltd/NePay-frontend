@@ -2,53 +2,109 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Copy, AlertCircle, Search, ChevronDown, Check, Info } from "lucide-react";
+import {
+    Copy,
+    AlertCircle,
+    ChevronDown,
+    Check,
+    Info,
+    Clock,
+    CheckCircle2,
+    XCircle,
+    Loader2,
+    RotateCcw,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { RequireKyc } from "@/components/shared/require-kyc";
 import { AddressQrCode } from "@/components/shared/address-qr-code";
 import { Button } from "@/components/shared/button";
-import { Panel, PanelHeader, PanelBody } from "@/components/shared/panel";
+import { Panel, PanelBody } from "@/components/shared/panel";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/shared/skeletons";
-import { useGenerateDepositAddress } from "@/lib/queries/crypto";
+import {
+    useCryptoCurrencies,
+    useCryptoMinAmount,
+    useGenerateDepositAddress,
+    useCryptoDepositStatus,
+} from "@/lib/queries/crypto";
 import { cn } from "@/lib/cn";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 
-const MOCK_300_ASSETS = [
-    { id: "usdt-trc20", coin: "USDT", network: "TRC20", name: "Tether (Tron)", icon: "🟢", color: "bg-green-500" },
-    { id: "usdt-erc20", coin: "USDT", network: "ERC20", name: "Tether (Ethereum)", icon: "🔵", color: "bg-blue-500" },
-    { id: "usdc-erc20", coin: "USDC", network: "ERC20", name: "USD Coin", icon: "🪙", color: "bg-indigo-500" },
-    { id: "btc", coin: "BTC", network: "BTC", name: "Bitcoin", icon: "₿", color: "bg-orange-500" },
-    { id: "eth", coin: "ETH", network: "ERC20", name: "Ethereum", icon: "⟠", color: "bg-slate-800" },
-    { id: "sol", coin: "SOL", network: "SOL", name: "Solana", icon: "◎", color: "bg-purple-500" },
-    { id: "doge", coin: "DOGE", network: "DOGE", name: "Dogecoin", icon: "🐕", color: "bg-yellow-500" },
-    { id: "ltc", coin: "LTC", network: "LTC", name: "Litecoin", icon: "Ł", color: "bg-gray-400" },
-    { id: "xrp", coin: "XRP", network: "XRP", name: "Ripple", icon: "✕", color: "bg-black" },
-    // Mocking the fact that there are hundreds more
-];
+function useCountdown(expiresAt: string | undefined) {
+    const [remainingMs, setRemainingMs] = React.useState<number | null>(null);
+
+    React.useEffect(() => {
+        if (!expiresAt) {
+            setRemainingMs(null);
+            return;
+        }
+        const target = new Date(expiresAt).getTime();
+        const tick = () => setRemainingMs(Math.max(0, target - Date.now()));
+        tick();
+        const id = setInterval(tick, 1000);
+        return () => clearInterval(id);
+    }, [expiresAt]);
+
+    return remainingMs;
+}
+
+function formatCountdown(ms: number) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
 
 export default function ReceiveCryptoPage() {
     const router = useRouter();
-    const [selectedAsset, setSelectedAsset] = React.useState(MOCK_300_ASSETS[0]!);
+
+    const { data: currencies, isPending: currenciesLoading, isError: currenciesError } = useCryptoCurrencies();
+    const [selectedCode, setSelectedCode] = React.useState<string | null>(null);
     const [openPicker, setOpenPicker] = React.useState(false);
 
-    const { 
-        mutate: generateAddress, 
-        data: depositData, 
-        isPending, 
-        isError 
+    React.useEffect(() => {
+        if (!selectedCode && currencies && currencies.length > 0) {
+            setSelectedCode(currencies[0]!.code);
+        }
+    }, [currencies, selectedCode]);
+
+    const selectedCurrency = currencies?.find((c) => c.code === selectedCode) ?? null;
+
+    const { data: minAmountData, isPending: minAmountLoading } = useCryptoMinAmount(selectedCode);
+
+    const {
+        mutate: generateAddress,
+        data: depositData,
+        isPending: addressPending,
+        isError: addressError,
+        reset: resetAddress,
     } = useGenerateDepositAddress();
 
     React.useEffect(() => {
-        generateAddress({ asset: selectedAsset.id });
-    }, [selectedAsset, generateAddress]);
+        if (selectedCode) {
+            resetAddress();
+            generateAddress({ currency: selectedCode });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedCode]);
 
-    const handleCopy = () => {
-        if (!depositData?.address) return;
-        navigator.clipboard.writeText(depositData.address);
-        toast.success("Wallet address copied to clipboard");
+    const remainingMs = useCountdown(depositData?.isFixedRate ? depositData.rateExpiresAt : undefined);
+    const rateExpired = depositData?.isFixedRate && remainingMs !== null && remainingMs <= 0;
+
+    const { data: statusData } = useCryptoDepositStatus(rateExpired ? null : depositData?.paymentId ?? null);
+    const status = statusData?.status;
+
+    const handleCopy = (value: string, label: string) => {
+        navigator.clipboard.writeText(value);
+        toast.success(`${label} copied to clipboard`);
+    };
+
+    const handleRetry = () => {
+        if (!selectedCode) return;
+        resetAddress();
+        generateAddress({ currency: selectedCode });
     };
 
     return (
@@ -57,7 +113,7 @@ export default function ReceiveCryptoPage() {
                 <div>
                     <h1 className="text-2xl font-bold text-ink sm:text-3xl">Receive crypto</h1>
                     <p className="mt-0.5 text-sm font-medium text-body">
-                        Select from 300+ cryptocurrencies. Funds are instantly converted to Naira.
+                        Select a coin and network. Funds are instantly converted to Naira.
                     </p>
                 </div>
 
@@ -66,94 +122,136 @@ export default function ReceiveCryptoPage() {
                     <div className="space-y-6 xl:col-span-7">
                         <Panel className="rounded-[24px]">
                             <PanelBody className="p-6 sm:p-8">
-                                
                                 {/* Asset Picker */}
-                                <div className="mb-8">
+                                <div className="mb-6">
                                     <label className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-muted">Select Asset</label>
-                                    <Popover open={openPicker} onOpenChange={setOpenPicker}>
-                                        <PopoverTrigger asChild>
-                                            <button className="flex h-14 w-full items-center justify-between rounded-xl border border-border bg-white px-4 transition-all hover:border-violet-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600">
-                                                <div className="flex items-center gap-3">
-                                                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-50 text-base shadow-sm">
-                                                        {selectedAsset.icon}
-                                                    </span>
-                                                    <div className="flex flex-col items-start">
-                                                        <span className="text-sm font-extrabold text-ink">{selectedAsset.name}</span>
-                                                        <span className="text-[11px] font-bold text-muted uppercase tracking-wider">{selectedAsset.coin} · {selectedAsset.network}</span>
+                                    {currenciesLoading ? (
+                                        <Skeleton className="h-14 w-full rounded-xl" />
+                                    ) : currenciesError || !currencies?.length ? (
+                                        <EmptyState
+                                            icon={AlertCircle}
+                                            heading="Couldn't load assets"
+                                            description="We couldn't fetch the list of supported currencies."
+                                            className="py-6"
+                                        />
+                                    ) : (
+                                        <Popover open={openPicker} onOpenChange={setOpenPicker}>
+                                            <PopoverTrigger asChild>
+                                                <button className="flex h-14 w-full items-center justify-between rounded-xl border border-border bg-white px-4 transition-all hover:border-violet-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600">
+                                                    <div className="flex items-center gap-3">
+                                                        {selectedCurrency?.iconUrl ? (
+                                                            // eslint-disable-next-line @next/next/no-img-element
+                                                            <img
+                                                                src={selectedCurrency.iconUrl}
+                                                                alt=""
+                                                                className="h-8 w-8 rounded-full bg-violet-50 object-contain"
+                                                            />
+                                                        ) : (
+                                                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-50 text-base shadow-sm">
+                                                                {selectedCurrency?.coin?.[0] ?? "?"}
+                                                            </span>
+                                                        )}
+                                                        <div className="flex flex-col items-start">
+                                                            <span className="text-sm font-extrabold text-ink">{selectedCurrency?.displayName ?? "Select an asset"}</span>
+                                                            {selectedCurrency ? (
+                                                                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">
+                                                                    {selectedCurrency.coin} · {selectedCurrency.network}
+                                                                </span>
+                                                            ) : null}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <ChevronDown className="h-4 w-4 text-muted" />
-                                            </button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-[300px] sm:w-[400px] p-0 rounded-[16px] overflow-hidden" align="start">
-                                            <Command>
-                                                <CommandInput placeholder="Search 300+ assets or networks..." />
-                                                <CommandList className="max-h-[300px]">
-                                                    <CommandEmpty>No assets found.</CommandEmpty>
-                                                    <CommandGroup>
-                                                        {MOCK_300_ASSETS.map((asset) => (
-                                                            <CommandItem
-                                                                key={asset.id}
-                                                                value={`${asset.name} ${asset.coin} ${asset.network}`}
-                                                                onSelect={() => {
-                                                                    setSelectedAsset(asset);
-                                                                    setOpenPicker(false);
-                                                                }}
-                                                                className="cursor-pointer py-3"
-                                                            >
-                                                                <Check className={cn("mr-3 h-4 w-4", selectedAsset.id === asset.id ? "opacity-100 text-violet-600" : "opacity-0")} />
-                                                                <div className="flex flex-1 items-center justify-between">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span>{asset.icon}</span>
-                                                                        <span className="font-bold text-ink text-[13px]">{asset.name}</span>
+                                                    <ChevronDown className="h-4 w-4 text-muted" />
+                                                </button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-[300px] sm:w-[400px] p-0 rounded-[16px] overflow-hidden" align="start">
+                                                <Command>
+                                                    <CommandInput placeholder="Search assets or networks..." />
+                                                    <CommandList className="max-h-[300px]">
+                                                        <CommandEmpty>No assets found.</CommandEmpty>
+                                                        <CommandGroup>
+                                                            {currencies.map((currency) => (
+                                                                <CommandItem
+                                                                    key={currency.code}
+                                                                    value={`${currency.displayName} ${currency.coin} ${currency.network}`}
+                                                                    onSelect={() => {
+                                                                        setSelectedCode(currency.code);
+                                                                        setOpenPicker(false);
+                                                                    }}
+                                                                    className="cursor-pointer py-3"
+                                                                >
+                                                                    <Check className={cn("mr-3 h-4 w-4", selectedCode === currency.code ? "opacity-100 text-violet-600" : "opacity-0")} />
+                                                                    <div className="flex flex-1 items-center justify-between">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className="font-bold text-ink text-[13px]">{currency.displayName}</span>
+                                                                        </div>
+                                                                        <span className="text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded-sm text-muted uppercase tracking-wider">
+                                                                            {currency.network}
+                                                                        </span>
                                                                     </div>
-                                                                    <span className="text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded-sm text-muted uppercase tracking-wider">
-                                                                        {asset.network}
-                                                                    </span>
-                                                                </div>
-                                                            </CommandItem>
-                                                        ))}
-                                                    </CommandGroup>
-                                                </CommandList>
-
-                                            </Command>
-                                        </PopoverContent>
-                                    </Popover>
+                                                                </CommandItem>
+                                                            ))}
+                                                        </CommandGroup>
+                                                    </CommandList>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
+                                    )}
                                 </div>
+
+                                {/* Minimum amount warning */}
+                                {selectedCode && (minAmountLoading || minAmountData) ? (
+                                    <div className="mb-6 flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                                        <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" />
+                                        {minAmountLoading ? (
+                                            <Skeleton className="h-4 w-56" />
+                                        ) : (
+                                            <p className="text-xs font-bold text-amber-900">
+                                                Minimum deposit: {minAmountData!.minAmount} {selectedCurrency?.coin ?? ""}
+                                                {minAmountData?.minAmountFiat ? ` (~₦${minAmountData.minAmountFiat.toLocaleString()})` : ""}
+                                                . Sending less will not be credited.
+                                            </p>
+                                        )}
+                                    </div>
+                                ) : null}
 
                                 {/* QR Code Area */}
                                 <div className="flex flex-col items-center">
                                     <div className="relative flex h-[220px] w-[220px] items-center justify-center rounded-[24px] border-2 border-dashed border-border bg-gray-50/50 p-4">
-                                        {isPending ? (
+                                        {addressPending ? (
                                             <Skeleton className="h-full w-full rounded-[16px]" />
-                                        ) : isError ? (
+                                        ) : addressError || rateExpired ? (
                                             <EmptyState
                                                 icon={AlertCircle}
-                                                heading="Generation failed"
-                                                description="Could not fetch deposit address."
-                                                action={{
-                                                    label: "Retry",
-                                                    onClick: () => generateAddress({ asset: selectedAsset.id }),
-                                                }}
+                                                heading={rateExpired ? "Address expired" : "Generation failed"}
+                                                description={rateExpired ? "This rate lock has expired." : "Could not fetch deposit address."}
+                                                action={{ label: "Generate new address", onClick: handleRetry }}
                                                 className="py-0"
                                             />
-                                        ) : depositData?.address ? (
+                                        ) : depositData?.payAddress ? (
                                             <div className="rounded-[16px] bg-white p-2 shadow-sm">
-                                                <AddressQrCode address={depositData.address} size={180} />
+                                                <AddressQrCode address={depositData.payAddress} size={180} />
                                             </div>
                                         ) : null}
                                     </div>
 
+                                    {/* Fixed-rate countdown */}
+                                    {depositData?.isFixedRate && !rateExpired && remainingMs !== null ? (
+                                        <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-muted">
+                                            <Clock className="h-3.5 w-3.5" />
+                                            Rate locked for {formatCountdown(remainingMs)}
+                                        </div>
+                                    ) : null}
+
                                     {/* Address Display */}
                                     <div className="mt-8 w-full max-w-md">
-                                        <label className="mb-2 block text-center text-[11px] font-bold uppercase tracking-widest text-muted">Wallet Address</label>
+                                        <label className="mb-2 block text-center text-[11px] font-bold uppercase tracking-widest text-muted">Deposit Address</label>
                                         <div className="flex w-full items-center justify-between rounded-xl border border-border bg-gray-50 p-1.5 transition-colors focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-600">
                                             <div className="flex-1 overflow-x-auto px-3 scrollbar-hide">
-                                                {isPending ? (
+                                                {addressPending ? (
                                                     <Skeleton className="h-5 w-48" />
                                                 ) : (
                                                     <span className="font-mono text-[13px] font-bold text-ink whitespace-nowrap">
-                                                        {depositData?.address || "—"}
+                                                        {depositData?.payAddress || "—"}
                                                     </span>
                                                 )}
                                             </div>
@@ -161,15 +259,47 @@ export default function ReceiveCryptoPage() {
                                                 variant="primary"
                                                 size="sm"
                                                 className="shrink-0 rounded-lg px-4 h-9 font-bold bg-violet-700 hover:bg-violet-600"
-                                                onClick={handleCopy}
-                                                disabled={!depositData?.address || isPending}
+                                                onClick={() => depositData?.payAddress && handleCopy(depositData.payAddress, "Address")}
+                                                disabled={!depositData?.payAddress || addressPending || rateExpired}
                                             >
                                                 <Copy className="mr-1.5 h-3.5 w-3.5" />
                                                 Copy
                                             </Button>
                                         </div>
+
+                                        {/* Memo / tag — equally prominent, never a footnote */}
+                                        {depositData?.payMemo ? (
+                                            <div className="mt-3">
+                                                <label className="mb-2 block text-center text-[11px] font-bold uppercase tracking-widest text-red-600">Memo / Tag — Required</label>
+                                                <div className="flex w-full items-center justify-between rounded-xl border-2 border-red-300 bg-red-50 p-1.5">
+                                                    <span className="flex-1 overflow-x-auto px-3 font-mono text-[13px] font-bold text-red-900 whitespace-nowrap scrollbar-hide">
+                                                        {depositData.payMemo}
+                                                    </span>
+                                                    <Button
+                                                        variant="primary"
+                                                        size="sm"
+                                                        className="shrink-0 rounded-lg px-4 h-9 font-bold bg-red-600 hover:bg-red-500"
+                                                        onClick={() => handleCopy(depositData.payMemo!, "Memo")}
+                                                        disabled={rateExpired}
+                                                    >
+                                                        <Copy className="mr-1.5 h-3.5 w-3.5" />
+                                                        Copy
+                                                    </Button>
+                                                </div>
+                                                <p className="mt-2 text-center text-[11px] font-bold text-red-700">
+                                                    You must include both the address AND this memo/tag, or your deposit may be lost.
+                                                </p>
+                                            </div>
+                                        ) : null}
                                     </div>
                                 </div>
+
+                                {/* Status banner */}
+                                {status ? (
+                                    <div className="mt-6">
+                                        <StatusBanner status={status} statusData={statusData} onRetry={handleRetry} />
+                                    </div>
+                                ) : null}
                             </PanelBody>
                         </Panel>
                     </div>
@@ -182,11 +312,11 @@ export default function ReceiveCryptoPage() {
                                 <div>
                                     <h4 className="text-sm font-bold text-amber-900">Important Network Rule</h4>
                                     <p className="text-xs font-medium text-amber-800 mt-1 leading-relaxed">
-                                        Send only <strong className="font-bold">{selectedAsset.coin}</strong> on the <strong className="font-bold">{selectedAsset.network}</strong> network to this address. Sending any other asset or using a different network will result in permanent loss of funds.
+                                        Send only <strong className="font-bold">{selectedCurrency?.coin ?? "this asset"}</strong> on the <strong className="font-bold">{selectedCurrency?.network ?? "selected"}</strong> network to this address. Sending any other asset or using a different network will result in permanent loss of funds.
                                     </p>
                                 </div>
                             </div>
-                            
+
                             <div className="p-6">
                                 <h3 className="text-[13px] font-extrabold uppercase tracking-widest text-muted mb-4">How it works</h3>
                                 <div className="space-y-6">
@@ -229,5 +359,98 @@ export default function ReceiveCryptoPage() {
                 </div>
             </div>
         </RequireKyc>
+    );
+}
+
+function StatusBanner({
+    status,
+    statusData,
+    onRetry,
+}: {
+    status: string;
+    statusData: { expectedAmount: number; actuallyPaid: number | null; creditedAmount: number | null; creditedCurrency: string | null; payCurrency: string } | undefined;
+    onRetry: () => void;
+}) {
+    switch (status) {
+        case "waiting":
+            return (
+                <Banner tone="pending" icon={<span className="relative flex h-3 w-3"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-75" /><span className="relative inline-flex h-3 w-3 rounded-full bg-violet-600" /></span>}>
+                    Waiting for your deposit...
+                </Banner>
+            );
+        case "confirming":
+        case "confirmed":
+        case "sending":
+            return (
+                <Banner tone="pending" icon={<Loader2 className="h-4 w-4 animate-spin text-violet-600" />}>
+                    Deposit detected, confirming on the network...
+                </Banner>
+            );
+        case "finished":
+            return (
+                <Banner tone="success" icon={<CheckCircle2 className="h-4 w-4 text-green-600" />}>
+                    Deposit confirmed — {statusData?.creditedAmount?.toLocaleString()} {statusData?.creditedCurrency} credited to your wallet.
+                </Banner>
+            );
+        case "partially_paid":
+            return (
+                <Banner tone="warning" icon={<AlertCircle className="h-4 w-4 text-amber-600" />}>
+                    You sent less than expected. Expected {statusData?.expectedAmount} {statusData?.payCurrency}, credited{" "}
+                    {statusData?.creditedAmount?.toLocaleString()} {statusData?.creditedCurrency}.
+                </Banner>
+            );
+        case "failed":
+            return (
+                <Banner tone="error" icon={<XCircle className="h-4 w-4 text-red-600" />} action={{ label: "Generate new address", onClick: onRetry }}>
+                    Deposit failed — this can happen if the amount sent was below the minimum.
+                </Banner>
+            );
+        case "expired":
+            return (
+                <Banner tone="error" icon={<XCircle className="h-4 w-4 text-red-600" />} action={{ label: "Generate new address", onClick: onRetry }}>
+                    This deposit window expired with nothing received.
+                </Banner>
+            );
+        case "refunded":
+            return (
+                <Banner tone="warning" icon={<RotateCcw className="h-4 w-4 text-amber-600" />}>
+                    This deposit was refunded. Your wallet balance was not affected.
+                </Banner>
+            );
+        default:
+            return null;
+    }
+}
+
+function Banner({
+    tone,
+    icon,
+    children,
+    action,
+}: {
+    tone: "pending" | "success" | "warning" | "error";
+    icon: React.ReactNode;
+    children: React.ReactNode;
+    action?: { label: string; onClick: () => void };
+}) {
+    const toneClasses = {
+        pending: "border-violet-200 bg-violet-50 text-violet-900",
+        success: "border-green-200 bg-green-50 text-green-900",
+        warning: "border-amber-200 bg-amber-50 text-amber-900",
+        error: "border-red-200 bg-red-50 text-red-900",
+    }[tone];
+
+    return (
+        <div className={cn("flex items-center justify-between gap-3 rounded-xl border px-4 py-3", toneClasses)}>
+            <div className="flex items-center gap-2.5">
+                {icon}
+                <p className="text-xs font-bold">{children}</p>
+            </div>
+            {action ? (
+                <Button variant="quiet" size="sm" className="shrink-0 h-8 rounded-lg text-xs font-bold" onClick={action.onClick}>
+                    {action.label}
+                </Button>
+            ) : null}
+        </div>
     );
 }
