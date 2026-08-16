@@ -80,6 +80,14 @@ function generateReceiptHTML(receipt: ReceiptData): string {
             font-weight: 800;
             color: #7c3aed;
             margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .logo img {
+            height: 32px;
+            width: auto;
         }
         .title {
             font-size: 20px;
