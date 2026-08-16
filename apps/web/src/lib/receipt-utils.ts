@@ -139,7 +139,7 @@ function generateReceiptHTML(receipt: ReceiptData): string {
 <body>
     <div class="receipt">
         <div class="header">
-            <div class="logo">NePay</div>
+            <div class="logo"><img src="/logo.png" alt="" />NePay</div>
             <div class="title">Transaction Receipt</div>
         </div>
         
