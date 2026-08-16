@@ -20,6 +20,7 @@ export default function EducationPage() {
 
     const [examBody, setExamBody] = React.useState<string | undefined>();
     const [variationCode, setVariationCode] = React.useState("");
+    const [phone, setPhone] = React.useState("");
 
     // ─── Dynamic catalog ────────────────────────────────────────────────────
     const { data: categories = [] } = useUtilityCategories();
@@ -53,6 +54,10 @@ export default function EducationPage() {
 
     // ─── Handlers ───────────────────────────────────────────────────────────────
     const handlePayClick = () => {
+        if (phone.length < 10) {
+            toast.error("Please enter a valid phone number");
+            return;
+        }
         if (!selectedPinType) {
             toast.error("Please select a PIN type");
             return;
@@ -70,6 +75,7 @@ export default function EducationPage() {
             {
                 examBody: selectedExamBody.serviceID,
                 variationCode: selectedPinType.variation_code,
+                phone,
                 amountNgn: Number(selectedPinType.variation_amount),
                 pin,
             },
@@ -91,7 +97,7 @@ export default function EducationPage() {
         );
     };
 
-    const isValid = !!selectedPinType;
+    const isValid = phone.length >= 10 && !!selectedPinType;
     const selectedAmount = selectedPinType ? Number(selectedPinType.variation_amount) : 0;
 
     return (
@@ -123,6 +129,16 @@ export default function EducationPage() {
                     {examBodiesLoading && (
                         <p className="-mt-6 px-1 text-xs font-medium text-muted">Loading exam bodies…</p>
                     )}
+
+                    {/* Recipient Phone Number */}
+                    <input
+                        type="tel"
+                        placeholder="Phone Number"
+                        value={phone}
+                        maxLength={11}
+                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                        className="w-full h-16 rounded-2xl border-2 border-border bg-white px-5 text-xl font-bold tracking-wide outline-none focus:border-indigo-600 transition-colors"
+                    />
 
                     {/* PIN Type Selection */}
                     <PlanGrid

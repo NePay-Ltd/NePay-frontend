@@ -122,11 +122,12 @@ export function usePayData() {
 }
 
 export function usePayEducation() {
-    return useMutation<UtilityPurchaseResponseDto, Error, { examBody: string; variationCode: string; amountNgn: number; pin: string }>({
-        mutationFn: async ({ examBody, variationCode, amountNgn, pin }) => {
+    return useMutation<UtilityPurchaseResponseDto, Error, { examBody: string; variationCode: string; phone: string; amountNgn: number; pin: string }>({
+        mutationFn: async ({ examBody, variationCode, phone, amountNgn, pin }) => {
             const res = await apiClient.post<ApiResponse<UtilityPurchaseResponseDto>>("/utilities/education", {
                 examBody,
                 variationCode,
+                phoneNumber: phone,
                 amount: amountNgn.toString(),
                 pin,
             });

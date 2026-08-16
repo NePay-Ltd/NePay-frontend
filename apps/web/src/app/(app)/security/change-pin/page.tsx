@@ -73,6 +73,10 @@ export default function ChangePinPage() {
             await changePin(payload);
 
             toast.success(isSetupMode ? "Transaction PIN set successfully." : "PIN changed successfully.");
+            // Mark that PIN was just set to prevent showing the dialog immediately
+            if (isSetupMode) {
+                localStorage.setItem('pinJustSet', 'true');
+            }
             router.back();
         } catch (err: any) {
             const message = err.response?.data?.message || err.message || "Failed to update PIN.";

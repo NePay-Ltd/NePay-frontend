@@ -36,10 +36,17 @@ function TransactionPinSetupGate() {
     const pathname = usePathname();
     const { user, isLoading } = useAuth();
     const [open, setOpen] = React.useState(false);
-    const hasPromptedRef = React.useRef(false);
 
     React.useEffect(() => {
         if (isLoading || !user) return;
+
+        // Check if we just set the PIN - if so, don't show the dialog
+        const pinJustSet = localStorage.getItem('pinJustSet') === 'true';
+        if (pinJustSet) {
+            localStorage.removeItem('pinJustSet');
+            setOpen(false);
+            return;
+        }
 
         const ignoredRoutes = ["/security", "/security/change-pin", "/login", "/register"];
         if (ignoredRoutes.some((route) => pathname === route || pathname.startsWith(route))) {
@@ -52,30 +59,20 @@ function TransactionPinSetupGate() {
             return;
         }
 
-        if (hasPromptedRef.current) {
-            return;
-        }
-
         let cancelled = false;
 
         const checkPinSetup = async () => {
             try {
                 const res = await apiClient.get<ApiResponse<{ hasTransactionPin?: boolean; pinSet?: boolean }>>("/security/pin-status");
-                const hasPin = res.data.data?.hasTransactionPin ?? res.data.data?.pinSet ?? true;
+                const hasPin = res.data.data?.hasTransactionPin ?? res.data.data?.pinSet ?? false;
 
-                if (!cancelled && !hasPin && !hasPromptedRef.current) {
-                    hasPromptedRef.current = true;
-                    setOpen(true);
-                }
-
-                if (!cancelled && hasPin) {
-                    setOpen(false);
+                if (!cancelled) {
+                    setOpen(!hasPin);
                 }
             } catch (error: any) {
                 const status = error?.response?.status;
-                if (status === 409 && !hasPromptedRef.current) {
-                    hasPromptedRef.current = true;
-                    if (!cancelled) setOpen(true);
+                if (status === 409 && !cancelled) {
+                    setOpen(true);
                 }
             }
         };
