@@ -15,6 +15,8 @@ import { TransactionRow } from "@/components/shared/transaction-row";
 import { Skeleton } from "@/components/shared/skeletons";
 import { useOverviewSummary } from "@/lib/queries/overview";
 import { formatNaira } from "@/lib/format";
+import { TransactionDetailModal, type TransactionDetailData } from "@/components/shared/transaction-detail-modal";
+import { BaseTransaction } from "@/components/shared/transaction-row";
 
 const FILTERS = ["All", "Deposits", "Withdrawals", "Payments", "Gift Cards", "Flights"] as const;
 
@@ -26,6 +28,10 @@ function TransactionsContent() {
     const currentType = searchParams.get("type") || "All";
     const currentPageStr = searchParams.get("page") || "1";
     const currentPage = parseInt(currentPageStr, 10) || 1;
+
+    // ─── Modal State ──────────────────────────────────────────────────────
+    const [selectedTransaction, setSelectedTransaction] = React.useState<TransactionDetailData | null>(null);
+    const [modalOpen, setModalOpen] = React.useState(false);
 
 
     // ─── Data Fetching ────────────────────────────────────────────────────
@@ -49,6 +55,23 @@ function TransactionsContent() {
             params.set("type", type);
         }
         router.push(`?${params.toString()}`);
+    };
+
+    const handleViewReceipt = (tx: BaseTransaction) => {
+        const detailData: TransactionDetailData = {
+            id: tx.id,
+            label: tx.label,
+            meta: tx.meta,
+            amount: tx.amount,
+            category: tx.category,
+            status: tx.status,
+            date: tx.date,
+            type: tx.meta,
+            direction: tx.amount > 0 ? "CREDIT" : "DEBIT",
+            currency: "NGN",
+        };
+        setSelectedTransaction(detailData);
+        setModalOpen(true);
     };
 
     // Flatten pages
@@ -158,7 +181,7 @@ function TransactionsContent() {
                         </div>
                     ) : (
                         filteredItems.map((tx) => (
-                            <TransactionRow key={tx.id} tx={tx} variant="compact" />
+                            <TransactionRow key={tx.id} tx={tx} variant="compact" onViewReceipt={handleViewReceipt} />
                         ))
                     )}
 
@@ -193,6 +216,14 @@ function TransactionsContent() {
                     </div>
                 )}
             </Panel>
+
+            {/* Transaction Detail Modal */}
+            <TransactionDetailModal
+                open={modalOpen}
+                onOpenChange={setModalOpen}
+                transaction={selectedTransaction}
+                onViewFullDetail={(txId) => router.push(`/transactions/${txId}`)}
+            />
         </div>
     );
 }

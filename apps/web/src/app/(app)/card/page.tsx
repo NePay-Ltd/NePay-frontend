@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Gift, ShieldCheck, Globe, CreditCard, Lock } from "lucide-react";
 import { toast } from "sonner";
 
@@ -10,13 +11,35 @@ import { Button } from "@/components/shared/button";
 import { Panel, PanelBody } from "@/components/shared/panel";
 import { Tag } from "@/components/shared/tag";
 import { type BaseTransaction, TransactionRow } from "@/components/shared/transaction-row";
+import { TransactionDetailModal, type TransactionDetailData } from "@/components/shared/transaction-detail-modal";
 
 export default function CardPage() {
+    const router = useRouter();
+    const [selectedTransaction, setSelectedTransaction] = React.useState<TransactionDetailData | null>(null);
+    const [modalOpen, setModalOpen] = React.useState(false);
+
     const cardTransactions: BaseTransaction[] = [
         { id: "c1", label: "Spotify Premium", meta: "Entertainment", amount: -900, category: "payment", status: "success", date: new Date().toISOString() },
         { id: "c2", label: "Uber", meta: "Transport", amount: -2500, category: "payment", status: "success", date: new Date().toISOString() },
         { id: "c3", label: "Netflix", meta: "Entertainment", amount: -4000, category: "payment", status: "success", date: new Date().toISOString() },
     ];
+
+    const handleViewReceipt = (tx: BaseTransaction) => {
+        const detailData: TransactionDetailData = {
+            id: tx.id,
+            label: tx.label,
+            meta: tx.meta,
+            amount: tx.amount,
+            category: tx.category,
+            status: tx.status,
+            date: tx.date,
+            type: tx.meta,
+            direction: tx.amount > 0 ? "CREDIT" : "DEBIT",
+            currency: "NGN",
+        };
+        setSelectedTransaction(detailData);
+        setModalOpen(true);
+    };
 
     return (
         <div className="relative">
@@ -107,7 +130,7 @@ export default function CardPage() {
                         <div className="divide-y divide-border/50">
                             {cardTransactions.length > 0 ? (
                                 cardTransactions.map((tx) => (
-                                    <TransactionRow key={tx.id} tx={tx} />
+                                    <TransactionRow key={tx.id} tx={tx} onViewReceipt={handleViewReceipt} />
                                 ))
                             ) : (
                                 <div className="p-8 text-center text-sm font-medium text-muted">
@@ -117,6 +140,15 @@ export default function CardPage() {
                         </div>
                     </Panel>
                 </div>
+            </div>
+
+            {/* Transaction Detail Modal */}
+            <TransactionDetailModal
+                open={modalOpen}
+                onOpenChange={setModalOpen}
+                transaction={selectedTransaction}
+                onViewFullDetail={(txId) => router.push(`/transactions/${txId}`)}
+            />
 
             </div>
         </div>

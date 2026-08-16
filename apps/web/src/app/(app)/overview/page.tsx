@@ -33,6 +33,8 @@ import { TransactionRow } from "@/components/shared/transaction-row";
 import { Tag } from "@/components/shared/tag";
 import { EmptyState } from "@/components/shared/empty-state";
 import { HeroCard } from "@/components/shared/hero-card";
+import { TransactionDetailModal, type TransactionDetailData } from "@/components/shared/transaction-detail-modal";
+import { BaseTransaction } from "@/components/shared/transaction-row";
 import {
     HeroCardSkeleton,
     TableRowSkeleton,
@@ -55,11 +57,31 @@ export default function OverviewPage() {
     const { data: summary, isLoading: queryLoading } = useOverviewSummary();
 
     const [isMounted, setIsMounted] = React.useState(false);
+    const [selectedTransaction, setSelectedTransaction] = React.useState<TransactionDetailData | null>(null);
+    const [modalOpen, setModalOpen] = React.useState(false);
+
     React.useEffect(() => {
         setIsMounted(true);
     }, []);
 
     const summaryLoading = !isMounted || queryLoading;
+
+    const handleViewReceipt = (tx: BaseTransaction) => {
+        const detailData: TransactionDetailData = {
+            id: tx.id,
+            label: tx.label,
+            meta: tx.meta,
+            amount: tx.amount,
+            category: tx.category,
+            status: tx.status,
+            date: tx.date,
+            type: tx.meta,
+            direction: tx.amount > 0 ? "CREDIT" : "DEBIT",
+            currency: "NGN",
+        };
+        setSelectedTransaction(detailData);
+        setModalOpen(true);
+    };
 
     const kpiData = summary?.kpi;
 
@@ -171,7 +193,7 @@ export default function OverviewPage() {
                             ) : summary?.recentTransactions?.length ? (
                                 <div className="space-y-1 mt-2">
                                     {summary.recentTransactions.slice(0, 5).map((tx) => (
-                                        <TransactionRow key={tx.id} tx={tx} variant="compact" />
+                                        <TransactionRow key={tx.id} tx={tx} variant="compact" onViewReceipt={handleViewReceipt} />
                                     ))}
                                 </div>
                             ) : (
@@ -188,6 +210,14 @@ export default function OverviewPage() {
                             )}
                         </PanelBody>
                     </Panel>
+
+                    {/* Transaction Detail Modal */}
+                    <TransactionDetailModal
+                        open={modalOpen}
+                        onOpenChange={setModalOpen}
+                        transaction={selectedTransaction}
+                        onViewFullDetail={(txId) => router.push(`/transactions/${txId}`)}
+                    />
             </div>
         </div>
     );

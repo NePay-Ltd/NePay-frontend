@@ -19,6 +19,7 @@ export interface BaseTransaction {
 export interface TransactionRowProps {
     tx: BaseTransaction;
     variant?: "table" | "compact";
+    onViewReceipt?: (tx: BaseTransaction) => void;
 }
 
 function getCategoryLabel(cat: TxCategory) {
@@ -51,7 +52,7 @@ function formatDateSmart(dateString?: string) {
     return format(date, "d MMM, yyyy");
 }
 
-export function TransactionRow({ tx, variant = "compact" }: TransactionRowProps) {
+export function TransactionRow({ tx, variant = "compact", onViewReceipt }: TransactionRowProps) {
     const masked = useUiStore((s) => s.masked);
     const isCredit = tx.amount > 0;
     const amountClass = isCredit ? "text-green-500" : "text-ink";
@@ -59,7 +60,7 @@ export function TransactionRow({ tx, variant = "compact" }: TransactionRowProps)
 
     if (variant === "table") {
         return (
-            <tr className="group border-b border-border bg-white transition-colors hover:bg-gray-50">
+            <tr className="group border-b border-border bg-white transition-colors hover:bg-gray-50 cursor-pointer" onClick={() => onViewReceipt?.(tx)}>
                 <td className="whitespace-nowrap px-6 py-4">
                     <div className="flex items-center gap-3">
                         <TxIcon category={tx.category} />
@@ -101,7 +102,7 @@ export function TransactionRow({ tx, variant = "compact" }: TransactionRowProps)
 
     // Compact variant (Overview)
     return (
-        <div className="group flex items-center gap-4 rounded-xl px-2 py-3 transition-colors hover:bg-violet-50/50">
+        <div className="group flex items-center gap-4 rounded-xl px-2 py-3 transition-colors hover:bg-violet-50/50 cursor-pointer" onClick={() => onViewReceipt?.(tx)}>
             <TxIcon category={tx.category} />
             <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold text-ink">{tx.label}</p>
