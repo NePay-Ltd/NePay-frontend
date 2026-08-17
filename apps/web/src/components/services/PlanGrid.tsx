@@ -26,13 +26,13 @@ function parsePlanInfo(name: string) {
     // Handle optional "N100" at the start
     const match = name.match(/(?:N\d+\s+)?([0-9.]+[MG]B)\s*-\s*(.*)/i);
     if (match) {
-        return { dataAmount: match[1], validity: match[2] };
+        return { dataAmount: match[1]!, validity: match[2] || '' };
     }
     const parts = name.split('-');
     if (parts.length > 1) {
         // Strip out "N100 " from the first part if it exists
-        const cleanData = parts[0].replace(/N\d+\s+/, '').trim();
-        return { dataAmount: cleanData, validity: parts[1].trim() };
+        const cleanData = parts[0]!.replace(/N\d+\s+/, '').trim();
+        return { dataAmount: cleanData, validity: parts[1]!.trim() };
     }
     return { dataAmount: name.replace(/N\d+\s+/, '').trim(), validity: '' };
 }
@@ -57,7 +57,7 @@ export function PlanGrid({ plans, selectedId, onChange, isLoading }: PlanGridPro
                 ...p,
                 parsedData: parsed.dataAmount,
                 parsedValidity: validity,
-                category: getPlanCategory(validity)
+                category: getPlanCategory(validity || '')
             };
         });
     }, [plans]);
