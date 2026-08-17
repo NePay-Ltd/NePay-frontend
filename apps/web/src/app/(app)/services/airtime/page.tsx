@@ -140,7 +140,28 @@ export default function AirtimePage() {
                 <div className="px-2 sm:px-0 space-y-8">
                     {/* Provider Selection */}
                     <ProviderSelector
-                        providers={networks.map((n) => ({ id: n.serviceID, label: n.name, color: "bg-violet-600", logoUrl: n.image }))}
+                        providers={networks.map((n) => {
+                            let label = n.name.replace(/airtime/i, '').replace(/vtu/i, '').trim();
+                            let logoUrl = n.image;
+                            const id = n.serviceID.toLowerCase();
+                            
+                            if (id.includes('mtn')) {
+                                label = 'MTN';
+                                logoUrl = '/images/providers/mtn.png';
+                            } else if (id.includes('glo')) {
+                                label = 'GLO';
+                                logoUrl = '/images/providers/glo.png';
+                            } else if (id.includes('airtel')) {
+                                label = 'Airtel';
+                                logoUrl = '/images/providers/airtel.png';
+                            } else if (id.includes('etisalat') || id.includes('9mobile')) {
+                                label = '9mobile';
+                                logoUrl = '/images/providers/9mobile.png';
+                            } else if (id.includes('foreign')) {
+                                label = 'International';
+                            }
+                            return { id: n.serviceID, label, color: "bg-violet-600", logoUrl };
+                        })}
                         selectedId={network ?? ""}
                         onChange={setNetwork}
                     />

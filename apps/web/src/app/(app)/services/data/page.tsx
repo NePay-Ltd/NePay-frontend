@@ -142,7 +142,31 @@ export default function DataPage() {
                 <div className="px-2 sm:px-0 space-y-8">
                     {/* Provider Selection */}
                     <ProviderSelector
-                        providers={networks.map((n) => ({ id: n.serviceID, label: n.name, color: "bg-blue-600", logoUrl: n.image }))}
+                        providers={networks.map((n) => {
+                            let label = n.name.replace(/data/i, '').replace(/sme/i, '').trim();
+                            let logoUrl = n.image;
+                            const id = n.serviceID.toLowerCase();
+                            
+                            if (id.includes('mtn')) {
+                                label = 'MTN';
+                                logoUrl = '/images/providers/mtn.png';
+                            } else if (id.includes('glo')) {
+                                label = 'GLO';
+                                logoUrl = '/images/providers/glo.png';
+                            } else if (id.includes('airtel')) {
+                                label = 'Airtel';
+                                logoUrl = '/images/providers/airtel.png';
+                            } else if (id.includes('etisalat') || id.includes('9mobile')) {
+                                label = '9mobile';
+                                logoUrl = '/images/providers/9mobile.png';
+                            } else if (id.includes('smile')) {
+                                label = 'Smile';
+                            } else if (id.includes('spectranet')) {
+                                label = 'Spectranet';
+                                logoUrl = '/images/providers/spectranet.png';
+                            }
+                            return { id: n.serviceID, label, color: "bg-blue-600", logoUrl };
+                        })}
                         selectedId={network ?? ""}
                         onChange={setNetwork}
                     />

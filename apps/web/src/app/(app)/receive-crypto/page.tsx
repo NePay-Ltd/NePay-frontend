@@ -14,8 +14,11 @@ import {
     RotateCcw,
     ChevronRight,
     Search,
+    ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
+
+import { Panel, PanelBody } from "@/components/shared/panel";
 
 import { RequireKyc } from "@/components/shared/require-kyc";
 import { AddressQrCode } from "@/components/shared/address-qr-code";
@@ -29,7 +32,28 @@ import {
     useCryptoDepositStatus,
 } from "@/lib/queries/crypto";
 import { cn } from "@/lib/cn";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import type { CryptoCurrencyDto } from "@/lib/types/api";
+
+interface CoinGroup {
+    coin: string;
+    variants: CryptoCurrencyDto[];
+    representative: CryptoCurrencyDto;
+}
+
+function groupByCoin(currencies: CryptoCurrencyDto[]): CoinGroup[] {
+    const byCoin = new Map<string, CryptoCurrencyDto[]>();
+    for (const currency of currencies) {
+        const variants = byCoin.get(currency.coin) ?? [];
+        variants.push(currency);
+        byCoin.set(currency.coin, variants);
+    }
+    return Array.from(byCoin.entries()).map(([coin, variants]) => {
+        const sorted = [...variants].sort((a, b) => Number(b.recommended) - Number(a.recommended));
+        return { coin, variants: sorted, representative: sorted[0]! };
+    });
+}
 
 function useCountdown(expiresAt: string | undefined) {
     const [remainingMs, setRemainingMs] = React.useState<number | null>(null);
@@ -62,26 +86,42 @@ export default function ReceiveCryptoPage() {
     const { data: currencies, isPending: currenciesLoading, isError: currenciesError } = useCryptoCurrencies();
     const [selectedCode, setSelectedCode] = React.useState<string | null>(null);
     const [openPicker, setOpenPicker] = React.useState(false);
-    const [searchQuery, setSearchQuery] = React.useState("");
+    const [pickerStep, setPickerStep] = React.useState<"coin" | "network">("coin");
+    const [pickerCoin, setPickerCoin] = React.useState<string | null>(null);
+    const [pickerSearch, setPickerSearch] = React.useState("");
+
+    const coinGroups = React.useMemo(() => groupByCoin(currencies ?? []), [currencies]);
+    const activeGroup = coinGroups.find((g) => g.coin === pickerCoin) ?? null;
 
     React.useEffect(() => {
-        if (!selectedCode && currencies && currencies.length > 0) {
-            setSelectedCode(currencies[0]!.code);
+        if (!selectedCode && coinGroups.length > 0) {
+            setSelectedCode(coinGroups[0]!.representative.code);
         }
-    }, [currencies, selectedCode]);
+    }, [coinGroups, selectedCode]);
+
+    const handlePickerOpenChange = (open: boolean) => {
+        setOpenPicker(open);
+        if (!open) {
+            setPickerStep("coin");
+            setPickerCoin(null);
+            setPickerSearch("");
+        }
+    };
+
+    const selectCoinGroup = (group: CoinGroup) => {
+        if (group.variants.length === 1) {
+            setSelectedCode(group.representative.code);
+            handlePickerOpenChange(false);
+            return;
+        }
+        setPickerCoin(group.coin);
+        setPickerStep("network");
+        setPickerSearch("");
+    };
 
     const selectedCurrency = currencies?.find((c) => c.code === selectedCode) ?? null;
 
-    const filteredCurrencies = React.useMemo(() => {
-        if (!currencies) return [];
-        if (!searchQuery.trim()) return currencies;
-        const q = searchQuery.toLowerCase();
-        return currencies.filter(c =>
-            c.name?.toLowerCase().includes(q) ||
-            c.code.toLowerCase().includes(q) ||
-            c.network?.toLowerCase().includes(q)
-        );
-    }, [currencies, searchQuery]);
+
 
     const { data: minAmountData, isPending: minAmountLoading } = useCryptoMinAmount(selectedCode);
 
@@ -128,238 +168,290 @@ export default function ReceiveCryptoPage() {
                     </p>
                 </div>
 
-                {/* Main Card */}
-                <div className="rounded-[36px] bg-gradient-to-b from-white to-violet-50/40 border border-white shadow-[0_8px_40px_rgb(0,0,0,0.04)] overflow-hidden">
-                    {/* Premium Asset Selector */}
-                    <div className="p-4 sm:p-6 pb-2">
-                        <Dialog open={openPicker} onOpenChange={setOpenPicker}>
-                            <DialogTrigger asChild>
-                                <button className="w-full flex items-center justify-between bg-white/80 backdrop-blur-md rounded-full px-5 py-3 border border-violet-100 shadow-sm transition-all hover:shadow-md hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 group">
-                                    <div className="flex items-center gap-4">
-                                        {currenciesLoading ? (
-                                            <Skeleton className="h-10 w-10 rounded-full" />
-                                        ) : selectedCurrency?.iconUrl ? (
-                                            // eslint-disable-next-line @next/next/no-img-element
-                                            <img
-                                                src={selectedCurrency.iconUrl}
-                                                alt=""
-                                                className="h-10 w-10 rounded-full bg-violet-50 object-contain shadow-sm"
-                                            />
-                                        ) : (
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-100 text-violet-700 font-bold shadow-sm">
-                                                {(selectedCurrency?.name ?? selectedCurrency?.code)?.[0]?.toUpperCase() ?? "?"}
-                                            </div>
-                                        )}
-                                        <div className="flex flex-col items-start">
-                                            <span className="text-[10px] font-bold text-violet-400 uppercase tracking-widest mb-0.5">Deposit Asset</span>
-                                            {currenciesLoading ? (
-                                                <Skeleton className="h-5 w-24" />
-                                            ) : (
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-base font-black text-violet-950">{selectedCurrency?.name ?? selectedCurrency?.code.toUpperCase() ?? "Select Asset"}</span>
-                                                    {selectedCurrency?.network && (
-                                                        <span className="text-[10px] font-extrabold bg-violet-100 text-violet-600 px-2 py-0.5 rounded-full uppercase tracking-widest shadow-sm">
-                                                            {selectedCurrency.network}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-50 text-violet-400 group-hover:bg-violet-100 group-hover:text-violet-600 transition-colors">
-                                        <ChevronRight className="h-4 w-4" />
-                                    </div>
-                                </button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-md rounded-[32px] p-0 overflow-hidden gap-0 border border-white shadow-2xl bg-white/60 backdrop-blur-xl">
-                                <DialogHeader className="p-6 bg-white/80 backdrop-blur-md border-b border-violet-100 pb-4">
-                                    <DialogTitle className="text-xl font-black text-violet-950">Select Asset</DialogTitle>
-                                    <div className="mt-4 relative">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-violet-300" />
-                                        <input
-                                            type="text"
-                                            placeholder="Search coin or network..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-3 bg-violet-50/50 border border-violet-100 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-violet-500 focus:bg-white transition-all outline-none"
+                <div className="grid grid-cols-1 gap-6 xl:grid-cols-12 xl:gap-8">
+                    {/* ── Left Panel (Selection & QR) ─────────────────────────────── */}
+                    <div className="space-y-6 xl:col-span-7">
+                        <Panel className="rounded-[24px]">
+                            <PanelBody className="p-6 sm:p-8">
+                                {/* Asset Picker */}
+                                <div className="mb-6">
+                                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-muted">Select Asset</label>
+                                    {currenciesLoading ? (
+                                        <Skeleton className="h-14 w-full rounded-xl" />
+                                    ) : currenciesError || !currencies?.length ? (
+                                        <EmptyState
+                                            icon={AlertCircle}
+                                            heading="Couldn't load assets"
+                                            description="We couldn't fetch the list of supported currencies."
+                                            className="py-6"
                                         />
-                                    </div>
-                                </DialogHeader>
-                                <div className="max-h-[50vh] overflow-y-auto p-3 space-y-1">
-                                    {filteredCurrencies.length === 0 ? (
-                                        <div className="py-12 text-center text-sm font-medium text-muted">
-                                            No assets found matching &quot;{searchQuery}&quot;
-                                        </div>
                                     ) : (
-                                        filteredCurrencies.map((currency) => (
-                                            <button
-                                                key={currency.code}
-                                                onClick={() => {
-                                                    setSelectedCode(currency.code);
-                                                    setOpenPicker(false);
-                                                    setSearchQuery("");
-                                                }}
-                                                className={cn(
-                                                    "w-full flex items-center justify-between p-4 rounded-[20px] transition-all text-left border",
-                                                    selectedCode === currency.code
-                                                        ? "bg-white border-violet-200 shadow-sm ring-1 ring-violet-500/10"
-                                                        : "bg-transparent border-transparent hover:bg-white/80 hover:shadow-sm"
-                                                )}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    {currency.iconUrl ? (
-                                                        // eslint-disable-next-line @next/next/no-img-element
-                                                        <img src={currency.iconUrl} alt="" className="h-10 w-10 rounded-full bg-violet-50" />
-                                                    ) : (
-                                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-100 text-violet-700 font-bold">
-                                                            {currency.name?.[0] ?? currency.code[0]}
+                                        <Popover open={openPicker} onOpenChange={handlePickerOpenChange}>
+                                            <PopoverTrigger asChild>
+                                                <button className="flex h-14 w-full items-center justify-between rounded-xl border border-border bg-white px-4 transition-all hover:border-violet-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600">
+                                                    <div className="flex items-center gap-3">
+                                                        {selectedCurrency?.iconUrl ? (
+                                                            // eslint-disable-next-line @next/next/no-img-element
+                                                            <img
+                                                                src={selectedCurrency.iconUrl}
+                                                                alt=""
+                                                                className="h-8 w-8 rounded-full bg-violet-50 object-contain"
+                                                            />
+                                                        ) : (
+                                                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-50 text-base shadow-sm">
+                                                                {(selectedCurrency?.name ?? selectedCurrency?.code)?.[0]?.toUpperCase() ?? "?"}
+                                                            </span>
+                                                        )}
+                                                        <div className="flex flex-col items-start">
+                                                            <span className="text-sm font-extrabold text-ink">{selectedCurrency?.name ?? selectedCurrency?.code.toUpperCase() ?? "Select an asset"}</span>
+                                                            {selectedCurrency ? (
+                                                                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">
+                                                                    {selectedCurrency.code}{selectedCurrency.network ? ` · ${selectedCurrency.network}` : ""}
+                                                                </span>
+                                                            ) : null}
                                                         </div>
-                                                    )}
-                                                    <div>
-                                                        <div className="font-bold text-ink">{currency.name ?? currency.code.toUpperCase()}</div>
-                                                        <div className="text-xs font-bold text-muted uppercase tracking-wider mt-0.5">{currency.code}</div>
                                                     </div>
-                                                </div>
-                                                {currency.network && (
-                                                    <div className="flex flex-col items-end">
-                                                        <span className="text-[10px] font-extrabold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md uppercase tracking-wider mb-1">
-                                                            {currency.network}
-                                                        </span>
-                                                        {selectedCode === currency.code && <Check className="h-4 w-4 text-violet-600" />}
-                                                    </div>
+                                                    <ChevronDown className="h-4 w-4 text-muted" />
+                                                </button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-[300px] sm:w-[400px] p-0 rounded-[16px] overflow-hidden" align="start">
+                                                {pickerStep === "network" && activeGroup ? (
+                                                    <Command>
+                                                        <div className="flex items-center gap-2 border-b border-border px-3 py-2.5">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setPickerStep("coin");
+                                                                    setPickerCoin(null);
+                                                                    setPickerSearch("");
+                                                                }}
+                                                                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted hover:bg-gray-100 hover:text-ink"
+                                                                aria-label="Back to coins"
+                                                            >
+                                                                <ChevronDown className="h-4 w-4 rotate-90" />
+                                                            </button>
+                                                            <span className="text-[13px] font-extrabold text-ink">
+                                                                Select network for {activeGroup.representative.name ?? activeGroup.coin}
+                                                            </span>
+                                                        </div>
+                                                        <CommandInput
+                                                            placeholder="Search networks..."
+                                                            value={pickerSearch}
+                                                            onValueChange={setPickerSearch}
+                                                        />
+                                                        <CommandList className="max-h-[300px]">
+                                                            <CommandEmpty>No networks found.</CommandEmpty>
+                                                            <CommandGroup>
+                                                                {activeGroup.variants.map((currency) => (
+                                                                    <CommandItem
+                                                                        key={currency.code}
+                                                                        value={`${currency.network ?? currency.code}`}
+                                                                        onSelect={() => {
+                                                                            setSelectedCode(currency.code);
+                                                                            handlePickerOpenChange(false);
+                                                                        }}
+                                                                        className="cursor-pointer py-3"
+                                                                    >
+                                                                        <Check className={cn("mr-3 h-4 w-4", selectedCode === currency.code ? "opacity-100 text-violet-600" : "opacity-0")} />
+                                                                        <div className="flex flex-1 items-center justify-between">
+                                                                            <span className="font-bold text-ink text-[13px] uppercase">
+                                                                                {currency.network ?? "Mainnet"}
+                                                                            </span>
+                                                                            {currency.recommended ? (
+                                                                                <span className="text-[10px] font-bold bg-violet-100 text-violet-700 px-2 py-0.5 rounded-sm uppercase tracking-wider">
+                                                                                    Recommended
+                                                                                </span>
+                                                                            ) : null}
+                                                                        </div>
+                                                                    </CommandItem>
+                                                                ))}
+                                                            </CommandGroup>
+                                                        </CommandList>
+                                                    </Command>
+                                                ) : (
+                                                    <Command>
+                                                        <CommandInput
+                                                            placeholder="Search coins..."
+                                                            value={pickerSearch}
+                                                            onValueChange={setPickerSearch}
+                                                        />
+                                                        <CommandList className="max-h-[300px]">
+                                                            <CommandEmpty>No coins found.</CommandEmpty>
+                                                            <CommandGroup>
+                                                                {coinGroups.map((group) => (
+                                                                    <CommandItem
+                                                                        key={group.coin}
+                                                                        value={`${group.representative.name ?? group.coin} ${group.coin}`}
+                                                                        onSelect={() => selectCoinGroup(group)}
+                                                                        className="cursor-pointer py-3"
+                                                                    >
+                                                                        <Check
+                                                                            className={cn(
+                                                                                "mr-3 h-4 w-4",
+                                                                                group.variants.some((v) => v.code === selectedCode) ? "opacity-100 text-violet-600" : "opacity-0",
+                                                                            )}
+                                                                        />
+                                                                        <div className="flex flex-1 items-center justify-between">
+                                                                            <span className="font-bold text-ink text-[13px]">
+                                                                                {group.representative.name ?? group.coin}
+                                                                            </span>
+                                                                            {group.variants.length > 1 ? (
+                                                                                <span className="text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded-sm text-muted uppercase tracking-wider">
+                                                                                    {group.variants.length} networks
+                                                                                </span>
+                                                                            ) : group.representative.network ? (
+                                                                                <span className="text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded-sm text-muted uppercase tracking-wider">
+                                                                                    {group.representative.network}
+                                                                                </span>
+                                                                            ) : null}
+                                                                        </div>
+                                                                    </CommandItem>
+                                                                ))}
+                                                            </CommandGroup>
+                                                        </CommandList>
+                                                    </Command>
                                                 )}
-                                            </button>
-                                        ))
+                                            </PopoverContent>
+                                        </Popover>
                                     )}
                                 </div>
-                            </DialogContent>
-                        </Dialog>
-                    </div>
 
-                    <div className="p-4 sm:p-6 flex flex-col items-center">
-                        {/* Minimum amount warning pill */}
-                        {selectedCode && (minAmountLoading || minAmountData) ? (
-                            <div className="mb-6 flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-4 py-1.5">
-                                <Info className="h-3.5 w-3.5 text-amber-600" />
-                                {minAmountLoading ? (
-                                    <Skeleton className="h-3 w-32" />
-                                ) : (
-                                    <span className="text-[11px] font-bold text-amber-900 uppercase tracking-wide">
-                                        Min Deposit: {minAmountData!.minAmount} {(selectedCurrency?.name ?? selectedCurrency?.code)?.toUpperCase() ?? ""}
-                                    </span>
-                                )}
-                            </div>
-                        ) : null}
+                                <div className="p-4 sm:p-6 flex flex-col items-center">
+                                    {/* Minimum amount warning pill */}
+                                    {selectedCode && (minAmountLoading || minAmountData) ? (
+                                        <div className="mb-6 flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-4 py-1.5">
+                                            <Info className="h-3.5 w-3.5 text-amber-600" />
+                                            {minAmountLoading ? (
+                                                <Skeleton className="h-3 w-32" />
+                                            ) : (
+                                                <span className="text-[11px] font-bold text-amber-900 uppercase tracking-wide">
+                                                    Min Deposit: {minAmountData!.minAmount} {(selectedCurrency?.name ?? selectedCurrency?.code)?.toUpperCase() ?? ""}
+                                                </span>
+                                            )}
+                                        </div>
+                                    ) : null}
 
-                        {/* QR Code Container */}
-                        <div className="relative flex h-[260px] w-[260px] items-center justify-center rounded-[40px] bg-white shadow-[0_20px_60px_-15px_rgba(139,92,246,0.3)] border border-violet-100 p-3 mb-10 transition-shadow hover:shadow-[0_20px_60px_-10px_rgba(139,92,246,0.4)]">
-                            {addressPending ? (
-                                <Skeleton className="h-full w-full rounded-[32px]" />
-                            ) : addressError || addressExpired ? (
-                                <EmptyState
-                                    icon={AlertCircle}
-                                    heading={addressExpired ? "Address expired" : "Generation failed"}
-                                    description={addressExpired ? "This deposit window has closed." : "Could not fetch deposit address."}
-                                    action={{ label: "Regenerate", onClick: handleRetry }}
-                                    className="py-0 scale-90"
-                                />
-                            ) : depositData?.address ? (
-                                <AddressQrCode address={depositData.address} size={210} />
-                            ) : null}
-                        </div>
+                                    {/* QR Code Container */}
+                                    <div className="relative flex h-[260px] w-[260px] items-center justify-center rounded-[40px] bg-white shadow-[0_20px_60px_-15px_rgba(139,92,246,0.3)] border border-violet-100 p-3 mb-10 transition-shadow hover:shadow-[0_20px_60px_-10px_rgba(139,92,246,0.4)]">
+                                        {addressPending ? (
+                                            <Skeleton className="h-full w-full rounded-[32px]" />
+                                        ) : addressError || addressExpired ? (
+                                            <EmptyState
+                                                icon={AlertCircle}
+                                                heading={addressExpired ? "Address expired" : "Generation failed"}
+                                                description={addressExpired ? "This deposit window has closed." : "Could not fetch deposit address."}
+                                                action={{ label: "Regenerate", onClick: handleRetry }}
+                                                className="py-0 scale-90"
+                                            />
+                                        ) : depositData?.address ? (
+                                            <AddressQrCode address={depositData.address} size={210} />
+                                        ) : null}
+                                    </div>
 
-                        {/* Network Row */}
-                        <div className="w-full bg-white/60 backdrop-blur-sm rounded-2xl p-4 mb-3 border border-violet-100 shadow-sm">
-                            <div className="flex justify-between items-center mb-1">
-                                <span className="text-[11px] font-bold text-violet-400 uppercase tracking-widest">Network</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="h-2 w-2 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
-                                <span className="font-black text-violet-950">
-                                    {selectedCurrency?.network ? selectedCurrency.network : (selectedCurrency?.name ?? selectedCurrency?.code.toUpperCase())}
-                                </span>
-                            </div>
-                        </div>
+                                    {/* Address-expiry countdown */}
+                                    {depositData?.expiresAt && !addressExpired && remainingMs !== null ? (
+                                        <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-muted">
+                                            <Clock className="h-3.5 w-3.5" />
+                                            Address valid for {formatCountdown(remainingMs)}
+                                        </div>
+                                    ) : null}
 
-                        {/* Address Row */}
-                        <div className="w-full bg-violet-50/50 backdrop-blur-sm rounded-[20px] p-4 border border-violet-100 shadow-sm group relative overflow-hidden">
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="text-[11px] font-bold text-violet-400 uppercase tracking-widest">Deposit Address</span>
-                            </div>
-                            <div className="flex items-center justify-between gap-3">
-                                {addressPending ? (
-                                    <Skeleton className="h-5 w-48" />
-                                ) : (
-                                    <span className="font-mono text-sm font-bold text-violet-700 break-all leading-tight">
-                                        {depositData?.address || "—"}
-                                    </span>
-                                )}
-                                <button
-                                    className="shrink-0 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md border border-violet-100 text-violet-600 hover:scale-105 active:scale-95 transition-transform"
-                                    onClick={() => depositData?.address && handleCopy(depositData.address, "Address")}
-                                    disabled={!depositData?.address || addressPending || addressExpired}
-                                >
-                                    <Copy className="h-4 w-4" />
-                                </button>
-                            </div>
-                        </div>
+                                    {/* Address Display */}
+                                    <div className="mt-8 w-full max-w-md">
+                                        <label className="mb-2 block text-center text-[11px] font-bold uppercase tracking-widest text-muted">Deposit Address</label>
+                                        <div className="flex w-full items-center justify-between rounded-xl border border-border bg-gray-50 p-1.5 transition-colors focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-600">
+                                            <div className="flex-1 overflow-x-auto px-3 scrollbar-hide">
+                                                {addressPending ? (
+                                                    <Skeleton className="h-5 w-48" />
+                                                ) : (
+                                                    <span className="font-mono text-[13px] font-bold text-ink whitespace-nowrap">
+                                                        {depositData?.address || "—"}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <Button
+                                                variant="primary"
+                                                size="sm"
+                                                className="shrink-0 rounded-lg px-4 h-9 font-bold bg-violet-700 hover:bg-violet-600"
+                                                onClick={() => depositData?.address && handleCopy(depositData.address, "Address")}
+                                                disabled={!depositData?.address || addressPending || addressExpired}
+                                            >
+                                                <Copy className="mr-1.5 h-3.5 w-3.5" />
+                                                Copy
+                                            </Button>
+                                        </div>
 
-                        {/* Memo Row */}
-                        {depositData?.payMemo ? (
-                            <div className="w-full bg-amber-50/50 backdrop-blur-sm rounded-[20px] p-4 border border-amber-100 mt-3 shadow-sm group relative overflow-hidden">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="text-[11px] font-bold text-amber-500 uppercase tracking-widest">Memo / Tag (Required)</span>
+                                        {/* Network warning — same visual prominence as the memo/tag warning below, never a footnote */}
+                                        {selectedCurrency?.network ? (
+                                            <div className="mt-3 flex items-center gap-2 rounded-xl border-2 border-red-300 bg-red-50 px-4 py-3">
+                                                <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
+                                                <p className="text-xs font-bold text-red-900">
+                                                    Only send {(selectedCurrency.name ?? selectedCurrency.coin).toUpperCase()} on the{" "}
+                                                    <span className="uppercase">{selectedCurrency.network}</span> network. Sending via any other network will result in permanent loss of funds.
+                                                </p>
+                                            </div>
+                                        ) : null}
+
+                                        {/* Memo Row */}
+                                        {depositData?.payMemo ? (
+                                            <div className="w-full bg-amber-50/50 backdrop-blur-sm rounded-[20px] p-4 border border-amber-100 mt-3 shadow-sm group relative overflow-hidden">
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-[11px] font-bold text-amber-500 uppercase tracking-widest">Memo / Tag (Required)</span>
+                                                </div>
+                                                <div className="flex items-center justify-between gap-3">
+                                                    <span className="font-mono text-sm font-black text-amber-700 break-all leading-tight">
+                                                        {depositData.payMemo}
+                                                    </span>
+                                                    <button
+                                                        className="shrink-0 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md border border-amber-100 text-amber-500 hover:scale-105 active:scale-95 transition-transform"
+                                                        onClick={() => handleCopy(depositData.payMemo!, "Memo")}
+                                                        disabled={addressExpired}
+                                                    >
+                                                        <Copy className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : null}
+
+                                        {/* Address-expiry countdown */}
+                                        {depositData?.expiresAt && !addressExpired && remainingMs !== null ? (
+                                            <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-muted">
+                                                <Clock className="h-3.5 w-3.5" />
+                                                Address expires in {formatCountdown(remainingMs)}
+                                            </div>
+                                        ) : null}
+
+                                        {/* Status banner */}
+                                        {status ? (
+                                            <div className="w-full mt-6">
+                                                <StatusBanner status={status} statusData={statusData} onRetry={handleRetry} />
+                                            </div>
+                                        ) : null}
+                                    </div>
                                 </div>
-                                <div className="flex items-center justify-between gap-3">
-                                    <span className="font-mono text-sm font-black text-amber-700 break-all leading-tight">
-                                        {depositData.payMemo}
-                                    </span>
-                                    <button
-                                        className="shrink-0 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md border border-amber-100 text-amber-500 hover:scale-105 active:scale-95 transition-transform"
-                                        onClick={() => handleCopy(depositData.payMemo!, "Memo")}
-                                        disabled={addressExpired}
+
+                                {/* Instructions Box */}
+                                <div className="rounded-[24px] bg-gray-50 p-6 border border-border">
+                                    <div className="flex items-start gap-3 mb-4">
+                                        <Info className="h-5 w-5 text-violet-600 shrink-0 mt-0.5" />
+                                        <div>
+                                            <h4 className="text-sm font-bold text-ink">Important Note</h4>
+                                            <p className="text-xs font-medium text-muted mt-1 leading-relaxed">
+                                                Send only <strong className="font-bold text-ink">{(selectedCurrency?.name ?? selectedCurrency?.code)?.toUpperCase() ?? "this asset"}</strong>{selectedCurrency?.network ? <> on the <strong className="font-bold text-ink">{selectedCurrency.network}</strong> network</> : null} to this address. Using a different network will result in permanent loss of funds.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        variant="quiet"
+                                        className="w-full bg-white font-bold h-12 rounded-xl text-sm shadow-sm border border-border hover:bg-gray-50"
+                                        onClick={() => router.push("/transactions?type=Deposits")}
                                     >
-                                        <Copy className="h-4 w-4" />
-                                    </button>
+                                        View Deposit History
+                                    </Button>
                                 </div>
-                            </div>
-                        ) : null}
-
-                        {/* Address-expiry countdown */}
-                        {depositData?.expiresAt && !addressExpired && remainingMs !== null ? (
-                            <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-muted">
-                                <Clock className="h-3.5 w-3.5" />
-                                Address expires in {formatCountdown(remainingMs)}
-                            </div>
-                        ) : null}
-
-                        {/* Status banner */}
-                        {status ? (
-                            <div className="w-full mt-6">
-                                <StatusBanner status={status} statusData={statusData} onRetry={handleRetry} />
-                            </div>
-                        ) : null}
+                            </PanelBody>
+                        </Panel>
                     </div>
-                </div>
-
-                {/* Instructions Box */}
-                <div className="rounded-[24px] bg-gray-50 p-6 border border-border">
-                    <div className="flex items-start gap-3 mb-4">
-                        <Info className="h-5 w-5 text-violet-600 shrink-0 mt-0.5" />
-                        <div>
-                            <h4 className="text-sm font-bold text-ink">Important Note</h4>
-                            <p className="text-xs font-medium text-muted mt-1 leading-relaxed">
-                                Send only <strong className="font-bold text-ink">{(selectedCurrency?.name ?? selectedCurrency?.code)?.toUpperCase() ?? "this asset"}</strong>{selectedCurrency?.network ? <> on the <strong className="font-bold text-ink">{selectedCurrency.network}</strong> network</> : null} to this address. Using a different network will result in permanent loss of funds.
-                            </p>
-                        </div>
-                    </div>
-                    <Button
-                        variant="quiet"
-                        className="w-full bg-white font-bold h-12 rounded-xl text-sm shadow-sm border border-border hover:bg-gray-50"
-                        onClick={() => router.push("/transactions?type=Deposits")}
-                    >
-                        View Deposit History
-                    </Button>
                 </div>
             </div>
         </RequireKyc>
@@ -377,83 +469,83 @@ function StatusBanner({
 }) {
     switch (status) {
         case "waiting":
-            return (
-                <Banner tone="pending" icon={<span className="relative flex h-3 w-3"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-75" /><span className="relative inline-flex h-3 w-3 rounded-full bg-violet-600" /></span>}>
-                    Waiting for your deposit...
-                </Banner>
-            );
-        case "confirming":
-        case "confirmed":
-        case "sending":
-            return (
-                <Banner tone="pending" icon={<Loader2 className="h-4 w-4 animate-spin text-violet-600" />}>
-                    Deposit detected, confirming on the network...
-                </Banner>
-            );
-        case "finished":
-            return (
-                <Banner tone="success" icon={<CheckCircle2 className="h-4 w-4 text-green-600" />}>
-                    Deposit confirmed — {statusData?.creditedAmount?.toLocaleString()} {statusData?.creditedCurrency} credited.
-                </Banner>
-            );
-        case "partially_paid":
-            return (
-                <Banner tone="warning" icon={<AlertCircle className="h-4 w-4 text-amber-600" />}>
-                    Partial payment. Expected {statusData?.expectedAmount} {statusData?.payCurrency}.
-                </Banner>
-            );
-        case "failed":
-            return (
-                <Banner tone="error" icon={<XCircle className="h-4 w-4 text-red-600" />} action={{ label: "Regenerate", onClick: onRetry }}>
-                    Deposit failed.
-                </Banner>
-            );
-        case "expired":
-            return (
-                <Banner tone="error" icon={<XCircle className="h-4 w-4 text-red-600" />} action={{ label: "Regenerate", onClick: onRetry }}>
-                    Deposit window expired.
-                </Banner>
-            );
-        case "refunded":
-            return (
-                <Banner tone="warning" icon={<RotateCcw className="h-4 w-4 text-amber-600" />}>
-                    Deposit refunded.
-                </Banner>
-            );
-        default:
-            return null;
+                        return (
+                        <Banner tone="pending" icon={<span className="relative flex h-3 w-3"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-75" /><span className="relative inline-flex h-3 w-3 rounded-full bg-violet-600" /></span>}>
+                            Waiting for your deposit...
+                        </Banner>
+                        );
+                        case "confirming":
+                        case "confirmed":
+                        case "sending":
+                        return (
+                        <Banner tone="pending" icon={<Loader2 className="h-4 w-4 animate-spin text-violet-600" />}>
+                            Deposit detected, confirming on the network...
+                        </Banner>
+                        );
+                        case "finished":
+                        return (
+                        <Banner tone="success" icon={<CheckCircle2 className="h-4 w-4 text-green-600" />}>
+                            Deposit confirmed — {statusData?.creditedAmount?.toLocaleString()} {statusData?.creditedCurrency} credited.
+                        </Banner>
+                        );
+                        case "partially_paid":
+                        return (
+                        <Banner tone="warning" icon={<AlertCircle className="h-4 w-4 text-amber-600" />}>
+                            Partial payment. Expected {statusData?.expectedAmount} {statusData?.payCurrency}.
+                        </Banner>
+                        );
+                        case "failed":
+                        return (
+                        <Banner tone="error" icon={<XCircle className="h-4 w-4 text-red-600" />} action={{ label: "Regenerate", onClick: onRetry }}>
+                            Deposit failed.
+                        </Banner>
+                        );
+                        case "expired":
+                        return (
+                        <Banner tone="error" icon={<XCircle className="h-4 w-4 text-red-600" />} action={{ label: "Regenerate", onClick: onRetry }}>
+                            Deposit window expired.
+                        </Banner>
+                        );
+                        case "refunded":
+                        return (
+                        <Banner tone="warning" icon={<RotateCcw className="h-4 w-4 text-amber-600" />}>
+                            Deposit refunded.
+                        </Banner>
+                        );
+                        default:
+                        return null;
     }
 }
 
-function Banner({
-    tone,
-    icon,
-    children,
-    action,
+                        function Banner({
+                            tone,
+                            icon,
+                            children,
+                            action,
 }: {
-    tone: "pending" | "success" | "warning" | "error";
-    icon: React.ReactNode;
-    children: React.ReactNode;
-    action?: { label: string; onClick: () => void };
+                            tone: "pending" | "success" | "warning" | "error";
+                        icon: React.ReactNode;
+                        children: React.ReactNode;
+                        action?: {label: string; onClick: () => void };
 }) {
     const toneClasses = {
-        pending: "border-violet-200 bg-violet-50 text-violet-900",
-        success: "border-green-200 bg-green-50 text-green-900",
-        warning: "border-amber-200 bg-amber-50 text-amber-900",
-        error: "border-red-200 bg-red-50 text-red-900",
+                            pending: "border-violet-200 bg-violet-50 text-violet-900",
+                        success: "border-green-200 bg-green-50 text-green-900",
+                        warning: "border-amber-200 bg-amber-50 text-amber-900",
+                        error: "border-red-200 bg-red-50 text-red-900",
     }[tone];
 
-    return (
-        <div className={cn("flex items-center justify-between gap-3 rounded-2xl border px-4 py-3", toneClasses)}>
-            <div className="flex items-center gap-2.5">
-                {icon}
-                <p className="text-[13px] font-bold">{children}</p>
-            </div>
-            {action ? (
-                <Button variant="quiet" size="sm" className="shrink-0 h-8 rounded-lg text-xs font-bold" onClick={action.onClick}>
-                    {action.label}
-                </Button>
-            ) : null}
-        </div>
-    );
+                        return (
+                        <div className={cn("flex items-center justify-between gap-3 rounded-2xl border px-4 py-3", toneClasses)}>
+                            <div className="flex items-center gap-2.5">
+                                {icon}
+                                <p className="text-[13px] font-bold">{children}</p>
+                            </div>
+                            {action ? (
+                                <Button variant="quiet" size="sm" className="shrink-0 h-8 rounded-lg text-xs font-bold" onClick={action.onClick}>
+                                    {action.label}
+                                </Button>
+                            ) : null}
+                        </div>
+                        );
 }

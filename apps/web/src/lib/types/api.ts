@@ -130,10 +130,12 @@ export interface VirtualAccountResponseDto {
 
 export interface CryptoCurrencyDto {
     code: string; // e.g. "usdttrc20" — the exact value to send back as `asset`
+    coin: string; // base symbol, e.g. "USDT" — groups this entry with its other enabled networks
     name: string | null;
     network: string | null;
     iconUrl: string | null;
     requiresExtraId: boolean; // true for memo/tag-based coins (XRP, XLM, ...)
+    recommended: boolean; // true for exactly one network per coin group — the lowest-fee/fastest one
 }
 
 export interface CryptoMinAmountDto {
