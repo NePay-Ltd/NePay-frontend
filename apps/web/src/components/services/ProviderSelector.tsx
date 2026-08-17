@@ -41,8 +41,8 @@ export function ProviderSelector({ providers, selectedId, onChange }: ProviderSe
                         >
                             <div className="flex items-center gap-3">
                                 {provider.logoUrl ? (
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm overflow-hidden border border-gray-100 shrink-0">
-                                        <img src={provider.logoUrl} alt={provider.label} className="w-full h-full object-cover" />
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm overflow-hidden border border-gray-100 shrink-0 p-1.5">
+                                        <img src={provider.logoUrl} alt={provider.label} className="w-full h-full object-contain" />
                                     </div>
                                 ) : (
                                     <div className={`flex h-10 w-10 items-center justify-center rounded-full ${provider.color} text-white font-black text-sm shadow-sm shrink-0`}>

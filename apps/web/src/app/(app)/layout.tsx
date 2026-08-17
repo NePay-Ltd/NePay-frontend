@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/layout/app-shell";
+import { AutoLogout } from "@/components/shared/auto-logout";
 
 /**
  * Authenticated app route group layout.
@@ -12,6 +13,11 @@ export default function AppLayout({
 }: {
     children: React.ReactNode;
 }) {
-    return <AppShell>{children}</AppShell>;
+    return (
+        <AppShell>
+            <AutoLogout />
+            {children}
+        </AppShell>
+    );
 }
 

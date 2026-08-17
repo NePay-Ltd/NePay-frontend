@@ -56,6 +56,7 @@ export function TransactionRow({ tx, variant = "compact", onViewReceipt }: Trans
     const masked = useUiStore((s) => s.masked);
     const isCredit = tx.amount > 0;
     const amountClass = isCredit ? "text-green-500" : "text-ink";
+
     const amountStr = masked ? "••••••" : `${isCredit ? "+" : ""}${formatNaira(tx.amount)}`;
 
     if (variant === "table") {

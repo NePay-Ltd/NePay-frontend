@@ -61,7 +61,7 @@ const MOCK_USER: AuthUser = {
     name: "Adaeze Okonkwo",
     email: "adaeze@example.com",
     phone: "08032145678",
-    kycTier: "PHONE_VERIFIED",
+    kycTier: "FULL_BVN_NIN",
     avatarInitials: "AO",
 };
 
@@ -72,9 +72,9 @@ const MOCK_TOKENS: AuthTokens = {
 
 // Tracks mock KYC state in-memory (resets on page refresh, intentionally).
 let mockKycState: KycStatusResponse = {
-    tier: "PHONE_VERIFIED",
-    bvnVerified: false,
-    ninVerified: false,
+    tier: "FULL_BVN_NIN",
+    bvnVerified: true,
+    ninVerified: true,
 };
 
 // ─── Endpoint mocks ───────────────────────────────────────────────────────────

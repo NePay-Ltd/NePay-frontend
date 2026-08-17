@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
@@ -15,7 +16,19 @@ import type { ApiError } from "@/lib/api";
 
 export default function LoginPage() {
     const { login } = useAuth();
+    const searchParams = useSearchParams();
     const [showPassword, setShowPassword] = React.useState(false);
+
+    React.useEffect(() => {
+        if (searchParams.get("reason") === "inactivity") {
+            toast.info("You have been logged out due to inactivity", {
+                duration: 5000,
+                description: "Please sign in again to continue.",
+            });
+            // Optional: Remove query param from url without refreshing
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }, [searchParams]);
 
     const {
         register,

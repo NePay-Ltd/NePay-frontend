@@ -19,9 +19,9 @@ import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const PROVIDERS = [
-    { id: "dstv", label: "DSTV", color: "bg-blue-600", logoUrl: "/images/providers/dstv.svg" },
-    { id: "gotv", label: "GOtv", color: "bg-green-600", logoUrl: "/images/providers/gotv.svg" },
-    { id: "startimes", label: "Startimes", color: "bg-orange-600", logoUrl: "/images/providers/startimes.svg" },
+    { id: "dstv", label: "DSTV", color: "bg-blue-600", logoUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200"><rect width="400" height="200" fill="%230099e5" rx="20"/><text x="200" y="130" font-family="Arial, Helvetica, sans-serif" font-size="100" font-weight="900" font-style="italic" fill="%23ffffff" text-anchor="middle" letter-spacing="-2">DStv</text></svg>' },
+    { id: "gotv", label: "GOtv", color: "bg-green-600", logoUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200"><rect width="400" height="200" fill="%23ffffff" rx="20"/><text x="140" y="130" font-family="Arial, Helvetica, sans-serif" font-size="110" font-weight="900" font-style="italic" fill="%23e3000f" text-anchor="middle" letter-spacing="-5">GO</text><text x="270" y="130" font-family="Arial, Helvetica, sans-serif" font-size="110" font-weight="900" font-style="italic" fill="%23008c3a" text-anchor="middle" letter-spacing="-2">tv</text></svg>' },
+    { id: "startimes", label: "Startimes", color: "bg-orange-600", logoUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200"><rect width="400" height="200" fill="%23ffffff" rx="20"/><circle cx="100" cy="100" r="40" fill="%23f26522"/><text x="240" y="125" font-family="Arial, Helvetica, sans-serif" font-size="60" font-weight="bold" fill="%23000000" text-anchor="middle">StarTimes</text></svg>' },
 ];
 
 const MOCK_TV_PLANS: Record<string, { id: string; name: string; price: number }[]> = {
@@ -49,10 +49,7 @@ const MOCK_TV_PLANS: Record<string, { id: string; name: string; price: number }[
     ]
 };
 
-const MOCK_RECENT_CONTACTS = [
-    { name: "Living Room DSTV", id: "1029384756" },
-    { name: "Mom's TV", id: "0987654321" },
-];
+const MOCK_RECENT_CONTACTS: {name: string; id: string}[] = [];
 
 export default function TvPage() {
     const router = useRouter();
