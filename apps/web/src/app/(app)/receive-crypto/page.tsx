@@ -31,6 +31,26 @@ import {
 import { cn } from "@/lib/cn";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import type { CryptoCurrencyDto } from "@/lib/types/api";
+
+interface CoinGroup {
+    coin: string;
+    variants: CryptoCurrencyDto[];
+    representative: CryptoCurrencyDto;
+}
+
+function groupByCoin(currencies: CryptoCurrencyDto[]): CoinGroup[] {
+    const byCoin = new Map<string, CryptoCurrencyDto[]>();
+    for (const currency of currencies) {
+        const variants = byCoin.get(currency.coin) ?? [];
+        variants.push(currency);
+        byCoin.set(currency.coin, variants);
+    }
+    return Array.from(byCoin.entries()).map(([coin, variants]) => {
+        const sorted = [...variants].sort((a, b) => Number(b.recommended) - Number(a.recommended));
+        return { coin, variants: sorted, representative: sorted[0]! };
+    });
+}
 
 function useCountdown(expiresAt: string | undefined) {
     const [remainingMs, setRemainingMs] = React.useState<number | null>(null);
@@ -63,12 +83,38 @@ export default function ReceiveCryptoPage() {
     const { data: currencies, isPending: currenciesLoading, isError: currenciesError } = useCryptoCurrencies();
     const [selectedCode, setSelectedCode] = React.useState<string | null>(null);
     const [openPicker, setOpenPicker] = React.useState(false);
+    const [pickerStep, setPickerStep] = React.useState<"coin" | "network">("coin");
+    const [pickerCoin, setPickerCoin] = React.useState<string | null>(null);
+    const [pickerSearch, setPickerSearch] = React.useState("");
+
+    const coinGroups = React.useMemo(() => groupByCoin(currencies ?? []), [currencies]);
+    const activeGroup = coinGroups.find((g) => g.coin === pickerCoin) ?? null;
 
     React.useEffect(() => {
-        if (!selectedCode && currencies && currencies.length > 0) {
-            setSelectedCode(currencies[0]!.code);
+        if (!selectedCode && coinGroups.length > 0) {
+            setSelectedCode(coinGroups[0]!.representative.code);
         }
-    }, [currencies, selectedCode]);
+    }, [coinGroups, selectedCode]);
+
+    const handlePickerOpenChange = (open: boolean) => {
+        setOpenPicker(open);
+        if (!open) {
+            setPickerStep("coin");
+            setPickerCoin(null);
+            setPickerSearch("");
+        }
+    };
+
+    const selectCoinGroup = (group: CoinGroup) => {
+        if (group.variants.length === 1) {
+            setSelectedCode(group.representative.code);
+            handlePickerOpenChange(false);
+            return;
+        }
+        setPickerCoin(group.coin);
+        setPickerStep("network");
+        setPickerSearch("");
+    };
 
     const selectedCurrency = currencies?.find((c) => c.code === selectedCode) ?? null;
 
@@ -135,7 +181,7 @@ export default function ReceiveCryptoPage() {
                                             className="py-6"
                                         />
                                     ) : (
-                                        <Popover open={openPicker} onOpenChange={setOpenPicker}>
+                                        <Popover open={openPicker} onOpenChange={handlePickerOpenChange}>
                                             <PopoverTrigger asChild>
                                                 <button className="flex h-14 w-full items-center justify-between rounded-xl border border-border bg-white px-4 transition-all hover:border-violet-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600">
                                                     <div className="flex items-center gap-3">
@@ -164,37 +210,102 @@ export default function ReceiveCryptoPage() {
                                                 </button>
                                             </PopoverTrigger>
                                             <PopoverContent className="w-[300px] sm:w-[400px] p-0 rounded-[16px] overflow-hidden" align="start">
-                                                <Command>
-                                                    <CommandInput placeholder="Search assets or networks..." />
-                                                    <CommandList className="max-h-[300px]">
-                                                        <CommandEmpty>No assets found.</CommandEmpty>
-                                                        <CommandGroup>
-                                                            {currencies.map((currency) => (
-                                                                <CommandItem
-                                                                    key={currency.code}
-                                                                    value={`${currency.name ?? currency.code} ${currency.network ?? ""}`}
-                                                                    onSelect={() => {
-                                                                        setSelectedCode(currency.code);
-                                                                        setOpenPicker(false);
-                                                                    }}
-                                                                    className="cursor-pointer py-3"
-                                                                >
-                                                                    <Check className={cn("mr-3 h-4 w-4", selectedCode === currency.code ? "opacity-100 text-violet-600" : "opacity-0")} />
-                                                                    <div className="flex flex-1 items-center justify-between">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <span className="font-bold text-ink text-[13px]">{currency.name ?? currency.code.toUpperCase()}</span>
-                                                                        </div>
-                                                                        {currency.network ? (
-                                                                            <span className="text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded-sm text-muted uppercase tracking-wider">
-                                                                                {currency.network}
+                                                {pickerStep === "network" && activeGroup ? (
+                                                    <Command>
+                                                        <div className="flex items-center gap-2 border-b border-border px-3 py-2.5">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setPickerStep("coin");
+                                                                    setPickerCoin(null);
+                                                                    setPickerSearch("");
+                                                                }}
+                                                                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted hover:bg-gray-100 hover:text-ink"
+                                                                aria-label="Back to coins"
+                                                            >
+                                                                <ChevronDown className="h-4 w-4 rotate-90" />
+                                                            </button>
+                                                            <span className="text-[13px] font-extrabold text-ink">
+                                                                Select network for {activeGroup.representative.name ?? activeGroup.coin}
+                                                            </span>
+                                                        </div>
+                                                        <CommandInput
+                                                            placeholder="Search networks..."
+                                                            value={pickerSearch}
+                                                            onValueChange={setPickerSearch}
+                                                        />
+                                                        <CommandList className="max-h-[300px]">
+                                                            <CommandEmpty>No networks found.</CommandEmpty>
+                                                            <CommandGroup>
+                                                                {activeGroup.variants.map((currency) => (
+                                                                    <CommandItem
+                                                                        key={currency.code}
+                                                                        value={`${currency.network ?? currency.code}`}
+                                                                        onSelect={() => {
+                                                                            setSelectedCode(currency.code);
+                                                                            handlePickerOpenChange(false);
+                                                                        }}
+                                                                        className="cursor-pointer py-3"
+                                                                    >
+                                                                        <Check className={cn("mr-3 h-4 w-4", selectedCode === currency.code ? "opacity-100 text-violet-600" : "opacity-0")} />
+                                                                        <div className="flex flex-1 items-center justify-between">
+                                                                            <span className="font-bold text-ink text-[13px] uppercase">
+                                                                                {currency.network ?? "Mainnet"}
                                                                             </span>
-                                                                        ) : null}
-                                                                    </div>
-                                                                </CommandItem>
-                                                            ))}
-                                                        </CommandGroup>
-                                                    </CommandList>
-                                                </Command>
+                                                                            {currency.recommended ? (
+                                                                                <span className="text-[10px] font-bold bg-violet-100 text-violet-700 px-2 py-0.5 rounded-sm uppercase tracking-wider">
+                                                                                    Recommended
+                                                                                </span>
+                                                                            ) : null}
+                                                                        </div>
+                                                                    </CommandItem>
+                                                                ))}
+                                                            </CommandGroup>
+                                                        </CommandList>
+                                                    </Command>
+                                                ) : (
+                                                    <Command>
+                                                        <CommandInput
+                                                            placeholder="Search coins..."
+                                                            value={pickerSearch}
+                                                            onValueChange={setPickerSearch}
+                                                        />
+                                                        <CommandList className="max-h-[300px]">
+                                                            <CommandEmpty>No coins found.</CommandEmpty>
+                                                            <CommandGroup>
+                                                                {coinGroups.map((group) => (
+                                                                    <CommandItem
+                                                                        key={group.coin}
+                                                                        value={`${group.representative.name ?? group.coin} ${group.coin}`}
+                                                                        onSelect={() => selectCoinGroup(group)}
+                                                                        className="cursor-pointer py-3"
+                                                                    >
+                                                                        <Check
+                                                                            className={cn(
+                                                                                "mr-3 h-4 w-4",
+                                                                                group.variants.some((v) => v.code === selectedCode) ? "opacity-100 text-violet-600" : "opacity-0",
+                                                                            )}
+                                                                        />
+                                                                        <div className="flex flex-1 items-center justify-between">
+                                                                            <span className="font-bold text-ink text-[13px]">
+                                                                                {group.representative.name ?? group.coin}
+                                                                            </span>
+                                                                            {group.variants.length > 1 ? (
+                                                                                <span className="text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded-sm text-muted uppercase tracking-wider">
+                                                                                    {group.variants.length} networks
+                                                                                </span>
+                                                                            ) : group.representative.network ? (
+                                                                                <span className="text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded-sm text-muted uppercase tracking-wider">
+                                                                                    {group.representative.network}
+                                                                                </span>
+                                                                            ) : null}
+                                                                        </div>
+                                                                    </CommandItem>
+                                                                ))}
+                                                            </CommandGroup>
+                                                        </CommandList>
+                                                    </Command>
+                                                )}
                                             </PopoverContent>
                                         </Popover>
                                     )}
@@ -267,6 +378,17 @@ export default function ReceiveCryptoPage() {
                                                 Copy
                                             </Button>
                                         </div>
+
+                                        {/* Network warning — same visual prominence as the memo/tag warning below, never a footnote */}
+                                        {selectedCurrency?.network ? (
+                                            <div className="mt-3 flex items-center gap-2 rounded-xl border-2 border-red-300 bg-red-50 px-4 py-3">
+                                                <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
+                                                <p className="text-xs font-bold text-red-900">
+                                                    Only send {(selectedCurrency.name ?? selectedCurrency.coin).toUpperCase()} on the{" "}
+                                                    <span className="uppercase">{selectedCurrency.network}</span> network. Sending via any other network will result in permanent loss of funds.
+                                                </p>
+                                            </div>
+                                        ) : null}
 
                                         {/* Memo / tag — equally prominent, never a footnote */}
                                         {depositData?.payMemo ? (
