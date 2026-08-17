@@ -6,12 +6,11 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 
 import { cn } from "@/lib/cn";
-import { useUiStore } from "@/lib/stores/ui-store";
+
 import { BOTTOM_NAV } from "@/lib/navigation";
 
 export function BottomNav() {
-    const activeNav = useUiStore((s) => s.activeNav);
-    const setActiveNav = useUiStore((s) => s.setActiveNav);
+
     const pathname = usePathname();
 
     // Hide the bottom navigation on service pages to allow the StickyPayBar to take over the screen
@@ -26,13 +25,13 @@ export function BottomNav() {
         >
             {BOTTOM_NAV.map((item) => {
                 const Icon = item.icon;
-                const active = activeNav === item.key;
+                const active = pathname.startsWith(item.href);
 
                 return (
                     <Link
                         key={item.key}
                         href={item.href}
-                        onClick={() => setActiveNav(item.key)}
+
                         className={cn(
                             "relative flex flex-1 flex-col items-center justify-center gap-1 rounded-full py-2 px-1 transition-colors z-10",
                             active ? "text-violet-700" : "text-muted hover:text-ink",

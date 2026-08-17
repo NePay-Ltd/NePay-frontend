@@ -33,22 +33,7 @@ export interface ServiceTransactionResponse {
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 
-const MOCK_SAVED_BILLERS: SavedBiller[] = [
-    {
-        id: "biller_1",
-        billerName: "Ikeja Electric",
-        identifier: "Meter •••4521",
-        lastPaidAmount: 15000,
-        serviceType: "electricity",
-    },
-    {
-        id: "biller_2",
-        billerName: "MTN Data",
-        identifier: "0803•••5678",
-        lastPaidAmount: 2500,
-        serviceType: "data",
-    },
-];
+const MOCK_SAVED_BILLERS: SavedBiller[] = [];
 
 const activeTransactions = new Map<string, ServiceTransactionResponse>();
 

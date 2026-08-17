@@ -11,17 +11,13 @@ import { UtilityPurchaseResponseDto } from "@/lib/types/api";
 
 // New Shared UI Components
 import { ProviderSelector } from "@/components/services/ProviderSelector";
-import { RecentNumbersRow } from "@/components/services/RecentNumbersRow";
+import { Switch } from "@/components/ui/switch";
 import { PlanGrid } from "@/components/services/PlanGrid";
 import { StickyPayBar } from "@/components/services/StickyPayBar";
 import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const MOCK_RECENT_CONTACTS = [
-    { name: "My Router", id: "08031234567" },
-    { name: "Dad", id: "07069876543" },
-];
 
 // Network-detection prefixes are matched against fetched service names,
 // since serviceIDs (e.g. "mtn") come from the backend and aren't hardcoded.
@@ -42,17 +38,13 @@ export default function DataPage() {
     const [network, setNetwork] = React.useState<string | undefined>(initialNetwork);
     const [phone, setPhone] = React.useState(initialPhone);
     const [variationCode, setVariationCode] = React.useState("");
+    const [saveBeneficiary, setSaveBeneficiary] = React.useState(true);
 
     // ─── Dynamic catalog ────────────────────────────────────────────────────
     const { data: categories = [] } = useUtilityCategories();
     const dataCategory = categories.find((c) => c.name.toLowerCase().includes("data"));
     const { data: networks = [], isLoading: networksLoading } = useUtilityServices(dataCategory?.identifier);
 
-    React.useEffect(() => {
-        if (!network && networks.length > 0) {
-            setNetwork(networks[0]?.serviceID);
-        }
-    }, [networks, network]);
 
     const selectedNetwork = networks.find((n) => n.serviceID === network);
     const { data: plans = [], isLoading: plansLoading } = useUtilityVariations(selectedNetwork?.serviceID);
@@ -176,19 +168,34 @@ export default function DataPage() {
                                 </div>
                             )}
                         </div>
-                        <RecentNumbersRow
-                            contacts={MOCK_RECENT_CONTACTS}
-                            onSelect={(id) => setPhone(id)}
-                        />
+                        <div className="flex items-center justify-between rounded-xl bg-white p-4 border border-border">
+                            <div>
+                                <p className="text-sm font-bold text-ink">Save as beneficiary</p>
+                                <p className="text-xs text-muted">Save this number for future recharges</p>
+                            </div>
+                            <Switch checked={saveBeneficiary} onCheckedChange={setSaveBeneficiary} />
+                        </div>
                     </div>
 
                     {/* Data Plans */}
-                    <PlanGrid
-                        plans={plans.map((p) => ({ id: p.variation_code, name: p.name, price: Number(p.variation_amount) }))}
-                        selectedId={variationCode}
-                        onChange={setVariationCode}
-                        isLoading={plansLoading}
-                    />
+                    {network ? (
+                        <PlanGrid
+                            plans={plans.map((p) => ({ id: p.variation_code, name: p.name, price: Number(p.variation_amount) }))}
+                            selectedId={variationCode}
+                            onChange={setVariationCode}
+                            isLoading={plansLoading}
+                        />
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-12 text-center">
+                            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-violet-50 text-violet-600">
+                                <Wifi className="h-8 w-8" />
+                            </div>
+                            <h3 className="text-lg font-bold text-ink">Select a Network</h3>
+                            <p className="mt-2 max-w-sm text-sm text-muted">
+                                Enter a phone number to auto-detect the network, or select a provider above to view available data plans.
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
 

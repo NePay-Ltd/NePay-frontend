@@ -36,7 +36,7 @@ export const SIDEBAR_GROUPS: NavGroup[] = [
         title: "MONEY",
         items: [
             { key: "overview", label: "Overview", icon: LayoutDashboard, href: "/overview" },
-            { key: "transactions", label: "Transactions", icon: Receipt, href: "/transactions", badge: 5 },
+            { key: "transactions", label: "Transactions", icon: Receipt, href: "/transactions" },
         ],
     },
     {

@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { X, LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 import { cn } from "@/lib/cn";
 import { useUiStore } from "@/lib/stores/ui-store";
@@ -61,8 +61,7 @@ function NavLink({
 }
 
 function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
-    const activeNav = useUiStore((s) => s.activeNav);
-    const setActiveNav = useUiStore((s) => s.setActiveNav);
+    const pathname = usePathname();
 
     return (
         <nav className="flex-1 space-y-6 overflow-y-auto px-4 py-6 scrollbar-thin">
@@ -76,9 +75,8 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
                             <NavLink
                                 key={item.key}
                                 item={item}
-                                active={activeNav === item.key}
+                                active={pathname.startsWith(item.href)}
                                 onClick={() => {
-                                    setActiveNav(item.key);
                                     onNavigate?.();
                                 }}
                             />

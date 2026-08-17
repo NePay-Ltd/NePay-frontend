@@ -11,7 +11,7 @@ import { UtilityPurchaseResponseDto } from "@/lib/types/api";
 
 // New Shared UI Components
 import { ProviderSelector } from "@/components/services/ProviderSelector";
-import { RecentNumbersRow } from "@/components/services/RecentNumbersRow";
+import { Switch } from "@/components/ui/switch";
 import { AmountCalculator } from "@/components/services/AmountCalculator";
 import { StickyPayBar } from "@/components/services/StickyPayBar";
 import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen";
@@ -20,12 +20,7 @@ import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen
 
 const PRESET_AMOUNTS = [50, 100, 500, 1000, 2000, 5000];
 
-// Mock recent contacts for UI refactor
-const MOCK_RECENT_CONTACTS = [
-    { name: "My MTN", id: "08031234567" },
-    { name: "Mom", id: "07069876543" },
-    { name: "John Doe", id: "08101239876" },
-];
+
 
 // Network-detection prefixes are matched against the fetched service names,
 // since serviceIDs (e.g. "mtn") come from the backend and aren't hardcoded.
@@ -46,6 +41,7 @@ export default function AirtimePage() {
     const [network, setNetwork] = React.useState<string | undefined>(initialNetwork);
     const [phone, setPhone] = React.useState(initialPhone);
     const [amount, setAmount] = React.useState(0);
+    const [saveBeneficiary, setSaveBeneficiary] = React.useState(true);
 
     // ─── Dynamic catalog ────────────────────────────────────────────────────
     const { data: categories = [] } = useUtilityCategories();
@@ -53,11 +49,6 @@ export default function AirtimePage() {
     const { data: networks = [], isLoading: networksLoading } = useUtilityServices(airtimeCategory?.identifier);
 
     // Default to the first available network once the catalog loads
-    React.useEffect(() => {
-        if (!network && networks.length > 0) {
-            setNetwork(networks[0]?.serviceID);
-        }
-    }, [networks, network]);
 
     const selectedNetwork = networks.find((n) => n.serviceID === network);
 
@@ -176,10 +167,13 @@ export default function AirtimePage() {
                                 </div>
                             )}
                         </div>
-                        <RecentNumbersRow
-                            contacts={MOCK_RECENT_CONTACTS}
-                            onSelect={(id) => setPhone(id)}
-                        />
+                        <div className="flex items-center justify-between rounded-xl bg-white p-4 border border-border">
+                            <div>
+                                <p className="text-sm font-bold text-ink">Save as beneficiary</p>
+                                <p className="text-xs text-muted">Save this number for future recharges</p>
+                            </div>
+                            <Switch checked={saveBeneficiary} onCheckedChange={setSaveBeneficiary} />
+                        </div>
                     </div>
 
                     {/* Amount Calculator */}

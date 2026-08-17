@@ -4,11 +4,12 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { formatNaira } from "@/lib/format";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export interface Plan {
     id: string;
-    name: string; // e.g. "10GB" or "DSTV Premium"
-    validity?: string; // e.g. "30 Days"
+    name: string; // e.g. "N100 100MB - 24 hrs"
+    validity?: string; // Optional override
     price: number;
     recommended?: boolean;
 }
@@ -20,22 +21,87 @@ interface PlanGridProps {
     isLoading?: boolean;
 }
 
+function parsePlanInfo(name: string) {
+    // Extract format: "N100 100MB - 24 hrs"
+    // Handle optional "N100" at the start
+    const match = name.match(/(?:N\d+\s+)?([0-9.]+[MG]B)\s*-\s*(.*)/i);
+    if (match) {
+        return { dataAmount: match[1], validity: match[2] };
+    }
+    const parts = name.split('-');
+    if (parts.length > 1) {
+        // Strip out "N100 " from the first part if it exists
+        const cleanData = parts[0].replace(/N\d+\s+/, '').trim();
+        return { dataAmount: cleanData, validity: parts[1].trim() };
+    }
+    return { dataAmount: name.replace(/N\d+\s+/, '').trim(), validity: '' };
+}
+
+function getPlanCategory(validity: string) {
+    const v = validity.toLowerCase();
+    if (!v) return 'Other';
+    if (v.includes('hr') || v.includes('1 day') || v.includes('2 day') || v.includes('3 day')) return 'Daily';
+    if (v.includes('7 day') || v.includes('14 day') || v.includes('week')) return 'Weekly';
+    if (v.includes('30 day') || v.includes('month')) return 'Monthly';
+    return 'Other';
+}
+
 export function PlanGrid({ plans, selectedId, onChange, isLoading }: PlanGridProps) {
+    const [activeTab, setActiveTab] = React.useState("All");
+
+    const parsedPlans = React.useMemo(() => {
+        return plans.map(p => {
+            const parsed = parsePlanInfo(p.name);
+            const validity = p.validity || parsed.validity;
+            return {
+                ...p,
+                parsedData: parsed.dataAmount,
+                parsedValidity: validity,
+                category: getPlanCategory(validity)
+            };
+        });
+    }, [plans]);
+
+    const filteredPlans = React.useMemo(() => {
+        if (activeTab === "All") return parsedPlans;
+        return parsedPlans.filter(p => p.category === activeTab);
+    }, [parsedPlans, activeTab]);
+
     if (isLoading) {
         return (
             <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-2">
                 {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="h-[120px] rounded-2xl border border-border bg-gray-50 animate-pulse" />
+                    <div key={i} className="h-[100px] rounded-2xl border border-border bg-gray-50 animate-pulse" />
                 ))}
             </div>
         );
     }
 
+    if (plans.length === 0) return null;
+
+    // Check which tabs actually have plans
+    const hasDaily = parsedPlans.some(p => p.category === 'Daily');
+    const hasWeekly = parsedPlans.some(p => p.category === 'Weekly');
+    const hasMonthly = parsedPlans.some(p => p.category === 'Monthly');
+    const hasOther = parsedPlans.some(p => p.category === 'Other');
+
     return (
         <div className="pt-2">
-            <h4 className="text-xs font-bold text-muted mb-3 px-1 uppercase tracking-wider">Select a Plan</h4>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                <h4 className="text-sm font-bold text-ink">Data Bundles</h4>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
+                    <TabsList className="w-full sm:w-auto grid grid-flow-col auto-cols-fr bg-gray-100 rounded-xl p-1 h-10">
+                        <TabsTrigger value="All" className="rounded-lg text-xs font-bold data-[state=active]:shadow-sm">All</TabsTrigger>
+                        {hasDaily && <TabsTrigger value="Daily" className="rounded-lg text-xs font-bold data-[state=active]:shadow-sm">Daily</TabsTrigger>}
+                        {hasWeekly && <TabsTrigger value="Weekly" className="rounded-lg text-xs font-bold data-[state=active]:shadow-sm">Weekly</TabsTrigger>}
+                        {hasMonthly && <TabsTrigger value="Monthly" className="rounded-lg text-xs font-bold data-[state=active]:shadow-sm">Monthly</TabsTrigger>}
+                        {hasOther && <TabsTrigger value="Other" className="rounded-lg text-xs font-bold data-[state=active]:shadow-sm">Other</TabsTrigger>}
+                    </TabsList>
+                </Tabs>
+            </div>
+
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-                {plans.map((plan) => {
+                {filteredPlans.map((plan) => {
                     const isSelected = selectedId === plan.id;
 
                     return (
@@ -44,40 +110,48 @@ export function PlanGrid({ plans, selectedId, onChange, isLoading }: PlanGridPro
                             type="button"
                             onClick={() => onChange(plan.id)}
                             whileTap={{ scale: 0.96 }}
-                            className={`relative flex flex-col items-start text-left p-4 min-h-[120px] w-full rounded-2xl border-2 transition-all ${
+                            className={`relative flex flex-col items-start justify-between text-left p-3 min-h-[100px] w-full rounded-2xl border-2 transition-all ${
                                 isSelected
-                                    ? "border-violet-600 bg-violet-50 shadow-md shadow-violet-500/10"
+                                    ? "border-violet-600 bg-violet-50/50 shadow-sm"
                                     : "border-border bg-white hover:border-violet-200 hover:bg-gray-50"
                             }`}
                         >
                             {plan.recommended && (
-                                <span className="absolute -top-3 left-4 bg-yellow-400 text-yellow-900 text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-full shadow-sm">
+                                <span className="absolute -top-3 left-3 bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
                                     Best Value
                                 </span>
                             )}
                             
-                            {/* Checkmark for selected state */}
                             {isSelected && (
-                                <div className="absolute right-3 top-3 h-5 w-5 bg-violet-600 rounded-full flex items-center justify-center shadow-sm">
-                                    <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                                <div className="absolute right-2 top-2 h-4 w-4 bg-violet-600 rounded-full flex items-center justify-center shadow-sm">
+                                    <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
                                 </div>
                             )}
 
-                            <span className={`text-xl sm:text-2xl font-black tracking-tight mt-1 w-full break-words ${isSelected ? 'text-violet-900' : 'text-ink'}`}>
-                                {plan.name}
-                            </span>
-                            {plan.validity && (
-                                <span className="text-xs font-medium text-muted mt-0.5">
-                                    {plan.validity}
+                            <div>
+                                <span className={`text-lg sm:text-xl font-black tracking-tight w-full break-words ${isSelected ? 'text-violet-900' : 'text-ink'}`}>
+                                    {plan.parsedData}
                                 </span>
-                            )}
-                            <div className="mt-4 text-sm sm:text-base font-bold text-ink">
+                                {plan.parsedValidity && (
+                                    <p className="text-[11px] font-medium text-muted mt-0.5 line-clamp-1">
+                                        {plan.parsedValidity}
+                                    </p>
+                                )}
+                            </div>
+                            
+                            <div className={`mt-3 text-sm font-bold ${isSelected ? 'text-violet-700' : 'text-ink/80'}`}>
                                 {formatNaira(plan.price)}
                             </div>
                         </motion.button>
                     );
                 })}
             </div>
+
+            {filteredPlans.length === 0 && (
+                <div className="py-10 text-center">
+                    <p className="text-sm text-muted">No {activeTab.toLowerCase()} plans available.</p>
+                </div>
+            )}
         </div>
     );
 }

@@ -136,15 +136,39 @@ export function TransactionModal({
 
                 {state === "pin" && (
                     <div className="flex flex-col items-center justify-center space-y-4 py-4 text-center">
-                        <div className="text-sm text-body">{pinDescription}</div>
-                        <Input 
-                            type="password" 
-                            maxLength={4} 
-                            placeholder="••••" 
-                            className="text-center text-3xl tracking-[1em] h-14 w-40 font-mono pl-6"
-                            value={pin}
-                            onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
-                        />
+                        <div className="text-sm font-medium text-muted">{pinDescription}</div>
+                        <div className="relative mx-auto mt-4 mb-2 w-fit">
+                            {/* Hidden actual input */}
+                            <input 
+                                type="tel" 
+                                maxLength={4}
+                                className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-text"
+                                value={pin}
+                                onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
+                                autoFocus
+                            />
+                            {/* Visual PIN boxes */}
+                            <div className="flex gap-3 sm:gap-4 justify-center">
+                                {[0, 1, 2, 3].map((index) => {
+                                    const digit = pin[index];
+                                    const isActive = pin.length === index;
+                                    return (
+                                        <div 
+                                            key={index}
+                                            className={`flex h-14 w-12 sm:h-16 sm:w-14 items-center justify-center rounded-2xl border-2 transition-all duration-200 ${
+                                                isActive ? "border-violet-500 ring-4 ring-violet-500/20 bg-violet-50" : 
+                                                digit ? "border-violet-500 bg-white shadow-sm" : 
+                                                "border-border bg-gray-50/50"
+                                            }`}
+                                        >
+                                            {digit && (
+                                                <div className="h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-violet-600 shadow-sm animate-in zoom-in duration-200" />
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </div>
                 )}
 

@@ -15,7 +15,7 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";
 import { useUiStore } from "@/lib/stores/ui-store";
-import { useUnreadNotificationCount } from "@/lib/queries/notifications";
+
 import { Button } from "@/components/shared/button";
 
 function Logo() {
@@ -62,7 +62,7 @@ export function TopBar() {
     const toggleMobileSidebar = useUiStore((s) => s.toggleMobileSidebar);
     const setCommandOpen = useUiStore((s) => s.setCommandOpen);
     const router = useRouter();
-    const { data: notificationCount = 0 } = useUnreadNotificationCount();
+
     const { title, subtitle } = usePageHeaders();
 
     return (
@@ -143,12 +143,9 @@ export function TopBar() {
                     type="button"
                     onClick={() => router.push("/notifications")}
                     className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-muted hover:bg-violet-50 hover:text-ink hover:border-violet-200 transition-all shadow-sm"
-                    aria-label={`Notifications${notificationCount > 0 ? `, ${notificationCount} unread` : ""}`}
+                    aria-label="Notifications"
                 >
                     <Bell className="h-[18px] w-[18px]" />
-                    {notificationCount > 0 ? (
-                        <span className="absolute right-0 top-0 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-red-500 ring-2 ring-white" />
-                    ) : null}
                 </button>
                 
 

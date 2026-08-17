@@ -13,7 +13,7 @@ import { Chip } from "@/components/shared/chip";
 import { EmptyState } from "@/components/shared/empty-state";
 import { TransactionRow } from "@/components/shared/transaction-row";
 import { Skeleton } from "@/components/shared/skeletons";
-import { useOverviewSummary } from "@/lib/queries/overview";
+
 import { formatNaira } from "@/lib/format";
 import { TransactionDetailModal, type TransactionDetailData } from "@/components/shared/transaction-detail-modal";
 import { BaseTransaction } from "@/components/shared/transaction-row";
@@ -43,8 +43,6 @@ function TransactionsContent() {
         fetchNextPage 
     } = useInfiniteTransactions();
 
-    const { data: summary } = useOverviewSummary();
-    const kpiData = summary?.kpi;
 
     // ─── Handlers ─────────────────────────────────────────────────────────
     const handleFilterClick = (type: string) => {
@@ -101,35 +99,6 @@ function TransactionsContent() {
 
     return (
         <div className="mx-auto max-w-5xl space-y-6">
-            
-            {/* ── KPI Summary (Horizontally Scrollable) ────────────────── */}
-            {kpiData && (
-                <div className="relative w-full">
-                    <div className="flex w-full gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2">
-                        {/* Fake padding block for snap start alignment if needed */}
-                        <div className="snap-start snap-always min-w-[200px] shrink-0 bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800/30 rounded-2xl p-4 sm:p-5 flex flex-col justify-center">
-                            <span className="text-[10px] uppercase font-bold text-violet-600 dark:text-violet-400">Money in</span>
-                            <span className="text-xl font-black text-ink tracking-tight mt-1">{formatNaira(kpiData.moneyIn)}</span>
-                        </div>
-                        <div className="snap-start snap-always min-w-[200px] shrink-0 bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800/30 rounded-2xl p-4 sm:p-5 flex flex-col justify-center">
-                            <span className="text-[10px] uppercase font-bold text-violet-600 dark:text-violet-400">Money out</span>
-                            <span className="text-xl font-black text-ink tracking-tight mt-1">{formatNaira(kpiData.moneyOut)}</span>
-                        </div>
-                        <div className="snap-start snap-always min-w-[200px] shrink-0 bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800/30 rounded-2xl p-4 sm:p-5 flex flex-col justify-center">
-                            <span className="text-[10px] uppercase font-bold text-violet-600 dark:text-violet-400">Net change</span>
-                            <span className="text-xl font-black text-ink tracking-tight mt-1">+{formatNaira(kpiData.netChange)}</span>
-                        </div>
-                        <div className="snap-start snap-always min-w-[200px] shrink-0 bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800/30 rounded-2xl p-4 sm:p-5 flex flex-col justify-center">
-                            <span className="text-[10px] uppercase font-bold text-violet-600 dark:text-violet-400">Pending</span>
-                            <span className="text-xl font-black text-ink tracking-tight mt-1">₦0</span>
-                        </div>
-                        {/* Spacer for the fade edge */}
-                        <div className="min-w-[16px] shrink-0" />
-                    </div>
-                    {/* Fade Mask (Right Edge) */}
-                    <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-black to-transparent" />
-                </div>
-            )}
 
             {/* Header & Dev Utility */}
                 <div>
