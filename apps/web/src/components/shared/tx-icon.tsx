@@ -4,6 +4,11 @@ import {
     CreditCard,
     Gift,
     Plane,
+    Smartphone,
+    Wifi,
+    Tv,
+    Zap,
+    Settings,
     type LucideIcon,
 } from "lucide-react";
 
@@ -14,7 +19,13 @@ export type TxCategory =
     | "withdrawal"
     | "payment"
     | "gift-card"
-    | "flight";
+    | "flight"
+    | "airtime"
+    | "data"
+    | "tv"
+    | "electricity"
+    | "admin"
+    | "cashback";
 
 export interface TxIconProps {
     category: TxCategory;
@@ -35,8 +46,14 @@ const CATEGORY_MAP: Record<TxCategory, CategoryConfig> = {
     deposit: { icon: ArrowDownLeft, bg: "bg-green-500/10", fg: "text-green-500" },
     withdrawal: { icon: ArrowUpRight, bg: "bg-red-500/10", fg: "text-red-500" },
     payment: { icon: CreditCard, bg: "bg-amber-500/10", fg: "text-amber-500" },
-    "gift-card": { icon: Gift, bg: "bg-violet-100", fg: "text-violet-700" },
-    flight: { icon: Plane, bg: "bg-blue-500/10", fg: "text-blue-500" },
+    "gift-card": { icon: Gift, bg: "bg-green-100", fg: "text-green-700" },
+    flight: { icon: Plane, bg: "bg-teal-100", fg: "text-teal-700" },
+    airtime: { icon: Smartphone, bg: "bg-violet-100", fg: "text-violet-700" },
+    data: { icon: Wifi, bg: "bg-blue-100", fg: "text-blue-700" },
+    tv: { icon: Tv, bg: "bg-pink-100", fg: "text-pink-700" },
+    electricity: { icon: Zap, bg: "bg-amber-100", fg: "text-amber-700" },
+    admin: { icon: Settings, bg: "bg-gray-200", fg: "text-gray-700" },
+    cashback: { icon: Gift, bg: "bg-emerald-100", fg: "text-emerald-700" },
 };
 
 /**

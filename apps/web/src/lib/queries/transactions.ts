@@ -14,9 +14,18 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
         case "DEPOSIT":
         case "BANK_DEPOSIT": category = "deposit"; break;
         case "WITHDRAWAL": category = "withdrawal"; break;
-        case "UTILITY_PURCHASE": category = "payment"; break;
+        case "UTILITY_PURCHASE": 
+            category = "payment"; 
+            if (entry.description?.toLowerCase().includes("airtime") || entry.description?.toLowerCase().includes("vtu")) category = "airtime";
+            if (entry.description?.toLowerCase().includes("data")) category = "data";
+            if (entry.description?.toLowerCase().includes("tv") || entry.description?.toLowerCase().includes("cable")) category = "tv";
+            if (entry.description?.toLowerCase().includes("electricity") || entry.description?.toLowerCase().includes("power")) category = "electricity";
+            break;
         case "GIFT_CARD_SALE": category = "gift-card"; break;
         case "FLIGHT_BOOKING": category = "flight"; break;
+        case "ADMIN_ADJUSTMENT": category = "admin"; break;
+        case "CASHBACK": category = "cashback"; break;
+        case "REFERRAL_REWARD": category = "cashback"; break;
     }
 
     return {

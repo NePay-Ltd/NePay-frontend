@@ -15,6 +15,11 @@ import {
     ChevronRight,
     Search,
     ChevronDown,
+    ArrowLeft,
+    Calculator,
+    RefreshCcw,
+    Bell,
+    Share2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -80,15 +85,26 @@ function formatCountdown(ms: number) {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
+const MOCK_PRICES: Record<string, { price: string; change: string; up: boolean }> = {
+    BTC: { price: "$64,262", change: "+1.14%", up: true },
+    USDT: { price: "$1.00", change: "", up: true },
+    USDC: { price: "$1.00", change: "", up: true },
+    ETH: { price: "$1,900.81", change: "-0.16%", up: false },
+    BNB: { price: "$603.52", change: "-0.34%", up: false },
+    SOL: { price: "$75.95", change: "+0.22%", up: true },
+    TRX: { price: "$0.3330", change: "+0.20%", up: true },
+};
+
 export default function ReceiveCryptoPage() {
     const router = useRouter();
 
-    const { data: currencies, isPending: currenciesLoading, isError: currenciesError } = useCryptoCurrencies();
+    const { data: currencies, isPending: currenciesLoading, isError: currenciesError, refetch: refetchCurrencies } = useCryptoCurrencies();
     const [selectedCode, setSelectedCode] = React.useState<string | null>(null);
     const [openPicker, setOpenPicker] = React.useState(false);
     const [pickerStep, setPickerStep] = React.useState<"coin" | "network">("coin");
     const [pickerCoin, setPickerCoin] = React.useState<string | null>(null);
     const [pickerSearch, setPickerSearch] = React.useState("");
+    const [mobileStep, setMobileStep] = React.useState<"list" | "details">("list");
 
     const coinGroups = React.useMemo(() => groupByCoin(currencies ?? []), [currencies]);
     const activeGroup = coinGroups.find((g) => g.coin === pickerCoin) ?? null;
@@ -160,7 +176,192 @@ export default function ReceiveCryptoPage() {
 
     return (
         <RequireKyc tier="FULL_BVN_NIN">
-            <div className="mx-auto max-w-md pb-24 space-y-6">
+            {/* ── Mobile 2-Step Flow ────────────────────────────────────────────────── */}
+            <div className="md:hidden bg-white min-h-[100dvh]">
+                {mobileStep === "list" ? (
+                    <div className="pb-24">
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-4 py-4 pt-6">
+                            <div className="flex items-center gap-3">
+                                <button onClick={() => router.back()} className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-50 border border-gray-100 text-ink">
+                                    <ArrowLeft className="h-5 w-5" />
+                                </button>
+                                <div>
+                                    <h1 className="text-[22px] font-black text-ink leading-none tracking-tight">Select asset</h1>
+                                    <div className="flex items-center gap-1.5 mt-1.5">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                                        <span className="text-[11px] font-bold text-muted">Live prices</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button 
+                                    className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-50 border border-gray-100 text-ink active:scale-95 transition-transform"
+                                    onClick={() => refetchCurrencies()}
+                                >
+                                    <RefreshCcw className={cn("h-4 w-4", currenciesLoading && "animate-spin text-muted")} />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* List */}
+                        <div className="px-5 mt-6 flex flex-col gap-8">
+                            {currenciesLoading ? (
+                                Array.from({ length: 5 }).map((_, i) => (
+                                    <div key={i} className="flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <Skeleton className="h-9 w-9 rounded-full" />
+                                            <div className="space-y-2">
+                                                <Skeleton className="h-4 w-24" />
+                                                <Skeleton className="h-3 w-16" />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2 flex flex-col items-end">
+                                            <Skeleton className="h-4 w-16" />
+                                            <Skeleton className="h-3 w-12" />
+                                        </div>
+                                    </div>
+                                ))
+                            ) : coinGroups.map(group => {
+                                const priceData = MOCK_PRICES[group.coin] || { price: "$0.00", change: "", up: true };
+                                return (
+                                    <div 
+                                        key={group.coin} 
+                                        className="flex items-center justify-between cursor-pointer active:opacity-70 transition-opacity"
+                                        onClick={() => {
+                                            setPickerCoin(group.coin);
+                                            setSelectedCode(group.representative.code);
+                                            setMobileStep("details");
+                                        }}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            {group.representative.iconUrl ? (
+                                                <img src={group.representative.iconUrl} alt={group.coin} className="h-9 w-9 rounded-full object-contain" />
+                                            ) : (
+                                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-100 text-violet-700 font-bold">
+                                                    {group.coin[0]}
+                                                </div>
+                                            )}
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-extrabold text-[16px] text-ink">{group.representative.name || group.coin}</span>
+                                                    <span className="text-[13px] font-bold text-muted">{group.coin}</span>
+                                                    {group.coin === 'BTC' && (
+                                                        <span className="px-2 py-0.5 rounded bg-green-50 text-green-700 text-[9px] font-black uppercase tracking-widest ml-1">Popular</span>
+                                                    )}
+                                                </div>
+                                                <div className="text-[11px] font-bold text-muted mt-1 uppercase tracking-widest">
+                                                    {group.variants.length > 1 ? `${group.variants.length} NETWORKS` : group.variants.map(v => v.network || v.code).join(' · ')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="font-black text-[17px] text-ink">{priceData.price}</div>
+                                            {priceData.change && (
+                                                <div className={`text-[11px] font-bold mt-1 ${priceData.up ? 'text-green-500' : 'text-red-500'}`}>
+                                                    {priceData.up ? '↗' : '↘'} {priceData.change}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="pb-32 flex flex-col items-center">
+                        {/* Header */}
+                        <div className="w-full flex items-center justify-between px-4 py-4 pt-6">
+                            <button onClick={() => setMobileStep("list")} className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-50 border border-gray-100 text-ink">
+                                <ArrowLeft className="h-5 w-5" />
+                            </button>
+                            <div className="flex items-center gap-2">
+                                <button className="flex h-11 w-11 items-center justify-center rounded-full bg-green-50 border border-green-100 text-green-600">
+                                    <Bell className="h-4 w-4" />
+                                </button>
+                                <button className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-50 border border-gray-100 text-ink">
+                                    <Share2 className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* QR container */}
+                        <div className="mt-2 p-5 rounded-[40px] border-[3px] border-orange-50 bg-white shadow-sm inline-block relative">
+                            {addressPending ? (
+                                <Skeleton className="h-[200px] w-[200px]" />
+                            ) : depositData?.address ? (
+                                <AddressQrCode address={depositData.address} size={220} />
+                            ) : null}
+                            
+                            {/* Small Logo overlay in the middle of QR */}
+                            {selectedCurrency?.iconUrl && !addressPending && depositData?.address && (
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-1 rounded-full shadow-sm">
+                                    <img src={selectedCurrency.iconUrl} className="h-8 w-8 rounded-full" alt="" />
+                                </div>
+                            )}
+                        </div>
+                        <div className="mt-5 font-bold text-orange-400 uppercase tracking-widest text-[13px]">
+                            {selectedCurrency?.coin}
+                        </div>
+
+                        {/* Address */}
+                        <div className="mt-6 flex items-center gap-3 max-w-[85%] mx-auto">
+                            <span className="font-mono text-[13px] font-bold text-ink truncate block">
+                                {depositData?.address || "—"}
+                            </span>
+                            <button onClick={() => depositData?.address && handleCopy(depositData.address, "Address")} className="shrink-0 text-muted hover:text-ink bg-gray-100 p-1 rounded">
+                                <Copy className="h-3.5 w-3.5" />
+                            </button>
+                        </div>
+                        
+                        {/* Divider */}
+                        <div className="w-10 h-[3px] rounded-full bg-orange-100/60 mt-8 mb-8"></div>
+
+                        {/* Details Box */}
+                        <div className="w-full px-6">
+                            <h4 className="text-[11px] font-extrabold text-muted uppercase tracking-widest mb-5">Accepted Here</h4>
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                    {selectedCurrency?.iconUrl && <img src={selectedCurrency.iconUrl} className="h-4 w-4 rounded-full object-contain" alt="" />}
+                                    <span className="font-bold text-ink text-[15px]">{selectedCurrency?.coin} ({selectedCurrency?.network?.toLowerCase() ?? 'native'})</span>
+                                </div>
+                                <div className="font-black text-ink text-[15px]">₦1385/$</div>
+                            </div>
+                            
+                            <div className="text-[13px] font-medium text-muted flex items-center gap-2 mt-2">
+                                <span>Min deposit <strong className="font-bold text-ink">${minAmountData?.minAmount ?? 5}</strong></span>
+                                <span>·</span>
+                                <span>Network fee <strong className="font-bold text-ink">$2</strong></span>
+                            </div>
+                            <div className="text-[13px] font-medium text-muted mt-2">
+                                Deposit limit · <strong className="font-bold text-ink">Unlimited</strong>
+                            </div>
+
+                            <div className="mt-10 text-[13px] font-medium text-muted leading-[1.6]">
+                                Send <strong className="font-bold text-red-500">{selectedCurrency?.coin} on the {selectedCurrency?.network ?? selectedCurrency?.coin} network only.</strong>
+                                <br/>Coins sent on any other chain or to a wrong address are permanently lost and cannot be recovered.
+                            </div>
+                        </div>
+
+                        {/* Overview Button */}
+                        <div className="w-full mt-8 px-4 pb-12">
+                            <Button
+                                variant="primary"
+                                className="w-full h-[56px] rounded-[18px] bg-violet-700 hover:bg-violet-800 font-bold text-[17px] flex items-center justify-between px-6 shadow-xl shadow-violet-200/50 transition-all active:scale-95"
+                                onClick={() => router.push("/")}
+                            >
+                                <span className="text-white">Back to Overview</span>
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 backdrop-blur-md">
+                                    <ArrowLeft className="h-4 w-4 text-white rotate-180" strokeWidth={2.5} />
+                                </div>
+                            </Button>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* ── Desktop Layout ────────────────────────────────────────────────────── */}
+            <div className="hidden md:block mx-auto max-w-md pb-24 space-y-6">
                 <div className="text-center mb-8">
                     <h1 className="text-2xl font-black text-ink tracking-tight">Deposit Crypto</h1>
                     <p className="mt-1 text-sm font-medium text-muted">

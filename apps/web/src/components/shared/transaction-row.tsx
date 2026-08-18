@@ -29,6 +29,12 @@ function getCategoryLabel(cat: TxCategory) {
         case "payment": return "Payment";
         case "gift-card": return "Gift Card";
         case "flight": return "Flight";
+        case "airtime": return "Airtime";
+        case "data": return "Data";
+        case "tv": return "TV/Cable";
+        case "electricity": return "Electricity";
+        case "admin": return "Adjustment";
+        case "cashback": return "Cashback";
         default: return "Transfer";
     }
 }
