@@ -253,90 +253,152 @@ export default function ReceiveCryptoPage() {
                         {/* Header */}
                         <div className="flex items-center justify-between px-4 py-4 pt-6">
                             <div className="flex items-center gap-3">
-                                <button onClick={() => router.back()} className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-50 border border-gray-100 text-ink">
+                                <button
+                                    onClick={() => {
+                                        if (pickerStep === "network") {
+                                            setPickerStep("coin");
+                                            setPickerCoin(null);
+                                            setPickerSearch("");
+                                        } else {
+                                            router.back();
+                                        }
+                                    }}
+                                    className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-50 border border-gray-100 text-ink"
+                                >
                                     <ArrowLeft className="h-5 w-5" />
                                 </button>
                                 <div>
-                                    <h1 className="text-[22px] font-black text-ink leading-none tracking-tight">Select asset</h1>
-                                    <div className="flex items-center gap-1.5 mt-1.5">
-                                        <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>
-                                        <span className="text-[11px] font-bold text-muted">Live prices</span>
-                                    </div>
+                                    <h1 className="text-[22px] font-black text-ink leading-none tracking-tight">
+                                        {pickerStep === "network" && activeGroup
+                                            ? `Select network for ${activeGroup.representative.name ?? activeGroup.coin}`
+                                            : "Select asset"}
+                                    </h1>
+                                    {pickerStep === "coin" ? (
+                                        <div className="flex items-center gap-1.5 mt-1.5">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                                            <span className="text-[11px] font-bold text-muted">Live prices</span>
+                                        </div>
+                                    ) : null}
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <button 
-                                    className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-50 border border-gray-100 text-ink active:scale-95 transition-transform"
-                                    onClick={() => refetchCurrencies()}
-                                >
-                                    <RefreshCcw className={cn("h-4 w-4", currenciesLoading && "animate-spin text-muted")} />
-                                </button>
-                            </div>
+                            {pickerStep === "coin" ? (
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-50 border border-gray-100 text-ink active:scale-95 transition-transform"
+                                        onClick={() => refetchCurrencies()}
+                                    >
+                                        <RefreshCcw className={cn("h-4 w-4", currenciesLoading && "animate-spin text-muted")} />
+                                    </button>
+                                </div>
+                            ) : null}
                         </div>
 
-                        {/* List */}
-                        <div className="px-5 mt-6 flex flex-col gap-8">
-                            {currenciesLoading ? (
-                                Array.from({ length: 5 }).map((_, i) => (
-                                    <div key={i} className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            <Skeleton className="h-9 w-9 rounded-full" />
-                                            <div className="space-y-2">
-                                                <Skeleton className="h-4 w-24" />
-                                                <Skeleton className="h-3 w-16" />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2 flex flex-col items-end">
-                                            <Skeleton className="h-4 w-16" />
-                                            <Skeleton className="h-3 w-12" />
-                                        </div>
+                        {pickerStep === "coin" ? (
+                            <>
+                                {/* Search — same behavior as the desktop picker: typing searches the
+                                    full currency list and replaces the shortlist entirely. */}
+                                <div className="px-5 mt-2">
+                                    <div className="flex items-center gap-2 rounded-xl border border-border bg-gray-50 px-3 h-11">
+                                        <Search className="h-4 w-4 text-muted shrink-0" />
+                                        <input
+                                            value={pickerSearch}
+                                            onChange={(e) => setPickerSearch(e.target.value)}
+                                            placeholder="Search all coins..."
+                                            className="flex-1 bg-transparent text-sm font-medium text-ink placeholder:text-muted outline-none"
+                                        />
                                     </div>
-                                ))
-                            ) : coinGroups.map(group => {
-                                const priceData = MOCK_PRICES[group.coin] || { price: "$0.00", change: "", up: true };
-                                return (
-                                    <div 
-                                        key={group.coin} 
+                                </div>
+
+                                {/* List — shortlist by default, full-catalog search results once typing */}
+                                <div className="px-5 mt-6 flex flex-col gap-8">
+                                    {!trimmedSearch ? (
+                                        <div className="text-[11px] font-extrabold text-muted uppercase tracking-widest -mb-4">Most used</div>
+                                    ) : null}
+                                    {currenciesLoading ? (
+                                        Array.from({ length: 5 }).map((_, i) => (
+                                            <div key={i} className="flex items-center justify-between">
+                                                <div className="flex items-center gap-4">
+                                                    <Skeleton className="h-9 w-9 rounded-full" />
+                                                    <div className="space-y-2">
+                                                        <Skeleton className="h-4 w-24" />
+                                                        <Skeleton className="h-3 w-16" />
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-2 flex flex-col items-end">
+                                                    <Skeleton className="h-4 w-16" />
+                                                    <Skeleton className="h-3 w-12" />
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : visibleCoinGroups.length === 0 ? (
+                                        <p className="text-center text-sm font-medium text-muted py-6">No coins found.</p>
+                                    ) : visibleCoinGroups.map(group => {
+                                        const priceData = MOCK_PRICES[group.coin] || { price: "$0.00", change: "", up: true };
+                                        return (
+                                            <div
+                                                key={group.coin}
+                                                className="flex items-center justify-between cursor-pointer active:opacity-70 transition-opacity"
+                                                onClick={() => {
+                                                    const singleNetwork = group.variants.length === 1;
+                                                    selectCoinGroup(group);
+                                                    if (singleNetwork) {
+                                                        setMobileStep("details");
+                                                    }
+                                                }}
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <CurrencyAvatar currency={group.representative} className="h-9 w-9 text-base" />
+                                                    <div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-extrabold text-[16px] text-ink">{group.representative.name || group.coin}</span>
+                                                            <span className="text-[13px] font-bold text-muted">{group.coin}</span>
+                                                            {group.coin === 'BTC' && (
+                                                                <span className="px-2 py-0.5 rounded bg-green-50 text-green-700 text-[9px] font-black uppercase tracking-widest ml-1">Popular</span>
+                                                            )}
+                                                        </div>
+                                                        <div className="text-[11px] font-bold text-muted mt-1 uppercase tracking-widest">
+                                                            {group.variants.length > 1 ? `${group.variants.length} NETWORKS` : group.variants.map(v => v.network || v.code).join(' · ')}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="font-black text-[17px] text-ink">{priceData.price}</div>
+                                                    {priceData.change && (
+                                                        <div className={`text-[11px] font-bold mt-1 ${priceData.up ? 'text-green-500' : 'text-red-500'}`}>
+                                                            {priceData.up ? '↗' : '↘'} {priceData.change}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </>
+                        ) : activeGroup ? (
+                            /* Network sub-step — same list every network chooser in this app uses */
+                            <div className="px-5 mt-6 flex flex-col gap-6">
+                                {activeGroup.variants.map((currency) => (
+                                    <div
+                                        key={currency.code}
                                         className="flex items-center justify-between cursor-pointer active:opacity-70 transition-opacity"
                                         onClick={() => {
-                                            setPickerCoin(group.coin);
-                                            setSelectedCode(group.representative.code);
+                                            setSelectedCode(currency.code);
+                                            handlePickerOpenChange(false);
                                             setMobileStep("details");
                                         }}
                                     >
-                                        <div className="flex items-center gap-4">
-                                            {group.representative.iconUrl ? (
-                                                <img src={group.representative.iconUrl} alt={group.coin} className="h-9 w-9 rounded-full object-contain" />
-                                            ) : (
-                                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-100 text-violet-700 font-bold">
-                                                    {group.coin[0]}
-                                                </div>
-                                            )}
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-extrabold text-[16px] text-ink">{group.representative.name || group.coin}</span>
-                                                    <span className="text-[13px] font-bold text-muted">{group.coin}</span>
-                                                    {group.coin === 'BTC' && (
-                                                        <span className="px-2 py-0.5 rounded bg-green-50 text-green-700 text-[9px] font-black uppercase tracking-widest ml-1">Popular</span>
-                                                    )}
-                                                </div>
-                                                <div className="text-[11px] font-bold text-muted mt-1 uppercase tracking-widest">
-                                                    {group.variants.length > 1 ? `${group.variants.length} NETWORKS` : group.variants.map(v => v.network || v.code).join(' · ')}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="font-black text-[17px] text-ink">{priceData.price}</div>
-                                            {priceData.change && (
-                                                <div className={`text-[11px] font-bold mt-1 ${priceData.up ? 'text-green-500' : 'text-red-500'}`}>
-                                                    {priceData.up ? '↗' : '↘'} {priceData.change}
-                                                </div>
-                                            )}
-                                        </div>
+                                        <span className="font-extrabold text-[16px] text-ink uppercase">
+                                            {currency.network ?? "Mainnet"}
+                                        </span>
+                                        {currency.recommended ? (
+                                            <span className="text-[10px] font-bold bg-violet-100 text-violet-700 px-2 py-0.5 rounded-sm uppercase tracking-wider">
+                                                Recommended
+                                            </span>
+                                        ) : null}
                                     </div>
-                                );
-                            })}
-                        </div>
+                                ))}
+                            </div>
+                        ) : null}
                     </div>
                 ) : (
                     <div className="pb-32 flex flex-col items-center">
