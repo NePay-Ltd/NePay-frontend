@@ -475,10 +475,15 @@ export default function ReceiveCryptoPage() {
                                         {displayMinAmount !== null ? displayMinAmount : "…"} {selectedCurrency?.coin ?? ""}
                                     </strong>
                                 </span>
-                                {/* Network fee intentionally omitted — no real data source exists yet
-                                    (NOWPayments doesn't expose on-chain network fees to us). A hardcoded
-                                    "$2" was here before; removed rather than shown as fact. Add back once
-                                    there's a real figure to show. */}
+                            </div>
+                            {/* No pre-send fee estimate exists: NOWPayments only reports the real
+                                on-chain fee (fee.depositFee) in the settlement webhook, after a deposit
+                                completes — never up front. Generic, honest copy here instead of either a
+                                fabricated number or an "unavailable" label that reads as broken. The real
+                                figure could be shown post-settlement in transaction history, where it'd be
+                                a fact rather than a guess — separate future work. */}
+                            <div className="text-[13px] font-medium text-muted mt-2">
+                                Network fee · <strong className="font-bold text-ink">Deducted automatically</strong>
                             </div>
                             <div className="text-[13px] font-medium text-muted mt-2">
                                 Deposit limit · <strong className="font-bold text-ink">Unlimited</strong>
