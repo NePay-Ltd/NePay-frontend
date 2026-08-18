@@ -316,14 +316,6 @@ export function TransactionDetailModal({ open, onOpenChange, transaction, onView
                                 )}
                             </div>
                         </div>
-                        <Button
-                            variant="ghost"
-                            fullWidth
-                            onClick={() => onOpenChange(false)}
-                            className="border border-border text-ink hover:bg-gray-50"
-                        >
-                            Close
-                        </Button>
                     </div>
                 </div>
             </DialogContent>

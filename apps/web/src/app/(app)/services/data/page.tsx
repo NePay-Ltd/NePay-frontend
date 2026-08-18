@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { PlanGrid } from "@/components/services/PlanGrid";
 import { StickyPayBar } from "@/components/services/StickyPayBar";
 import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen";
+import { TransactionDetailModal } from "@/components/shared/transaction-detail-modal";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -64,6 +65,7 @@ export default function DataPage() {
     const [txState, setTxState] = React.useState<TransactionState>("pin");
     const [txResult, setTxResult] = React.useState<UtilityPurchaseResponseDto | null>(null);
     const [successOpen, setSuccessOpen] = React.useState(false);
+    const [receiptOpen, setReceiptOpen] = React.useState(false);
 
     // ─── Handlers ───────────────────────────────────────────────────────────────
     React.useEffect(() => {
@@ -254,7 +256,27 @@ export default function DataPage() {
                     )
                 }
                 onHome={() => router.push("/overview")}
-                onReceipt={() => router.push("/transactions")}
+                onReceipt={() => {
+                    setSuccessOpen(false);
+                    setReceiptOpen(true);
+                }}
+            />
+
+            <TransactionDetailModal
+                open={receiptOpen}
+                onOpenChange={setReceiptOpen}
+                transaction={txResult ? {
+                    id: txResult.reference || `tx-${Date.now()}`,
+                    label: `DATA purchase: ${selectedNetwork?.serviceID}-${selectedPlan?.variation_code} ${phone}`,
+                    meta: "UTILITY PURCHASE",
+                    amount: -selectedAmount,
+                    category: "payment",
+                    status: txResult.status === "PROCESSING" ? "pending" : "success",
+                    date: new Date().toISOString(),
+                    type: "UTILITY_PURCHASE",
+                    direction: "DEBIT",
+                    currency: "NGN"
+                } : null}
             />
         </>
     );

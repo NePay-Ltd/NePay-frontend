@@ -90,12 +90,12 @@ export function PlanGrid({ plans, selectedId, onChange, isLoading }: PlanGridPro
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
                 <h4 className="text-sm font-bold text-ink">Data Bundles</h4>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
-                    <TabsList className="w-full sm:w-auto grid grid-flow-col auto-cols-fr bg-gray-100 rounded-xl p-1 h-10">
-                        <TabsTrigger value="All" className="rounded-lg text-xs font-bold data-[state=active]:shadow-sm">All</TabsTrigger>
-                        {hasDaily && <TabsTrigger value="Daily" className="rounded-lg text-xs font-bold data-[state=active]:shadow-sm">Daily</TabsTrigger>}
-                        {hasWeekly && <TabsTrigger value="Weekly" className="rounded-lg text-xs font-bold data-[state=active]:shadow-sm">Weekly</TabsTrigger>}
-                        {hasMonthly && <TabsTrigger value="Monthly" className="rounded-lg text-xs font-bold data-[state=active]:shadow-sm">Monthly</TabsTrigger>}
-                        {hasOther && <TabsTrigger value="Other" className="rounded-lg text-xs font-bold data-[state=active]:shadow-sm">Other</TabsTrigger>}
+                    <TabsList className="flex w-full overflow-x-auto no-scrollbar sm:grid sm:grid-flow-col sm:auto-cols-fr bg-gray-100 rounded-xl p-1 h-10 shrink-0">
+                        <TabsTrigger value="All" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:shadow-sm">All</TabsTrigger>
+                        {hasDaily && <TabsTrigger value="Daily" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:shadow-sm">Daily</TabsTrigger>}
+                        {hasWeekly && <TabsTrigger value="Weekly" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:shadow-sm">Weekly</TabsTrigger>}
+                        {hasMonthly && <TabsTrigger value="Monthly" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:shadow-sm">Monthly</TabsTrigger>}
+                        {hasOther && <TabsTrigger value="Other" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:shadow-sm">Other</TabsTrigger>}
                     </TabsList>
                 </Tabs>
             </div>
