@@ -60,6 +60,45 @@ function groupByCoin(currencies: CryptoCurrencyDto[]): CoinGroup[] {
     });
 }
 
+/**
+ * Display-order preference for the coin-picker's "most used" shortlist —
+ * purely cosmetic, never a filter/gate. Which coins are *eligible* for the
+ * shortlist is entirely backend-driven (`MerchantCurrency.curated`, from
+ * NowPaymentsAdapter's STATIC_CURRENCY_INFO); this only orders whichever of
+ * those happen to be curated right now. A curated coin not listed here still
+ * appears in the shortlist, just after these five.
+ */
+const SHORTLIST_ORDER = ["USDT", "USDC", "BTC", "ETH", "TRX"];
+const SHORTLIST_SIZE = 5;
+
+function rankInShortlist(coin: string): number {
+    const index = SHORTLIST_ORDER.indexOf(coin);
+    return index === -1 ? SHORTLIST_ORDER.length : index;
+}
+
+/** Ticker, coin symbol, and (when curated) display name — searches the full ~300-currency list, not just the shortlist. */
+function matchesCoinQuery(group: CoinGroup, query: string): boolean {
+    if (group.coin.toLowerCase().includes(query)) {
+        return true;
+    }
+    if (group.representative.name?.toLowerCase().includes(query)) {
+        return true;
+    }
+    return group.variants.some((variant) => variant.code.toLowerCase().includes(query));
+}
+
+/** Real icon when curated and one exists; otherwise a generic initial-letter avatar — never a broken image or blank space. */
+function CurrencyAvatar({ currency, className }: { currency: CryptoCurrencyDto; className: string }) {
+    return currency.iconUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={currency.iconUrl} alt="" className={cn("rounded-full bg-violet-50 object-contain", className)} />
+    ) : (
+        <span className={cn("flex items-center justify-center rounded-full bg-violet-50 font-bold text-violet-700", className)}>
+            {(currency.name ?? currency.coin)[0]?.toUpperCase() ?? "?"}
+        </span>
+    );
+}
+
 function useCountdown(expiresAt: string | undefined) {
     const [remainingMs, setRemainingMs] = React.useState<number | null>(null);
 
@@ -109,6 +148,28 @@ export default function ReceiveCryptoPage() {
     const coinGroups = React.useMemo(() => groupByCoin(currencies ?? []), [currencies]);
     const activeGroup = coinGroups.find((g) => g.coin === pickerCoin) ?? null;
 
+    // Default view: a short curated shortlist, not the full ~300-coin list.
+    const shortlistGroups = React.useMemo(
+        () =>
+            coinGroups
+                .filter((g) => g.representative.curated)
+                .sort((a, b) => rankInShortlist(a.coin) - rankInShortlist(b.coin))
+                .slice(0, SHORTLIST_SIZE),
+        [coinGroups],
+    );
+
+    // Typing a query searches the full list (ticker + display name), not just
+    // the shortlist — and replaces it entirely, never shown alongside it.
+    const trimmedSearch = pickerSearch.trim().toLowerCase();
+    const searchResults = React.useMemo(() => {
+        if (!trimmedSearch) {
+            return [];
+        }
+        return coinGroups.filter((g) => matchesCoinQuery(g, trimmedSearch));
+    }, [coinGroups, trimmedSearch]);
+
+    const visibleCoinGroups = trimmedSearch ? searchResults : shortlistGroups;
+
     React.useEffect(() => {
         if (!selectedCode && coinGroups.length > 0) {
             setSelectedCode(coinGroups[0]!.representative.code);
@@ -156,6 +217,15 @@ export default function ReceiveCryptoPage() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedCode]);
+
+    // Prefer the confirmed amount for the actual session the provider
+    // accepted (depositData.expectedAmount) over the pre-session estimate
+    // (minAmountData.minAmount) the moment it's available — the provider's
+    // real minimum can exceed that earlier estimate (see backend's own
+    // note), so the two are never shown as if interchangeable; the more
+    // specific number always wins.
+    const displayMinAmount = depositData?.expectedAmount ?? minAmountData?.minAmount ?? null;
+    const displayMinAmountLoading = !depositData?.expectedAmount && minAmountLoading;
 
     const remainingMs = useCountdown(depositData?.expiresAt ?? undefined);
     const addressExpired = depositData?.expiresAt !== undefined && remainingMs !== null && remainingMs <= 0;
@@ -389,19 +459,12 @@ export default function ReceiveCryptoPage() {
                                     ) : (
                                         <Popover open={openPicker} onOpenChange={handlePickerOpenChange}>
                                             <PopoverTrigger asChild>
-                                                <button className="flex h-14 w-full items-center justify-between rounded-xl border border-border bg-white px-4 transition-all hover:border-violet-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600">
+                                                <button data-testid="asset-picker-trigger" className="flex h-14 w-full items-center justify-between rounded-xl border border-border bg-white px-4 transition-all hover:border-violet-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600">
                                                     <div className="flex items-center gap-3">
-                                                        {selectedCurrency?.iconUrl ? (
-                                                            // eslint-disable-next-line @next/next/no-img-element
-                                                            <img
-                                                                src={selectedCurrency.iconUrl}
-                                                                alt=""
-                                                                className="h-8 w-8 rounded-full bg-violet-50 object-contain"
-                                                            />
+                                                        {selectedCurrency ? (
+                                                            <CurrencyAvatar currency={selectedCurrency} className="h-8 w-8 text-base shadow-sm" />
                                                         ) : (
-                                                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-50 text-base shadow-sm">
-                                                                {(selectedCurrency?.name ?? selectedCurrency?.code)?.[0]?.toUpperCase() ?? "?"}
-                                                            </span>
+                                                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-50 text-base shadow-sm">?</span>
                                                         )}
                                                         <div className="flex flex-col items-start">
                                                             <span className="text-sm font-extrabold text-ink">{selectedCurrency?.name ?? selectedCurrency?.code.toUpperCase() ?? "Select an asset"}</span>
@@ -470,38 +533,39 @@ export default function ReceiveCryptoPage() {
                                                         </CommandList>
                                                     </Command>
                                                 ) : (
-                                                    <Command>
+                                                    <Command shouldFilter={false}>
                                                         <CommandInput
-                                                            placeholder="Search coins..."
+                                                            placeholder="Search all coins..."
                                                             value={pickerSearch}
                                                             onValueChange={setPickerSearch}
                                                         />
                                                         <CommandList className="max-h-[300px]">
                                                             <CommandEmpty>No coins found.</CommandEmpty>
-                                                            <CommandGroup>
-                                                                {coinGroups.map((group) => (
+                                                            <CommandGroup heading={trimmedSearch ? "Search results" : "Most used"}>
+                                                                {visibleCoinGroups.map((group) => (
                                                                     <CommandItem
                                                                         key={group.coin}
-                                                                        value={`${group.representative.name ?? group.coin} ${group.coin}`}
+                                                                        value={group.coin}
                                                                         onSelect={() => selectCoinGroup(group)}
                                                                         className="cursor-pointer py-3"
                                                                     >
                                                                         <Check
                                                                             className={cn(
-                                                                                "mr-3 h-4 w-4",
+                                                                                "mr-3 h-4 w-4 shrink-0",
                                                                                 group.variants.some((v) => v.code === selectedCode) ? "opacity-100 text-violet-600" : "opacity-0",
                                                                             )}
                                                                         />
-                                                                        <div className="flex flex-1 items-center justify-between">
-                                                                            <span className="font-bold text-ink text-[13px]">
+                                                                        <CurrencyAvatar currency={group.representative} className="mr-3 h-6 w-6 shrink-0 text-[11px]" />
+                                                                        <div className="flex flex-1 items-center justify-between gap-2 min-w-0">
+                                                                            <span className="font-bold text-ink text-[13px] truncate">
                                                                                 {group.representative.name ?? group.coin}
                                                                             </span>
                                                                             {group.variants.length > 1 ? (
-                                                                                <span className="text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded-sm text-muted uppercase tracking-wider">
+                                                                                <span className="shrink-0 text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded-sm text-muted uppercase tracking-wider">
                                                                                     {group.variants.length} networks
                                                                                 </span>
                                                                             ) : group.representative.network ? (
-                                                                                <span className="text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded-sm text-muted uppercase tracking-wider">
+                                                                                <span className="shrink-0 text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded-sm text-muted uppercase tracking-wider">
                                                                                     {group.representative.network}
                                                                                 </span>
                                                                             ) : null}
@@ -519,14 +583,14 @@ export default function ReceiveCryptoPage() {
 
                                 <div className="p-4 sm:p-6 flex flex-col items-center">
                                     {/* Minimum amount warning pill */}
-                                    {selectedCode && (minAmountLoading || minAmountData) ? (
+                                    {selectedCode && (displayMinAmountLoading || displayMinAmount !== null) ? (
                                         <div className="mb-6 flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-4 py-1.5">
                                             <Info className="h-3.5 w-3.5 text-amber-600" />
-                                            {minAmountLoading ? (
+                                            {displayMinAmountLoading ? (
                                                 <Skeleton className="h-3 w-32" />
                                             ) : (
                                                 <span className="text-[11px] font-bold text-amber-900 uppercase tracking-wide">
-                                                    Min Deposit: {minAmountData!.minAmount} {(selectedCurrency?.name ?? selectedCurrency?.code)?.toUpperCase() ?? ""}
+                                                    Min Deposit: {displayMinAmount} {(selectedCurrency?.name ?? selectedCurrency?.code)?.toUpperCase() ?? ""}
                                                 </span>
                                             )}
                                         </div>

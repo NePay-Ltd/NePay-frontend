@@ -135,12 +135,18 @@ export interface CryptoCurrencyDto {
     network: string | null;
     iconUrl: string | null;
     requiresExtraId: boolean; // true for memo/tag-based coins (XRP, XLM, ...)
-    recommended: boolean; // true for exactly one network per coin group — the lowest-fee/fastest one
+    recommended: boolean; // true for exactly one network per coin group — the lowest-fee/fastest one, among curated variants only
+    curated: boolean; // true when name/iconUrl/requiresExtraId are real, reviewed metadata rather than a generic fallback (raw ticker, no icon)
 }
 
 export interface CryptoMinAmountDto {
     currency: string;
+    /** The enforced minimum — max(usdOneEquivalent, nowPaymentsMinAmount). A pre-session ESTIMATE only — once a real address exists, prefer CryptoDepositAddressDto.expectedAmount instead, which reflects the actual session the provider accepted (see its own note; can be higher than this figure). */
     minAmount: number;
+    /** NOWPayments' own raw minimum for this asset — exposed for transparency only. */
+    nowPaymentsMinAmount: number;
+    /** $1 USD converted into this asset's units at the current rate. Null if a rate wasn't available when minAmount was computed. */
+    usdOneEquivalent: number | null;
 }
 
 export interface CryptoDepositAddressDto {
@@ -149,6 +155,8 @@ export interface CryptoDepositAddressDto {
     asset: string;
     payMemo: string | null; // only non-null for memo/tag-based coins (XRP, XLM, ...)
     expiresAt: string | null; // ISO timestamp — a NOWPayments session is not permanent
+    /** The confirmed amount the provider actually accepted for THIS session — prefer this over CryptoMinAmountDto.minAmount once available; it can be higher (the provider's real minimum sometimes exceeds that pre-session estimate). Null only if the provider didn't return one. */
+    expectedAmount: number | null;
 }
 
 export interface CryptoDepositStatusDto {

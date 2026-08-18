@@ -42,7 +42,27 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
 export const transactionKeys = {
     all: ["transactions"] as const,
     list: (page: number) => [...transactionKeys.all, "list", page] as const,
+    detail: (id: string) => [...transactionKeys.all, "detail", id] as const,
 };
+
+/**
+ * A single transaction by id, straight from GET /wallet/transactions/:id —
+ * not a search through whatever page of the list happens to be cached.
+ * Receipt views (the /transactions/[id] page, "View Full Receipt" from the
+ * summary modal) must use this, not useInfiniteTransactions + .find(), which
+ * only ever finds a transaction if it's within the pages already fetched —
+ * silently "not found" for anything older than that.
+ */
+export function useTransaction(id: string | null) {
+    return useQuery<BaseTransaction>({
+        queryKey: transactionKeys.detail(id ?? ""),
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<LedgerEntryDto>>(`/wallet/transactions/${id}`);
+            return mapLedgerToTransaction(res.data.data);
+        },
+        enabled: !!id,
+    });
+}
 
 export function useTransactions(page: number = 1, limit: number = 20) {
     return useQuery<ApiPaginated<BaseTransaction>>({

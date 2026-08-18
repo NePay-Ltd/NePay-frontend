@@ -4,14 +4,13 @@ import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { ArrowLeft, Copy, Check, Download, Share2, Image, ChevronDown } from "lucide-react";
-import { useInfiniteTransactions } from "@/lib/queries/transactions";
+import { useTransaction } from "@/lib/queries/transactions";
 import { Button } from "@/components/shared/button";
 import { Panel, PanelBody } from "@/components/shared/panel";
 import { TxIcon } from "@/components/shared/tx-icon";
 import { formatNaira } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { Skeleton } from "@/components/shared/skeletons";
-import { BaseTransaction } from "@/components/shared/transaction-row";
 import { downloadReceipt, downloadReceiptPDF, downloadReceiptImage, shareReceipt, shareReceiptImage, type ReceiptData } from "@/lib/receipt-utils";
 
 function getCategoryColor(category: string) {
@@ -46,21 +45,15 @@ export default function TransactionDetailPage() {
     const router = useRouter();
     const transactionId = params.id as string;
 
-    // Fetch all transactions to find the one matching the ID
-    const { data, isLoading } = useInfiniteTransactions(50);
+    // Fetched directly by id — GET /wallet/transactions/:id — not searched
+    // out of whatever page of the list happens to be cached, so this works
+    // for any transaction the caller owns, not just the most recent ones.
+    const { data: transaction, isLoading } = useTransaction(transactionId);
     const [copied, setCopied] = React.useState(false);
     const [isDownloading, setIsDownloading] = React.useState(false);
     const [isSharing, setIsSharing] = React.useState(false);
     const [showDownloadMenu, setShowDownloadMenu] = React.useState(false);
     const [showShareMenu, setShowShareMenu] = React.useState(false);
-
-    // Find the transaction in the loaded data
-    const allTransactions = React.useMemo(() => {
-        if (!data) return [];
-        return data.pages.flatMap((p) => p.items);
-    }, [data]);
-
-    const transaction = allTransactions.find((tx) => tx.id === transactionId);
 
     const handleCopyId = () => {
         navigator.clipboard.writeText(transactionId);
