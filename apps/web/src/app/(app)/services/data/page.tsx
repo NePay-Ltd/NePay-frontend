@@ -266,7 +266,7 @@ export default function DataPage() {
                 open={receiptOpen}
                 onOpenChange={setReceiptOpen}
                 transaction={txResult ? {
-                    id: txResult.reference || `tx-${Date.now()}`,
+                    id: txResult.providerReference || `tx-${Date.now()}`,
                     label: `DATA purchase: ${selectedNetwork?.serviceID}-${selectedPlan?.variation_code} ${phone}`,
                     meta: "UTILITY PURCHASE",
                     amount: -selectedAmount,
