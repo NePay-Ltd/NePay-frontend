@@ -139,6 +139,12 @@ export interface CryptoCurrencyDto {
     curated: boolean; // true when name/iconUrl/requiresExtraId are real, reviewed metadata rather than a generic fallback (raw ticker, no icon)
 }
 
+export interface CryptoPricesDto {
+    currency: Currency; // always NGN — the platform's own settlement currency
+    /** Keyed by coin symbol (CryptoCurrencyDto.coin), NGN per 1 unit of the coin, as a decimal string. Null (never a fabricated number) for an uncurated coin or a coin with a temporarily-unavailable rate — missing from this map entirely means the same thing. */
+    prices: Record<string, string | null>;
+}
+
 export interface CryptoMinAmountDto {
     currency: string;
     /** The enforced minimum — max(usdOneEquivalent, nowPaymentsMinAmount). A pre-session ESTIMATE only — once a real address exists, prefer CryptoDepositAddressDto.expectedAmount instead, which reflects the actual session the provider accepted (see its own note; can be higher than this figure). */

@@ -10,6 +10,7 @@ import {
     CryptoMinAmountDto,
     CryptoDepositAddressDto,
     CryptoDepositStatusDto,
+    CryptoPricesDto,
 } from "@/lib/types/api";
 
 const TERMINAL_STATUSES = ["finished", "failed", "expired", "refunded", "partially_paid"];
@@ -17,6 +18,7 @@ const TERMINAL_STATUSES = ["finished", "failed", "expired", "refunded", "partial
 export const cryptoKeys = {
     all: ["crypto"] as const,
     currencies: () => [...cryptoKeys.all, "currencies"] as const,
+    prices: () => [...cryptoKeys.all, "prices"] as const,
     minAmount: (currency: string) => [...cryptoKeys.all, "min-amount", currency] as const,
     depositStatus: (paymentId: string) => [...cryptoKeys.all, "deposit-status", paymentId] as const,
 };
@@ -29,6 +31,18 @@ export function useCryptoCurrencies() {
             return res.data.data.currencies;
         },
         staleTime: Infinity,
+    });
+}
+
+/** Real, live prices for curated coins only (see CryptoPricesDto's own note) — never mock/placeholder data. 30s staleTime mirrors the backend's own rate cache, so a refetch here isn't just re-reading a stale local cache without also giving the server a chance to have a fresher one. */
+export function useCryptoPrices() {
+    return useQuery<CryptoPricesDto>({
+        queryKey: cryptoKeys.prices(),
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<CryptoPricesDto>>("/crypto/prices");
+            return res.data.data;
+        },
+        staleTime: 30_000,
     });
 }
 

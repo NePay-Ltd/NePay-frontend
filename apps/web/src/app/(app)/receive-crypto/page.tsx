@@ -32,6 +32,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/shared/skeletons";
 import {
     useCryptoCurrencies,
+    useCryptoPrices,
     useCryptoMinAmount,
     useGenerateDepositAddress,
     useCryptoDepositStatus,
@@ -124,20 +125,23 @@ function formatCountdown(ms: number) {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-const MOCK_PRICES: Record<string, { price: string; change: string; up: boolean }> = {
-    BTC: { price: "$64,262", change: "+1.14%", up: true },
-    USDT: { price: "$1.00", change: "", up: true },
-    USDC: { price: "$1.00", change: "", up: true },
-    ETH: { price: "$1,900.81", change: "-0.16%", up: false },
-    BNB: { price: "$603.52", change: "-0.34%", up: false },
-    SOL: { price: "$75.95", change: "+0.22%", up: true },
-    TRX: { price: "$0.3330", change: "+0.20%", up: true },
-};
+/** NGN per 1 unit of the coin, formatted for display — null (never a fabricated number) when there's no real price to show. */
+function formatNgnPrice(raw: string | null | undefined): string | null {
+    if (raw == null) {
+        return null;
+    }
+    const value = Number(raw);
+    if (!Number.isFinite(value) || value <= 0) {
+        return null;
+    }
+    return `₦${value.toLocaleString("en-NG", { maximumFractionDigits: value >= 1 ? 2 : 6 })}`;
+}
 
 export default function ReceiveCryptoPage() {
     const router = useRouter();
 
     const { data: currencies, isPending: currenciesLoading, isError: currenciesError, refetch: refetchCurrencies } = useCryptoCurrencies();
+    const { data: pricesData, isFetching: pricesFetching, refetch: refetchPrices } = useCryptoPrices();
     const [selectedCode, setSelectedCode] = React.useState<string | null>(null);
     const [openPicker, setOpenPicker] = React.useState(false);
     const [pickerStep, setPickerStep] = React.useState<"coin" | "network">("coin");
@@ -285,9 +289,12 @@ export default function ReceiveCryptoPage() {
                                 <div className="flex items-center gap-2">
                                     <button
                                         className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-50 border border-gray-100 text-ink active:scale-95 transition-transform"
-                                        onClick={() => refetchCurrencies()}
+                                        onClick={() => {
+                                            refetchCurrencies();
+                                            refetchPrices();
+                                        }}
                                     >
-                                        <RefreshCcw className={cn("h-4 w-4", currenciesLoading && "animate-spin text-muted")} />
+                                        <RefreshCcw className={cn("h-4 w-4", (currenciesLoading || pricesFetching) && "animate-spin text-muted")} />
                                     </button>
                                 </div>
                             ) : null}
@@ -333,7 +340,7 @@ export default function ReceiveCryptoPage() {
                                     ) : visibleCoinGroups.length === 0 ? (
                                         <p className="text-center text-sm font-medium text-muted py-6">No coins found.</p>
                                     ) : visibleCoinGroups.map(group => {
-                                        const priceData = MOCK_PRICES[group.coin] || { price: "$0.00", change: "", up: true };
+                                        const price = formatNgnPrice(pricesData?.prices[group.coin]);
                                         return (
                                             <div
                                                 key={group.coin}
@@ -362,11 +369,10 @@ export default function ReceiveCryptoPage() {
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <div className="font-black text-[17px] text-ink">{priceData.price}</div>
-                                                    {priceData.change && (
-                                                        <div className={`text-[11px] font-bold mt-1 ${priceData.up ? 'text-green-500' : 'text-red-500'}`}>
-                                                            {priceData.up ? '↗' : '↘'} {priceData.change}
-                                                        </div>
+                                                    {price ? (
+                                                        <div className="font-black text-[17px] text-ink">{price}</div>
+                                                    ) : (
+                                                        <div className="text-[11px] font-bold text-muted uppercase tracking-wide">Price unavailable</div>
                                                     )}
                                                 </div>
                                             </div>
@@ -457,7 +463,9 @@ export default function ReceiveCryptoPage() {
                                     {selectedCurrency?.iconUrl && <img src={selectedCurrency.iconUrl} className="h-4 w-4 rounded-full object-contain" alt="" />}
                                     <span className="font-bold text-ink text-[15px]">{selectedCurrency?.coin} ({selectedCurrency?.network?.toLowerCase() ?? 'native'})</span>
                                 </div>
-                                <div className="font-black text-ink text-[15px]">₦1385/$</div>
+                                <div className="font-black text-ink text-[15px]">
+                                    {formatNgnPrice(pricesData?.prices[selectedCurrency?.coin ?? ""]) ?? "Price unavailable"}
+                                </div>
                             </div>
                             
                             <div className="text-[13px] font-medium text-muted flex items-center gap-2 mt-2">
@@ -467,8 +475,10 @@ export default function ReceiveCryptoPage() {
                                         {displayMinAmount !== null ? displayMinAmount : "…"} {selectedCurrency?.coin ?? ""}
                                     </strong>
                                 </span>
-                                <span>·</span>
-                                <span>Network fee <strong className="font-bold text-ink">$2</strong></span>
+                                {/* Network fee intentionally omitted — no real data source exists yet
+                                    (NOWPayments doesn't expose on-chain network fees to us). A hardcoded
+                                    "$2" was here before; removed rather than shown as fact. Add back once
+                                    there's a real figure to show. */}
                             </div>
                             <div className="text-[13px] font-medium text-muted mt-2">
                                 Deposit limit · <strong className="font-bold text-ink">Unlimited</strong>
