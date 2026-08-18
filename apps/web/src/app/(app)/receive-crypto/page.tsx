@@ -399,7 +399,12 @@ export default function ReceiveCryptoPage() {
                             </div>
                             
                             <div className="text-[13px] font-medium text-muted flex items-center gap-2 mt-2">
-                                <span>Min deposit <strong className="font-bold text-ink">${minAmountData?.minAmount ?? 5}</strong></span>
+                                <span>
+                                    Min deposit{" "}
+                                    <strong className="font-bold text-ink">
+                                        {displayMinAmount !== null ? displayMinAmount : "…"} {selectedCurrency?.coin ?? ""}
+                                    </strong>
+                                </span>
                                 <span>·</span>
                                 <span>Network fee <strong className="font-bold text-ink">$2</strong></span>
                             </div>
