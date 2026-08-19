@@ -114,6 +114,8 @@ export interface LedgerEntryDto {
     amount: string; // always positive
     currency: Currency;
     description: string | null;
+    rate: string | null;
+    assetQuantity: string | null;
     createdAt: string;
 }
 

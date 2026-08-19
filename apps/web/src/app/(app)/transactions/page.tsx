@@ -67,6 +67,9 @@ function TransactionsContent() {
             type: tx.meta,
             direction: tx.amount > 0 ? "CREDIT" : "DEBIT",
             currency: "NGN",
+                cryptoAmount: tx.cryptoAmount,
+                cryptoAsset: tx.cryptoAsset,
+                exchangeRate: tx.exchangeRate,
         };
         setSelectedTransaction(detailData);
         setModalOpen(true);

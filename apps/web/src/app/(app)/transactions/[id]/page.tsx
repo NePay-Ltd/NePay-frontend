@@ -189,20 +189,25 @@ export default function TransactionDetailPage() {
             <Panel>
                 <PanelBody className="space-y-8">
                     {/* Transaction Header */}
-                    <div className="flex items-start justify-between gap-4 pb-8 border-b border-border">
-                        <div className="flex items-start gap-4 flex-1">
+                    <div className="flex min-w-0 flex-col gap-5 border-b border-border pb-8 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="flex min-w-0 items-start gap-4 flex-1">
                             <div className="mt-1">
                                 <TxIcon category={transaction.category} />
                             </div>
-                            <div className="flex-1">
-                                <h1 className="text-2xl font-bold text-ink">{transaction.label}</h1>
+                            <div className="min-w-0 flex-1">
+                                <h1 className="text-2xl font-bold text-ink break-words">{transaction.label}</h1>
                                 <p className="text-sm text-muted mt-2">{transaction.meta}</p>
                             </div>
                         </div>
-                        <div className="text-right shrink-0">
+                        <div className="shrink-0 text-left sm:text-right">
                             <p className={cn("text-3xl font-bold font-sans tabular-nums", amountClass)}>
                                 {isCredit ? "+" : ""}{formatNaira(transaction.amount)}
                             </p>
+                            {transaction.cryptoAmount && transaction.cryptoAsset && (
+                                <p className="mt-1 text-sm font-semibold text-muted">
+                                    {transaction.cryptoAmount} {transaction.cryptoAsset}
+                                </p>
+                            )}
                         </div>
                     </div>
 
@@ -246,6 +251,15 @@ export default function TransactionDetailPage() {
                                     {transaction.amount > 0 ? "Received" : "Sent"}
                                 </p>
                             </div>
+
+                            {transaction.cryptoAmount && transaction.cryptoAsset && (
+                                <div>
+                                    <p className="text-xs font-semibold text-muted uppercase mb-2">Crypto received</p>
+                                    <p className="text-sm font-semibold text-ink">
+                                        {transaction.cryptoAmount} {transaction.cryptoAsset}
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Right Column */}
