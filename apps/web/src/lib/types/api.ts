@@ -104,6 +104,8 @@ export interface WalletBalanceDto {
     displayCurrency: Currency;
     availableBalance: string;
     pendingBalance: string;
+    /** availableBalance converted to USD for display, using the admin's real current rate — null when no real rate is available (never a fabricated figure). */
+    usdEquivalent: string | null;
     lastUpdated: string;
 }
 

@@ -1,20 +1,16 @@
 /**
  * TanStack Query hooks for the overview page.
- *
- * Each hook wraps a mock fetch function. To integrate with the real backend,
- * replace the queryFn body with `api.get<T>(path)` — no component changes needed.
  */
 
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { WalletBalanceDto, ApiPaginated, LedgerEntryDto, ApiResponse } from "@/lib/types/api";
-import { fetchRateQuote, type OverviewSummary, type RateQuote } from "@/lib/mock-overview";
+import { type OverviewSummary } from "@/lib/mock-overview";
 import { mapLedgerToTransaction } from "./transactions";
 
 export const overviewKeys = {
     all: ["overview"] as const,
     summary: () => [...overviewKeys.all, "summary"] as const,
-    rate: () => [...overviewKeys.all, "rate"] as const,
 };
 
 export function useOverviewSummary() {
@@ -28,14 +24,25 @@ export function useOverviewSummary() {
             ]);
 
             const balance = parseFloat(balanceRes.data.data.availableBalance);
-            
-            // For now, hardcode exchange rate for balanceUsd (or use a mock)
-            const balanceUsd = balance / 1565.50;
+
+            // From the backend's own usdEquivalent (WalletService.getUsdEquivalent) —
+            // converted using the admin's real, current USD→NGN rate, not a
+            // hardcoded/stale one. null when the backend has no real rate to
+            // convert with (e.g. no manual rate configured) — never guessed here.
+            const usdEquivalent = balanceRes.data.data.usdEquivalent;
+            const balanceUsd = usdEquivalent !== null ? parseFloat(usdEquivalent) : null;
 
             return {
                 balance,
                 balanceUsd,
-                // Mock sparkline and KPI since backend lacks analytics endpoints currently
+                // STILL HARDCODED — unlike balance/balanceUsd above, these are not
+                // wired to anything real. `sparkline` is six literal figures plus
+                // today's real balance tacked on the end; `moneyIn`/`moneyOut`/
+                // `netChange` are flat constants, not derived from this wallet's
+                // actual ledger history at all. No backend analytics endpoint
+                // exists yet to compute either for real — flagging rather than
+                // quietly leaving it, since this sits in the same hook the
+                // balanceUsd fix lives in.
                 sparkline: [340_000, 355_200, 348_900, 362_100, 370_500, 378_200, balance],
                 kpi: {
                     moneyIn: 142_500,
@@ -48,14 +55,5 @@ export function useOverviewSummary() {
         },
         staleTime: 60_000,
         enabled: typeof window !== "undefined" && !!localStorage.getItem("nepay-auth"),
-    });
-}
-
-export function useRateQuote() {
-    return useQuery<RateQuote>({
-        queryKey: overviewKeys.rate(),
-        queryFn: fetchRateQuote,
-        staleTime: 30_000,
-        refetchInterval: 60_000,
     });
 }

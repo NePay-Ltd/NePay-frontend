@@ -1,7 +1,10 @@
 /**
- * Mock responses for overview-related API endpoints.
- * Shapes are designed to be drop-in compatible with the real backend.
- * Swap each function body for `api.get<T>(path)` during integration.
+ * Shared overview types, plus the one mock endpoint (`fetchSearch`) still
+ * actually wired to a component (command-palette.tsx) — search has no real
+ * backend endpoint yet. `useOverviewSummary` (lib/queries/overview.ts) calls
+ * the real `/wallet` and `/wallet/transactions` endpoints directly and does
+ * not use anything from this file's fetch functions; `OverviewSummary` here
+ * is only the shared response type.
  */
 
 import type { TxCategory } from "@/components/shared/tx-icon";
@@ -10,7 +13,8 @@ import type { TxCategory } from "@/components/shared/tx-icon";
 
 export interface OverviewSummary {
     balance: number;
-    balanceUsd: number;
+    /** null when the backend has no real rate to convert with — see WalletBalanceDto.usdEquivalent. Never a fabricated figure. */
+    balanceUsd: number | null;
     /** 7 daily balance data-points, oldest first. */
     sparkline: number[];
     kpi: {
@@ -29,13 +33,6 @@ export interface Transaction {
     amount: number;     // positive = credit, negative = debit
     category: TxCategory;
     status: "success" | "pending" | "failed";
-}
-
-export interface RateQuote {
-    symbol: string;     // "USDT/NGN"
-    rate: number;       // e.g. 1565.50
-    changePercent: number; // e.g. 0.82 or -1.3
-    updatedAt: string;  // ISO timestamp
 }
 
 export interface SearchResults {
@@ -58,75 +55,6 @@ function delay(ms: number) {
 }
 
 // ─── Endpoint mocks ───────────────────────────────────────────────────────────
-
-/** GET /overview/summary */
-export async function fetchOverviewSummary(): Promise<OverviewSummary> {
-    await delay(900);
-    return {
-        balance: 385_000.45,
-        balanceUsd: 246.80,
-        sparkline: [340_000, 355_200, 348_900, 362_100, 370_500, 378_200, 385_000],
-        kpi: {
-            moneyIn: 142_500,
-            moneyOut: 97_800,
-            netChange: 44_700,
-            pending: 3,
-        },
-        recentTransactions: [
-            {
-                id: "tx_01",
-                label: "MTN Airtime",
-                meta: "Aug 7 · Airtime",
-                amount: -2_000,
-                category: "payment",
-                status: "success",
-            },
-            {
-                id: "tx_02",
-                label: "Wallet Top-Up",
-                meta: "Aug 6 · Bank Transfer",
-                amount: 50_000,
-                category: "deposit",
-                status: "success",
-            },
-            {
-                id: "tx_03",
-                label: "Amazon Gift Card",
-                meta: "Aug 5 · Gift Card",
-                amount: -15_500,
-                category: "gift-card",
-                status: "success",
-            },
-            {
-                id: "tx_04",
-                label: "Abuja → Lagos",
-                meta: "Aug 4 · Flight · Air Peace",
-                amount: -67_200,
-                category: "flight",
-                status: "pending",
-            },
-            {
-                id: "tx_05",
-                label: "USDT Sale",
-                meta: "Aug 3 · Crypto Off-Ramp",
-                amount: 78_400,
-                category: "deposit",
-                status: "success",
-            },
-        ],
-    };
-}
-
-/** GET /overview/rate */
-export async function fetchRateQuote(): Promise<RateQuote> {
-    await delay(600);
-    return {
-        symbol: "USDT/NGN",
-        rate: 1_565.50,
-        changePercent: 0.82,
-        updatedAt: new Date().toISOString(),
-    };
-}
 
 /** GET /search?q=<query> */
 export async function fetchSearch(query: string): Promise<SearchResults> {
