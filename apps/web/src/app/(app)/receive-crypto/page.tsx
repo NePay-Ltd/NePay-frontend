@@ -474,7 +474,7 @@ export default function ReceiveCryptoPage() {
                                 <span>
                                     Min deposit{" "}
                                     <strong className="font-bold text-ink">
-                                        {displayMinAmountUsd !== null ? formatUsd(displayMinAmountUsd) : "…"}
+                                        {formatUsd(displayMinAmountUsd) ?? "Unavailable"}
                                     </strong>
                                 </span>
                             </div>
