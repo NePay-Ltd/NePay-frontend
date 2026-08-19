@@ -222,7 +222,15 @@ export default function ReceiveCryptoPage() {
     // specific number always wins.
     const displayMinAmount = depositData?.expectedAmount ?? minAmountData?.minAmount ?? null;
     const displayMinAmountLoading = !depositData?.expectedAmount && minAmountLoading;
+    const displayMinAmountUsd =
+        displayMinAmount !== null && minAmountData?.usdOneEquivalent
+            ? displayMinAmount / minAmountData.usdOneEquivalent
+            : null;
 
+    const formatUsd = (amount: number | null) =>
+        amount === null || !Number.isFinite(amount)
+            ? null
+            : `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     const remainingMs = useCountdown(depositData?.expiresAt ?? undefined);
     const addressExpired = depositData?.expiresAt !== undefined && remainingMs !== null && remainingMs <= 0;
 
@@ -456,7 +464,9 @@ export default function ReceiveCryptoPage() {
                                     <span className="font-bold text-ink text-[15px]">{selectedCurrency?.coin} ({selectedCurrency?.network?.toLowerCase() ?? 'native'})</span>
                                 </div>
                                 <div className="font-black text-ink text-[15px]">
-                                    {formatNgnPrice(pricesData?.prices[selectedCurrency?.coin ?? ""]) ?? "Price unavailable"}
+                                    {minAmountData?.usdOneEquivalent
+                                        ? `$${(1 / minAmountData.usdOneEquivalent).toLocaleString("en-US", { maximumFractionDigits: 6 })}`
+                                        : "Price unavailable"}
                                 </div>
                             </div>
                             
@@ -464,7 +474,7 @@ export default function ReceiveCryptoPage() {
                                 <span>
                                     Min deposit{" "}
                                     <strong className="font-bold text-ink">
-                                        {displayMinAmount !== null ? displayMinAmount : "…"} {selectedCurrency?.coin ?? ""}
+                                        {displayMinAmountUsd !== null ? formatUsd(displayMinAmountUsd) : "…"}
                                     </strong>
                                 </span>
                             </div>
@@ -664,7 +674,8 @@ export default function ReceiveCryptoPage() {
                                                 <Skeleton className="h-3 w-32" />
                                             ) : (
                                                 <span className="text-[11px] font-bold text-amber-900 uppercase tracking-wide">
-                                                    Min Deposit: {displayMinAmount} {(selectedCurrency?.name ?? selectedCurrency?.code)?.toUpperCase() ?? ""}
+                                                    Min Deposit: {formatUsd(displayMinAmountUsd) ?? "Unavailable"}
+                                                        Min Deposit: {formatUsd(displayMinAmountUsd) ?? "Unavailable"}
                                                 </span>
                                             )}
                                         </div>
