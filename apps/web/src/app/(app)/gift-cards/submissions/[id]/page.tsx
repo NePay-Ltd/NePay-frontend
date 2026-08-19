@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { 
+import {
     Check,
     Clock,
     X,
@@ -14,14 +14,14 @@ import {
 
 import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/format";
-import { useGiftCardSubmissionStatus } from "@/lib/queries/gift-cards";
+import { useGiftCardOrder } from "@/lib/queries/gift-cards";
 
 import { Panel, PanelBody } from "@/components/shared/panel";
 import { Button } from "@/components/shared/button";
 
 export default function SubmissionTrackerPage({ params }: { params: { id: string } }) {
     const router = useRouter();
-    const { data: submission, isLoading } = useGiftCardSubmissionStatus(params.id);
+    const { data: order, isLoading } = useGiftCardOrder(params.id);
 
     if (isLoading) {
         return (
@@ -32,7 +32,7 @@ export default function SubmissionTrackerPage({ params }: { params: { id: string
         );
     }
 
-    if (!submission) {
+    if (!order) {
         return (
             <div className="flex min-h-[400px] flex-col items-center justify-center space-y-4 text-center">
                 <p className="text-lg font-medium text-ink">Submission not found</p>
@@ -43,12 +43,13 @@ export default function SubmissionTrackerPage({ params }: { params: { id: string
         );
     }
 
-    // Determine stepper state
-    const status = submission.status;
-    const isSubmitted = true; // Always true if we exist
-    const isVerifying = status === "verifying" || status === "paid" || status === "rejected";
-    const isPaid = status === "paid";
-    const isRejected = status === "rejected";
+    // PENDING_REVIEW/APPROVED/REJECTED — the same three states shown in
+    // transaction history, never folded into a generic "processing" label:
+    // this is a human review in progress, not provider latency.
+    const status = order.status;
+    const isPending = status === "PENDING_REVIEW";
+    const isApproved = status === "APPROVED";
+    const isRejected = status === "REJECTED";
 
     return (
         <div className="mx-auto max-w-lg space-y-6">
@@ -68,10 +69,10 @@ export default function SubmissionTrackerPage({ params }: { params: { id: string
                         {/* Summary Header */}
                         <div className="text-center">
                             <h2 className="text-sm font-medium uppercase tracking-wider text-muted">
-                                {submission.brand} Gift Card
+                                {order.cardBrand} Gift Card
                             </h2>
                             <p className="mt-1 font-mono text-3xl font-bold text-ink">
-                                ${parseFloat(submission.faceValueUsd || "0").toFixed(2)}
+                                ${parseFloat(order.faceValueUsd || "0").toFixed(2)}
                             </p>
                         </div>
 
@@ -83,67 +84,67 @@ export default function SubmissionTrackerPage({ params }: { params: { id: string
                             <div className="space-y-10 relative">
                                 {/* Step 1: Submitted */}
                                 <div className="relative flex gap-4">
-                                    <div className={cn(
-                                        "absolute -left-6 flex h-8 w-8 items-center justify-center rounded-full ring-4 ring-white",
-                                        isSubmitted ? "bg-violet-600 text-white" : "bg-gray-100 text-muted"
-                                    )}>
+                                    <div className="absolute -left-6 flex h-8 w-8 items-center justify-center rounded-full ring-4 ring-white bg-violet-600 text-white">
                                         <UploadCloud className="h-4 w-4" />
                                     </div>
                                     <div className="pt-1">
-                                        <h3 className={cn("text-sm font-semibold", isSubmitted ? "text-ink" : "text-muted")}>
+                                        <h3 className="text-sm font-semibold text-ink">
                                             Card Submitted
                                         </h3>
                                         <p className="text-xs text-muted mt-1">We have received your gift card details.</p>
                                     </div>
                                 </div>
 
-                                {/* Step 2: Verifying */}
+                                {/* Step 2: Under Review */}
                                 <div className="relative flex gap-4">
                                     <div className={cn(
                                         "absolute -left-6 flex h-8 w-8 items-center justify-center rounded-full ring-4 ring-white",
-                                        status === "verifying" ? "bg-amber-500 text-white" : 
-                                        isVerifying ? "bg-violet-600 text-white" : "bg-gray-100 text-muted"
+                                        isPending ? "bg-amber-500 text-white" : "bg-violet-600 text-white"
                                     )}>
-                                        {status === "verifying" ? <Clock className="h-4 w-4 animate-pulse" /> : <Search className="h-4 w-4" />}
+                                        {isPending ? <Clock className="h-4 w-4 animate-pulse" /> : <Search className="h-4 w-4" />}
                                     </div>
                                     <div className="pt-1">
-                                        <h3 className={cn("text-sm font-semibold", isVerifying ? "text-ink" : "text-muted")}>
-                                            Verifying Code
+                                        <h3 className="text-sm font-semibold text-ink">
+                                            {isPending ? "Under Review" : "Reviewed"}
                                         </h3>
-                                        <p className="text-xs text-muted mt-1">Our team is checking the balance and validity.</p>
+                                        <p className="text-xs text-muted mt-1">
+                                            {isPending
+                                                ? "A member of our team is checking this card — usually under 30 minutes. You'll be notified once it clears."
+                                                : "This card's review is complete."}
+                                        </p>
                                     </div>
                                 </div>
 
-                                {/* Step 3: Terminal State (Paid/Rejected) */}
+                                {/* Step 3: Terminal State (Approved/Rejected) */}
                                 <div className="relative flex gap-4">
                                     <div className={cn(
                                         "absolute -left-6 flex h-8 w-8 items-center justify-center rounded-full ring-4 ring-white",
-                                        isPaid ? "bg-green-500 text-white" : 
+                                        isApproved ? "bg-green-500 text-white" :
                                         isRejected ? "bg-red-500 text-white" : "bg-gray-100 text-muted"
                                     )}>
-                                        {isRejected ? <X className="h-4 w-4" /> : 
-                                         isPaid ? <Check className="h-4 w-4" /> : <Banknote className="h-4 w-4" />}
+                                        {isRejected ? <X className="h-4 w-4" /> :
+                                         isApproved ? <Check className="h-4 w-4" /> : <Banknote className="h-4 w-4" />}
                                     </div>
                                     <div className="pt-1">
-                                        <h3 className={cn("text-sm font-semibold", 
-                                            isPaid ? "text-green-600" : 
+                                        <h3 className={cn("text-sm font-semibold",
+                                            isApproved ? "text-green-600" :
                                             isRejected ? "text-red-600" : "text-muted"
                                         )}>
-                                            {isPaid ? "Payment Sent" : isRejected ? "Card Rejected" : "Get Paid"}
+                                            {isApproved ? "Payout Sent" : isRejected ? "Card Rejected" : "Get Paid"}
                                         </h3>
-                                        
-                                        {isPaid && (
+
+                                        {isApproved && (
                                             <p className="text-xs text-muted mt-1">
-                                                <span className="font-bold text-ink">{formatNaira(submission.payoutNgn || 0)}</span> has been added to your wallet.
+                                                <span className="font-bold text-ink">{formatNaira(parseFloat(order.payoutAmount))}</span> has been added to your wallet.
                                             </p>
                                         )}
                                         {isRejected && (
                                             <p className="text-xs text-red-500/80 mt-1">
-                                                {submission.failureReason || "The card was invalid or already redeemed."}
+                                                This card could not be approved. No amount was ever added to your wallet for it.
                                             </p>
                                         )}
-                                        {!isPaid && !isRejected && (
-                                            <p className="text-xs text-muted mt-1">Cash will be added to your balance.</p>
+                                        {isPending && (
+                                            <p className="text-xs text-muted mt-1">No payout yet — nothing is added to your wallet until review clears.</p>
                                         )}
                                     </div>
                                 </div>
@@ -151,7 +152,7 @@ export default function SubmissionTrackerPage({ params }: { params: { id: string
                         </div>
 
                         {/* Terminal Actions */}
-                        {isPaid && (
+                        {isApproved && (
                             <div className="pt-4 border-t border-border">
                                 <Button variant="primary" fullWidth size="lg" onClick={() => router.push("/gift-cards")}>
                                     Back to Gift Cards

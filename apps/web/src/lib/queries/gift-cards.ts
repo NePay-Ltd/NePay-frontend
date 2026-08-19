@@ -5,6 +5,7 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { ApiResponse } from "@/lib/types/api";
+import type { GiftCardOrderResponseDto, GiftCardQuoteResponseDto } from "@/lib/types/api";
 import {
     mockGetGiftCardEarnings,
     mockGetGiftCardRates,
@@ -16,9 +17,13 @@ export const giftCardKeys = {
     all: ["gift-cards"] as const,
     earnings: () => [...giftCardKeys.all, "earnings"] as const,
     rates: () => [...giftCardKeys.all, "rates"] as const,
-    status: (id: string) => [...giftCardKeys.all, "status", id] as const,
+    order: (id: string) => [...giftCardKeys.all, "order", id] as const,
 };
 
+// Rates/earnings shown on the /gift-cards landing page have no backing
+// endpoint yet (no GET /giftcards/rates exists) — left on mock data, same
+// as the landing page itself; only the quote/sell/status flow below is
+// wired to the real API.
 export function useGiftCardEarnings() {
     return useQuery<GiftCardEarnings>({
         queryKey: giftCardKeys.earnings(),
@@ -39,46 +44,52 @@ interface QuotePayload {
     faceValueUsd: string;
     quantity: number;
 }
-interface QuoteResponse {
-    quoteId: string;
-    totalPayout: string;
-    rate: string;
-    expiresAt: string;
-}
 
 export function useGiftCardQuote() {
-    return useMutation<QuoteResponse, Error, QuotePayload>({
+    return useMutation<GiftCardQuoteResponseDto, Error, QuotePayload>({
         mutationFn: async (payload) => {
-            const res = await apiClient.post<ApiResponse<QuoteResponse>>("/giftcards/quote", payload);
+            const res = await apiClient.post<ApiResponse<GiftCardQuoteResponseDto>>("/giftcards/quote", payload);
             return res.data.data;
         },
     });
 }
 
+interface SellPayload {
+    quoteId: string;
+    cardCode: string;
+    pin: string;
+}
+
+/**
+ * Real response is a GiftCardOrder, not a fire-and-forget receipt —
+ * `status` is what tells the caller whether this resolved instantly
+ * (APPROVED) or needs the honest "under review" state (PENDING_REVIEW).
+ * See the sell page's own handling.
+ */
 export function useSubmitGiftCard() {
-    return useMutation<{ saleId: string; creditedAmount: string; status: string }, Error, { quoteId: string; cardCode: string; pin: string }>({
+    return useMutation<GiftCardOrderResponseDto, Error, SellPayload>({
         mutationFn: async (payload) => {
-            const res = await apiClient.post<ApiResponse<{ saleId: string; creditedAmount: string; status: string }>>("/giftcards/sell", payload);
+            const res = await apiClient.post<ApiResponse<GiftCardOrderResponseDto>>("/giftcards/sell", payload);
             return res.data.data;
         },
     });
 }
 
-export function useGiftCardSubmissionStatus(submissionId: string | null) {
-    return useQuery<{ id: string; status: string; brand?: string; faceValueUsd?: string; payoutNgn?: string; failureReason?: string | null }>({
-        queryKey: giftCardKeys.status(submissionId!),
+/**
+ * The submission-tracker screen's data source — GET /giftcards/:id, the
+ * caller's own order. Polls every few seconds while the order is still
+ * PENDING_REVIEW so "you'll be notified once it clears" is actually true
+ * rather than requiring a manual refresh; stops once a terminal status
+ * (APPROVED/REJECTED) is reached.
+ */
+export function useGiftCardOrder(id: string | null) {
+    return useQuery<GiftCardOrderResponseDto>({
+        queryKey: giftCardKeys.order(id ?? ""),
         queryFn: async () => {
-            // Ideally GET /gift-cards/sell/:id, but API docs don't define a polling endpoint for gift cards.
-            // Simulate polling success.
-            return {
-                id: submissionId!,
-                status: "success", 
-                brand: "amazon",
-                faceValueUsd: "100.00",
-                payoutNgn: "120000.00",
-            };
+            const res = await apiClient.get<ApiResponse<GiftCardOrderResponseDto>>(`/giftcards/${id}`);
+            return res.data.data;
         },
-        enabled: !!submissionId,
-        refetchInterval: false,
+        enabled: !!id,
+        refetchInterval: (query) => (query.state.data?.status === "PENDING_REVIEW" ? 5000 : false),
     });
 }

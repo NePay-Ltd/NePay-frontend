@@ -80,18 +80,30 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
         );
     };
 
+    const [submittedOrderId, setSubmittedOrderId] = React.useState<string | null>(null);
+
     const handlePinSubmit = (pin: string) => {
         if (!currentQuoteId) return;
         setTxState("processing");
 
         submitMutation.mutate({ quoteId: currentQuoteId, cardCode, pin }, {
             onSuccess: (data) => {
-                setTxState("success");
-                // Wait briefly then redirect to the submission page
-                setTimeout(() => {
-                    setModalOpen(false);
-                    router.push(`/gift-cards/submissions/${data.saleId}`);
-                }, 1500);
+                setSubmittedOrderId(data.id);
+
+                if (data.status === "APPROVED") {
+                    // Eligible seller, non-restricted brand — the automated path
+                    // already cleared and credited the wallet. A real success.
+                    setTxState("success");
+                    setTimeout(() => {
+                        setModalOpen(false);
+                        router.push(`/gift-cards/submissions/${data.id}`);
+                    }, 1500);
+                } else {
+                    // PENDING_REVIEW — genuinely nothing paid out yet. Never show
+                    // the success checkmark for this; the "review" state is honest
+                    // about what's actually happening.
+                    setTxState("review");
+                }
             },
             onError: (err: any) => {
                 toast.error(err.response?.data?.message || "Failed to submit gift card");
@@ -213,11 +225,24 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
                 onPinSubmit={handlePinSubmit}
                 // Processing UI
                 processingText={txState === "processing" && currentQuoteId ? "Submitting gift card..." : "Getting best quote..."}
-                // Success UI
-                successTitle="Card Submitted"
-                successDescription={<p>Your gift card has been submitted successfully for verification.</p>}
+                // Success UI (only ever reached for an instantly-cleared, automated approval)
+                successTitle="Payout Sent"
+                successDescription={<p>Your card was approved automatically and the payout has been added to your wallet.</p>}
                 successButtonLabel="View Submission"
                 onSuccessAction={() => setModalOpen(false)}
+                // Review UI — genuinely pending, no payout yet
+                reviewTitle="Under Review"
+                reviewDescription={
+                    <p>
+                        Your card is being reviewed — you&apos;ll be notified once it clears, usually under 30 minutes.
+                        No payout has been sent yet.
+                    </p>
+                }
+                reviewButtonLabel="Track Status"
+                onReviewAction={() => {
+                    setModalOpen(false);
+                    if (submittedOrderId) router.push(`/gift-cards/submissions/${submittedOrderId}`);
+                }}
                 // Error UI
                 errorTitle="Submission Failed"
                 errorDescription={<p>{submitMutation.error?.message || "An unexpected error occurred."}</p>}
