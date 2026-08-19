@@ -223,14 +223,30 @@ export default function ReceiveCryptoPage() {
     const displayMinAmount = depositData?.expectedAmount ?? minAmountData?.minAmount ?? null;
     const displayMinAmountLoading = !depositData?.expectedAmount && minAmountLoading;
     const displayMinAmountUsd =
-        displayMinAmount !== null && minAmountData?.usdOneEquivalent
+        displayMinAmount !== null && minAmountData?.usdOneEquivalent && minAmountData.minimumSource !== "unavailable"
             ? displayMinAmount / minAmountData.usdOneEquivalent
             : null;
+
+    const minimumIsExact = Boolean(depositData?.expectedAmount) || minAmountData?.minimumSource === "exact";
+    const minimumDisplayLabel = minimumIsExact
+        ? "Min deposit"
+        : minAmountData?.minimumSource === "estimated"
+            ? "Estimated minimum"
+            : "Minimum unavailable";
 
     const formatUsd = (amount: number | null) =>
         amount === null || !Number.isFinite(amount)
             ? null
             : `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const formatCrypto = (amount: number | null) =>
+        amount === null || !Number.isFinite(amount)
+            ? null
+            : amount.toLocaleString("en-US", { maximumFractionDigits: 8 });
+    const minimumDisplayValue = minimumIsExact
+        ? `${formatCrypto(displayMinAmount)} ${selectedCurrency?.coin ?? ""}`.trim()
+        : minAmountData?.minimumSource === "estimated"
+            ? formatUsd(displayMinAmountUsd)
+            : null;
     const remainingMs = useCountdown(depositData?.expiresAt ?? undefined);
     const addressExpired = depositData?.expiresAt !== undefined && remainingMs !== null && remainingMs <= 0;
 
@@ -472,10 +488,8 @@ export default function ReceiveCryptoPage() {
                             
                             <div className="text-[13px] font-medium text-muted flex items-center gap-2 mt-2">
                                 <span>
-                                    Min deposit{" "}
-                                    <strong className="font-bold text-ink">
-                                        {formatUsd(displayMinAmountUsd) ?? "Unavailable"}
-                                    </strong>
+                                    {minimumDisplayLabel}{minimumDisplayValue ? " " : ""}
+                                    {minimumDisplayValue && <strong className="font-bold text-ink">{minimumDisplayValue}</strong>}
                                 </span>
                             </div>
                             {/* No pre-send fee estimate exists: NOWPayments only reports the real
@@ -674,8 +688,7 @@ export default function ReceiveCryptoPage() {
                                                 <Skeleton className="h-3 w-32" />
                                             ) : (
                                                 <span className="text-[11px] font-bold text-amber-900 uppercase tracking-wide">
-                                                    Min Deposit: {formatUsd(displayMinAmountUsd) ?? "Unavailable"}
-                                                        Min Deposit: {formatUsd(displayMinAmountUsd) ?? "Unavailable"}
+                                                    {minimumDisplayLabel}{minimumDisplayValue ? `: ${minimumDisplayValue}` : ""}
                                                 </span>
                                             )}
                                         </div>

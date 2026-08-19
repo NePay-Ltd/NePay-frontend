@@ -155,6 +155,7 @@ export interface CryptoMinAmountDto {
     usdOneEquivalent: number | null;
     /** Active admin-configured NGN value for $1. */
     usdNgnRate: number | null;
+    minimumSource: "exact" | "estimated" | "unavailable";
 }
 
 export interface CryptoDepositAddressDto {
