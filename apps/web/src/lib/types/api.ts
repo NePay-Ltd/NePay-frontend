@@ -153,6 +153,8 @@ export interface CryptoMinAmountDto {
     nowPaymentsMinAmount: number;
     /** $1 USD converted into this asset's units at the current rate. Null if a rate wasn't available when minAmount was computed. */
     usdOneEquivalent: number | null;
+    /** Active admin-configured NGN value for $1. */
+    usdNgnRate: number | null;
 }
 
 export interface CryptoDepositAddressDto {

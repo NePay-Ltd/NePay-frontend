@@ -464,9 +464,9 @@ export default function ReceiveCryptoPage() {
                                     <span className="font-bold text-ink text-[15px]">{selectedCurrency?.coin} ({selectedCurrency?.network?.toLowerCase() ?? 'native'})</span>
                                 </div>
                                 <div className="font-black text-ink text-[15px]">
-                                    {minAmountData?.usdOneEquivalent
-                                        ? `$${(1 / minAmountData.usdOneEquivalent).toLocaleString("en-US", { maximumFractionDigits: 6 })}`
-                                        : "Price unavailable"}
+                                    {minAmountData?.usdNgnRate
+                                        ? `₦${minAmountData.usdNgnRate.toLocaleString("en-NG", { maximumFractionDigits: 2 })} / $1`
+                                        : "Market rate"}
                                 </div>
                             </div>
                             
