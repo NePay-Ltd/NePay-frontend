@@ -61,14 +61,7 @@ function groupByCoin(currencies: CryptoCurrencyDto[]): CoinGroup[] {
     });
 }
 
-/**
- * Display-order preference for the coin-picker's "most used" shortlist —
- * purely cosmetic, never a filter/gate. Which coins are *eligible* for the
- * shortlist is entirely backend-driven (`MerchantCurrency.curated`, from
- * NowPaymentsAdapter's STATIC_CURRENCY_INFO); this only orders whichever of
- * those happen to be curated right now. A curated coin not listed here still
- * appears in the shortlist, just after these five.
- */
+/** Display-order preference for the compact "most used" shortlist. */
 const SHORTLIST_ORDER = ["USDT", "USDC", "BTC", "ETH", "TRX"];
 const SHORTLIST_SIZE = 5;
 
@@ -152,11 +145,10 @@ export default function ReceiveCryptoPage() {
     const coinGroups = React.useMemo(() => groupByCoin(currencies ?? []), [currencies]);
     const activeGroup = coinGroups.find((g) => g.coin === pickerCoin) ?? null;
 
-    // Default view: a short curated shortlist, not the full ~300-coin list.
+    // Keep the default picker compact; typing searches the complete catalog.
     const shortlistGroups = React.useMemo(
         () =>
-            coinGroups
-                .filter((g) => g.representative.curated)
+            [...coinGroups]
                 .sort((a, b) => rankInShortlist(a.coin) - rankInShortlist(b.coin))
                 .slice(0, SHORTLIST_SIZE),
         [coinGroups],
