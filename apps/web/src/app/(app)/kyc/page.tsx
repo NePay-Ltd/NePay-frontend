@@ -145,9 +145,10 @@ function stripNonDigits(value: string): string {
 
 interface BvnNumberStepProps {
     onSuccess: () => void;
+    onRejected: () => void;
 }
 
-function BvnNumberStep({ onSuccess }: BvnNumberStepProps) {
+function BvnNumberStep({ onSuccess, onRejected }: BvnNumberStepProps) {
     const [displayValue, setDisplayValue] = React.useState("");
     const submitBvn = useSubmitBvn();
 
@@ -172,7 +173,12 @@ function BvnNumberStep({ onSuccess }: BvnNumberStepProps) {
         submitBvn.mutate(
             { bvn: values.bvn },
             {
-                onSuccess: () => {
+                onSuccess: (record) => {
+                    if (record.status !== "PENDING") {
+                        onRejected();
+                        return;
+                    }
+
                     toast.success("A code has been sent to the phone number on file.");
                     onSuccess();
                 },
@@ -620,7 +626,10 @@ export default function KycPage() {
 
                     {/* Step content */}
                     {step === "bvn-number" && (
-                        <BvnNumberStep onSuccess={() => setStep("bvn-otp")} />
+                        <BvnNumberStep
+                            onSuccess={() => setStep("bvn-otp")}
+                            onRejected={() => setStep("bvn-rejected")}
+                        />
                     )}
                     {step === "bvn-otp" && (
                         <OtpStep
