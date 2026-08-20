@@ -91,10 +91,19 @@ export interface LoginEventResponseDto {
 
 // ─── KYC ─────────────────────────────────────────────────────────────────────
 
+export type VerificationType = "BVN" | "NIN";
+export type KycRecordStatus = "PENDING" | "APPROVED" | "REJECTED";
+
 export interface KycStatusDto {
     tier: KycTier;
     bvnVerified: boolean;
     ninVerified: boolean;
+}
+
+/** Response of POST /kyc/verify-bvn(/confirm) and /kyc/verify-nin(/confirm). */
+export interface KycRecordDto {
+    id: string;
+    status: KycRecordStatus;
 }
 
 // ─── Wallet & Ledger ─────────────────────────────────────────────────────────
@@ -128,6 +137,13 @@ export interface VirtualAccountResponseDto {
     accountName: string;
     status: VirtualAccountStatus;
     createdAt: string;
+}
+
+/** Body of POST /wallet/virtual-account — only meaningful on first call. */
+export interface CreateVirtualAccountDto {
+    identityType: VerificationType;
+    identityNumber: string;
+    otp: string;
 }
 
 // ─── Crypto Deposits (NOWPayments-backed) ────────────────────────────────────

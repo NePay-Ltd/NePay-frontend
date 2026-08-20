@@ -2,33 +2,64 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { 
-    ArrowLeft, 
-    Bitcoin, 
-    Landmark, 
-    CreditCard, 
-    Copy, 
-    AlertCircle, 
-    Loader2 
+import {
+    ArrowLeft,
+    Bitcoin,
+    Landmark,
+    CreditCard,
+    Copy,
+    AlertCircle,
+    Loader2
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { usePaystackCheckout } from "@/hooks/use-paystack";
 import { useVirtualAccount, useCreateVirtualAccount } from "@/lib/queries/wallet";
+import type { VerificationType } from "@/lib/types/api";
 
 import { Button } from "@/components/shared/button";
 import { RowItem } from "@/components/shared/row-item";
 import { Panel, PanelBody } from "@/components/shared/panel";
+import { Chip } from "@/components/shared/chip";
+import { Field } from "@/components/shared/field";
+import { Input } from "@/components/ui/input";
+
+function stripNonDigits(value: string): string {
+    return value.replace(/\D/g, "");
+}
 
 export default function AddMoneyPage() {
     const router = useRouter();
     const { initializePayment, isReady } = usePaystackCheckout();
-    
+
     // Virtual account state
     const [bankExpanded, setBankExpanded] = React.useState(false);
-    
+
     const { data: virtualAccount, isLoading: vaLoading, error: vaError, refetch: refetchVa } = useVirtualAccount();
-    const { mutate: createVirtualAccount, isPending: creatingVa } = useCreateVirtualAccount();
+    const { mutate: createVirtualAccount, isPending: creatingVa, error: createVaError } = useCreateVirtualAccount();
+
+    // Fresh prompt for the virtual-account creation step — deliberately not
+    // reused from the KYC screen's own identity number / OTP, since whether
+    // the same OTP can be reused here is still unconfirmed on the backend.
+    const [identityType, setIdentityType] = React.useState<VerificationType>("BVN");
+    const [identityNumber, setIdentityNumber] = React.useState("");
+    const [vaOtp, setVaOtp] = React.useState("");
+
+    const kycRequired = (createVaError as any)?.response?.status === 409;
+    const canSubmitVa = identityNumber.length === 11 && vaOtp.length > 0;
+
+    const handleCreateVirtualAccount = () => {
+        createVirtualAccount(
+            { identityType, identityNumber, otp: vaOtp },
+            {
+                onError: (err: any) => {
+                    if (err.response?.status !== 409) {
+                        toast.error(err.response?.data?.message || "Could not create virtual account.");
+                    }
+                },
+            },
+        );
+    };
 
     const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -158,17 +189,87 @@ export default function AddMoneyPage() {
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <div className="space-y-3">
+                                                <div className="space-y-4">
                                                     <p className="text-sm text-body">
-                                                        You don&apos;t have a dedicated virtual account yet. Create one to easily receive bank transfers.
+                                                        You don&apos;t have a dedicated virtual account yet. Verify your identity again to create one.
                                                     </p>
-                                                    <Button
-                                                        variant="primary"
-                                                        loading={creatingVa}
-                                                        onClick={() => createVirtualAccount()}
-                                                    >
-                                                        Create Virtual Account
-                                                    </Button>
+
+                                                    {kycRequired ? (
+                                                        <div className="space-y-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5">
+                                                            <p className="text-sm text-amber-700">
+                                                                {(createVaError as any)?.response?.data?.message ??
+                                                                    "Complete KYC verification before creating a virtual account."}
+                                                            </p>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="quiet"
+                                                                onClick={() => router.push("/kyc")}
+                                                            >
+                                                                Complete KYC
+                                                            </Button>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <div className="flex gap-2">
+                                                                <Chip
+                                                                    active={identityType === "BVN"}
+                                                                    onClick={() => {
+                                                                        setIdentityType("BVN");
+                                                                        setIdentityNumber("");
+                                                                    }}
+                                                                >
+                                                                    BVN
+                                                                </Chip>
+                                                                <Chip
+                                                                    active={identityType === "NIN"}
+                                                                    onClick={() => {
+                                                                        setIdentityType("NIN");
+                                                                        setIdentityNumber("");
+                                                                    }}
+                                                                >
+                                                                    NIN
+                                                                </Chip>
+                                                            </div>
+
+                                                            <Field label={identityType}>
+                                                                <Input
+                                                                    inputMode="numeric"
+                                                                    placeholder={`Enter your ${identityType}`}
+                                                                    maxLength={11}
+                                                                    value={identityNumber}
+                                                                    onChange={(e) =>
+                                                                        setIdentityNumber(stripNonDigits(e.target.value).slice(0, 11))
+                                                                    }
+                                                                    autoComplete="off"
+                                                                    className="font-mono tracking-widest"
+                                                                />
+                                                            </Field>
+
+                                                            <Field
+                                                                label="One-time code"
+                                                                hint="Sent to the phone number on file with this number"
+                                                            >
+                                                                <Input
+                                                                    inputMode="numeric"
+                                                                    placeholder="Enter code"
+                                                                    maxLength={10}
+                                                                    value={vaOtp}
+                                                                    onChange={(e) => setVaOtp(stripNonDigits(e.target.value).slice(0, 10))}
+                                                                    autoComplete="one-time-code"
+                                                                    className="font-mono tracking-widest"
+                                                                />
+                                                            </Field>
+
+                                                            <Button
+                                                                variant="primary"
+                                                                loading={creatingVa}
+                                                                disabled={!canSubmitVa}
+                                                                onClick={handleCreateVirtualAccount}
+                                                            >
+                                                                Create Virtual Account
+                                                            </Button>
+                                                        </>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>

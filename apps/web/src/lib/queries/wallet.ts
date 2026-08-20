@@ -4,7 +4,12 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
-import { WalletBalanceDto, VirtualAccountResponseDto, ApiResponse } from "@/lib/types/api";
+import {
+    WalletBalanceDto,
+    VirtualAccountResponseDto,
+    CreateVirtualAccountDto,
+    ApiResponse,
+} from "@/lib/types/api";
 
 export const walletKeys = {
     all: ["wallet"] as const,
@@ -40,10 +45,13 @@ export function useVirtualAccount() {
 
 export function useCreateVirtualAccount() {
     const queryClient = useQueryClient();
-    
-    return useMutation({
-        mutationFn: async () => {
-            const res = await apiClient.post<ApiResponse<VirtualAccountResponseDto>>("/wallet/virtual-account");
+
+    return useMutation<VirtualAccountResponseDto, unknown, CreateVirtualAccountDto>({
+        mutationFn: async (payload) => {
+            const res = await apiClient.post<ApiResponse<VirtualAccountResponseDto>>(
+                "/wallet/virtual-account",
+                payload,
+            );
             return res.data.data;
         },
         onSuccess: (data) => {
