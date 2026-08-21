@@ -1,13 +1,12 @@
 /**
  * TanStack Query hooks for the KYC section.
  *
- * BVN/NIN verification is a two-step, synchronous OTP flow: submitting the
- * number (verify-bvn / verify-nin) makes Safe Haven send a one-time code to
- * the phone on file, and confirming it (verify-bvn/confirm / verify-nin/confirm)
- * decides the verification immediately — no polling.
+ * Korapay BVN/NIN verification is synchronous: submitting the identity number
+ * returns the terminal APPROVED or REJECTED result immediately. There is no
+ * OTP confirmation request in the active provider flow.
  */
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { ApiResponse, KycRecordDto, KycStatusDto } from "@/lib/types/api";
 
@@ -35,19 +34,6 @@ export function useSubmitBvn() {
     });
 }
 
-export function useConfirmBvn() {
-    const queryClient = useQueryClient();
-    return useMutation<KycRecordDto, unknown, { otp: string }>({
-        mutationFn: async ({ otp }) => {
-            const res = await apiClient.post<ApiResponse<KycRecordDto>>("/kyc/verify-bvn/confirm", { otp });
-            return res.data.data;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: kycKeys.status() });
-        },
-    });
-}
-
 export function useSubmitNin() {
     return useMutation<KycRecordDto, unknown, { nin: string }>({
         mutationFn: async ({ nin }) => {
@@ -57,15 +43,3 @@ export function useSubmitNin() {
     });
 }
 
-export function useConfirmNin() {
-    const queryClient = useQueryClient();
-    return useMutation<KycRecordDto, unknown, { otp: string }>({
-        mutationFn: async ({ otp }) => {
-            const res = await apiClient.post<ApiResponse<KycRecordDto>>("/kyc/verify-nin/confirm", { otp });
-            return res.data.data;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: kycKeys.status() });
-        },
-    });
-}

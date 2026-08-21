@@ -143,7 +143,6 @@ export interface VirtualAccountResponseDto {
 export interface CreateVirtualAccountDto {
     identityType: VerificationType;
     identityNumber: string;
-    otp: string;
 }
 
 // ─── Crypto Deposits (NOWPayments-backed) ────────────────────────────────────

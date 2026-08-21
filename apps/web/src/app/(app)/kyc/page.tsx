@@ -20,17 +20,13 @@ import { toast } from "sonner";
 import {
     verifyBvnSchema,
     verifyNinSchema,
-    confirmOtpSchema,
     type VerifyBvnValues,
     type VerifyNinValues,
-    type ConfirmOtpValues,
 } from "@/lib/schemas/kyc";
 import {
     useKycStatus,
     useSubmitBvn,
-    useConfirmBvn,
     useSubmitNin,
-    useConfirmNin,
 } from "@/lib/queries/kyc";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/shared/button";
@@ -144,11 +140,11 @@ function stripNonDigits(value: string): string {
 // ─── BVN Number Step ──────────────────────────────────────────────────────────
 
 interface BvnNumberStepProps {
-    onSuccess: () => void;
+    onApproved: () => void;
     onRejected: () => void;
 }
 
-function BvnNumberStep({ onSuccess, onRejected }: BvnNumberStepProps) {
+function BvnNumberStep({ onApproved, onRejected }: BvnNumberStepProps) {
     const [displayValue, setDisplayValue] = React.useState("");
     const submitBvn = useSubmitBvn();
 
@@ -174,13 +170,17 @@ function BvnNumberStep({ onSuccess, onRejected }: BvnNumberStepProps) {
             { bvn: values.bvn },
             {
                 onSuccess: (record) => {
-                    if (record.status !== "PENDING") {
+                    if (record.status === "APPROVED") {
+                        onApproved();
+                        return;
+                    }
+
+                    if (record.status === "REJECTED") {
                         onRejected();
                         return;
                     }
 
-                    toast.success("A code has been sent to the phone number on file.");
-                    onSuccess();
+                    toast.error("Verification is still pending. Please try again shortly.");
                 },
                 onError: (err) => {
                     toast.error(apiErrorMessage(err, "BVN verification failed."));
@@ -196,8 +196,8 @@ function BvnNumberStep({ onSuccess, onRejected }: BvnNumberStepProps) {
                     Enter your Bank Verification Number
                 </h2>
                 <p className="text-sm text-body">
-                    Your BVN is an 11-digit number issued by the CBN. We&apos;ll send a one-time
-                    code to the phone number linked to it to confirm it&apos;s you.
+                    Your BVN is an 11-digit number issued by the CBN. Korapay will verify it
+                    against its identity records immediately.
                 </p>
             </div>
 
@@ -253,7 +253,7 @@ function BvnNumberStep({ onSuccess, onRejected }: BvnNumberStepProps) {
                     loading={submitBvn.isPending}
                 >
                     <ShieldCheck className="h-4 w-4" />
-                    Send verification code
+                    Verify BVN
                 </Button>
             </form>
         </div>
@@ -263,10 +263,11 @@ function BvnNumberStep({ onSuccess, onRejected }: BvnNumberStepProps) {
 // ─── NIN Number Step ──────────────────────────────────────────────────────────
 
 interface NinNumberStepProps {
-    onSuccess: () => void;
+    onApproved: () => void;
+    onRejected: () => void;
 }
 
-function NinNumberStep({ onSuccess }: NinNumberStepProps) {
+function NinNumberStep({ onApproved, onRejected }: NinNumberStepProps) {
     const [displayValue, setDisplayValue] = React.useState("");
     const submitNin = useSubmitNin();
 
@@ -295,9 +296,18 @@ function NinNumberStep({ onSuccess }: NinNumberStepProps) {
         submitNin.mutate(
             { nin: values.nin },
             {
-                onSuccess: () => {
-                    toast.success("A code has been sent to the phone number on file.");
-                    onSuccess();
+                onSuccess: (record) => {
+                    if (record.status === "APPROVED") {
+                        onApproved();
+                        return;
+                    }
+
+                    if (record.status === "REJECTED") {
+                        onRejected();
+                        return;
+                    }
+
+                    toast.error("Verification is still pending. Please try again shortly.");
                 },
                 onError: (err) => {
                     toast.error(apiErrorMessage(err, "NIN verification failed."));
@@ -313,8 +323,8 @@ function NinNumberStep({ onSuccess }: NinNumberStepProps) {
                     Enter your National Identification Number
                 </h2>
                 <p className="text-sm text-body">
-                    Your NIN is an 11-digit number issued by NIMC. We&apos;ll send a one-time
-                    code to the phone number linked to it to confirm it&apos;s you.
+                    Your NIN is an 11-digit number issued by NIMC. Korapay will verify it
+                    against its identity records immediately.
                 </p>
             </div>
 
@@ -369,105 +379,7 @@ function NinNumberStep({ onSuccess }: NinNumberStepProps) {
                     loading={submitNin.isPending}
                 >
                     <Fingerprint className="h-4 w-4" />
-                    Send verification code
-                </Button>
-            </form>
-        </div>
-    );
-}
-
-// ─── OTP confirmation step (shared shape for BVN & NIN) ──────────────────────
-
-interface OtpStepProps {
-    /** Which document this OTP confirms — drives copy only. */
-    type: "BVN" | "NIN";
-    icon: React.ElementType;
-    onConfirm: (otp: string) => Promise<"APPROVED" | "REJECTED">;
-    onApproved: () => void;
-    onRejected: () => void;
-}
-
-function OtpStep({ type, icon: Icon, onConfirm, onApproved, onRejected }: OtpStepProps) {
-    const [apiError, setApiError] = React.useState<string | null>(null);
-
-    const {
-        register,
-        handleSubmit,
-        setValue,
-        watch,
-        formState: { errors, isSubmitting },
-    } = useForm<ConfirmOtpValues>({
-        resolver: zodResolver(confirmOtpSchema),
-        defaultValues: { otp: "" },
-    });
-
-    const otpValue = watch("otp");
-
-    const handleOtpInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const raw = stripNonDigits(e.target.value).slice(0, 10);
-        setValue("otp", raw, { shouldValidate: true });
-        setApiError(null);
-    };
-
-    const onSubmit = async (values: ConfirmOtpValues) => {
-        setApiError(null);
-        try {
-            const status = await onConfirm(values.otp);
-            if (status === "APPROVED") {
-                onApproved();
-            } else {
-                onRejected();
-            }
-        } catch (err) {
-            setApiError(apiErrorMessage(err, "That code didn't work. Please try again."));
-        }
-    };
-
-    return (
-        <div className="space-y-6">
-            <div className="space-y-1">
-                <div className="flex justify-center">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-violet-050 text-violet-600">
-                        <Icon className="h-6 w-6" />
-                    </div>
-                </div>
-                <h2 className="text-center text-xl font-bold text-ink">
-                    Enter the code sent to your phone
-                </h2>
-                <p className="text-center text-sm text-body">
-                    Safe Haven sent a one-time code to the phone number on file with your {type}.
-                    Enter it below to confirm your {type} instantly.
-                </p>
-            </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-                <input type="hidden" {...register("otp")} />
-
-                <Field label="One-time code" htmlFor="otp-input" error={errors.otp?.message}>
-                    <Input
-                        id="otp-input"
-                        type="text"
-                        inputMode="numeric"
-                        placeholder="Enter code"
-                        maxLength={10}
-                        value={otpValue}
-                        onChange={handleOtpInput}
-                        autoComplete="one-time-code"
-                        autoFocus
-                        className="text-center font-mono text-lg tracking-[0.3em]"
-                        aria-invalid={!!errors.otp || !!apiError}
-                    />
-                </Field>
-
-                {apiError && (
-                    <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2.5">
-                        <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
-                        <p className="text-sm text-red-500">{apiError}</p>
-                    </div>
-                )}
-
-                <Button type="submit" variant="primary" size="lg" fullWidth loading={isSubmitting}>
-                    Confirm code
+                    Verify NIN
                 </Button>
             </form>
         </div>
@@ -547,18 +459,14 @@ function KycSuccess({ userName }: { userName: string }) {
 
 type KycStep =
     | "bvn-number"
-    | "bvn-otp"
     | "bvn-rejected"
     | "nin-number"
-    | "nin-otp"
     | "nin-rejected"
     | "done";
 
 export default function KycPage() {
     const { user, updateKycTier } = useAuth();
     const { data: kycStatus, isLoading: statusLoading } = useKycStatus();
-    const confirmBvn = useConfirmBvn();
-    const confirmNin = useConfirmNin();
 
     const [step, setStep] = React.useState<KycStep | null>(null);
 
@@ -579,7 +487,7 @@ export default function KycPage() {
 
     const isDone = step === "done";
     const bvnDone =
-        step === "nin-number" || step === "nin-otp" || step === "nin-rejected" || step === "done";
+        step === "nin-number" || step === "nin-rejected" || step === "done";
     const ninDone = step === "done";
 
     if (step === null || statusLoading) {
@@ -627,21 +535,6 @@ export default function KycPage() {
                     {/* Step content */}
                     {step === "bvn-number" && (
                         <BvnNumberStep
-                            onSuccess={() => setStep("bvn-otp")}
-                            onRejected={() => setStep("bvn-rejected")}
-                        />
-                    )}
-                    {step === "bvn-otp" && (
-                        <OtpStep
-                            type="BVN"
-                            icon={CreditCard}
-                            onConfirm={async (otp) => {
-                                // /kyc/verify-bvn/confirm only ever decides APPROVED or
-                                // REJECTED — a PENDING record is what's being confirmed,
-                                // never what confirming it returns.
-                                const record = await confirmBvn.mutateAsync({ otp });
-                                return record.status as "APPROVED" | "REJECTED";
-                            }}
                             onApproved={() => {
                                 toast.success("BVN verified! Proceed to NIN.");
                                 setStep("nin-number");
@@ -652,16 +545,7 @@ export default function KycPage() {
                     {step === "bvn-rejected" && <KycRejected type="BVN" />}
 
                     {step === "nin-number" && (
-                        <NinNumberStep onSuccess={() => setStep("nin-otp")} />
-                    )}
-                    {step === "nin-otp" && (
-                        <OtpStep
-                            type="NIN"
-                            icon={Fingerprint}
-                            onConfirm={async (otp) => {
-                                const record = await confirmNin.mutateAsync({ otp });
-                                return record.status as "APPROVED" | "REJECTED";
-                            }}
+                        <NinNumberStep
                             onApproved={() => {
                                 // Both BVN and NIN are now APPROVED server-side, which is
                                 // exactly the condition that promotes the account to

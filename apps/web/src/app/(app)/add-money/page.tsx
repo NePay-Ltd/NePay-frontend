@@ -20,7 +20,6 @@ import type { VerificationType } from "@/lib/types/api";
 import { Button } from "@/components/shared/button";
 import { RowItem } from "@/components/shared/row-item";
 import { Panel, PanelBody } from "@/components/shared/panel";
-import { Chip } from "@/components/shared/chip";
 import { Field } from "@/components/shared/field";
 import { Input } from "@/components/ui/input";
 
@@ -38,19 +37,16 @@ export default function AddMoneyPage() {
     const { data: virtualAccount, isLoading: vaLoading, error: vaError, refetch: refetchVa } = useVirtualAccount();
     const { mutate: createVirtualAccount, isPending: creatingVa, error: createVaError } = useCreateVirtualAccount();
 
-    // Fresh prompt for the virtual-account creation step — deliberately not
-    // reused from the KYC screen's own identity number / OTP, since whether
-    // the same OTP can be reused here is still unconfirmed on the backend.
-    const [identityType, setIdentityType] = React.useState<VerificationType>("BVN");
+    // Korapay's virtual-account request needs the already-verified identity number.
+    const identityType: VerificationType = "BVN";
     const [identityNumber, setIdentityNumber] = React.useState("");
-    const [vaOtp, setVaOtp] = React.useState("");
 
     const kycRequired = (createVaError as any)?.response?.status === 409;
-    const canSubmitVa = identityNumber.length === 11 && vaOtp.length > 0;
+    const canSubmitVa = identityNumber.length === 11;
 
     const handleCreateVirtualAccount = () => {
         createVirtualAccount(
-            { identityType, identityNumber, otp: vaOtp },
+            { identityType, identityNumber },
             {
                 onError: (err: any) => {
                     if (err.response?.status !== 409) {
@@ -210,27 +206,6 @@ export default function AddMoneyPage() {
                                                         </div>
                                                     ) : (
                                                         <>
-                                                            <div className="flex gap-2">
-                                                                <Chip
-                                                                    active={identityType === "BVN"}
-                                                                    onClick={() => {
-                                                                        setIdentityType("BVN");
-                                                                        setIdentityNumber("");
-                                                                    }}
-                                                                >
-                                                                    BVN
-                                                                </Chip>
-                                                                <Chip
-                                                                    active={identityType === "NIN"}
-                                                                    onClick={() => {
-                                                                        setIdentityType("NIN");
-                                                                        setIdentityNumber("");
-                                                                    }}
-                                                                >
-                                                                    NIN
-                                                                </Chip>
-                                                            </div>
-
                                                             <Field label={identityType}>
                                                                 <Input
                                                                     inputMode="numeric"
@@ -241,21 +216,6 @@ export default function AddMoneyPage() {
                                                                         setIdentityNumber(stripNonDigits(e.target.value).slice(0, 11))
                                                                     }
                                                                     autoComplete="off"
-                                                                    className="font-mono tracking-widest"
-                                                                />
-                                                            </Field>
-
-                                                            <Field
-                                                                label="One-time code"
-                                                                hint="Sent to the phone number on file with this number"
-                                                            >
-                                                                <Input
-                                                                    inputMode="numeric"
-                                                                    placeholder="Enter code"
-                                                                    maxLength={10}
-                                                                    value={vaOtp}
-                                                                    onChange={(e) => setVaOtp(stripNonDigits(e.target.value).slice(0, 10))}
-                                                                    autoComplete="one-time-code"
                                                                     className="font-mono tracking-widest"
                                                                 />
                                                             </Field>
