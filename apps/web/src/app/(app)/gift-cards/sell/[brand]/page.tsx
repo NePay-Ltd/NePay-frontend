@@ -2,21 +2,19 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { 
-    ArrowLeft, 
-    UploadCloud, 
-    ShoppingCart, 
-    Smartphone, 
-    Tag, 
+import {
+    ArrowLeft,
+    ShoppingCart,
+    Smartphone,
+    Tag,
     Gamepad2,
-    Loader2,
-    CheckCircle2
+    Loader2
 } from "lucide-react";
-import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/format";
+import { brandSlugToCode } from "@/lib/gift-card-brands";
 import { useGiftCardRates, useGiftCardQuote, useSubmitGiftCard } from "@/lib/queries/gift-cards";
 
 import { Panel, PanelBody } from "@/components/shared/panel";
@@ -66,7 +64,7 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
         setModalOpen(true);
 
         quoteMutation.mutate(
-            { cardBrand: brandId.toUpperCase(), faceValueUsd: parsedValue.toFixed(2), quantity: 1 },
+            { cardBrand: brandSlugToCode(brandId), faceValueUsd: parsedValue.toFixed(2), quantity: 1 },
             {
                 onSuccess: (data: { quoteId: string }) => {
                     setCurrentQuoteId(data.quoteId);

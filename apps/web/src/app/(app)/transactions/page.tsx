@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Receipt, ChevronLeft, ChevronRight } from "lucide-react";
+import { Receipt, ChevronLeft, ChevronRight, Info } from "lucide-react";
 
 import { useInfiniteTransactions } from "@/lib/queries/transactions";
 
@@ -123,6 +123,23 @@ function TransactionsContent() {
                     </Chip>
                 ))}
             </div>
+
+            {currentType.toLowerCase() === "gift cards" && (
+                <div className="flex items-start gap-2 rounded-xl bg-violet-50 p-3 text-xs text-violet-800">
+                    <Info className="h-4 w-4 shrink-0 mt-0.5" />
+                    <p>
+                        This list only shows gift cards that have actually paid out — a card still under review or
+                        a rejected card never posts here. See{" "}
+                        <button
+                            onClick={() => router.push("/gift-cards/history")}
+                            className="font-bold underline underline-offset-2"
+                        >
+                            My Submissions
+                        </button>{" "}
+                        for the full picture, including pending and rejected cards.
+                    </p>
+                </div>
+            )}
 
             <Panel>
                 {/* Unified Card List View */}
