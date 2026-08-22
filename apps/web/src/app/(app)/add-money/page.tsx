@@ -9,22 +9,58 @@ import {
     CreditCard,
     Copy,
     AlertCircle,
-    Loader2
+    Loader2,
+    FlaskConical
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { usePaystackCheckout } from "@/hooks/use-paystack";
-import { useVirtualAccount, useCreateVirtualAccount } from "@/lib/queries/wallet";
+import { useVirtualAccount, useCreateVirtualAccount, useSimulateDeposit, useWalletBalance } from "@/lib/queries/wallet";
+import { useTestMode } from "@/lib/queries/config";
+import { formatNaira } from "@/lib/format";
 import type { VerificationType } from "@/lib/types/api";
 
 import { Button } from "@/components/shared/button";
 import { RowItem } from "@/components/shared/row-item";
 import { Panel, PanelBody } from "@/components/shared/panel";
 import { Field } from "@/components/shared/field";
+import { Chip } from "@/components/shared/chip";
 import { Input } from "@/components/ui/input";
 
 function stripNonDigits(value: string): string {
     return value.replace(/\D/g, "");
+}
+
+const SIMULATE_PRESETS = [5000, 20000, 100000];
+
+/**
+ * The simulated deposit credits the wallet asynchronously, via Korapay's
+ * real webhook — not this request's own response. Polls the balance every
+ * 2s for up to 20s, comparing against the pre-trigger balance, so the UI
+ * confirms the real credit as soon as it lands rather than leaving the
+ * user staring at a stale balance and guessing whether it worked.
+ */
+function pollForCredit(
+    balanceBefore: number,
+    refetchBalance: () => Promise<{ data?: { availableBalance: string } }>,
+): void {
+    let attempts = 0;
+    const interval = setInterval(async () => {
+        attempts += 1;
+        const { data } = await refetchBalance();
+        const current = data ? Number(data.availableBalance) : balanceBefore;
+
+        if (current > balanceBefore) {
+            toast.success(`Wallet credited — new balance ${formatNaira(current)}.`);
+            clearInterval(interval);
+            return;
+        }
+
+        if (attempts >= 10) {
+            clearInterval(interval);
+            toast.info("Still processing — check your balance shortly.");
+        }
+    }, 2000);
 }
 
 export default function AddMoneyPage() {
@@ -36,6 +72,33 @@ export default function AddMoneyPage() {
 
     const { data: virtualAccount, isLoading: vaLoading, error: vaError, refetch: refetchVa } = useVirtualAccount();
     const { mutate: createVirtualAccount, isPending: creatingVa, error: createVaError } = useCreateVirtualAccount();
+
+    // Simulate Deposit (test mode only) — the button itself doesn't exist
+    // unless the backend confirms test mode, not just a client-side guess.
+    const { data: testMode } = useTestMode();
+    const [simulateExpanded, setSimulateExpanded] = React.useState(false);
+    const [simulateAmount, setSimulateAmount] = React.useState<number | "">(SIMULATE_PRESETS[0] ?? "");
+    const { data: walletBalance, refetch: refetchBalance } = useWalletBalance();
+    const { mutate: simulateDeposit, isPending: simulating } = useSimulateDeposit();
+
+    const handleSimulateDeposit = () => {
+        if (!simulateAmount || simulateAmount <= 0) return;
+
+        const balanceBefore = Number(walletBalance?.availableBalance ?? 0);
+
+        simulateDeposit(
+            { amount: simulateAmount.toFixed(2) },
+            {
+                onSuccess: () => {
+                    toast.info("Deposit triggered — crediting via Korapay's webhook, this takes a few seconds.");
+                    pollForCredit(balanceBefore, refetchBalance);
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || "Could not trigger the simulated deposit.");
+                },
+            },
+        );
+    };
 
     // Korapay's virtual-account request needs the already-verified identity number.
     const identityType: VerificationType = "BVN";
@@ -247,6 +310,74 @@ export default function AddMoneyPage() {
                             onClick={handleDebitCard}
                             className="rounded-lg px-3 hover:bg-violet-050"
                         />
+
+                        {/*
+                            Option 4: Simulate Deposit — test mode only. The
+                            button doesn't exist at all (not just disabled)
+                            unless the backend's own GET /config/test-mode
+                            confirms it: `testMode` is undefined while
+                            loading and false in a live build, so this only
+                            ever renders `=== true`.
+                        */}
+                        {testMode === true && (
+                            <div className="rounded-lg bg-white overflow-hidden">
+                                <RowItem
+                                    icon={FlaskConical}
+                                    iconTint="amber"
+                                    title="Simulate Deposit"
+                                    subtitle="Test mode — credits your wallet via a real Korapay sandbox transfer"
+                                    showChevron={!simulateExpanded}
+                                    onClick={() => setSimulateExpanded(!simulateExpanded)}
+                                    className={`px-3 transition-colors hover:bg-violet-050 ${simulateExpanded ? "bg-violet-050" : ""}`}
+                                />
+
+                                {simulateExpanded && (
+                                    <div className="overflow-hidden bg-violet-050/50 transition-all duration-300 ease-in-out">
+                                        <div className="space-y-4 p-5 pl-16 border-t border-violet-100">
+                                            <Field label="Amount">
+                                                <div className="relative">
+                                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-base text-muted">
+                                                        ₦
+                                                    </span>
+                                                    <Input
+                                                        type="number"
+                                                        className="pl-9 font-mono"
+                                                        placeholder="0.00"
+                                                        min={0}
+                                                        value={simulateAmount}
+                                                        onChange={(e) =>
+                                                            setSimulateAmount(e.target.value === "" ? "" : Number(e.target.value))
+                                                        }
+                                                    />
+                                                </div>
+                                            </Field>
+
+                                            <div className="flex flex-wrap gap-2">
+                                                {SIMULATE_PRESETS.map((preset) => (
+                                                    <Chip
+                                                        key={preset}
+                                                        active={simulateAmount === preset}
+                                                        onClick={() => setSimulateAmount(preset)}
+                                                    >
+                                                        {formatNaira(preset)}
+                                                    </Chip>
+                                                ))}
+                                            </div>
+
+                                            <Button
+                                                fullWidth
+                                                variant="primary"
+                                                loading={simulating}
+                                                disabled={!simulateAmount || simulateAmount <= 0}
+                                                onClick={handleSimulateDeposit}
+                                            >
+                                                Simulate Deposit (Test Mode)
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </PanelBody>
             </Panel>

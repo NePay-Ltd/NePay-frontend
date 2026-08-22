@@ -145,6 +145,16 @@ export interface CreateVirtualAccountDto {
     identityNumber: string;
 }
 
+/** Body of POST /wallet/virtual-account/simulate-deposit — test mode only, no account number (always the caller's own account). */
+export interface SimulateDepositDto {
+    amount: string;
+}
+
+/** Response of GET /config/test-mode. */
+export interface TestModeDto {
+    testMode: boolean;
+}
+
 // ─── Crypto Deposits (NOWPayments-backed) ────────────────────────────────────
 
 export interface CryptoCurrencyDto {
