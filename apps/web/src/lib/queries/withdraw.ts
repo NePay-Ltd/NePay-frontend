@@ -88,30 +88,6 @@ export function useInitiateWithdrawal() {
     });
 }
 
-/**
- * Test mode only — withdraws against one of Korapay's confirmed sandbox
- * destinations (POST /withdrawals/simulate). No bank/account fields: the
- * destination is pinned server-side by `scenario`. Same real code path as
- * `useInitiateWithdrawal` underneath (PIN check, balance check, ledger
- * debit, webhook-driven completion) — this only chooses where the money
- * goes.
- */
-export function useSimulateWithdrawal() {
-    return useMutation<
-        WithdrawalResponseDto,
-        Error,
-        { amount: string; scenario: "success" | "failure" | "invalid_account"; pin: string }
-    >({
-        mutationFn: async (payload) => {
-            const res = await apiClient.post<ApiResponse<WithdrawalResponseDto>>(
-                "/withdrawals/simulate",
-                payload,
-            );
-            return res.data.data;
-        },
-    });
-}
-
 export function useWithdrawalStatus(withdrawalId: string | null) {
     return useQuery<WithdrawalResponseDto>({
         queryKey: withdrawKeys.status(withdrawalId!),

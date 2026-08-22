@@ -11,29 +11,25 @@ import {
     Plus,
     Landmark,
     Loader2,
-    Building2,
-    FlaskConical
+    Building2
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/format";
 import { useOverviewSummary } from "@/lib/queries/overview";
-import { useTestMode } from "@/lib/queries/config";
 import {
     useSavedBankAccounts,
     useBankList,
     useResolveBankAccount,
     useSaveBankAccount,
     useInitiateWithdrawal,
-    useWithdrawalStatus,
-    useSimulateWithdrawal
+    useWithdrawalStatus
 } from "@/lib/queries/withdraw";
 
 import { RequireKyc } from "@/components/shared/require-kyc";
 import { Button } from "@/components/shared/button";
 import { Chip } from "@/components/shared/chip";
-import { RowItem } from "@/components/shared/row-item";
 import { Panel, PanelHeader, PanelBody } from "@/components/shared/panel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,14 +37,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
 
-const FEE = 50;
 const PRESET_AMOUNTS = [10000, 50000, 100000];
-
-const SIMULATE_SCENARIOS: { value: "success" | "failure" | "invalid_account"; label: string }[] = [
-    { value: "success", label: "Success" },
-    { value: "failure", label: "Failure" },
-    { value: "invalid_account", label: "Invalid Account" },
-];
 
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
 
@@ -75,39 +64,6 @@ export default function WithdrawPage() {
     const saveBankMutation = useSaveBankAccount();
     const initiateMutation = useInitiateWithdrawal();
 
-    // Simulate Withdrawal (test mode only) — no bank picker needed, the
-    // destination is pinned server-side by the chosen scenario.
-    const { data: testMode } = useTestMode();
-    const [simulateExpanded, setSimulateExpanded] = React.useState(false);
-    const [simulateScenario, setSimulateScenario] = React.useState<
-        "success" | "failure" | "invalid_account"
-    >("success");
-    const [simulateAmount, setSimulateAmount] = React.useState<number | "">(5000);
-    const [simulatePin, setSimulatePin] = React.useState("");
-    const simulateMutation = useSimulateWithdrawal();
-
-    const handleSimulateWithdrawal = () => {
-        if (!simulateAmount || simulateAmount <= 0 || simulatePin.length !== 4) return;
-
-        simulateMutation.mutate(
-            { amount: simulateAmount.toFixed(2), scenario: simulateScenario, pin: simulatePin },
-            {
-                onSuccess: () => {
-                    toast.success("Withdrawal triggered — status updates via Korapay's real webhook.");
-                    setSimulatePin("");
-                },
-                onError: (err: any) => {
-                    if (simulateScenario === "invalid_account") {
-                        toast.success("Invalid-account rejection confirmed working as expected.");
-                        setSimulatePin("");
-                        return;
-                    }
-                    toast.error(err.response?.data?.message || "Could not trigger the simulated withdrawal.");
-                },
-            },
-        );
-    };
-
     // ── Form State ──
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -121,8 +77,10 @@ export default function WithdrawPage() {
     const watchBankAccountId = form.watch("bankAccountId");
     const selectedAccount = savedAccounts.find((a) => a.id === watchBankAccountId);
 
-    const totalDeducted = watchAmount > 0 ? watchAmount + FEE : 0;
-    const isValidAmount = watchAmount > 0 && totalDeducted <= withdrawable;
+    // No client-side fee estimate — the real fee is Korapay's own, only
+    // known once the transfer completes (charged as a separate ledger
+    // debit after the fact, see the backend's WithdrawalService.handleWebhook).
+    const isValidAmount = watchAmount > 0 && watchAmount <= withdrawable;
 
     // ── Modal & Transaction State ──
     const [modalOpen, setModalOpen] = React.useState(false);
@@ -233,86 +191,6 @@ export default function WithdrawPage() {
                         Transfer money securely to your local bank account.
                     </p>
                 </div>
-
-                {/*
-                    Simulate Withdrawal — test mode only. Doesn't exist at
-                    all (not just disabled) unless the backend's own
-                    GET /config/test-mode confirms it.
-                */}
-                {testMode === true && (
-                    <Panel>
-                        <RowItem
-                            icon={FlaskConical}
-                            iconTint="amber"
-                            title="Simulate Withdrawal"
-                            subtitle="Test mode — sends a real Korapay sandbox payout"
-                            showChevron={!simulateExpanded}
-                            onClick={() => setSimulateExpanded(!simulateExpanded)}
-                            className={`px-3 transition-colors hover:bg-violet-050 ${simulateExpanded ? "bg-violet-050" : ""}`}
-                        />
-                        {simulateExpanded && (
-                            <PanelBody className="space-y-4 border-t border-violet-100 bg-violet-050/50 p-5">
-                                <div className="flex flex-wrap gap-2">
-                                    {SIMULATE_SCENARIOS.map((s) => (
-                                        <Chip
-                                            key={s.value}
-                                            active={simulateScenario === s.value}
-                                            onClick={() => setSimulateScenario(s.value)}
-                                        >
-                                            {s.label}
-                                        </Chip>
-                                    ))}
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label className="text-xs text-muted">Amount</Label>
-                                        <div className="relative">
-                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-base text-muted">
-                                                ₦
-                                            </span>
-                                            <Input
-                                                type="number"
-                                                className="pl-9 font-mono"
-                                                min={0}
-                                                value={simulateAmount}
-                                                onChange={(e) =>
-                                                    setSimulateAmount(e.target.value === "" ? "" : Number(e.target.value))
-                                                }
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-xs text-muted">Transaction PIN</Label>
-                                        <Input
-                                            type="password"
-                                            inputMode="numeric"
-                                            maxLength={4}
-                                            placeholder="1234"
-                                            value={simulatePin}
-                                            onChange={(e) =>
-                                                setSimulatePin(e.target.value.replace(/\D/g, "").slice(0, 4))
-                                            }
-                                        />
-                                    </div>
-                                </div>
-
-                                <Button
-                                    fullWidth
-                                    variant="primary"
-                                    loading={simulateMutation.isPending}
-                                    disabled={!simulateAmount || simulateAmount <= 0 || simulatePin.length !== 4}
-                                    onClick={handleSimulateWithdrawal}
-                                >
-                                    Simulate Withdrawal (Test Mode)
-                                </Button>
-                                <p className="text-center text-xs text-body">
-                                    &quot;Invalid Account&quot; is expected to fail — that failure confirms the rejection path works.
-                                </p>
-                            </PanelBody>
-                        )}
-                    </Panel>
-                )}
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-10">
                     {/* ── Left Column (Form) ── */}
@@ -507,11 +385,11 @@ export default function WithdrawPage() {
                                                 +{formatNaira(preset)}
                                             </Chip>
                                         ))}
-                                        <Chip 
-                                            active={watchAmount === withdrawable - FEE && withdrawable > FEE}
+                                        <Chip
+                                            active={watchAmount === withdrawable && withdrawable > 0}
                                             onClick={() => {
-                                                if (withdrawable > FEE) {
-                                                    form.setValue("amount", withdrawable - FEE, { shouldValidate: true });
+                                                if (withdrawable > 0) {
+                                                    form.setValue("amount", withdrawable, { shouldValidate: true });
                                                 }
                                             }}
                                             className="font-semibold text-violet-700"
@@ -519,13 +397,16 @@ export default function WithdrawPage() {
                                             Max
                                         </Chip>
                                     </div>
-                                    
+
                                     {form.formState.errors.amount && (
                                         <p className="text-xs text-red-500">{form.formState.errors.amount.message}</p>
                                     )}
                                     {watchAmount > 0 && !isValidAmount && !form.formState.errors.amount && (
-                                        <p className="text-xs text-red-500">Insufficient funds for this amount + fee.</p>
+                                        <p className="text-xs text-red-500">Insufficient funds for this amount.</p>
                                     )}
+                                    <p className="text-xs text-muted">
+                                        A processing fee applies, deducted separately once the transfer completes — the exact amount depends on the destination bank.
+                                    </p>
                                 </div>
                             </PanelBody>
                         </Panel>
@@ -537,27 +418,18 @@ export default function WithdrawPage() {
                             <PanelHeader title="Transaction Summary" />
                             <PanelBody className="p-5">
                                 <div className="space-y-4">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-body">You withdraw</span>
-                                        <span className="font-mono font-medium text-ink">
+                                    <div className="flex justify-between text-base font-bold">
+                                        <span className="text-ink">You withdraw</span>
+                                        <span className="font-mono text-violet-700">
                                             {formatNaira(watchAmount || 0)}
                                         </span>
                                     </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-body">Processing fee</span>
-                                        <span className="font-mono font-medium text-ink">
-                                            {formatNaira(FEE)}
-                                        </span>
-                                    </div>
-                                    
+
                                     <div className="my-2 border-t border-dashed border-border" />
-                                    
-                                    <div className="flex justify-between text-base font-bold">
-                                        <span className="text-ink">Total Deducted</span>
-                                        <span className="font-mono text-violet-700">
-                                            {formatNaira(totalDeducted)}
-                                        </span>
-                                    </div>
+
+                                    <p className="text-xs text-body">
+                                        A processing fee is charged separately once the transfer completes — the exact amount is set by the destination bank, not a fixed rate.
+                                    </p>
                                 </div>
                             </PanelBody>
                         </Panel>
