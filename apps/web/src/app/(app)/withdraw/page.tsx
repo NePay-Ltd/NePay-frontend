@@ -5,31 +5,35 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { 
-    Check, 
-    ChevronsUpDown, 
-    Plus, 
-    Landmark, 
-    Loader2, 
-    Building2
+import {
+    Check,
+    ChevronsUpDown,
+    Plus,
+    Landmark,
+    Loader2,
+    Building2,
+    FlaskConical
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/format";
 import { useOverviewSummary } from "@/lib/queries/overview";
-import { 
-    useSavedBankAccounts, 
-    useBankList, 
-    useResolveBankAccount, 
+import { useTestMode } from "@/lib/queries/config";
+import {
+    useSavedBankAccounts,
+    useBankList,
+    useResolveBankAccount,
     useSaveBankAccount,
     useInitiateWithdrawal,
-    useWithdrawalStatus
+    useWithdrawalStatus,
+    useSimulateWithdrawal
 } from "@/lib/queries/withdraw";
 
 import { RequireKyc } from "@/components/shared/require-kyc";
 import { Button } from "@/components/shared/button";
 import { Chip } from "@/components/shared/chip";
+import { RowItem } from "@/components/shared/row-item";
 import { Panel, PanelHeader, PanelBody } from "@/components/shared/panel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +43,12 @@ import { TransactionModal, type TransactionState } from "@/components/shared/tra
 
 const FEE = 50;
 const PRESET_AMOUNTS = [10000, 50000, 100000];
+
+const SIMULATE_SCENARIOS: { value: "success" | "failure" | "invalid_account"; label: string }[] = [
+    { value: "success", label: "Success" },
+    { value: "failure", label: "Failure" },
+    { value: "invalid_account", label: "Invalid Account" },
+];
 
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
 
@@ -64,6 +74,39 @@ export default function WithdrawPage() {
     const resolveMutation = useResolveBankAccount();
     const saveBankMutation = useSaveBankAccount();
     const initiateMutation = useInitiateWithdrawal();
+
+    // Simulate Withdrawal (test mode only) — no bank picker needed, the
+    // destination is pinned server-side by the chosen scenario.
+    const { data: testMode } = useTestMode();
+    const [simulateExpanded, setSimulateExpanded] = React.useState(false);
+    const [simulateScenario, setSimulateScenario] = React.useState<
+        "success" | "failure" | "invalid_account"
+    >("success");
+    const [simulateAmount, setSimulateAmount] = React.useState<number | "">(5000);
+    const [simulatePin, setSimulatePin] = React.useState("");
+    const simulateMutation = useSimulateWithdrawal();
+
+    const handleSimulateWithdrawal = () => {
+        if (!simulateAmount || simulateAmount <= 0 || simulatePin.length !== 4) return;
+
+        simulateMutation.mutate(
+            { amount: simulateAmount.toFixed(2), scenario: simulateScenario, pin: simulatePin },
+            {
+                onSuccess: () => {
+                    toast.success("Withdrawal triggered — status updates via Korapay's real webhook.");
+                    setSimulatePin("");
+                },
+                onError: (err: any) => {
+                    if (simulateScenario === "invalid_account") {
+                        toast.success("Invalid-account rejection confirmed working as expected.");
+                        setSimulatePin("");
+                        return;
+                    }
+                    toast.error(err.response?.data?.message || "Could not trigger the simulated withdrawal.");
+                },
+            },
+        );
+    };
 
     // ── Form State ──
     const form = useForm<FormValues>({
@@ -156,10 +199,17 @@ export default function WithdrawPage() {
     };
 
     const handlePinSubmit = (pin: string) => {
-        if (!resolutionToken) return;
+        if (!resolutionToken || !selectedAccount) return;
         setTxState("processing");
         initiateMutation.mutate(
-            { amount: watchAmount.toString(), resolutionToken, pin },
+            {
+                amount: watchAmount.toString(),
+                resolutionToken,
+                pin,
+                bankCode: selectedAccount.bankCode,
+                accountNumber: selectedAccount.accountNumber,
+                accountName: selectedAccount.accountName,
+            },
             {
                 onSuccess: (res) => {
                     setTxId(res.id); // Triggers success since we mock the polling
@@ -183,6 +233,86 @@ export default function WithdrawPage() {
                         Transfer money securely to your local bank account.
                     </p>
                 </div>
+
+                {/*
+                    Simulate Withdrawal — test mode only. Doesn't exist at
+                    all (not just disabled) unless the backend's own
+                    GET /config/test-mode confirms it.
+                */}
+                {testMode === true && (
+                    <Panel>
+                        <RowItem
+                            icon={FlaskConical}
+                            iconTint="amber"
+                            title="Simulate Withdrawal"
+                            subtitle="Test mode — sends a real Korapay sandbox payout"
+                            showChevron={!simulateExpanded}
+                            onClick={() => setSimulateExpanded(!simulateExpanded)}
+                            className={`px-3 transition-colors hover:bg-violet-050 ${simulateExpanded ? "bg-violet-050" : ""}`}
+                        />
+                        {simulateExpanded && (
+                            <PanelBody className="space-y-4 border-t border-violet-100 bg-violet-050/50 p-5">
+                                <div className="flex flex-wrap gap-2">
+                                    {SIMULATE_SCENARIOS.map((s) => (
+                                        <Chip
+                                            key={s.value}
+                                            active={simulateScenario === s.value}
+                                            onClick={() => setSimulateScenario(s.value)}
+                                        >
+                                            {s.label}
+                                        </Chip>
+                                    ))}
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-xs text-muted">Amount</Label>
+                                        <div className="relative">
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-base text-muted">
+                                                ₦
+                                            </span>
+                                            <Input
+                                                type="number"
+                                                className="pl-9 font-mono"
+                                                min={0}
+                                                value={simulateAmount}
+                                                onChange={(e) =>
+                                                    setSimulateAmount(e.target.value === "" ? "" : Number(e.target.value))
+                                                }
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-xs text-muted">Transaction PIN</Label>
+                                        <Input
+                                            type="password"
+                                            inputMode="numeric"
+                                            maxLength={4}
+                                            placeholder="1234"
+                                            value={simulatePin}
+                                            onChange={(e) =>
+                                                setSimulatePin(e.target.value.replace(/\D/g, "").slice(0, 4))
+                                            }
+                                        />
+                                    </div>
+                                </div>
+
+                                <Button
+                                    fullWidth
+                                    variant="primary"
+                                    loading={simulateMutation.isPending}
+                                    disabled={!simulateAmount || simulateAmount <= 0 || simulatePin.length !== 4}
+                                    onClick={handleSimulateWithdrawal}
+                                >
+                                    Simulate Withdrawal (Test Mode)
+                                </Button>
+                                <p className="text-center text-xs text-body">
+                                    &quot;Invalid Account&quot; is expected to fail — that failure confirms the rejection path works.
+                                </p>
+                            </PanelBody>
+                        )}
+                    </Panel>
+                )}
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-10">
                     {/* ── Left Column (Form) ── */}
