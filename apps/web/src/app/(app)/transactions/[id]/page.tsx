@@ -189,18 +189,18 @@ export default function TransactionDetailPage() {
             <Panel>
                 <PanelBody className="space-y-8">
                     {/* Transaction Header */}
-                    <div className="flex min-w-0 flex-col gap-5 border-b border-border pb-8 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="flex min-w-0 items-start gap-4 flex-1">
-                            <div className="mt-1">
+                    <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-start sm:justify-between sm:gap-5 sm:pb-8">
+                        <div className="flex min-w-0 items-start gap-3 flex-1">
+                            <div className="mt-1 shrink-0">
                                 <TxIcon category={transaction.category} />
                             </div>
                             <div className="min-w-0 flex-1">
-                                <h1 className="text-2xl font-bold text-ink break-words">{transaction.label}</h1>
-                                <p className="text-sm text-muted mt-2">{transaction.meta}</p>
+                                <h1 className="text-xl sm:text-2xl font-bold text-ink break-words">{transaction.label}</h1>
+                                <p className="text-sm text-muted mt-1">{transaction.meta}</p>
                             </div>
                         </div>
-                        <div className="shrink-0 text-left sm:text-right">
-                            <p className={cn("text-3xl font-bold font-sans tabular-nums", amountClass)}>
+                        <div className="shrink-0">
+                            <p className={cn("text-2xl sm:text-3xl font-bold font-sans tabular-nums", amountClass)}>
                                 {isCredit ? "+" : ""}{formatNaira(transaction.amount)}
                             </p>
                             {transaction.cryptoAmount && transaction.cryptoAsset && (
@@ -216,8 +216,8 @@ export default function TransactionDetailPage() {
                         {getStatusLabel(transaction.status)}
                     </div>
 
-                    {/* Details Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {/* Details Grid — single col on mobile, 2-col on sm+ */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
                         {/* Left Column */}
                         <div className="space-y-6">
                             <div>
@@ -293,9 +293,10 @@ export default function TransactionDetailPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="pt-4 border-t border-border space-y-3">
+                    <div className="pt-4 border-t border-border">
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-1 sm:space-y-3">
                         {/* Download Dropdown */}
-                        <div className="relative">
+                        <div className="relative sm:col-span-1">
                             <Button 
                                 variant="primary" 
                                 fullWidth
@@ -305,30 +306,30 @@ export default function TransactionDetailPage() {
                             >
                                 <span className="flex items-center">
                                     <Download className="h-4 w-4 mr-2" />
-                                    {isDownloading ? "Downloading..." : "Download Receipt"}
+                                    {isDownloading ? "Downloading..." : "Download"}
                                 </span>
                                 <ChevronDown className="h-4 w-4" />
                             </Button>
                             {showDownloadMenu && (
-                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-lg shadow-lg z-50">
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#1C1C1E] border border-border rounded-xl shadow-lg z-50 overflow-hidden">
                                     <button
                                         onClick={handleDownloadHTML}
                                         disabled={isDownloading}
-                                        className="w-full px-4 py-2 text-sm text-left text-ink hover:bg-gray-50 border-b border-border disabled:opacity-50"
+                                        className="w-full px-4 py-2.5 text-sm text-left text-ink dark:text-trueWhite hover:bg-gray-50 dark:hover:bg-trueWhite/10 border-b border-border disabled:opacity-50"
                                     >
                                         As HTML
                                     </button>
                                     <button
                                         onClick={handleDownloadPDF}
                                         disabled={isDownloading}
-                                        className="w-full px-4 py-2 text-sm text-left text-ink hover:bg-gray-50 border-b border-border disabled:opacity-50"
+                                        className="w-full px-4 py-2.5 text-sm text-left text-ink dark:text-trueWhite hover:bg-gray-50 dark:hover:bg-trueWhite/10 border-b border-border disabled:opacity-50"
                                     >
                                         As PDF
                                     </button>
                                     <button
                                         onClick={handleDownloadImage}
                                         disabled={isDownloading}
-                                        className="w-full px-4 py-2 text-sm text-left text-ink hover:bg-gray-50 disabled:opacity-50"
+                                        className="w-full px-4 py-2.5 text-sm text-left text-ink dark:text-trueWhite hover:bg-gray-50 dark:hover:bg-trueWhite/10 disabled:opacity-50"
                                     >
                                         As Image (PNG)
                                     </button>
@@ -337,38 +338,39 @@ export default function TransactionDetailPage() {
                         </div>
 
                         {/* Share Dropdown */}
-                        <div className="relative">
+                        <div className="relative sm:col-span-1">
                             <Button 
                                 variant="ghost" 
                                 fullWidth 
-                                className="border border-border text-ink hover:bg-gray-50 justify-between"
+                                className="border border-border text-ink dark:text-trueWhite hover:bg-gray-50 dark:hover:bg-trueWhite/10 justify-between"
                                 onClick={() => setShowShareMenu(!showShareMenu)}
                                 disabled={isSharing}
                             >
                                 <span className="flex items-center">
                                     <Share2 className="h-4 w-4 mr-2" />
-                                    {isSharing ? "Sharing..." : "Share Receipt"}
+                                    {isSharing ? "Sharing..." : "Share"}
                                 </span>
                                 <ChevronDown className="h-4 w-4" />
                             </Button>
                             {showShareMenu && (
-                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-lg shadow-lg z-50">
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#1C1C1E] border border-border rounded-xl shadow-lg z-50 overflow-hidden">
                                     <button
                                         onClick={handleShareText}
                                         disabled={isSharing}
-                                        className="w-full px-4 py-2 text-sm text-left text-ink hover:bg-gray-50 border-b border-border disabled:opacity-50"
+                                        className="w-full px-4 py-2.5 text-sm text-left text-ink dark:text-trueWhite hover:bg-gray-50 dark:hover:bg-trueWhite/10 border-b border-border disabled:opacity-50"
                                     >
                                         As Text
                                     </button>
                                     <button
                                         onClick={handleShareImage}
                                         disabled={isSharing}
-                                        className="w-full px-4 py-2 text-sm text-left text-ink hover:bg-gray-50 disabled:opacity-50"
+                                        className="w-full px-4 py-2.5 text-sm text-left text-ink dark:text-trueWhite hover:bg-gray-50 dark:hover:bg-trueWhite/10 disabled:opacity-50"
                                     >
                                         As Image
                                     </button>
                                 </div>
                             )}
+                        </div>
                         </div>
                     </div>
                 </PanelBody>
