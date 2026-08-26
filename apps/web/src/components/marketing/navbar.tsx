@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ThemeToggle } from "./theme-toggle";
 import { cn } from "@/lib/cn";
 
 export function Navbar() {
@@ -63,7 +62,6 @@ export function Navbar() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-4">
-          <ThemeToggle />
           <div className="hidden sm:flex items-center gap-3">
             <Link
               href="/login"
