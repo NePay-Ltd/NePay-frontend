@@ -1,12 +1,12 @@
 import * as React from "react";
-import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, AlertCircle, Loader2, Clock } from "lucide-react";
 
 import { Modal } from "./modal";
 import { Button } from "./button";
 
 import { Input } from "@/components/ui/input";
 
-export type TransactionState = "confirm" | "pin" | "processing" | "success" | "error";
+export type TransactionState = "confirm" | "pin" | "processing" | "success" | "review" | "error";
 
 export interface TransactionModalProps {
     open: boolean;
@@ -38,6 +38,12 @@ export interface TransactionModalProps {
     onSuccessAction?: () => void;
     successButtonLabel?: string;
 
+    // ── Review State (genuinely pending — distinct from success, nothing has paid out yet) ──
+    reviewTitle?: string;
+    reviewDescription?: React.ReactNode;
+    onReviewAction?: () => void;
+    reviewButtonLabel?: string;
+
     // ── Error State ──
     errorTitle?: string;
     errorDescription?: React.ReactNode;
@@ -65,6 +71,10 @@ export function TransactionModal({
     successDescription = "Your transaction has been completed successfully.",
     onSuccessAction,
     successButtonLabel = "Done",
+    reviewTitle = "Under Review",
+    reviewDescription = "This is being reviewed. We'll notify you once it clears.",
+    onReviewAction,
+    reviewButtonLabel = "Track Status",
     errorTitle = "Transaction Failed",
     errorDescription = "We encountered an issue. Please try again.",
     onErrorAction,
@@ -81,11 +91,12 @@ export function TransactionModal({
     }, [open]);
 
     // Determine dynamic title based on state
-    const modalTitle = 
+    const modalTitle =
         state === "confirm" ? confirmTitle :
         state === "pin" ? pinTitle :
         state === "processing" ? processingTitle :
         state === "success" ? successTitle :
+        state === "review" ? reviewTitle :
         errorTitle;
 
     // Disable closing the modal via backdrop/escape while processing
@@ -123,6 +134,10 @@ export function TransactionModal({
                 ) : state === "success" ? (
                     <Button variant="primary" fullWidth onClick={() => onSuccessAction?.()} className="mt-4">
                         {successButtonLabel}
+                    </Button>
+                ) : state === "review" ? (
+                    <Button variant="primary" fullWidth onClick={() => onReviewAction?.()} className="mt-4">
+                        {reviewButtonLabel}
                     </Button>
                 ) : state === "error" ? (
                     <Button variant="primary" fullWidth onClick={() => onErrorAction?.()} className="mt-4">
@@ -185,6 +200,15 @@ export function TransactionModal({
                             <CheckCircle2 className="h-8 w-8" />
                         </div>
                         <div className="text-sm text-body">{successDescription}</div>
+                    </div>
+                )}
+
+                {state === "review" && (
+                    <div className="flex flex-col items-center justify-center space-y-4 py-6 text-center">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-500/10 text-amber-500">
+                            <Clock className="h-8 w-8" />
+                        </div>
+                        <div className="text-sm text-body">{reviewDescription}</div>
                     </div>
                 )}
 

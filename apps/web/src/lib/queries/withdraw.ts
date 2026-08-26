@@ -69,7 +69,18 @@ export function useDeleteBankAccount() {
 }
 
 export function useInitiateWithdrawal() {
-    return useMutation<WithdrawalResponseDto, Error, { amount: string; resolutionToken: string; pin: string }>({
+    return useMutation<
+        WithdrawalResponseDto,
+        Error,
+        {
+            amount: string;
+            resolutionToken: string;
+            pin: string;
+            bankCode: string;
+            accountNumber: string;
+            accountName: string;
+        }
+    >({
         mutationFn: async (payload) => {
             const res = await apiClient.post<ApiResponse<WithdrawalResponseDto>>("/withdrawals", payload);
             return res.data.data;

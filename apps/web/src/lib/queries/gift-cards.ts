@@ -4,32 +4,63 @@
 
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
-import { ApiResponse } from "@/lib/types/api";
-import {
-    mockGetGiftCardEarnings,
-    mockGetGiftCardRates,
-    type GiftCardEarnings,
-    type GiftCardRates,
-} from "@/lib/mock-gift-cards";
+import { ApiPaginated, ApiResponse } from "@/lib/types/api";
+import type { GiftCardOrderResponseDto, GiftCardQuoteResponseDto } from "@/lib/types/api";
+import { GIFT_CARD_BRAND_CODES } from "@/lib/gift-card-brands";
+
+export interface GiftCardEarnings {
+    totalNgn: number;
+    cardsSold: number;
+}
+
+export type GiftCardRates = Record<string, number>;
 
 export const giftCardKeys = {
     all: ["gift-cards"] as const,
     earnings: () => [...giftCardKeys.all, "earnings"] as const,
     rates: () => [...giftCardKeys.all, "rates"] as const,
-    status: (id: string) => [...giftCardKeys.all, "status", id] as const,
+    order: (id: string) => [...giftCardKeys.all, "order", id] as const,
+    history: (page: number) => [...giftCardKeys.all, "history", page] as const,
 };
 
+/**
+ * The caller's own APPROVED gift card sales this month — real data off
+ * GET /giftcards/earnings, no mock. `totalNgn`/`cardsSold` used to be a
+ * fixed mock value shown to every seller regardless of their actual
+ * activity.
+ */
 export function useGiftCardEarnings() {
     return useQuery<GiftCardEarnings>({
         queryKey: giftCardKeys.earnings(),
-        queryFn: () => mockGetGiftCardEarnings("month"),
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<{ totalNgn: string; cardsSold: number }>>(
+                "/giftcards/earnings",
+                { params: { period: "month" } },
+            );
+            return { totalNgn: parseFloat(res.data.data.totalNgn), cardsSold: res.data.data.cardsSold };
+        },
     });
 }
 
+/**
+ * Per-brand payout rate off GET /giftcards/rates, keyed by this app's
+ * slug (amazon, itunes, google-play, steam) via GIFT_CARD_BRAND_CODES —
+ * the backend returns its own canonical codes (AMAZON, GOOGLE_PLAY, ...).
+ * A preview only; POST /giftcards/quote is the figure that actually binds.
+ */
 export function useGiftCardRates() {
     return useQuery<GiftCardRates>({
         queryKey: giftCardKeys.rates(),
-        queryFn: mockGetGiftCardRates,
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<Record<string, string>>>("/giftcards/rates");
+            const rates: GiftCardRates = {};
+            for (const [slug, code] of Object.entries(GIFT_CARD_BRAND_CODES)) {
+                if (res.data.data[code] !== undefined) {
+                    rates[slug] = parseFloat(res.data.data[code]);
+                }
+            }
+            return rates;
+        },
         staleTime: 60 * 1000,
     });
 }
@@ -39,46 +70,71 @@ interface QuotePayload {
     faceValueUsd: string;
     quantity: number;
 }
-interface QuoteResponse {
-    quoteId: string;
-    totalPayout: string;
-    rate: string;
-    expiresAt: string;
-}
 
 export function useGiftCardQuote() {
-    return useMutation<QuoteResponse, Error, QuotePayload>({
+    return useMutation<GiftCardQuoteResponseDto, Error, QuotePayload>({
         mutationFn: async (payload) => {
-            const res = await apiClient.post<ApiResponse<QuoteResponse>>("/giftcards/quote", payload);
+            const res = await apiClient.post<ApiResponse<GiftCardQuoteResponseDto>>("/giftcards/quote", payload);
             return res.data.data;
         },
     });
 }
 
+interface SellPayload {
+    quoteId: string;
+    cardCode: string;
+    pin: string;
+}
+
+/**
+ * Real response is a GiftCardOrder, not a fire-and-forget receipt —
+ * `status` is what tells the caller whether this resolved instantly
+ * (APPROVED) or needs the honest "under review" state (PENDING_REVIEW).
+ * See the sell page's own handling.
+ */
 export function useSubmitGiftCard() {
-    return useMutation<{ saleId: string; creditedAmount: string; status: string }, Error, { quoteId: string; cardCode: string; pin: string }>({
+    return useMutation<GiftCardOrderResponseDto, Error, SellPayload>({
         mutationFn: async (payload) => {
-            const res = await apiClient.post<ApiResponse<{ saleId: string; creditedAmount: string; status: string }>>("/giftcards/sell", payload);
+            const res = await apiClient.post<ApiResponse<GiftCardOrderResponseDto>>("/giftcards/sell", payload);
             return res.data.data;
         },
     });
 }
 
-export function useGiftCardSubmissionStatus(submissionId: string | null) {
-    return useQuery<{ id: string; status: string; brand?: string; faceValueUsd?: string; payoutNgn?: string; failureReason?: string | null }>({
-        queryKey: giftCardKeys.status(submissionId!),
+/**
+ * The submission-tracker screen's data source — GET /giftcards/:id, the
+ * caller's own order. Polls every few seconds while the order is still
+ * PENDING_REVIEW so "you'll be notified once it clears" is actually true
+ * rather than requiring a manual refresh; stops once a terminal status
+ * (APPROVED/REJECTED) is reached.
+ */
+export function useGiftCardOrder(id: string | null) {
+    return useQuery<GiftCardOrderResponseDto>({
+        queryKey: giftCardKeys.order(id ?? ""),
         queryFn: async () => {
-            // Ideally GET /gift-cards/sell/:id, but API docs don't define a polling endpoint for gift cards.
-            // Simulate polling success.
-            return {
-                id: submissionId!,
-                status: "success", 
-                brand: "amazon",
-                faceValueUsd: "100.00",
-                payoutNgn: "120000.00",
-            };
+            const res = await apiClient.get<ApiResponse<GiftCardOrderResponseDto>>(`/giftcards/${id}`);
+            return res.data.data;
         },
-        enabled: !!submissionId,
-        refetchInterval: false,
+        enabled: !!id,
+        refetchInterval: (query) => (query.state.data?.status === "PENDING_REVIEW" ? 5000 : false),
+    });
+}
+
+/**
+ * The one place a seller can see every gift card order they've ever placed
+ * — including PENDING_REVIEW and REJECTED orders, which never get a ledger
+ * entry and so never appear on the generic /transactions page. GET
+ * /giftcards/history, real API, no mock.
+ */
+export function useGiftCardHistory(page = 1, limit = 20) {
+    return useQuery<ApiPaginated<GiftCardOrderResponseDto>>({
+        queryKey: giftCardKeys.history(page),
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<ApiPaginated<GiftCardOrderResponseDto>>>(
+                "/giftcards/history",
+                { params: { page, limit } },
+            );
+            return res.data.data;
+        },
     });
 }
