@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { 
-    Check, 
-    ChevronsUpDown, 
-    Plus, 
-    Landmark, 
-    Loader2, 
+import {
+    Check,
+    ChevronsUpDown,
+    Plus,
+    Landmark,
+    Loader2,
     Building2
 } from "lucide-react";
 import { toast } from "sonner";
@@ -18,10 +18,10 @@ import { toast } from "sonner";
 import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/format";
 import { useOverviewSummary } from "@/lib/queries/overview";
-import { 
-    useSavedBankAccounts, 
-    useBankList, 
-    useResolveBankAccount, 
+import {
+    useSavedBankAccounts,
+    useBankList,
+    useResolveBankAccount,
     useSaveBankAccount,
     useInitiateWithdrawal,
     useWithdrawalStatus
@@ -37,7 +37,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
 
-const FEE = 50;
 const PRESET_AMOUNTS = [10000, 50000, 100000];
 
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
@@ -78,8 +77,10 @@ export default function WithdrawPage() {
     const watchBankAccountId = form.watch("bankAccountId");
     const selectedAccount = savedAccounts.find((a) => a.id === watchBankAccountId);
 
-    const totalDeducted = watchAmount > 0 ? watchAmount + FEE : 0;
-    const isValidAmount = watchAmount > 0 && totalDeducted <= withdrawable;
+    // No client-side fee estimate — the real fee is Korapay's own, only
+    // known once the transfer completes (charged as a separate ledger
+    // debit after the fact, see the backend's WithdrawalService.handleWebhook).
+    const isValidAmount = watchAmount > 0 && watchAmount <= withdrawable;
 
     // ── Modal & Transaction State ──
     const [modalOpen, setModalOpen] = React.useState(false);
@@ -156,10 +157,17 @@ export default function WithdrawPage() {
     };
 
     const handlePinSubmit = (pin: string) => {
-        if (!resolutionToken) return;
+        if (!resolutionToken || !selectedAccount) return;
         setTxState("processing");
         initiateMutation.mutate(
-            { amount: watchAmount.toString(), resolutionToken, pin },
+            {
+                amount: watchAmount.toString(),
+                resolutionToken,
+                pin,
+                bankCode: selectedAccount.bankCode,
+                accountNumber: selectedAccount.accountNumber,
+                accountName: selectedAccount.accountName,
+            },
             {
                 onSuccess: (res) => {
                     setTxId(res.id); // Triggers success since we mock the polling
@@ -377,11 +385,11 @@ export default function WithdrawPage() {
                                                 +{formatNaira(preset)}
                                             </Chip>
                                         ))}
-                                        <Chip 
-                                            active={watchAmount === withdrawable - FEE && withdrawable > FEE}
+                                        <Chip
+                                            active={watchAmount === withdrawable && withdrawable > 0}
                                             onClick={() => {
-                                                if (withdrawable > FEE) {
-                                                    form.setValue("amount", withdrawable - FEE, { shouldValidate: true });
+                                                if (withdrawable > 0) {
+                                                    form.setValue("amount", withdrawable, { shouldValidate: true });
                                                 }
                                             }}
                                             className="font-semibold text-violet-700"
@@ -389,13 +397,16 @@ export default function WithdrawPage() {
                                             Max
                                         </Chip>
                                     </div>
-                                    
+
                                     {form.formState.errors.amount && (
                                         <p className="text-xs text-red-500">{form.formState.errors.amount.message}</p>
                                     )}
                                     {watchAmount > 0 && !isValidAmount && !form.formState.errors.amount && (
-                                        <p className="text-xs text-red-500">Insufficient funds for this amount + fee.</p>
+                                        <p className="text-xs text-red-500">Insufficient funds for this amount.</p>
                                     )}
+                                    <p className="text-xs text-muted">
+                                        A processing fee applies, deducted separately once the transfer completes — the exact amount depends on the destination bank.
+                                    </p>
                                 </div>
                             </PanelBody>
                         </Panel>
@@ -407,27 +418,18 @@ export default function WithdrawPage() {
                             <PanelHeader title="Transaction Summary" />
                             <PanelBody className="p-5">
                                 <div className="space-y-4">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-body">You withdraw</span>
-                                        <span className="font-mono font-medium text-ink">
+                                    <div className="flex justify-between text-base font-bold">
+                                        <span className="text-ink">You withdraw</span>
+                                        <span className="font-mono text-violet-700">
                                             {formatNaira(watchAmount || 0)}
                                         </span>
                                     </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-body">Processing fee</span>
-                                        <span className="font-mono font-medium text-ink">
-                                            {formatNaira(FEE)}
-                                        </span>
-                                    </div>
-                                    
+
                                     <div className="my-2 border-t border-dashed border-border" />
-                                    
-                                    <div className="flex justify-between text-base font-bold">
-                                        <span className="text-ink">Total Deducted</span>
-                                        <span className="font-mono text-violet-700">
-                                            {formatNaira(totalDeducted)}
-                                        </span>
-                                    </div>
+
+                                    <p className="text-xs text-body">
+                                        A processing fee is charged separately once the transfer completes — the exact amount is set by the destination bank, not a fixed rate.
+                                    </p>
                                 </div>
                             </PanelBody>
                         </Panel>

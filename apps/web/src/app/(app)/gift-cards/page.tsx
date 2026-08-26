@@ -1,17 +1,20 @@
 "use client";
 
 import * as React from "react";
-import { 
-    Layers, 
-    ShoppingBag, 
-    Music, 
-    Play, 
-    Gamepad2, 
-    Tag
+import { useRouter } from "next/navigation";
+import {
+    Layers,
+    ShoppingBag,
+    Music,
+    Play,
+    Gamepad2,
+    Tag,
+    Receipt
 } from "lucide-react";
 import { Button } from "@/components/shared/button";
 import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/format";
+import { useGiftCardEarnings, useGiftCardRates } from "@/lib/queries/gift-cards";
 
 // Dummy data
 const CATEGORIES = [
@@ -58,7 +61,15 @@ const GIFT_CARDS = [
 ];
 
 export default function GiftCardsPage() {
+    const router = useRouter();
     const [mode, setMode] = React.useState<"buy" | "sell">("sell");
+
+    // Real data for the sell side — GET /giftcards/earnings and
+    // GET /giftcards/rates. No "buy" flow exists on the backend yet, so
+    // buy mode keeps its own separate, clearly-labelled placeholder below
+    // rather than being wired to sell-side data.
+    const { data: earnings, isLoading: earningsLoading } = useGiftCardEarnings();
+    const { data: rates } = useGiftCardRates();
 
     return (
         <div className="">
@@ -73,27 +84,34 @@ export default function GiftCardsPage() {
                         {mode === "sell" ? "Sell cards at today's rates" : "Buy cards for your subscriptions"}
                     </p>
                 </div>
-                
-                {/* Buy / Sell Toggle */}
-                <div className="flex rounded-xl border border-border bg-gray-50 p-1 shadow-sm">
-                    <button
-                        onClick={() => setMode("buy")}
-                        className={cn(
-                            "rounded-lg px-6 py-2 text-sm font-bold transition-all",
-                            mode === "buy" ? "bg-white text-ink shadow-sm ring-1 ring-black/5" : "text-muted hover:text-ink"
-                        )}
-                    >
-                        Buy Cards
-                    </button>
-                    <button
-                        onClick={() => setMode("sell")}
-                        className={cn(
-                            "rounded-lg px-6 py-2 text-sm font-bold transition-all",
-                            mode === "sell" ? "bg-white text-ink shadow-sm ring-1 ring-black/5" : "text-muted hover:text-ink"
-                        )}
-                    >
-                        Sell Cards
-                    </button>
+
+                <div className="flex items-center gap-3">
+                    <Button variant="quiet" onClick={() => router.push("/gift-cards/history")} className="gap-2">
+                        <Receipt className="h-4 w-4" />
+                        My Submissions
+                    </Button>
+
+                    {/* Buy / Sell Toggle */}
+                    <div className="flex rounded-xl border border-border bg-gray-50 p-1 shadow-sm">
+                        <button
+                            onClick={() => setMode("buy")}
+                            className={cn(
+                                "rounded-lg px-6 py-2 text-sm font-bold transition-all",
+                                mode === "buy" ? "bg-white text-ink shadow-sm ring-1 ring-black/5" : "text-muted hover:text-ink"
+                            )}
+                        >
+                            Buy Cards
+                        </button>
+                        <button
+                            onClick={() => setMode("sell")}
+                            className={cn(
+                                "rounded-lg px-6 py-2 text-sm font-bold transition-all",
+                                mode === "sell" ? "bg-white text-ink shadow-sm ring-1 ring-black/5" : "text-muted hover:text-ink"
+                            )}
+                        >
+                            Sell Cards
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -132,12 +150,29 @@ export default function GiftCardsPage() {
                         <p className="text-[10px] font-bold uppercase tracking-widest text-muted">
                             {mode === "sell" ? "Earned this month" : "Spent this month"}
                         </p>
-                        <p className="mt-2 font-sans tabular-nums text-2xl font-extrabold text-ink tracking-tighter leading-none">
-                            {mode === "sell" ? formatNaira(45000) : formatNaira(12500)}
-                        </p>
-                        <p className="mt-4 text-xs font-medium text-body leading-relaxed">
-                            {mode === "sell" ? "From one Amazon card sold on 17 May." : "On Apple and Spotify subscriptions."}
-                        </p>
+                        {mode === "sell" ? (
+                            <>
+                                <p className="mt-2 font-sans tabular-nums text-2xl font-extrabold text-ink tracking-tighter leading-none">
+                                    {earningsLoading ? "…" : formatNaira(earnings?.totalNgn ?? 0)}
+                                </p>
+                                <p className="mt-4 text-xs font-medium text-body leading-relaxed">
+                                    {earningsLoading
+                                        ? "Loading…"
+                                        : earnings && earnings.cardsSold > 0
+                                            ? `From ${earnings.cardsSold} card${earnings.cardsSold === 1 ? "" : "s"} approved this month.`
+                                            : "No cards approved yet this month."}
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <p className="mt-2 font-sans tabular-nums text-2xl font-extrabold text-muted tracking-tighter leading-none">
+                                    —
+                                </p>
+                                <p className="mt-4 text-xs font-medium text-body leading-relaxed">
+                                    Buying gift cards isn&apos;t live yet — this figure is a placeholder.
+                                </p>
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -162,7 +197,9 @@ export default function GiftCardsPage() {
 
                         {/* Cards Grid */}
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                            {GIFT_CARDS.map((card) => (
+                            {GIFT_CARDS.map((card) => {
+                                const cardRate = rates?.[card.id];
+                                return (
                                 <div key={card.id} className="overflow-hidden rounded-[20px] border border-border shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md">
                                     <div className={cn("flex h-[120px] items-center justify-center text-white", card.bgColor)}>
                                         <card.icon className="h-10 w-10 opacity-90" />
@@ -171,14 +208,19 @@ export default function GiftCardsPage() {
                                         <h3 className="font-extrabold text-ink text-[15px]">{card.name}</h3>
                                         <p className="text-[11px] font-medium text-muted mt-0.5">{card.desc}</p>
                                         <div className="mt-4 inline-flex items-center rounded-lg bg-green-50 px-2 py-1 text-[11px] font-bold text-green-700">
-                                            {mode === "sell" ? card.rate : "Available now"}
+                                            {mode === "sell"
+                                                ? cardRate !== undefined
+                                                    ? `${formatNaira(cardRate)}/USD`
+                                                    : "…"
+                                                : "Available now"}
                                         </div>
                                         <Button variant="quiet" className="mt-4 w-full bg-violet-50 text-violet-700 font-bold hover:bg-violet-100 rounded-xl h-10">
                                             {mode === "sell" ? "Sell this card" : "Buy this card"}
                                         </Button>
                                     </div>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
 
@@ -201,8 +243,8 @@ export default function GiftCardsPage() {
                                         2
                                     </div>
                                     <div>
-                                        <h3 className="text-sm font-bold text-ink">Upload the code or photo</h3>
-                                        <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Clear photos of the back, or paste the e-code directly.</p>
+                                        <h3 className="text-sm font-bold text-ink">Type in the code</h3>
+                                        <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Paste or type the e-code from your card.</p>
                                     </div>
                                 </div>
                                 <div className="flex gap-4">

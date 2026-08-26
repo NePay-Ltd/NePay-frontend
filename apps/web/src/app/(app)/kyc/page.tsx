@@ -13,17 +13,32 @@ import {
     ArrowRight,
     Lock,
     BadgeCheck,
+    XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { verifyBvnSchema, verifyNinSchema, type VerifyBvnValues, type VerifyNinValues } from "@/lib/schemas/kyc";
-import { mockVerifyBvn, mockVerifyNin } from "@/lib/mock-api";
+import {
+    verifyBvnSchema,
+    verifyNinSchema,
+    type VerifyBvnValues,
+    type VerifyNinValues,
+} from "@/lib/schemas/kyc";
+import {
+    useKycStatus,
+    useSubmitBvn,
+    useSubmitNin,
+} from "@/lib/queries/kyc";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/shared/button";
 import { Field } from "@/components/shared/field";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/shared/spinner";
 import { cn } from "@/lib/cn";
-import type { ApiError } from "@/lib/api";
+
+function apiErrorMessage(err: unknown, fallback: string): string {
+    const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+    return message ?? fallback;
+}
 
 // ─── Stepper indicator ────────────────────────────────────────────────────────
 
@@ -122,21 +137,22 @@ function stripNonDigits(value: string): string {
     return value.replace(/\D/g, "");
 }
 
-// ─── BVN Step ─────────────────────────────────────────────────────────────────
+// ─── BVN Number Step ──────────────────────────────────────────────────────────
 
-interface BvnStepProps {
-    onSuccess: () => void;
+interface BvnNumberStepProps {
+    onApproved: () => void;
+    onRejected: () => void;
 }
 
-function BvnStep({ onSuccess }: BvnStepProps) {
+function BvnNumberStep({ onApproved, onRejected }: BvnNumberStepProps) {
     const [displayValue, setDisplayValue] = React.useState("");
-    const [verifyError, setVerifyError] = React.useState<string | null>(null);
+    const submitBvn = useSubmitBvn();
 
     const {
         register,
         handleSubmit,
         setValue,
-        formState: { errors, isSubmitting },
+        formState: { errors },
     } = useForm<VerifyBvnValues>({
         resolver: zodResolver(verifyBvnSchema),
         defaultValues: { bvn: "" },
@@ -146,19 +162,31 @@ function BvnStep({ onSuccess }: BvnStepProps) {
         const raw = stripNonDigits(e.target.value);
         setValue("bvn", raw, { shouldValidate: true });
         setDisplayValue(formatBvn(raw));
-        setVerifyError(null);
+        submitBvn.reset();
     };
 
-    const onSubmit = async (values: VerifyBvnValues) => {
-        setVerifyError(null);
-        try {
-            await mockVerifyBvn(values.bvn);
-            toast.success("BVN verified! Proceed to NIN.");
-            onSuccess();
-        } catch (err) {
-            const apiErr = err as ApiError;
-            setVerifyError(apiErr.message ?? "BVN verification failed.");
-        }
+    const onSubmit = (values: VerifyBvnValues) => {
+        submitBvn.mutate(
+            { bvn: values.bvn },
+            {
+                onSuccess: (record) => {
+                    if (record.status === "APPROVED") {
+                        onApproved();
+                        return;
+                    }
+
+                    if (record.status === "REJECTED") {
+                        onRejected();
+                        return;
+                    }
+
+                    toast.error("Verification is still pending. Please try again shortly.");
+                },
+                onError: (err) => {
+                    toast.error(apiErrorMessage(err, "BVN verification failed."));
+                },
+            },
+        );
     };
 
     return (
@@ -168,8 +196,8 @@ function BvnStep({ onSuccess }: BvnStepProps) {
                     Enter your Bank Verification Number
                 </h2>
                 <p className="text-sm text-body">
-                    Your BVN is an 11-digit number issued by the CBN. It links your biometrics
-                    to your bank accounts and is required to verify your identity.
+                    Your BVN is an 11-digit number issued by the CBN. Korapay will verify it
+                    against its identity records immediately.
                 </p>
             </div>
 
@@ -204,15 +232,16 @@ function BvnStep({ onSuccess }: BvnStepProps) {
                         onChange={handleBvnInput}
                         autoComplete="off"
                         className="font-mono tracking-widest text-base"
-                        aria-invalid={!!errors.bvn || !!verifyError}
+                        aria-invalid={!!errors.bvn || submitBvn.isError}
                     />
                 </Field>
 
-                {/* API-level error (different from Zod validation) */}
-                {verifyError && (
+                {submitBvn.isError && (
                     <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2.5">
                         <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
-                        <p className="text-sm text-red-500">{verifyError}</p>
+                        <p className="text-sm text-red-500">
+                            {apiErrorMessage(submitBvn.error, "BVN verification failed.")}
+                        </p>
                     </div>
                 )}
 
@@ -221,38 +250,32 @@ function BvnStep({ onSuccess }: BvnStepProps) {
                     variant="primary"
                     size="lg"
                     fullWidth
-                    loading={isSubmitting}
+                    loading={submitBvn.isPending}
                 >
                     <ShieldCheck className="h-4 w-4" />
                     Verify BVN
                 </Button>
             </form>
-
-            {process.env.NEXT_PUBLIC_PROTOTYPE_MODE === "true" && (
-                <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 text-center">
-                    Mock mode — any valid 11-digit BVN works.
-                    Use <code className="font-mono">00000000000</code> to trigger an error.
-                </p>
-            )}
         </div>
     );
 }
 
-// ─── NIN Step ─────────────────────────────────────────────────────────────────
+// ─── NIN Number Step ──────────────────────────────────────────────────────────
 
-interface NinStepProps {
-    onSuccess: () => void;
+interface NinNumberStepProps {
+    onApproved: () => void;
+    onRejected: () => void;
 }
 
-function NinStep({ onSuccess }: NinStepProps) {
+function NinNumberStep({ onApproved, onRejected }: NinNumberStepProps) {
     const [displayValue, setDisplayValue] = React.useState("");
-    const [verifyError, setVerifyError] = React.useState<string | null>(null);
+    const submitNin = useSubmitNin();
 
     const {
         register,
         handleSubmit,
         setValue,
-        formState: { errors, isSubmitting },
+        formState: { errors },
     } = useForm<VerifyNinValues>({
         resolver: zodResolver(verifyNinSchema),
         defaultValues: { nin: "" },
@@ -266,19 +289,31 @@ function NinStep({ onSuccess }: NinStepProps) {
         if (raw.length > 4) fmt = `${raw.slice(0, 4)} ${raw.slice(4)}`;
         if (raw.length > 8) fmt = `${raw.slice(0, 4)} ${raw.slice(4, 8)} ${raw.slice(8)}`;
         setDisplayValue(fmt);
-        setVerifyError(null);
+        submitNin.reset();
     };
 
-    const onSubmit = async (values: VerifyNinValues) => {
-        setVerifyError(null);
-        try {
-            await mockVerifyNin(values.nin);
-            toast.success("NIN verified! You're fully verified.");
-            onSuccess();
-        } catch (err) {
-            const apiErr = err as ApiError;
-            setVerifyError(apiErr.message ?? "NIN verification failed.");
-        }
+    const onSubmit = (values: VerifyNinValues) => {
+        submitNin.mutate(
+            { nin: values.nin },
+            {
+                onSuccess: (record) => {
+                    if (record.status === "APPROVED") {
+                        onApproved();
+                        return;
+                    }
+
+                    if (record.status === "REJECTED") {
+                        onRejected();
+                        return;
+                    }
+
+                    toast.error("Verification is still pending. Please try again shortly.");
+                },
+                onError: (err) => {
+                    toast.error(apiErrorMessage(err, "NIN verification failed."));
+                },
+            },
+        );
     };
 
     return (
@@ -288,8 +323,8 @@ function NinStep({ onSuccess }: NinStepProps) {
                     Enter your National Identification Number
                 </h2>
                 <p className="text-sm text-body">
-                    Your NIN is an 11-digit number issued by NIMC. It uniquely identifies
-                    you as a Nigerian citizen or resident.
+                    Your NIN is an 11-digit number issued by NIMC. Korapay will verify it
+                    against its identity records immediately.
                 </p>
             </div>
 
@@ -323,14 +358,16 @@ function NinStep({ onSuccess }: NinStepProps) {
                         onChange={handleNinInput}
                         autoComplete="off"
                         className="font-mono tracking-widest text-base"
-                        aria-invalid={!!errors.nin || !!verifyError}
+                        aria-invalid={!!errors.nin || submitNin.isError}
                     />
                 </Field>
 
-                {verifyError && (
+                {submitNin.isError && (
                     <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2.5">
                         <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
-                        <p className="text-sm text-red-500">{verifyError}</p>
+                        <p className="text-sm text-red-500">
+                            {apiErrorMessage(submitNin.error, "NIN verification failed.")}
+                        </p>
                     </div>
                 )}
 
@@ -339,19 +376,35 @@ function NinStep({ onSuccess }: NinStepProps) {
                     variant="primary"
                     size="lg"
                     fullWidth
-                    loading={isSubmitting}
+                    loading={submitNin.isPending}
                 >
                     <Fingerprint className="h-4 w-4" />
                     Verify NIN
                 </Button>
             </form>
+        </div>
+    );
+}
 
-            {process.env.NEXT_PUBLIC_PROTOTYPE_MODE === "true" && (
-                <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 text-center">
-                    Mock mode — any valid 11-digit NIN works.
-                    Use <code className="font-mono">00000000000</code> to trigger an error.
+// ─── Rejected screen ──────────────────────────────────────────────────────────
+
+function KycRejected({ type }: { type: "BVN" | "NIN" }) {
+    return (
+        <div className="space-y-6 text-center">
+            <div className="flex justify-center">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-500/10">
+                    <XCircle className="h-10 w-10 text-red-500" />
+                </div>
+            </div>
+            <div className="space-y-2">
+                <h2 className="text-xl font-bold text-ink">
+                    We couldn&apos;t verify your {type}
+                </h2>
+                <p className="text-sm text-body">
+                    This verification wasn&apos;t successful and can&apos;t be resubmitted from
+                    here. Please contact support for help completing your verification.
                 </p>
-            )}
+            </div>
         </div>
     );
 }
@@ -404,29 +457,53 @@ function KycSuccess({ userName }: { userName: string }) {
 
 // ─── KYC Page ─────────────────────────────────────────────────────────────────
 
-type KycStep = "bvn" | "nin" | "done";
+type KycStep =
+    | "bvn-number"
+    | "bvn-rejected"
+    | "nin-number"
+    | "nin-rejected"
+    | "done";
 
 export default function KycPage() {
     const { user, updateKycTier } = useAuth();
-    const [step, setStep] = React.useState<KycStep>("bvn");
-    const bvnDone = step === "nin" || step === "done";
+    const { data: kycStatus, isLoading: statusLoading } = useKycStatus();
+
+    const [step, setStep] = React.useState<KycStep | null>(null);
+
+    // Once the account's real KYC status loads, jump straight to whichever
+    // step it hasn't completed yet — a returning user shouldn't be asked to
+    // resubmit a BVN/NIN that's already verified.
+    React.useEffect(() => {
+        if (step !== null || !kycStatus) return;
+
+        if (kycStatus.ninVerified) {
+            setStep("done");
+        } else if (kycStatus.bvnVerified) {
+            setStep("nin-number");
+        } else {
+            setStep("bvn-number");
+        }
+    }, [kycStatus, step]);
+
+    const isDone = step === "done";
+    const bvnDone =
+        step === "nin-number" || step === "nin-rejected" || step === "done";
     const ninDone = step === "done";
 
-    const handleBvnSuccess = () => {
-        setStep("nin");
-    };
-
-    const handleNinSuccess = () => {
-        updateKycTier("FULL_BVN_NIN");
-        setStep("done");
-    };
+    if (step === null || statusLoading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-bg">
+                <Spinner label="Checking your verification status…" />
+            </div>
+        );
+    }
 
     return (
         <div className="flex min-h-screen items-start justify-center bg-bg px-4 py-12">
             <div className="w-full max-w-lg">
                 {/* Card */}
                 <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
-                    {step !== "done" && (
+                    {!isDone && step !== "bvn-rejected" && step !== "nin-rejected" && (
                         <>
                             {/* Header */}
                             <div className="mb-8 space-y-1">
@@ -444,7 +521,7 @@ export default function KycPage() {
                             {/* Stepper */}
                             <div className="mb-8 flex justify-center">
                                 <Stepper
-                                    currentStep={step === "bvn" ? 1 : 2}
+                                    currentStep={step.startsWith("bvn") ? 1 : 2}
                                     bvnDone={bvnDone}
                                     ninDone={ninDone}
                                 />
@@ -456,15 +533,37 @@ export default function KycPage() {
                     )}
 
                     {/* Step content */}
-                    {step === "bvn" && <BvnStep onSuccess={handleBvnSuccess} />}
-                    {step === "nin" && <NinStep onSuccess={handleNinSuccess} />}
-                    {step === "done" && (
-                        <KycSuccess userName={user?.firstName ?? "there"} />
+                    {step === "bvn-number" && (
+                        <BvnNumberStep
+                            onApproved={() => {
+                                toast.success("BVN verified! Proceed to NIN.");
+                                setStep("nin-number");
+                            }}
+                            onRejected={() => setStep("bvn-rejected")}
+                        />
                     )}
+                    {step === "bvn-rejected" && <KycRejected type="BVN" />}
+
+                    {step === "nin-number" && (
+                        <NinNumberStep
+                            onApproved={() => {
+                                // Both BVN and NIN are now APPROVED server-side, which is
+                                // exactly the condition that promotes the account to
+                                // FULL_BVN_NIN (see KycService.computeTier).
+                                updateKycTier("FULL_BVN_NIN");
+                                toast.success("NIN verified! You're fully verified.");
+                                setStep("done");
+                            }}
+                            onRejected={() => setStep("nin-rejected")}
+                        />
+                    )}
+                    {step === "nin-rejected" && <KycRejected type="NIN" />}
+
+                    {isDone && <KycSuccess userName={user?.firstName ?? "there"} />}
                 </div>
 
                 {/* Security disclaimer */}
-                {step !== "done" && (
+                {!isDone && step !== "bvn-rejected" && step !== "nin-rejected" && (
                     <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-xs text-muted">
                         <Lock className="h-3 w-3" />
                         Your data is encrypted and processed securely in line with CBN guidelines.

@@ -9,7 +9,8 @@ import { useUiStore } from "@/lib/stores/ui-store";
 
 export interface HeroCardProps {
     balance: number;
-    balanceUsd: number;
+    /** null when the backend has no real rate to convert with — rendered as a quiet placeholder, never a fabricated figure. */
+    balanceUsd: number | null;
     sparkline: number[];
     periodLabel?: string;
 }
@@ -64,7 +65,11 @@ export function HeroCard({
                     {/* USD equivalent */}
                     <div className="mt-3 flex items-center gap-1.5 text-sm font-medium text-violet-200">
                         <p>
-                            {masked ? "***" : `$${balanceUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                            {masked
+                                ? "***"
+                                : balanceUsd !== null
+                                    ? `$${balanceUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                    : "USD rate unavailable"}
                         </p>
                     </div>
 

@@ -14,6 +14,9 @@ export interface BaseTransaction {
     category: TxCategory;
     status: "success" | "pending" | "failed";
     date?: string; // Optional for Overview, required for Transactions
+    cryptoAmount?: string;
+    cryptoAsset?: string;
+    exchangeRate?: string;
 }
 
 export interface TransactionRowProps {
@@ -113,7 +116,9 @@ export function TransactionRow({ tx, variant = "compact", onViewReceipt }: Trans
             <TxIcon category={tx.category} />
             <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold text-ink">{tx.label}</p>
-                <p className="truncate text-xs font-medium text-muted mt-0.5">{tx.meta}</p>
+                <p className="truncate text-xs font-medium text-muted mt-0.5">
+                    {tx.cryptoAmount && tx.cryptoAsset ? `${tx.cryptoAmount} ${tx.cryptoAsset} · Crypto deposit` : tx.meta}
+                </p>
             </div>
             <div className="shrink-0 text-right">
                 <p className={cn("font-sans tabular-nums tracking-tighter text-sm font-bold", amountClass)}>

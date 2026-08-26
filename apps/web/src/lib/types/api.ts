@@ -91,10 +91,19 @@ export interface LoginEventResponseDto {
 
 // ─── KYC ─────────────────────────────────────────────────────────────────────
 
+export type VerificationType = "BVN" | "NIN";
+export type KycRecordStatus = "PENDING" | "APPROVED" | "REJECTED";
+
 export interface KycStatusDto {
     tier: KycTier;
     bvnVerified: boolean;
     ninVerified: boolean;
+}
+
+/** Response of POST /kyc/verify-bvn(/confirm) and /kyc/verify-nin(/confirm). */
+export interface KycRecordDto {
+    id: string;
+    status: KycRecordStatus;
 }
 
 // ─── Wallet & Ledger ─────────────────────────────────────────────────────────
@@ -104,6 +113,8 @@ export interface WalletBalanceDto {
     displayCurrency: Currency;
     availableBalance: string;
     pendingBalance: string;
+    /** availableBalance converted to USD for display, using the admin's real current rate — null when no real rate is available (never a fabricated figure). */
+    usdEquivalent: string | null;
     lastUpdated: string;
 }
 
@@ -114,6 +125,8 @@ export interface LedgerEntryDto {
     amount: string; // always positive
     currency: Currency;
     description: string | null;
+    rate: string | null;
+    assetQuantity: string | null;
     createdAt: string;
 }
 
@@ -124,6 +137,22 @@ export interface VirtualAccountResponseDto {
     accountName: string;
     status: VirtualAccountStatus;
     createdAt: string;
+}
+
+/** Body of POST /wallet/virtual-account — only meaningful on first call. */
+export interface CreateVirtualAccountDto {
+    identityType: VerificationType;
+    identityNumber: string;
+}
+
+/** Body of POST /wallet/virtual-account/simulate-deposit — test mode only, no account number (always the caller's own account). */
+export interface SimulateDepositDto {
+    amount: string;
+}
+
+/** Response of GET /config/test-mode. */
+export interface TestModeDto {
+    testMode: boolean;
 }
 
 // ─── Crypto Deposits (NOWPayments-backed) ────────────────────────────────────
@@ -153,6 +182,9 @@ export interface CryptoMinAmountDto {
     nowPaymentsMinAmount: number;
     /** $1 USD converted into this asset's units at the current rate. Null if a rate wasn't available when minAmount was computed. */
     usdOneEquivalent: number | null;
+    /** Active admin-configured NGN value for $1. */
+    usdNgnRate: number | null;
+    minimumSource: "exact" | "estimated" | "unavailable";
 }
 
 export interface CryptoDepositAddressDto {

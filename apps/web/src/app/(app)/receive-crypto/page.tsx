@@ -61,14 +61,7 @@ function groupByCoin(currencies: CryptoCurrencyDto[]): CoinGroup[] {
     });
 }
 
-/**
- * Display-order preference for the coin-picker's "most used" shortlist —
- * purely cosmetic, never a filter/gate. Which coins are *eligible* for the
- * shortlist is entirely backend-driven (`MerchantCurrency.curated`, from
- * NowPaymentsAdapter's STATIC_CURRENCY_INFO); this only orders whichever of
- * those happen to be curated right now. A curated coin not listed here still
- * appears in the shortlist, just after these five.
- */
+/** Display-order preference for the compact "most used" shortlist. */
 const SHORTLIST_ORDER = ["USDT", "USDC", "BTC", "ETH", "TRX"];
 const SHORTLIST_SIZE = 5;
 
@@ -152,11 +145,10 @@ export default function ReceiveCryptoPage() {
     const coinGroups = React.useMemo(() => groupByCoin(currencies ?? []), [currencies]);
     const activeGroup = coinGroups.find((g) => g.coin === pickerCoin) ?? null;
 
-    // Default view: a short curated shortlist, not the full ~300-coin list.
+    // Keep the default picker compact; typing searches the complete catalog.
     const shortlistGroups = React.useMemo(
         () =>
-            coinGroups
-                .filter((g) => g.representative.curated)
+            [...coinGroups]
                 .sort((a, b) => rankInShortlist(a.coin) - rankInShortlist(b.coin))
                 .slice(0, SHORTLIST_SIZE),
         [coinGroups],
@@ -230,7 +222,31 @@ export default function ReceiveCryptoPage() {
     // specific number always wins.
     const displayMinAmount = depositData?.expectedAmount ?? minAmountData?.minAmount ?? null;
     const displayMinAmountLoading = !depositData?.expectedAmount && minAmountLoading;
+    const displayMinAmountUsd =
+        displayMinAmount !== null && minAmountData?.usdOneEquivalent && minAmountData.minimumSource !== "unavailable"
+            ? displayMinAmount / minAmountData.usdOneEquivalent
+            : null;
 
+    const minimumIsExact = Boolean(depositData?.expectedAmount) || minAmountData?.minimumSource === "exact";
+    const minimumDisplayLabel = minimumIsExact
+        ? "Min deposit"
+        : minAmountData?.minimumSource === "estimated"
+            ? "Estimated minimum"
+            : "Minimum unavailable";
+
+    const formatUsd = (amount: number | null) =>
+        amount === null || !Number.isFinite(amount)
+            ? null
+            : `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const formatCrypto = (amount: number | null) =>
+        amount === null || !Number.isFinite(amount)
+            ? null
+            : amount.toLocaleString("en-US", { maximumFractionDigits: 8 });
+    const minimumDisplayValue = minimumIsExact
+        ? `${formatCrypto(displayMinAmount)} ${selectedCurrency?.coin ?? ""}`.trim()
+        : minAmountData?.minimumSource === "estimated"
+            ? formatUsd(displayMinAmountUsd)
+            : null;
     const remainingMs = useCountdown(depositData?.expiresAt ?? undefined);
     const addressExpired = depositData?.expiresAt !== undefined && remainingMs !== null && remainingMs <= 0;
 
@@ -464,21 +480,26 @@ export default function ReceiveCryptoPage() {
                                     <span className="font-bold text-ink text-[15px]">{selectedCurrency?.coin} ({selectedCurrency?.network?.toLowerCase() ?? 'native'})</span>
                                 </div>
                                 <div className="font-black text-ink text-[15px]">
-                                    {formatNgnPrice(pricesData?.prices[selectedCurrency?.coin ?? ""]) ?? "Price unavailable"}
+                                    {minAmountData?.usdNgnRate
+                                        ? `₦${minAmountData.usdNgnRate.toLocaleString("en-NG", { maximumFractionDigits: 2 })} / $1`
+                                        : "Market rate"}
                                 </div>
                             </div>
                             
                             <div className="text-[13px] font-medium text-muted flex items-center gap-2 mt-2">
                                 <span>
-                                    Min deposit{" "}
-                                    <strong className="font-bold text-ink">
-                                        {displayMinAmount !== null ? displayMinAmount : "…"} {selectedCurrency?.coin ?? ""}
-                                    </strong>
+                                    {minimumDisplayLabel}{minimumDisplayValue ? " " : ""}
+                                    {minimumDisplayValue && <strong className="font-bold text-ink">{minimumDisplayValue}</strong>}
                                 </span>
-                                {/* Network fee intentionally omitted — no real data source exists yet
-                                    (NOWPayments doesn't expose on-chain network fees to us). A hardcoded
-                                    "$2" was here before; removed rather than shown as fact. Add back once
-                                    there's a real figure to show. */}
+                            </div>
+                            {/* No pre-send fee estimate exists: NOWPayments only reports the real
+                                on-chain fee (fee.depositFee) in the settlement webhook, after a deposit
+                                completes — never up front. Generic, honest copy here instead of either a
+                                fabricated number or an "unavailable" label that reads as broken. The real
+                                figure could be shown post-settlement in transaction history, where it'd be
+                                a fact rather than a guess — separate future work. */}
+                            <div className="text-[13px] font-medium text-muted mt-2">
+                                Network fee · <strong className="font-bold text-ink">Deducted automatically</strong>
                             </div>
                             <div className="text-[13px] font-medium text-muted mt-2">
                                 Deposit limit · <strong className="font-bold text-ink">Unlimited</strong>
@@ -667,7 +688,7 @@ export default function ReceiveCryptoPage() {
                                                 <Skeleton className="h-3 w-32" />
                                             ) : (
                                                 <span className="text-[11px] font-bold text-amber-900 uppercase tracking-wide">
-                                                    Min Deposit: {displayMinAmount} {(selectedCurrency?.name ?? selectedCurrency?.code)?.toUpperCase() ?? ""}
+                                                    {minimumDisplayLabel}{minimumDisplayValue ? `: ${minimumDisplayValue}` : ""}
                                                 </span>
                                             )}
                                         </div>

@@ -28,14 +28,25 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
         case "REFERRAL_REWARD": category = "cashback"; break;
     }
 
+    const cryptoAsset = entry.assetQuantity && entry.description
+        ? entry.description.match(/\s([A-Za-z0-9_-]+)\s@\s/)?.[1]
+        : undefined;
+
     return {
         id: entry.id,
-        label: entry.description || entry.type.replace(/_/g, " "),
-        meta: entry.type.replace(/_/g, " "),
+        label: entry.assetQuantity && cryptoAsset
+            ? `Crypto deposit${entry.description?.includes("partial payment") ? " (partial payment)" : ""}`
+            : entry.description || entry.type.replace(/_/g, " "),
+        meta: entry.assetQuantity && cryptoAsset
+            ? `${entry.assetQuantity} ${cryptoAsset} · Crypto deposit`
+            : entry.type.replace(/_/g, " "),
         amount: entry.direction === "DEBIT" ? -parseFloat(entry.amount) : parseFloat(entry.amount),
         category,
         status: "success",
         date: entry.createdAt,
+        cryptoAmount: entry.assetQuantity ?? undefined,
+        cryptoAsset,
+        exchangeRate: entry.rate ?? undefined,
     };
 }
 

@@ -25,3 +25,18 @@ export const verifyNinSchema = z.object({
     nin: ninSchema,
 });
 export type VerifyNinValues = z.infer<typeof verifyNinSchema>;
+
+/**
+ * OTP sent by Safe Haven to confirm a BVN/NIN submission. Loosely validated
+ * (length only, matching the backend's own ConfirmKycDto) — Safe Haven's
+ * exact OTP format isn't confirmed.
+ */
+export const otpSchema = z
+    .string()
+    .min(1, "Enter the code sent to your phone")
+    .max(10, "Code is too long");
+
+export const confirmOtpSchema = z.object({
+    otp: otpSchema,
+});
+export type ConfirmOtpValues = z.infer<typeof confirmOtpSchema>;

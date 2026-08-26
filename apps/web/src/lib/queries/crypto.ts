@@ -34,7 +34,7 @@ export function useCryptoCurrencies() {
     });
 }
 
-/** Real, live prices for curated coins only (see CryptoPricesDto's own note) — never mock/placeholder data. 30s staleTime mirrors the backend's own rate cache, so a refetch here isn't just re-reading a stale local cache without also giving the server a chance to have a fresher one. */
+/** Real, live prices for all enabled coins where CoinGecko has an unambiguous listing — never mock/placeholder data. 30s staleTime mirrors the backend's own rate cache. */
 export function useCryptoPrices() {
     return useQuery<CryptoPricesDto>({
         queryKey: cryptoKeys.prices(),
