@@ -32,9 +32,14 @@ export function useOverviewSummary() {
             const usdEquivalent = balanceRes.data.data.usdEquivalent;
             const balanceUsd = usdEquivalent !== null ? parseFloat(usdEquivalent) : null;
 
+            const preferredCurrencyEquivalent = balanceRes.data.data.preferredCurrencyEquivalent;
+
             return {
                 balance,
                 balanceUsd,
+                preferredCurrency: balanceRes.data.data.preferredCurrency,
+                preferredCurrencyEquivalent:
+                    preferredCurrencyEquivalent !== null ? parseFloat(preferredCurrencyEquivalent) : null,
                 // STILL HARDCODED — unlike balance/balanceUsd above, these are not
                 // wired to anything real. `sparkline` is six literal figures plus
                 // today's real balance tacked on the end; `moneyIn`/`moneyOut`/

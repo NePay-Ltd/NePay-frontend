@@ -1,5 +1,4 @@
 export type Currency = "NGN" | "USD" | "EUR" | "GBP";
-export type KycTier = "NONE" | "PHONE_VERIFIED" | "FULL_BVN_NIN";
 export type LedgerDirection = "CREDIT" | "DEBIT";
 export type LedgerEntryType = "DEPOSIT" | "BANK_DEPOSIT" | "WITHDRAWAL" | "ADMIN_ADJUSTMENT" | "UTILITY_PURCHASE" | "GIFT_CARD_SALE" | "FLIGHT_BOOKING" | "FEE" | "CASHBACK" | "REFERRAL_REWARD";
 export type CryptoDepositStatus =
@@ -42,6 +41,12 @@ export interface ApiError {
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
+/**
+ * Matches the backend's real response shape since the tier-collapse rework:
+ * users.kycTier was replaced by a single users.kycVerified boolean (BVN
+ * approval alone is sufficient KYC now — NIN verification no longer exists),
+ * so there is no tier field on any auth/KYC response anymore.
+ */
 export interface UserResponseDto {
     id: string;
     firstName: string;
@@ -50,7 +55,8 @@ export interface UserResponseDto {
     phoneNumber: string;
     role: "customer"; // strictly customer for this app
     preferredCurrency: Currency;
-    kycTier: KycTier;
+    /** True once this account has an APPROVED BVN verification. */
+    kycVerified: boolean;
     isActive: boolean;
     emailVerified: boolean;
     phoneVerified: boolean;
@@ -91,16 +97,20 @@ export interface LoginEventResponseDto {
 
 // ─── KYC ─────────────────────────────────────────────────────────────────────
 
-export type VerificationType = "BVN" | "NIN";
+/** BVN is the only identity check — matches the backend's VerificationType enum. */
+export type VerificationType = "BVN";
 export type KycRecordStatus = "PENDING" | "APPROVED" | "REJECTED";
 
+/**
+ * Response of GET /kyc/status — a single derived boolean, computed fresh from
+ * kyc_records on every call (see backend KycService.getStatus). The old
+ * { tier, bvnVerified, ninVerified } shape no longer exists.
+ */
 export interface KycStatusDto {
-    tier: KycTier;
-    bvnVerified: boolean;
-    ninVerified: boolean;
+    verified: boolean;
 }
 
-/** Response of POST /kyc/verify-bvn(/confirm) and /kyc/verify-nin(/confirm). */
+/** Response of POST /kyc/verify-bvn — synchronous APPROVED/REJECTED decision. */
 export interface KycRecordDto {
     id: string;
     status: KycRecordStatus;
@@ -115,6 +125,10 @@ export interface WalletBalanceDto {
     pendingBalance: string;
     /** availableBalance converted to USD for display, using the admin's real current rate — null when no real rate is available (never a fabricated figure). */
     usdEquivalent: string | null;
+    /** The caller's currently preferred DISPLAY currency — purely presentational, never displayCurrency itself, which stays the wallet's real settlement currency. */
+    preferredCurrency: Currency;
+    /** availableBalance converted into preferredCurrency, live/unlocked — null when no real rate is available (never a fabricated figure). */
+    preferredCurrencyEquivalent: string | null;
     lastUpdated: string;
 }
 
@@ -137,12 +151,6 @@ export interface VirtualAccountResponseDto {
     accountName: string;
     status: VirtualAccountStatus;
     createdAt: string;
-}
-
-/** Body of POST /wallet/virtual-account — only meaningful on first call. */
-export interface CreateVirtualAccountDto {
-    identityType: VerificationType;
-    identityNumber: string;
 }
 
 /** Body of POST /wallet/virtual-account/simulate-deposit — test mode only, no account number (always the caller's own account). */

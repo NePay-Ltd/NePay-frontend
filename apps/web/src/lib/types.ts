@@ -2,14 +2,13 @@
  * Shared domain types.
  */
 
-export type KycTier = "NONE" | "PHONE_VERIFIED" | "FULL_BVN_NIN";
-
 export interface User {
     id: string;
     name: string;
     email: string;
     phone: string;
-    kycTier: KycTier;
+    /** True once this account has an APPROVED BVN verification. */
+    kycVerified: boolean;
 }
 
 export interface AuthSession {

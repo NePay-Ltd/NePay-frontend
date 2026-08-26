@@ -52,7 +52,7 @@ const QUICK_ACTIONS = [
 ] as const;
 
 export default function OverviewPage() {
-    const { kycTier } = useAuth();
+    const { user } = useAuth();
     const router = useRouter();
     const { data: summary, isLoading: queryLoading } = useOverviewSummary();
 
@@ -89,7 +89,7 @@ export default function OverviewPage() {
         <div className="pb-32 sm:pb-8">
             
             {/* ── KYC Prompt Banner (Conditional) ──────────────────────── */}
-            {isMounted && kycTier !== "FULL_BVN_NIN" && (
+            {isMounted && !user?.kycVerified && (
                 <div className="mb-6 sm:mb-8 flex items-center gap-3 rounded-[16px] border border-violet-200 bg-violet-50 px-4 py-3 shadow-sm sm:gap-4 sm:px-6 sm:py-5">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 sm:h-10 sm:w-10">
                         <ShieldCheck className="h-4 w-4 text-violet-700 sm:h-5 sm:w-5" />
@@ -99,7 +99,7 @@ export default function OverviewPage() {
                             Unlock ₦5M transfer limits
                         </p>
                         <p className="mt-0.5 hidden text-sm font-medium text-violet-800 sm:block">
-                            You&apos;re 80% of the way there. Verify your BVN and NIN to unlock Tier 2.
+                            Verify your BVN to unlock full account limits — it takes under 2 minutes.
                         </p>
                     </div>
                     <button
@@ -120,6 +120,8 @@ export default function OverviewPage() {
                         <HeroCard
                             balance={summary.balance}
                             balanceUsd={summary.balanceUsd}
+                            preferredCurrency={summary.preferredCurrency}
+                            preferredCurrencyEquivalent={summary.preferredCurrencyEquivalent}
                             sparkline={summary.sparkline}
                             periodLabel="Last 7 days"
                         />

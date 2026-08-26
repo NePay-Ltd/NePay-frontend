@@ -82,7 +82,10 @@ export function useGiftCardQuote() {
 
 interface SellPayload {
     quoteId: string;
+    /** Typed by the seller — required, never OCR-derived. */
     cardCode: string;
+    /** Base64 of the LIVE camera capture — required for every submission, e-codes included. */
+    cardPhotoBase64: string;
     pin: string;
 }
 

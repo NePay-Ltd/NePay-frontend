@@ -1,10 +1,12 @@
 "use client";
 
 import * as React from "react";
+import { Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, UserPlus, Phone, AtSign, Lock, Check } from "lucide-react";
+import { Eye, EyeOff, UserPlus, Phone, AtSign, Lock, Check, Gift, Users } from "lucide-react";
 import { toast } from "sonner";
 
 import { registerSchema, type RegisterValues } from "@/lib/schemas/auth";
@@ -14,16 +16,28 @@ import { Field } from "@/components/shared/field";
 import { Input } from "@/components/ui/input";
 import type { ApiError } from "@/lib/api";
 
-export default function RegisterPage() {
+function RegisterPageContent() {
     const { register: registerUser } = useAuth();
+    const searchParams = useSearchParams();
     const [showPassword, setShowPassword] = React.useState(false);
     const [showConfirm, setShowConfirm] = React.useState(false);
+
+    // `?ref=` is a peer's own shareable referral code — prefilled but still
+    // editable, the same as a promo code field elsewhere. `?mkt=` is a
+    // marketer's attribution code: never something a customer types by hand
+    // (it identifies an external partner's own campaign link, not a "share
+    // with a friend" mechanic), so it's captured silently from the URL only
+    // and never rendered as an input — see RegisterDto's own note on why the
+    // two are distinct attribution paths.
+    const refFromUrl = searchParams.get("ref")?.trim() ?? "";
+    const marketerCodeFromUrl = searchParams.get("mkt")?.trim() ?? "";
 
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
         setError,
+        setValue,
         watch,
     } = useForm<RegisterValues>({
         resolver: zodResolver(registerSchema),
@@ -35,8 +49,18 @@ export default function RegisterPage() {
             password: "",
             confirmPassword: "",
             acceptTerms: false,
+            referralCode: refFromUrl,
+            referredByMarketerCode: marketerCodeFromUrl,
         },
     });
+
+    React.useEffect(() => {
+        if (refFromUrl) setValue("referralCode", refFromUrl);
+        if (marketerCodeFromUrl) setValue("referredByMarketerCode", marketerCodeFromUrl);
+        // Only ever runs off the URL the page loaded with — a code typed
+        // afterwards must not be silently overwritten by a stale param.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const email = watch("email");
     const isValidEmail = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -74,6 +98,8 @@ export default function RegisterPage() {
                 phone: formattedPhone,
                 email: values.email,
                 password: values.password,
+                referralCode: values.referralCode,
+                referredByMarketerCode: values.referredByMarketerCode,
             });
         } catch (err) {
             const apiErr = err as ApiError;
@@ -256,6 +282,33 @@ export default function RegisterPage() {
                     />
                 </Field>
 
+                <Field
+                    label="Referral Code (optional)"
+                    htmlFor="reg-referral-code"
+                    error={errors.referralCode?.message}
+                    trailing={<Gift className="h-4 w-4" aria-hidden />}
+                >
+                    <Input
+                        id="reg-referral-code"
+                        type="text"
+                        placeholder="e.g. NP4F82A1"
+                        autoComplete="off"
+                        {...register("referralCode")}
+                        aria-invalid={!!errors.referralCode}
+                        className="pr-10 font-mono uppercase tracking-wider"
+                    />
+                </Field>
+
+                {/* Marketer attribution rides in silently via a partner
+                    link's ?mkt= param — never a field the customer fills in
+                    themselves, just a quiet acknowledgment it was picked up. */}
+                {marketerCodeFromUrl && (
+                    <div className="flex items-center gap-2 rounded-lg border border-violet-100 bg-violet-050 px-3 py-2 text-xs text-violet-700">
+                        <Users className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                        Signing up via a partner referral link.
+                    </div>
+                )}
+
                 {/* Terms */}
                 <div className="space-y-1">
                     <label className="flex cursor-pointer items-start gap-3">
@@ -325,5 +378,16 @@ export default function RegisterPage() {
                 </p>
             )}
         </div>
+    );
+}
+
+// useSearchParams() requires a Suspense boundary for the ?ref=/?mkt= read —
+// the same pattern the transactions page already uses for its own query
+// params.
+export default function RegisterPage() {
+    return (
+        <Suspense fallback={null}>
+            <RegisterPageContent />
+        </Suspense>
     );
 }

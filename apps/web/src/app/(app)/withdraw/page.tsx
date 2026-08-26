@@ -182,7 +182,7 @@ export default function WithdrawPage() {
     };
 
     return (
-        <RequireKyc tier="FULL_BVN_NIN">
+        <RequireKyc>
             <div className="mx-auto max-w-5xl space-y-8">
                 {/* ── Top Header ── */}
                 <div className="text-center md:text-left">

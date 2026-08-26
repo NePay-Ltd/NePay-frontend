@@ -104,7 +104,7 @@ function UserProfileCard() {
     const router = useRouter();
     
     const displayName = user ? `${user.firstName} ${user.lastName}` : "Ugochukwu Nebeani";
-    const status = user?.kycTier === "FULL_BVN_NIN" ? "Verified account" : "Verified account"; // Match prototype
+    const status = user?.kycVerified ? "Verified account" : "Verification pending";
 
     return (
         <div className="mt-2 flex items-center justify-between p-4">

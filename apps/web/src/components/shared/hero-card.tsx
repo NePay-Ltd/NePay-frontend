@@ -4,29 +4,54 @@ import { Eye, EyeOff, Plus, Building2, ArrowLeftRight } from "lucide-react";
 
 import { Button } from "@/components/shared/button";
 import { Sparkline } from "@/components/shared/sparkline";
-import { formatNaira } from "@/lib/format";
+import { formatByCurrency } from "@/lib/format";
 import { useUiStore } from "@/lib/stores/ui-store";
 
 export interface HeroCardProps {
+    /** The real NGN balance — always the wallet's actual settlement figure. */
     balance: number;
     /** null when the backend has no real rate to convert with — rendered as a quiet placeholder, never a fabricated figure. */
     balanceUsd: number | null;
+    /** The account's currently preferred display currency — decides which figure below renders as the headline vs. the subscript. */
+    preferredCurrency: string;
+    /** `balance` converted into `preferredCurrency` — null when preferredCurrency is NGN (nothing to convert) or no real rate is available. */
+    preferredCurrencyEquivalent: number | null;
     sparkline: number[];
     periodLabel?: string;
 }
 
 /**
- * Premium Wallet Card (Prototype matched)
+ * Premium Wallet Card (Prototype matched).
+ *
+ * The headline figure always matches the account's `preferredCurrency`
+ * (default NGN for a new account); the other of {NGN balance, USD
+ * equivalent} renders as the quieter subscript line below it — never
+ * hardcoded NGN-primary/USD-subscript regardless of preference, which is
+ * what this card did before `preferredCurrency` existed on GET /wallet.
  */
 export function HeroCard({
     balance,
     balanceUsd,
+    preferredCurrency,
+    preferredCurrencyEquivalent,
     sparkline,
     periodLabel = "Last 7 days",
 }: HeroCardProps) {
     const masked = useUiStore((s) => s.masked);
     const toggleMasked = useUiStore((s) => s.toggleMasked);
     const router = useRouter();
+
+    // preferredCurrency === NGN, OR no real rate exists yet to convert into a
+    // non-NGN preference: NGN is the headline, USD (if a rate exists) is the
+    // subscript — the original pairing, and the only one possible without a
+    // real converted figure to show. Otherwise the preferred-currency
+    // equivalent takes the headline and the real NGN balance moves to the
+    // subscript, so the settlement figure is never lost.
+    const showPreferredAsPrimary = preferredCurrency !== "NGN" && preferredCurrencyEquivalent !== null;
+    const primaryAmount = showPreferredAsPrimary ? preferredCurrencyEquivalent : balance;
+    const primaryCurrency = showPreferredAsPrimary ? preferredCurrency : "NGN";
+    const secondaryAmount = showPreferredAsPrimary ? balance : balanceUsd;
+    const secondaryCurrency = showPreferredAsPrimary ? "NGN" : "USD";
 
     return (
         <div className="relative overflow-hidden rounded-[24px] bg-brand-gradient p-5 sm:p-6 text-white shadow-2xl lg:p-8 border border-white/10">
@@ -57,19 +82,19 @@ export function HeroCard({
                         </button>
                     </div>
 
-                    {/* Balance figure */}
+                    {/* Balance figure — headline always matches preferredCurrency */}
                     <p className="mt-2 font-sans tabular-nums tracking-tighter text-[40px] leading-none font-extrabold lg:text-[56px]">
-                        {masked ? "••••••" : formatNaira(balance)}
+                        {masked ? "••••••" : formatByCurrency(primaryAmount, primaryCurrency)}
                     </p>
 
-                    {/* USD equivalent */}
+                    {/* The other currency, as the quieter subscript */}
                     <div className="mt-3 flex items-center gap-1.5 text-sm font-medium text-violet-200">
                         <p>
                             {masked
                                 ? "***"
-                                : balanceUsd !== null
-                                    ? `$${balanceUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                                    : "USD rate unavailable"}
+                                : secondaryAmount !== null
+                                    ? formatByCurrency(secondaryAmount, secondaryCurrency)
+                                    : `${secondaryCurrency} rate unavailable`}
                         </p>
                     </div>
 

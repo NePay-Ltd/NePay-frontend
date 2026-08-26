@@ -3,8 +3,8 @@
 /**
  * AuthContext — global authentication state for the NePay app.
  *
- * Exposes: user, kycTier, isLoading, login(), logout(), register(),
- * and a silent refreshToken() used by api.ts on 401.
+ * Exposes: user, kycVerified, isLoading, login(), logout(), register(),
+ * markKycVerified(), and a silent refreshToken() used by api.ts on 401.
  *
  * The access token is stored in the in-memory auth-store (auth-store.ts),
  * NOT in React state, so the api.ts fetch wrapper can read it synchronously.
@@ -16,16 +16,21 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { apiClient, setTokens, clearTokens, getTokens } from "./api-client";
+import { getOrCreateDeviceId } from "./device-id";
 import type { LoginValues, RegisterValues } from "./schemas/auth";
-import type { UserResponseDto, KycTier, LoginResponse, AuthTokensDto, ApiResponse } from "./types/api";
+import type { UserResponseDto, LoginResponse, AuthTokensDto, ApiResponse } from "./types/api";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface AuthContextValue {
     /** Authenticated user. Null when logged out or loading. */
     user: UserResponseDto | null;
-    /** Current KYC tier derived from the user object. */
-    kycTier: KycTier;
+    /**
+     * True once this account has an APPROVED BVN verification — derived from
+     * user.kycVerified (the backend's single KYC flag since the tier-collapse
+     * rework; there is no kycTier on any response anymore).
+     */
+    kycVerified: boolean;
     /** True while the initial session check is in-flight. */
     isLoading: boolean;
     /** True when a login/register/logout mutation is pending. */
@@ -34,8 +39,8 @@ export interface AuthContextValue {
     login: (values: LoginValues) => Promise<void>;
     register: (values: Omit<RegisterValues, "confirmPassword" | "acceptTerms">) => Promise<void>;
     logout: () => Promise<void>;
-    /** Manually update the user's KYC tier (called after KYC steps complete). */
-    updateKycTier: (tier: KycTier) => void;
+    /** Locally flip kycVerified to true after a successful BVN submission. */
+    markKycVerified: () => void;
 }
 
 const AuthContext = React.createContext<AuthContextValue | null>(null);
@@ -121,6 +126,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     email: values.email,
                     phoneNumber: values.phone,
                     password: values.password,
+                    // Best-effort fraud signal — see FraudDetectionService's
+                    // own note on why this is deliberately weaker than a
+                    // native app's hardware device id. undefined (omitted
+                    // from the body) when storage is unavailable, never sent
+                    // as a fabricated value.
+                    deviceId: getOrCreateDeviceId() ?? undefined,
+                    // Both optional attribution codes — see the register
+                    // page's own note on where each one comes from.
+                    referralCode: values.referralCode || undefined,
+                    referredByMarketerCode: values.referredByMarketerCode || undefined,
                 });
                 
                 const data = res.data.data;
@@ -157,20 +172,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }, [router]);
 
-    // ── Update KYC tier ────────────────────────────────────────────────────
-    const updateKycTier = React.useCallback((tier: KycTier) => {
-        setUser((prev) => (prev ? { ...prev, kycTier: tier } : prev));
+    // ── Mark KYC verified ───────────────────────────────────────────────────
+    const markKycVerified = React.useCallback(() => {
+        setUser((prev) => (prev ? { ...prev, kycVerified: true } : prev));
     }, []);
 
     const value: AuthContextValue = {
         user,
-        kycTier: "FULL_BVN_NIN", // TEMPORARY BYPASS: user?.kycTier ?? "FULL_BVN_NIN",
+        kycVerified: user?.kycVerified ?? false,
         isLoading,
         isMutating,
         login,
         register,
         logout,
-        updateKycTier,
+        markKycVerified,
     };
 
     return (

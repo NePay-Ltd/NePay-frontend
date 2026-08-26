@@ -15,10 +15,9 @@ import {
 import { toast } from "sonner";
 
 import { usePaystackCheckout } from "@/hooks/use-paystack";
-import { useVirtualAccount, useCreateVirtualAccount, useSimulateDeposit, useWalletBalance } from "@/lib/queries/wallet";
+import { useVirtualAccount, useSimulateDeposit, useWalletBalance } from "@/lib/queries/wallet";
 import { useTestMode } from "@/lib/queries/config";
 import { formatNaira } from "@/lib/format";
-import type { VerificationType } from "@/lib/types/api";
 
 import { Button } from "@/components/shared/button";
 import { RowItem } from "@/components/shared/row-item";
@@ -26,10 +25,6 @@ import { Panel, PanelBody } from "@/components/shared/panel";
 import { Field } from "@/components/shared/field";
 import { Chip } from "@/components/shared/chip";
 import { Input } from "@/components/ui/input";
-
-function stripNonDigits(value: string): string {
-    return value.replace(/\D/g, "");
-}
 
 const SIMULATE_PRESETS = [5000, 20000, 100000];
 
@@ -71,7 +66,6 @@ export default function AddMoneyPage() {
     const [bankExpanded, setBankExpanded] = React.useState(false);
 
     const { data: virtualAccount, isLoading: vaLoading, error: vaError, refetch: refetchVa } = useVirtualAccount();
-    const { mutate: createVirtualAccount, isPending: creatingVa, error: createVaError } = useCreateVirtualAccount();
 
     // Simulate Deposit (test mode only) — the button itself doesn't exist
     // unless the backend confirms test mode, not just a client-side guess.
@@ -100,25 +94,13 @@ export default function AddMoneyPage() {
         );
     };
 
-    // Korapay's virtual-account request needs the already-verified identity number.
-    const identityType: VerificationType = "BVN";
-    const [identityNumber, setIdentityNumber] = React.useState("");
-
-    const kycRequired = (createVaError as any)?.response?.status === 409;
-    const canSubmitVa = identityNumber.length === 11;
-
-    const handleCreateVirtualAccount = () => {
-        createVirtualAccount(
-            { identityType, identityNumber },
-            {
-                onError: (err: any) => {
-                    if (err.response?.status !== 409) {
-                        toast.error(err.response?.data?.message || "Could not create virtual account.");
-                    }
-                },
-            },
-        );
-    };
+    // There is no "create virtual account" step here on purpose: BVN approval
+    // auto-provisions it server-side (see the backend's BvnVerifiedListener),
+    // so this page only ever displays the already-existing account. If GET
+    // /wallet/virtual-account returns none yet, the only missing piece is KYC
+    // — direct the user there rather than re-asking for a BVN the backend
+    // already verified (it never stores the raw number, so it cannot re-issue
+    // an account from this screen anyway).
 
     const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -250,49 +232,23 @@ export default function AddMoneyPage() {
                                             ) : (
                                                 <div className="space-y-4">
                                                     <p className="text-sm text-body">
-                                                        You don&apos;t have a dedicated virtual account yet. Verify your identity again to create one.
+                                                        You don&apos;t have a dedicated virtual account yet.
                                                     </p>
 
-                                                    {kycRequired ? (
-                                                        <div className="space-y-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5">
-                                                            <p className="text-sm text-amber-700">
-                                                                {(createVaError as any)?.response?.data?.message ??
-                                                                    "Complete KYC verification before creating a virtual account."}
-                                                            </p>
-                                                            <Button
-                                                                size="sm"
-                                                                variant="quiet"
-                                                                onClick={() => router.push("/kyc")}
-                                                            >
-                                                                Complete KYC
-                                                            </Button>
-                                                        </div>
-                                                    ) : (
-                                                        <>
-                                                            <Field label={identityType}>
-                                                                <Input
-                                                                    inputMode="numeric"
-                                                                    placeholder={`Enter your ${identityType}`}
-                                                                    maxLength={11}
-                                                                    value={identityNumber}
-                                                                    onChange={(e) =>
-                                                                        setIdentityNumber(stripNonDigits(e.target.value).slice(0, 11))
-                                                                    }
-                                                                    autoComplete="off"
-                                                                    className="font-mono tracking-widest"
-                                                                />
-                                                            </Field>
-
-                                                            <Button
-                                                                variant="primary"
-                                                                loading={creatingVa}
-                                                                disabled={!canSubmitVa}
-                                                                onClick={handleCreateVirtualAccount}
-                                                            >
-                                                                Create Virtual Account
-                                                            </Button>
-                                                        </>
-                                                    )}
+                                                    <div className="space-y-3 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2.5">
+                                                        <p className="text-sm text-violet-800">
+                                                            Your account is created automatically once your
+                                                            BVN verification is approved — no separate
+                                                            setup needed.
+                                                        </p>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="primary"
+                                                            onClick={() => router.push("/kyc")}
+                                                        >
+                                                            Complete BVN verification
+                                                        </Button>
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>

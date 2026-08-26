@@ -265,7 +265,7 @@ export default function ReceiveCryptoPage() {
     };
 
     return (
-        <RequireKyc tier="FULL_BVN_NIN">
+        <RequireKyc>
             {/* ── Mobile 2-Step Flow ────────────────────────────────────────────────── */}
             <div className="md:hidden bg-white min-h-[100dvh]">
                 {mobileStep === "list" ? (

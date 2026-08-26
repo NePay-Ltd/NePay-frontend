@@ -12,9 +12,14 @@ import type { TxCategory } from "@/components/shared/tx-icon";
 // ─── Types (shared with the real backend contract) ────────────────────────────
 
 export interface OverviewSummary {
+    /** The real NGN balance — always the wallet's actual settlement figure, regardless of display preference. */
     balance: number;
     /** null when the backend has no real rate to convert with — see WalletBalanceDto.usdEquivalent. Never a fabricated figure. */
     balanceUsd: number | null;
+    /** The account's currently preferred display currency — see WalletBalanceDto.preferredCurrency. Decides which of balance/preferredCurrencyEquivalent HeroCard shows as the headline vs. the subscript. */
+    preferredCurrency: string;
+    /** balance converted into preferredCurrency — see WalletBalanceDto.preferredCurrencyEquivalent. null when preferredCurrency is NGN (nothing to convert) or no real rate is available. */
+    preferredCurrencyEquivalent: number | null;
     /** 7 daily balance data-points, oldest first. */
     sparkline: number[];
     kpi: {

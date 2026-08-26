@@ -35,6 +35,14 @@ export const loginSchema = z.object({
 export type LoginValues = z.infer<typeof loginSchema>;
 
 // ─── Register ─────────────────────────────────────────────────────────
+
+/** Matches the backend's own @Length(4, 20) on RegisterDto.referralCode/referredByMarketerCode — only enforced when a value is actually present, since both are optional. */
+const attributionCodeSchema = z
+    .string()
+    .trim()
+    .refine((v) => v.length === 0 || (v.length >= 4 && v.length <= 20), "Code must be 4-20 characters")
+    .optional();
+
 export const registerSchema = z
     .object({
         firstName: z.string().min(1, "First name is required").max(80, "First name is too long"),
@@ -46,6 +54,10 @@ export const registerSchema = z
         acceptTerms: z
             .boolean()
             .refine((v) => v === true, "You must accept the terms of service"),
+        /** Another customer's shareable code, typed in by hand or prefilled from a `?ref=` link. */
+        referralCode: attributionCodeSchema,
+        /** A marketer's own attribution code — only ever arrives via a `?mkt=` partner link, never typed by hand; see the register page's own note. */
+        referredByMarketerCode: attributionCodeSchema,
     })
     .refine((data) => data.password === data.confirmPassword, {
         message: "Passwords do not match",

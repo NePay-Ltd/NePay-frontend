@@ -7,7 +7,6 @@ import { apiClient } from "@/lib/api-client";
 import {
     WalletBalanceDto,
     VirtualAccountResponseDto,
-    CreateVirtualAccountDto,
     SimulateDepositDto,
     ApiResponse,
 } from "@/lib/types/api";
@@ -41,23 +40,6 @@ export function useVirtualAccount() {
             }
         },
         staleTime: Infinity,
-    });
-}
-
-export function useCreateVirtualAccount() {
-    const queryClient = useQueryClient();
-
-    return useMutation<VirtualAccountResponseDto, unknown, CreateVirtualAccountDto>({
-        mutationFn: async (payload) => {
-            const res = await apiClient.post<ApiResponse<VirtualAccountResponseDto>>(
-                "/wallet/virtual-account",
-                payload,
-            );
-            return res.data.data;
-        },
-        onSuccess: (data) => {
-            queryClient.setQueryData(walletKeys.virtualAccount(), data);
-        },
     });
 }
 

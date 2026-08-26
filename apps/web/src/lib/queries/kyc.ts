@@ -1,9 +1,12 @@
 /**
  * TanStack Query hooks for the KYC section.
  *
- * Korapay BVN/NIN verification is synchronous: submitting the identity number
+ * Korapay BVN verification is synchronous: submitting the identity number
  * returns the terminal APPROVED or REJECTED result immediately. There is no
- * OTP confirmation request in the active provider flow.
+ * OTP confirmation step and no NIN flow — BVN alone is sufficient KYC.
+ * Approval also auto-provisions the caller's virtual account server-side
+ * (see the backend's BvnVerifiedListener), so nothing else needs to be
+ * called after useSubmitBvn succeeds.
  */
 
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -34,12 +37,4 @@ export function useSubmitBvn() {
     });
 }
 
-export function useSubmitNin() {
-    return useMutation<KycRecordDto, unknown, { nin: string }>({
-        mutationFn: async ({ nin }) => {
-            const res = await apiClient.post<ApiResponse<KycRecordDto>>("/kyc/verify-nin", { nin });
-            return res.data.data;
-        },
-    });
-}
 

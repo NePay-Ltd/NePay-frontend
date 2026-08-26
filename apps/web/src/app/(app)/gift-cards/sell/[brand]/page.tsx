@@ -44,12 +44,32 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
 
     const [faceValueUsd, setFaceValueUsd] = React.useState<string>("");
     const [cardCode, setCardCode] = React.useState("");
+    // LIVE camera capture only — the fraud control. The <input capture>
+    // attribute below opens the camera directly on mobile and never offers
+    // the gallery/file-picker; a captured image is required before submit.
+    const [cardPhotoBase64, setCardPhotoBase64] = React.useState<string>("");
+    const photoInputRef = React.useRef<HTMLInputElement>(null);
 
     const parsedValue = parseFloat(faceValueUsd) || 0;
     const payoutNgn = parsedValue * rate;
-    
-    // Validation
-    const isValid = parsedValue > 0 && cardCode.trim().length > 0;
+
+    const handlePhotoCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            // Strip the data-URI prefix — the backend wants bare base64.
+            const result = String(reader.result ?? "");
+            setCardPhotoBase64(result.includes(",") ? (result.split(",")[1] ?? "") : result);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    // Validation — ALL three are required, e-codes included: typed code AND
+    // a live-captured photo of the card / its email receipt.
+    const isValid =
+        parsedValue > 0 && cardCode.trim().length > 0 && cardPhotoBase64.length > 0;
 
     // Modal State
     const [modalOpen, setModalOpen] = React.useState(false);
@@ -81,16 +101,16 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
     const [submittedOrderId, setSubmittedOrderId] = React.useState<string | null>(null);
 
     const handlePinSubmit = (pin: string) => {
-        if (!currentQuoteId) return;
+        if (!currentQuoteId || !cardPhotoBase64) return;
         setTxState("processing");
 
-        submitMutation.mutate({ quoteId: currentQuoteId, cardCode, pin }, {
+        submitMutation.mutate({ quoteId: currentQuoteId, cardCode, cardPhotoBase64, pin }, {
             onSuccess: (data) => {
                 setSubmittedOrderId(data.id);
 
                 if (data.status === "APPROVED") {
-                    // Eligible seller, non-restricted brand — the automated path
-                    // already cleared and credited the wallet. A real success.
+                    // Legacy branch — every order is PENDING_REVIEW since the
+                    // fully-manual rework, but kept honest rather than assumed.
                     setTxState("success");
                     setTimeout(() => {
                         setModalOpen(false);
@@ -196,6 +216,60 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
                             />
                         </div>
 
+                        {/* LIVE camera capture — required for every submission,
+                            e-codes included. The capture attribute opens the
+                            camera directly on mobile; gallery/file-picker is
+                            not offered. Desktop browsers fall back to a file
+                            dialog they cannot prevent — noted honestly. */}
+                        <div className="space-y-3 pt-4 border-t border-border">
+                            <Label>Live Photo (required)</Label>
+                            <p className="text-xs text-body">
+                                Capture the card now with your camera — for an e-code,
+                                photograph its email or receipt instead. Screenshots and
+                                gallery uploads are not accepted.
+                            </p>
+                            <input
+                                ref={photoInputRef}
+                                type="file"
+                                accept="image/*"
+                                capture="environment"
+                                className="hidden"
+                                onChange={handlePhotoCapture}
+                            />
+                            {cardPhotoBase64 ? (
+                                <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-3">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={`data:image/jpeg;base64,${cardPhotoBase64}`}
+                                        alt="Captured card"
+                                        className="h-16 w-16 rounded-md object-cover"
+                                    />
+                                    <div className="flex-1 text-xs text-green-700">
+                                        Photo captured. It will be reviewed alongside your code.
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                            setCardPhotoBase64("");
+                                            if (photoInputRef.current) photoInputRef.current.value = "";
+                                        }}
+                                    >
+                                        Retake
+                                    </Button>
+                                </div>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => photoInputRef.current?.click()}
+                                    className="w-full rounded-xl border-2 border-dashed border-violet-300 bg-violet-50/50 px-4 py-6 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-100/60"
+                                >
+                                    Take a photo of the card now
+                                </button>
+                            )}
+                        </div>
+
                         <Button 
                             type="submit" 
                             variant="primary" 
@@ -223,8 +297,8 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
                 onPinSubmit={handlePinSubmit}
                 // Processing UI
                 processingText={txState === "processing" && currentQuoteId ? "Submitting gift card..." : "Getting best quote..."}
-                // Success UI (only ever reached for an instantly-cleared, automated approval)
-                successTitle="Payout Sent"
+                // Success UI (legacy path — every order is PENDING_REVIEW now)
+                successTitle="Submission Approved"
                 successDescription={<p>Your card was approved automatically and the payout has been added to your wallet.</p>}
                 successButtonLabel="View Submission"
                 onSuccessAction={() => setModalOpen(false)}

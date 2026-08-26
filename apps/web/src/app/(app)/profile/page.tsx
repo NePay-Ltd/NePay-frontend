@@ -132,8 +132,8 @@ export default function ProfilePage() {
                         <h1 className="mt-4 text-2xl font-bold text-ink">{profile.firstName} {profile.lastName}</h1>
                         
                         <div className="mt-2">
-                            {profile.kycTier === "FULL_BVN_NIN" ? (
-                                <Tag variant="ok" dot>Verified · Tier 2</Tag>
+                            {profile.kycVerified ? (
+                                <Tag variant="ok" dot>Verified</Tag>
                             ) : (
                                 <Tag variant="warn" dot>Pending Verification</Tag>
                             )}
@@ -195,11 +195,11 @@ export default function ProfilePage() {
                         />
                         <RowItem
                             icon={ShieldCheck}
-                            iconTint={profile?.kycTier === "FULL_BVN_NIN" ? "green" : "violet"}
+                            iconTint={profile?.kycVerified ? "green" : "violet"}
                             title="KYC Verification"
                             trailing={
                                 <div className="flex items-center gap-3">
-                                    {profile?.kycTier === "FULL_BVN_NIN" && (
+                                    {profile?.kycVerified && (
                                         <Tag variant="ok" dot>Verified</Tag>
                                     )}
                                     <ChevronRight className="h-5 w-5 text-muted" />
