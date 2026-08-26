@@ -5,7 +5,18 @@ import { User, Shield, Sliders, Smartphone, LogOut, ShieldCheck, Mail, Lock } fr
 import { Button } from "@/components/shared/button";
 import { Panel, PanelBody, PanelHeader } from "@/components/shared/panel";
 import { useAuth } from "@/lib/auth-context";
+import { useProfile, useUpdatePreferredCurrency } from "@/lib/queries/profile";
 import { cn } from "@/lib/cn";
+import type { Currency } from "@/lib/types/api";
+
+// Restricted to NGN/USD — matching the backend's own UpdateCurrencyDto. GBP
+// (and EUR) were dropped rather than built out: there's no live rate source
+// for either anywhere in this codebase, so offering them would be a
+// preference nothing could ever actually honour.
+const PREFERRED_CURRENCY_OPTIONS: Array<{ value: Extract<Currency, "NGN" | "USD">; label: string }> = [
+    { value: "NGN", label: "Nigerian Naira (₦)" },
+    { value: "USD", label: "US Dollar ($)" },
+];
 
 export default function SettingsPage() {
     const { user, logout } = useAuth();
@@ -161,25 +172,7 @@ export default function SettingsPage() {
                         </div>
                     )}
 
-                    {activeTab === "preferences" && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <Panel className="rounded-[24px]">
-                                <PanelHeader className="px-6 pt-6" title="Application Preferences" description="Customize your NePay experience." />
-                                <PanelBody className="p-6">
-                                    <div className="space-y-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[11px] font-bold uppercase tracking-widest text-muted">Primary Display Currency</label>
-                                            <select className="w-full sm:max-w-xs rounded-xl border border-border bg-gray-50 px-4 py-3 text-sm font-bold text-ink focus:border-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-600">
-                                                <option value="NGN">Nigerian Naira (₦)</option>
-                                                <option value="USD">US Dollar ($)</option>
-                                                <option value="GBP">British Pound (£)</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </PanelBody>
-                            </Panel>
-                        </div>
-                    )}
+                    {activeTab === "preferences" && <PreferencesTab />}
 
                 </div>
             </div>
@@ -194,6 +187,85 @@ export default function SettingsPage() {
                     Log out of NePay
                 </button>
             </div>
+        </div>
+    );
+}
+
+/**
+ * The only field here is a display preference — see UpdateCurrencyDto's own
+ * note. Picking USD does not move money, does not touch the wallet's real
+ * settlement currency, and does not change how any transaction is priced or
+ * settled: it only decides which of {NGN, USD} the wallet balance card shows
+ * as the headline number, with the other as the subscript — see HeroCard.
+ */
+function PreferencesTab() {
+    const { user } = useAuth();
+    const { data: profile } = useProfile();
+    const updateCurrency = useUpdatePreferredCurrency();
+
+    // useProfile() is the authoritative, live value once it loads; user (from
+    // auth-context, fetched once at app load) is what's available
+    // immediately so the select isn't blank while that fetch is in flight.
+    const savedCurrency = (profile?.preferredCurrency ?? user?.preferredCurrency ?? "NGN") as Extract<
+        Currency,
+        "NGN" | "USD"
+    >;
+
+    const [selected, setSelected] = React.useState(savedCurrency);
+
+    // Resync if the authoritative value changes underneath us (the initial
+    // fetch resolving, or a save completing) — but only while the caller
+    // hasn't made an unsaved edit of their own.
+    React.useEffect(() => {
+        setSelected(savedCurrency);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [savedCurrency]);
+
+    const isDirty = selected !== savedCurrency;
+
+    return (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <Panel className="rounded-[24px]">
+                <PanelHeader className="px-6 pt-6" title="Application Preferences" description="Customize your NePay experience." />
+                <PanelBody className="p-6">
+                    <div className="space-y-6">
+                        <div className="space-y-2">
+                            <label htmlFor="preferred-currency" className="text-[11px] font-bold uppercase tracking-widest text-muted">
+                                Primary Display Currency
+                            </label>
+                            <select
+                                id="preferred-currency"
+                                className="w-full sm:max-w-xs rounded-xl border border-border bg-gray-50 px-4 py-3 text-sm font-bold text-ink focus:border-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-600"
+                                value={selected}
+                                onChange={(e) => setSelected(e.target.value as Extract<Currency, "NGN" | "USD">)}
+                            >
+                                {PREFERRED_CURRENCY_OPTIONS.map((option) => (
+                                    <option key={option.value} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="text-xs font-medium text-body">
+                                {selected === "USD"
+                                    ? "Your balance shows in dollars, with the naira equivalent underneath."
+                                    : "Your balance shows in naira, with the dollar equivalent underneath."}{" "}
+                                Everything else — deposits, withdrawals, spending — still happens in naira, no matter what you pick here.
+                            </p>
+                        </div>
+
+                        <div className="flex justify-end pt-2">
+                            <Button
+                                variant="primary"
+                                className="rounded-xl px-6 font-bold bg-violet-700 hover:bg-violet-600"
+                                disabled={!isDirty || updateCurrency.isPending}
+                                onClick={() => updateCurrency.mutate(selected)}
+                            >
+                                {updateCurrency.isPending ? "Saving…" : "Save Changes"}
+                            </Button>
+                        </div>
+                    </div>
+                </PanelBody>
+            </Panel>
         </div>
     );
 }

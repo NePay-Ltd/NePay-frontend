@@ -42,12 +42,18 @@ export function HeroCard({
     const router = useRouter();
 
     // preferredCurrency === NGN, OR no real rate exists yet to convert into a
-    // non-NGN preference: NGN is the headline, USD (if a rate exists) is the
-    // subscript — the original pairing, and the only one possible without a
-    // real converted figure to show. Otherwise the preferred-currency
-    // equivalent takes the headline and the real NGN balance moves to the
-    // subscript, so the settlement figure is never lost.
-    const showPreferredAsPrimary = preferredCurrency !== "NGN" && preferredCurrencyEquivalent !== null;
+    // non-NGN preference, OR preferredCurrency itself is missing/malformed
+    // (an older backend response, a network hiccup): NGN is the headline,
+    // USD (if a rate exists) is the subscript — the original pairing, and
+    // the only one ever shown without a real, well-formed converted figure
+    // to back it. `!= null` (loose) below catches undefined too — a caller
+    // silently passing `undefined` must fall back exactly like a caller
+    // passing `null`, never render as the literal word "undefined".
+    // Restricted to USD by construction: preferredCurrency is only ever
+    // NGN or USD (see the backend's UpdateCurrencyDto — GBP/EUR were
+    // dropped, there's no live rate source for either).
+    const showPreferredAsPrimary =
+        preferredCurrency === "USD" && preferredCurrencyEquivalent != null && Number.isFinite(preferredCurrencyEquivalent);
     const primaryAmount = showPreferredAsPrimary ? preferredCurrencyEquivalent : balance;
     const primaryCurrency = showPreferredAsPrimary ? preferredCurrency : "NGN";
     const secondaryAmount = showPreferredAsPrimary ? balance : balanceUsd;

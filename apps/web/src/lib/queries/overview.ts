@@ -37,9 +37,15 @@ export function useOverviewSummary() {
             return {
                 balance,
                 balanceUsd,
-                preferredCurrency: balanceRes.data.data.preferredCurrency,
+                // `?? "NGN"` guards against an older backend response that
+                // predates this field entirely (undefined, not null) — the
+                // exact gap that produced a literal "undefined" in the
+                // headline before this fix, since `undefined !== "NGN"` and
+                // `undefined !== null` both read as "yes, use it" downstream.
+                preferredCurrency: balanceRes.data.data.preferredCurrency ?? "NGN",
+                // `!= null` (loose) catches both null and undefined — same reasoning.
                 preferredCurrencyEquivalent:
-                    preferredCurrencyEquivalent !== null ? parseFloat(preferredCurrencyEquivalent) : null,
+                    preferredCurrencyEquivalent != null ? parseFloat(preferredCurrencyEquivalent) : null,
                 // STILL HARDCODED — unlike balance/balanceUsd above, these are not
                 // wired to anything real. `sparkline` is six literal figures plus
                 // today's real balance tacked on the end; `moneyIn`/`moneyOut`/
