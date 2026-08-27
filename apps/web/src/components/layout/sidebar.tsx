@@ -9,6 +9,7 @@ import { cn } from "@/lib/cn";
 import { useUiStore } from "@/lib/stores/ui-store";
 import { SIDEBAR_GROUPS, type NavItem } from "@/lib/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { useReferralSummary } from "@/lib/queries/referrals";
 
 function Logo() {
     return (
@@ -62,6 +63,15 @@ function NavLink({
 
 function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname();
+    const { data: referral } = useReferralSummary();
+    const referralLink = referral && typeof window !== "undefined"
+        ? `${window.location.origin}/register?ref=${encodeURIComponent(referral.referralCode)}`
+        : "";
+
+    const copyReferralLink = async () => {
+        if (!referralLink) return;
+        await navigator.clipboard.writeText(referralLink);
+    };
 
     return (
         <nav className="flex-1 space-y-6 overflow-y-auto px-4 py-6 scrollbar-thin">
@@ -86,12 +96,14 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
             ))}
 
             {/* Refer & Earn Card */}
-            <div className="mt-8 rounded-2xl bg-trueWhite/5 p-4 border border-trueWhite/10">
-                <h4 className="text-sm font-bold text-trueWhite">Refer & earn</h4>
-                <p className="mt-1 mb-4 text-xs font-medium text-violet-200/80 dark:text-muted leading-relaxed">
-                    Invite a friend and earn up to ₦5,000 once they sign up and transact.
-                </p>
-                <button type="button" className="w-full rounded-xl bg-white dark:bg-gray-100 py-2.5 text-xs font-bold text-ink transition-transform hover:scale-[1.02] active:scale-95 shadow-sm">
+            <div className="mt-8 rounded-2xl border border-trueWhite/10 bg-trueWhite/5 p-4">
+                <Link href="/refer" className="block">
+                    <h4 className="text-sm font-bold text-trueWhite">Refer & earn</h4>
+                    <p className="mt-1 text-xs font-medium leading-relaxed text-violet-200/80 dark:text-muted">
+                        Invite a friend and earn referral points when they complete the requirements.
+                    </p>
+                </Link>
+                <button type="button" onClick={() => void copyReferralLink()} disabled={!referralLink} className="mt-4 w-full rounded-xl bg-white py-2.5 text-xs font-bold text-ink shadow-sm transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-50">
                     Copy invite link
                 </button>
             </div>

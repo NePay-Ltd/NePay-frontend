@@ -14,6 +14,8 @@ import {
     Home,
     Users,
     PlusCircle,
+    Trophy,
+    UserPlus,
     type LucideIcon,
 } from "lucide-react";
 
@@ -37,6 +39,8 @@ export const SIDEBAR_GROUPS: NavGroup[] = [
         items: [
             { key: "overview", label: "Overview", icon: LayoutDashboard, href: "/overview" },
             { key: "transactions", label: "Transactions", icon: Receipt, href: "/transactions" },
+            { key: "leaderboard", label: "Leaderboard", icon: Trophy, href: "/leaderboard" },
+            { key: "refer", label: "Refer & Earn", icon: UserPlus, href: "/refer" },
         ],
     },
     {
