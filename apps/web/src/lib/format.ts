@@ -22,21 +22,7 @@ const nairaFormatter = new Intl.NumberFormat("en-NG", {
  */
 import React from 'react';
 
-const NairaSvg = React.createElement(
-    "svg",
-    {
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2.5",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
-        className: "w-[0.85em] h-[0.85em] self-center mr-[2px] inline-block -translate-y-[0.05em]"
-    },
-    React.createElement("path", { d: "M5 21V3l14 18V3" }),
-    React.createElement("path", { d: "M3 10h18" }),
-    React.createElement("path", { d: "M3 14h18" })
-);
+const NairaText = React.createElement("span", { className: "font-sans font-bold tracking-normal antialiased mr-[2px] opacity-95" }, "₦");
 
 export function formatNaira(amount: string | number): React.ReactNode {
     const numeric = typeof amount === "string" ? Number.parseFloat(amount) : amount;
@@ -48,7 +34,7 @@ export function formatNaira(amount: string | number): React.ReactNode {
         return React.createElement(
             "span",
             { className: "inline-flex items-baseline" },
-            NairaSvg,
+            NairaText,
             "0.00"
         );
     }
@@ -61,7 +47,7 @@ export function formatNaira(amount: string | number): React.ReactNode {
         "span",
         { className: "inline-flex items-baseline" },
         isNegative ? "-" : null,
-        NairaSvg,
+        NairaText,
         valueStr
     );
 }
@@ -88,7 +74,7 @@ export function formatNairaCompact(amount: string | number): React.ReactNode {
     if (Number.isNaN(numeric)) return React.createElement(
         "span",
         { className: "inline-flex items-baseline" },
-        NairaSvg,
+        NairaText,
         "0"
     );
     
@@ -100,7 +86,7 @@ export function formatNairaCompact(amount: string | number): React.ReactNode {
         "span",
         { className: "inline-flex items-baseline" },
         isNegative ? "-" : null,
-        NairaSvg,
+        NairaText,
         valueStr
     );
 }
