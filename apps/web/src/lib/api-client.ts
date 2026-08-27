@@ -10,10 +10,45 @@ export const apiClient = axios.create({
     },
 });
 
-// ─── Token Management ────────────────────────────────────────────────────────
+// ─── Error Extraction ─────────────────────────────────────────────────────────
 
-// In a real app with more complex auth state, these would be in Zustand.
-// For the interceptor, we often need synchronous access without react hooks.
+/**
+ * Extracts the human-readable error message from any error thrown by apiClient.
+ *
+ * The NePay backend always returns:
+ *   { success: false, code: "CONFLICT", message: "...", traceId: "..." }
+ *
+ * Axios wraps this in error.response.data. Without this helper, callers
+ * would see "Request failed with status 409" instead of the real message.
+ *
+ * Usage:
+ *   onError: (err) => toast.error(getApiErrorMessage(err))
+ *   catch(err) { toast.error(getApiErrorMessage(err, "Operation failed")) }
+ */
+export function getApiErrorMessage(
+    err: unknown,
+    fallback = "Something went wrong. Please try again."
+): string {
+    if (!err) return fallback;
+
+    // Axios error — backend message is in error.response.data.message
+    if (axios.isAxiosError(err)) {
+        const backendMsg = (err.response?.data as any)?.message;
+        if (typeof backendMsg === "string" && backendMsg.length > 0) {
+            return backendMsg;
+        }
+        return err.message || fallback;
+    }
+
+    // Standard Error or ApiError (from api.ts fetch-based client)
+    if (err instanceof Error && err.message) {
+        return err.message;
+    }
+
+    return fallback;
+}
+
+// ─── Token Management ────────────────────────────────────────────────────────
 
 export function getTokens(): AuthTokensDto | null {
     const raw = typeof window !== "undefined" ? localStorage.getItem("nepay-auth") : null;
@@ -65,10 +100,19 @@ apiClient.interceptors.response.use(
     async (error: AxiosError) => {
         const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
+        // ── Overwrite error.message with the backend's human-readable message ──
+        // This means any catch(err) block that reads err.message will see
+        // the actual backend message (e.g. "An account with this phone number
+        // already exists") instead of the generic Axios "Request failed with
+        // status 409". All toast.error(err.message) calls are fixed for free.
+        const backendMsg = (error.response?.data as any)?.message;
+        if (typeof backendMsg === "string" && backendMsg.length > 0) {
+            error.message = backendMsg;
+        }
+
         // Handle 401 Unauthorized
         if (error.response?.status === 401 && !originalRequest._retry) {
             
-            // Check if it's explicitly a token expiry
             // If the code is INVALID_CREDENTIALS, it's a login failure, not an expiry.
             const data = error.response.data as any;
             if (data?.code === "INVALID_CREDENTIALS") {
@@ -77,15 +121,12 @@ apiClient.interceptors.response.use(
 
             const tokens = getTokens();
             if (!tokens?.refreshToken) {
-                // No refresh token available to retry
                 clearTokens();
-                // Optionally dispatch a global logout event here
                 window.location.href = "/login";
                 return Promise.reject(error);
             }
 
             if (isRefreshing) {
-                // If a refresh is already in flight, queue this request
                 return new Promise((resolve, reject) => {
                     failedQueue.push({
                         resolve: (token) => {
@@ -103,7 +144,6 @@ apiClient.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                // Perform the refresh
                 const refreshResponse = await axios.post<{ success: boolean; data: AuthTokensDto }>(
                     `${BASE_URL}/auth/refresh`,
                     { refreshToken: tokens.refreshToken }
@@ -112,15 +152,11 @@ apiClient.interceptors.response.use(
                 const newTokens = refreshResponse.data.data;
                 setTokens(newTokens);
                 
-                // Retry the original request
                 originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
-                
-                // Resolve all queued requests
                 processQueue(null, newTokens.accessToken);
                 
                 return apiClient(originalRequest);
             } catch (refreshError) {
-                // Refresh failed (e.g., refresh token expired or was replayed)
                 processQueue(refreshError, null);
                 clearTokens();
                 window.location.href = "/login";

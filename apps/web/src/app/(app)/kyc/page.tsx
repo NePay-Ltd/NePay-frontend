@@ -30,10 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/shared/spinner";
 import { cn } from "@/lib/cn";
 
-function apiErrorMessage(err: unknown, fallback: string): string {
-    const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-    return message ?? fallback;
-}
+import { getApiErrorMessage } from "@/lib/api-client";
 
 // ─── BVN digit formatter (groups: XXX XXXX XXXX) ─────────────────────────────
 
@@ -94,7 +91,7 @@ function BvnNumberStep({ onApproved, onRejected }: BvnNumberStepProps) {
                     toast.error("Verification is still pending. Please try again shortly.");
                 },
                 onError: (err) => {
-                    toast.error(apiErrorMessage(err, "BVN verification failed."));
+                    toast.error(getApiErrorMessage(err, "BVN verification failed."));
                 },
             },
         );
@@ -151,7 +148,7 @@ function BvnNumberStep({ onApproved, onRejected }: BvnNumberStepProps) {
                     <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2.5">
                         <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
                         <p className="text-sm text-red-500">
-                            {apiErrorMessage(submitBvn.error, "BVN verification failed.")}
+                            {getApiErrorMessage(submitBvn.error, "BVN verification failed.")}
                         </p>
                     </div>
                 )}

@@ -77,17 +77,17 @@ export default function SubmissionTrackerPage({ params }: { params: { id: string
                         </div>
 
                         {/* Vertical Stepper */}
-                        <div className="relative pl-6 py-4">
-                            {/* Connecting Line */}
-                            <div className="absolute bottom-4 left-[23px] top-4 w-0.5 bg-gray-100" />
+                        <div className="relative pl-10 py-4">
+                            {/* Connecting Line — sits behind the icon circles */}
+                            <div className="absolute bottom-4 left-[19px] top-4 w-0.5 bg-border" />
 
-                            <div className="space-y-10 relative">
+                            <div className="space-y-8 relative">
                                 {/* Step 1: Submitted */}
-                                <div className="relative flex gap-4">
-                                    <div className="absolute -left-6 flex h-8 w-8 items-center justify-center rounded-full ring-4 ring-white bg-violet-600 text-white">
+                                <div className="relative flex items-start gap-4">
+                                    <div className="absolute -left-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ring-4 ring-white dark:ring-[#1C1C1E] bg-violet-600 text-trueWhite">
                                         <ArrowDownToLine className="h-4 w-4" />
                                     </div>
-                                    <div className="pt-1">
+                                    <div>
                                         <h3 className="text-sm font-semibold text-ink">
                                             Card Submitted
                                         </h3>
@@ -96,14 +96,14 @@ export default function SubmissionTrackerPage({ params }: { params: { id: string
                                 </div>
 
                                 {/* Step 2: Under Review */}
-                                <div className="relative flex gap-4">
+                                <div className="relative flex items-start gap-4">
                                     <div className={cn(
-                                        "absolute -left-6 flex h-8 w-8 items-center justify-center rounded-full ring-4 ring-white",
-                                        isPending ? "bg-amber-500 text-white" : "bg-violet-600 text-white"
+                                        "absolute -left-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ring-4 ring-white dark:ring-[#1C1C1E]",
+                                        isPending ? "bg-amber-500 text-trueWhite" : "bg-violet-600 text-trueWhite"
                                     )}>
                                         {isPending ? <Clock className="h-4 w-4 animate-pulse" /> : <Search className="h-4 w-4" />}
                                     </div>
-                                    <div className="pt-1">
+                                    <div>
                                         <h3 className="text-sm font-semibold text-ink">
                                             {isPending ? "Under Review" : "Reviewed"}
                                         </h3>
@@ -115,17 +115,17 @@ export default function SubmissionTrackerPage({ params }: { params: { id: string
                                     </div>
                                 </div>
 
-                                {/* Step 3: Terminal State (Approved/Rejected) */}
-                                <div className="relative flex gap-4">
+                                {/* Step 3: Terminal State (Approved / Rejected) */}
+                                <div className="relative flex items-start gap-4">
                                     <div className={cn(
-                                        "absolute -left-6 flex h-8 w-8 items-center justify-center rounded-full ring-4 ring-white",
-                                        isApproved ? "bg-green-500 text-white" :
-                                        isRejected ? "bg-red-500 text-white" : "bg-gray-100 text-muted"
+                                        "absolute -left-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ring-4 ring-white dark:ring-[#1C1C1E]",
+                                        isApproved ? "bg-green-500 text-trueWhite" :
+                                        isRejected ? "bg-red-500 text-trueWhite" : "bg-gray-100 dark:bg-gray-700 text-muted"
                                     )}>
                                         {isRejected ? <X className="h-4 w-4" /> :
                                          isApproved ? <Check className="h-4 w-4" /> : <Banknote className="h-4 w-4" />}
                                     </div>
-                                    <div className="pt-1">
+                                    <div>
                                         <h3 className={cn("text-sm font-semibold",
                                             isApproved ? "text-green-600" :
                                             isRejected ? "text-red-600" : "text-muted"

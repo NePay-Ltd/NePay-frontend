@@ -29,10 +29,10 @@ export default function NotificationsPage() {
     const hasUnread = notifications.some((n) => !n.read);
 
     return (
-        <div className="mx-auto max-w-4xl space-y-6">
+        <div className="mx-auto max-w-2xl space-y-4 pb-24 sm:pb-8 px-0 sm:px-0">
             {/* Page Header */}
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-ink">Notifications</h1>
+            <div className="flex items-center justify-between px-1 sm:px-0 pt-2 sm:pt-0">
+                <h1 className="text-2xl font-bold text-ink sm:text-3xl">Notifications</h1>
                 {notifications.length > 0 && (
                     <button
                         type="button"
@@ -49,23 +49,23 @@ export default function NotificationsPage() {
             <Panel flush>
                 {isLoading ? (
                     <div className="flex flex-col divide-y divide-border">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                            <div key={i} className="flex items-start gap-4 p-5">
-                                <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <div key={i} className="flex items-start gap-3 px-4 py-4 sm:gap-4 sm:px-5 sm:py-5">
+                                <Skeleton className="h-9 w-9 shrink-0 rounded-full sm:h-10 sm:w-10" />
                                 <div className="space-y-2 flex-1">
-                                    <Skeleton className="h-4 w-40" />
-                                    <Skeleton className="h-3 w-full max-w-md" />
-                                    <Skeleton className="h-3 w-20" />
+                                    <Skeleton className="h-4 w-36 sm:w-44" />
+                                    <Skeleton className="h-3 w-full max-w-xs sm:max-w-md" />
+                                    <Skeleton className="h-3 w-16" />
                                 </div>
                             </div>
                         ))}
                     </div>
                 ) : notifications.length === 0 ? (
-                    <div className="py-20">
+                    <div className="py-16 sm:py-20">
                         <EmptyState
                             icon={Bell}
                             heading="You're all caught up"
-                            description="No new notifications. When something happens on your account, you'll see it here."
+                            description="No transactions yet. Once you start using NePay, your activity will appear here."
                         />
                     </div>
                 ) : (
@@ -78,7 +78,7 @@ export default function NotificationsPage() {
                 
                 {/* Load More */}
                 {hasNextPage && (
-                    <div className="border-t border-border p-5 text-center">
+                    <div className="border-t border-border p-4 text-center sm:p-5">
                         <Button
                             variant="ghost"
                             onClick={() => fetchNextPage()}
