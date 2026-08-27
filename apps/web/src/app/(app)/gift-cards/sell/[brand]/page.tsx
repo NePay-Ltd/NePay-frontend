@@ -8,7 +8,8 @@ import {
     Smartphone,
     Tag,
     Gamepad2,
-    Loader2
+    Loader2,
+    Camera,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -44,26 +45,55 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
 
     const [faceValueUsd, setFaceValueUsd] = React.useState<string>("");
     const [cardCode, setCardCode] = React.useState("");
-    // LIVE camera capture only — the fraud control. The <input capture>
-    // attribute below opens the camera directly on mobile and never offers
-    // the gallery/file-picker; a captured image is required before submit.
+    // Live camera capture only — a captured image is required before submit.
     const [cardPhotoBase64, setCardPhotoBase64] = React.useState<string>("");
-    const photoInputRef = React.useRef<HTMLInputElement>(null);
+    const videoRef = React.useRef<HTMLVideoElement>(null);
+    const streamRef = React.useRef<MediaStream | null>(null);
+    const [cameraOpen, setCameraOpen] = React.useState(false);
+    const [cameraError, setCameraError] = React.useState<string | null>(null);
 
     const parsedValue = parseFloat(faceValueUsd) || 0;
     const payoutNgn = parsedValue * rate;
 
-    const handlePhotoCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+    const stopCamera = React.useCallback(() => {
+        streamRef.current?.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+        setCameraOpen(false);
+    }, []);
 
-        const reader = new FileReader();
-        reader.onload = () => {
-            // Strip the data-URI prefix — the backend wants bare base64.
-            const result = String(reader.result ?? "");
-            setCardPhotoBase64(result.includes(",") ? (result.split(",")[1] ?? "") : result);
-        };
-        reader.readAsDataURL(file);
+    React.useEffect(() => stopCamera, [stopCamera]);
+
+    React.useEffect(() => {
+        if (cameraOpen && videoRef.current && streamRef.current) {
+            videoRef.current.srcObject = streamRef.current;
+        }
+    }, [cameraOpen]);
+
+    const openCamera = async () => {
+        setCameraError(null);
+        if (!navigator.mediaDevices?.getUserMedia) {
+            setCameraError("Camera capture is not supported by this browser.");
+            return;
+        }
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+            streamRef.current = stream;
+            setCameraOpen(true);
+            if (videoRef.current) videoRef.current.srcObject = stream;
+        } catch {
+            setCameraError("Camera access was denied or unavailable. Allow camera access to continue.");
+        }
+    };
+
+    const capturePhoto = () => {
+        const video = videoRef.current;
+        if (!video || video.videoWidth === 0) return;
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d")?.drawImage(video, 0, 0);
+        setCardPhotoBase64(canvas.toDataURL("image/jpeg", 0.88).split(",")[1] ?? "");
+        stopCamera();
     };
 
     // Validation — ALL three are required, e-codes included: typed code AND
@@ -108,20 +138,8 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
             onSuccess: (data) => {
                 setSubmittedOrderId(data.id);
 
-                if (data.status === "APPROVED") {
-                    // Legacy branch — every order is PENDING_REVIEW since the
-                    // fully-manual rework, but kept honest rather than assumed.
-                    setTxState("success");
-                    setTimeout(() => {
-                        setModalOpen(false);
-                        router.push(`/gift-cards/submissions/${data.id}`);
-                    }, 1500);
-                } else {
-                    // PENDING_REVIEW — genuinely nothing paid out yet. Never show
-                    // the success checkmark for this; the "review" state is honest
-                    // about what's actually happening.
-                    setTxState("review");
-                }
+                // Every submission is manual. There is no instant-success path.
+                setTxState("review");
             },
             onError: (err: any) => {
                 toast.error(err.response?.data?.message || "Failed to submit gift card");
@@ -216,11 +234,7 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
                             />
                         </div>
 
-                        {/* LIVE camera capture — required for every submission,
-                            e-codes included. The capture attribute opens the
-                            camera directly on mobile; gallery/file-picker is
-                            not offered. Desktop browsers fall back to a file
-                            dialog they cannot prevent — noted honestly. */}
+                        {/* Camera evidence is required for physical cards and e-codes. */}
                         <div className="space-y-3 pt-4 border-t border-border">
                             <Label>Live Photo (required)</Label>
                             <p className="text-xs text-body">
@@ -228,14 +242,6 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
                                 photograph its email or receipt instead. Screenshots and
                                 gallery uploads are not accepted.
                             </p>
-                            <input
-                                ref={photoInputRef}
-                                type="file"
-                                accept="image/*"
-                                capture="environment"
-                                className="hidden"
-                                onChange={handlePhotoCapture}
-                            />
                             {cardPhotoBase64 ? (
                                 <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-3">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -253,21 +259,22 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
                                         size="sm"
                                         onClick={() => {
                                             setCardPhotoBase64("");
-                                            if (photoInputRef.current) photoInputRef.current.value = "";
                                         }}
                                     >
                                         Retake
                                     </Button>
                                 </div>
                             ) : (
-                                <button
-                                    type="button"
-                                    onClick={() => photoInputRef.current?.click()}
-                                    className="w-full rounded-xl border-2 border-dashed border-violet-300 bg-violet-50/50 px-4 py-6 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-100/60"
-                                >
-                                    Take a photo of the card now
-                                </button>
+                                cameraOpen ? (
+                                    <div className="space-y-3">
+                                        <video ref={videoRef} autoPlay playsInline muted className="aspect-video w-full rounded-xl bg-black object-cover" />
+                                        <div className="flex gap-3"><Button type="button" variant="primary" onClick={capturePhoto} className="flex-1"><Camera className="mr-2 h-4 w-4" />Capture photo</Button><Button type="button" variant="ghost" onClick={stopCamera}>Cancel</Button></div>
+                                    </div>
+                                ) : (
+                                    <button type="button" onClick={() => void openCamera()} className="flex w-full items-center justify-center rounded-xl border-2 border-dashed border-violet-300 bg-violet-50/50 px-4 py-6 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-100/60"><Camera className="mr-2 h-5 w-5" />Take a photo with camera</button>
+                                )
                             )}
+                            {cameraError && <p className="text-xs text-red-600">{cameraError}</p>}
                         </div>
 
                         <Button 
@@ -297,11 +304,6 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
                 onPinSubmit={handlePinSubmit}
                 // Processing UI
                 processingText={txState === "processing" && currentQuoteId ? "Submitting gift card..." : "Getting best quote..."}
-                // Success UI (legacy path — every order is PENDING_REVIEW now)
-                successTitle="Submission Approved"
-                successDescription={<p>Your card was approved automatically and the payout has been added to your wallet.</p>}
-                successButtonLabel="View Submission"
-                onSuccessAction={() => setModalOpen(false)}
                 // Review UI — genuinely pending, no payout yet
                 reviewTitle="Under Review"
                 reviewDescription={

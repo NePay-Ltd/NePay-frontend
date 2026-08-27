@@ -6,7 +6,7 @@ import {
     Check,
     Clock,
     X,
-    UploadCloud,
+    ArrowDownToLine,
     Search,
     Banknote,
     ArrowLeft
@@ -85,7 +85,7 @@ export default function SubmissionTrackerPage({ params }: { params: { id: string
                                 {/* Step 1: Submitted */}
                                 <div className="relative flex gap-4">
                                     <div className="absolute -left-6 flex h-8 w-8 items-center justify-center rounded-full ring-4 ring-white bg-violet-600 text-white">
-                                        <UploadCloud className="h-4 w-4" />
+                                        <ArrowDownToLine className="h-4 w-4" />
                                     </div>
                                     <div className="pt-1">
                                         <h3 className="text-sm font-semibold text-ink">

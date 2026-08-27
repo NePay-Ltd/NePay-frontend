@@ -9,7 +9,8 @@ import {
     Play,
     Gamepad2,
     Tag,
-    Receipt
+    Receipt,
+    ArrowDownToLine,
 } from "lucide-react";
 import { Button } from "@/components/shared/button";
 import { cn } from "@/lib/cn";
@@ -63,6 +64,7 @@ const GIFT_CARDS = [
 export default function GiftCardsPage() {
     const router = useRouter();
     const [mode, setMode] = React.useState<"buy" | "sell">("sell");
+    const [selectedCategory, setSelectedCategory] = React.useState("all");
 
     // Real data for the sell side — GET /giftcards/earnings and
     // GET /giftcards/rates. No "buy" flow exists on the backend yet, so
@@ -125,9 +127,11 @@ export default function GiftCardsPage() {
                             {CATEGORIES.map((cat) => (
                                 <li key={cat.id}>
                                     <button
+                                        type="button"
+                                        onClick={() => setSelectedCategory(cat.id)}
                                         className={cn(
                                             "flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-colors",
-                                            cat.active 
+                                            selectedCategory === cat.id
                                                 ? "bg-violet-100 text-violet-700" 
                                                 : "text-body hover:bg-violet-50 hover:text-violet-900"
                                         )}
@@ -189,15 +193,16 @@ export default function GiftCardsPage() {
                                     {mode === "sell" ? "Rates refresh every hour — the rate you see is the rate you get" : "Purchase digital codes delivered instantly to your email"}
                                 </p>
                             </div>
-                            <Button className="shrink-0 bg-violet-700 text-white font-bold rounded-xl px-5 py-2.5 shadow-sm hover:bg-violet-600">
+                            <Button type="button" onClick={() => { setMode("sell"); document.getElementById("gift-card-options")?.scrollIntoView({ behavior: "smooth" }); }} className="shrink-0 bg-violet-700 text-white font-bold rounded-xl px-5 py-2.5 shadow-sm hover:bg-violet-600">
                                 <Tag className="mr-2 h-4 w-4" />
                                 {mode === "sell" ? "Sell a card" : "Buy a card"}
                             </Button>
                         </div>
 
                         {/* Cards Grid */}
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                        <div id="gift-card-options" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                             {GIFT_CARDS.map((card) => {
+                                if (selectedCategory !== "all" && selectedCategory !== card.id) return null;
                                 const cardRate = rates?.[card.id];
                                 return (
                                 <div key={card.id} className="overflow-hidden rounded-[20px] border border-border shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md">
@@ -214,7 +219,7 @@ export default function GiftCardsPage() {
                                                     : "…"
                                                 : "Available now"}
                                         </div>
-                                        <Button variant="quiet" className="mt-4 w-full bg-violet-50 text-violet-700 font-bold hover:bg-violet-100 rounded-xl h-10">
+                                        <Button type="button" variant="quiet" onClick={() => mode === "sell" && router.push(`/gift-cards/sell/${card.id}`)} disabled={mode !== "sell"} className="mt-4 w-full bg-violet-50 text-violet-700 font-bold hover:bg-violet-100 rounded-xl h-10">
                                             {mode === "sell" ? "Sell this card" : "Buy this card"}
                                         </Button>
                                     </div>
