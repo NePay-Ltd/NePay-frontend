@@ -13,7 +13,6 @@ import {
     ApiResponse,
 } from "@/lib/types/api";
 import {
-    mockGetSavedBillers,
     mockVerifySmartcard,
     type SavedBiller,
 } from "@/lib/mock-services";
@@ -27,11 +26,41 @@ export const servicesKeys = {
     status: (id: string) => [...servicesKeys.all, "status", id] as const,
 };
 
-// Saved billers are kept mocked as they are not provided in the API docs yet.
 export function useSavedBillers() {
     return useQuery<SavedBiller[]>({
         queryKey: servicesKeys.savedBillers(),
-        queryFn: mockGetSavedBillers,
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<SavedBiller[]>>("/utilities/beneficiaries");
+            return res.data.data.map((biller) => ({
+                id: biller.id,
+                billerName: biller.label || biller.provider || biller.identifier,
+                identifier: biller.identifier,
+                lastPaidAmount: 0,
+                serviceType: biller.category === "AIRTIME" ? "airtime" : biller.category === "DATA" ? "data" : biller.category === "ELECTRICITY" ? "electricity" : "cable-tv",
+                iconUrl: undefined,
+            }));
+        },
+    });
+}
+
+export function useSaveBeneficiary() {
+    return useMutation<SavedBiller, Error, { category: string; provider: string; identifier: string; label?: string | null }>({
+        mutationFn: async ({ category, provider, identifier, label }) => {
+            const res = await apiClient.post<ApiResponse<SavedBiller>>("/utilities/beneficiaries", {
+                category,
+                provider,
+                identifier,
+                label,
+            });
+            return {
+                id: res.data.data.id,
+                billerName: res.data.data.label || res.data.data.provider || res.data.data.identifier,
+                identifier: res.data.data.identifier,
+                lastPaidAmount: 0,
+                serviceType: res.data.data.category === "AIRTIME" ? "airtime" : res.data.data.category === "DATA" ? "data" : res.data.data.category === "ELECTRICITY" ? "electricity" : "cable-tv",
+                iconUrl: undefined,
+            };
+        },
     });
 }
 

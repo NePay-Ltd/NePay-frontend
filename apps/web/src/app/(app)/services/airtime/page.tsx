@@ -6,7 +6,7 @@ import { ArrowLeft, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { usePayAirtime, useUtilityCategories, useUtilityServices } from "@/lib/queries/services";
+import { usePayAirtime, useSaveBeneficiary, useUtilityCategories, useUtilityServices } from "@/lib/queries/services";
 import { UtilityPurchaseResponseDto } from "@/lib/types/api";
 
 // New Shared UI Components
@@ -54,6 +54,7 @@ export default function AirtimePage() {
 
     // Queries & Mutations
     const payAirtime = usePayAirtime();
+    const saveBeneficiaryMutation = useSaveBeneficiary();
 
     // ─── Transaction State ────────────────────────────────────────────────
     const [pinModalOpen, setPinModalOpen] = React.useState(false);
@@ -101,6 +102,14 @@ export default function AirtimePage() {
             {
                 onSuccess: (res) => {
                     setTxResult(res);
+                    if (saveBeneficiary) {
+                        saveBeneficiaryMutation.mutate({
+                            category: "AIRTIME",
+                            provider: selectedNetwork.serviceID,
+                            identifier: phone,
+                            label: `${selectedNetwork.name} ${phone}`,
+                        });
+                    }
                     if (res.status === "FAILED") {
                         setTxState("error");
                         return;

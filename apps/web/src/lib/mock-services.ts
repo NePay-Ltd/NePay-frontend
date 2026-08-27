@@ -19,6 +19,9 @@ export interface SavedBiller {
     lastPaidAmount: number;
     iconUrl?: string; // Optional icon
     serviceType: "electricity" | "cable-tv" | "airtime" | "data";
+    category?: string;
+    provider?: string;
+    label?: string | null;
 }
 
 export type ServiceTransactionStatus = "pending" | "processing" | "success" | "failed";

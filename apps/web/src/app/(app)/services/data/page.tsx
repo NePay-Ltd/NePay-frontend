@@ -6,7 +6,7 @@ import { ArrowLeft, Wifi } from "lucide-react";
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { usePayData, useUtilityCategories, useUtilityServices, useUtilityVariations } from "@/lib/queries/services";
+import { usePayData, useSaveBeneficiary, useUtilityCategories, useUtilityServices, useUtilityVariations } from "@/lib/queries/services";
 import { UtilityPurchaseResponseDto } from "@/lib/types/api";
 
 // New Shared UI Components
@@ -52,6 +52,7 @@ export default function DataPage() {
 
     // Queries & Mutations
     const payData = usePayData();
+    const saveBeneficiaryMutation = useSaveBeneficiary();
 
     // Reset plan when network changes
     React.useEffect(() => {
@@ -104,6 +105,14 @@ export default function DataPage() {
             {
                 onSuccess: (res) => {
                     setTxResult(res);
+                    if (saveBeneficiary) {
+                        saveBeneficiaryMutation.mutate({
+                            category: "DATA",
+                            provider: selectedNetwork.serviceID,
+                            identifier: phone,
+                            label: `${selectedNetwork.name} ${phone}`,
+                        });
+                    }
                     if (res.status === "FAILED") {
                         setTxState("error");
                         return;
