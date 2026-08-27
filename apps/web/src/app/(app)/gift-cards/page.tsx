@@ -122,7 +122,7 @@ export default function GiftCardsPage() {
                 {/* Left Sidebar */}
                 <div className="space-y-6">
                     {/* Navigation Menu */}
-                    <nav className="rounded-[24px] border border-border bg-white p-3 shadow-sm">
+                    <nav className="rounded-3xl border border-border bg-white p-3 shadow-sm">
                         <ul className="space-y-1">
                             {CATEGORIES.map((cat) => (
                                 <li key={cat.id}>
@@ -150,7 +150,7 @@ export default function GiftCardsPage() {
                     </nav>
 
                     {/* Stats Card */}
-                    <div className="rounded-[24px] border border-border bg-white p-5 shadow-sm">
+                    <div className="rounded-3xl border border-border bg-white p-5 shadow-sm">
                         <p className="text-[10px] font-bold uppercase tracking-widest text-muted">
                             {mode === "sell" ? "Earned this month" : "Spent this month"}
                         </p>
@@ -184,7 +184,7 @@ export default function GiftCardsPage() {
                 <div className="xl:col-span-3 space-y-8">
                     
                     {/* Today's Rates Section */}
-                    <div className="rounded-[24px] border border-border bg-white p-6 shadow-sm sm:p-8">
+                    <div className="rounded-3xl border border-border bg-white p-6 shadow-sm sm:p-8">
                         {/* Header */}
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
                             <div>
@@ -205,7 +205,7 @@ export default function GiftCardsPage() {
                                 if (selectedCategory !== "all" && selectedCategory !== card.id) return null;
                                 const cardRate = rates?.[card.id];
                                 return (
-                                <div key={card.id} className="overflow-hidden rounded-[20px] border border-border shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md">
+                                <div key={card.id} className="overflow-hidden rounded-2xl border border-border shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md">
                                     <div className={cn("flex h-[120px] items-center justify-center text-white", card.bgColor)}>
                                         <card.icon className="h-10 w-10 opacity-90" />
                                     </div>
@@ -231,7 +231,7 @@ export default function GiftCardsPage() {
 
                     {/* Instructions Section */}
                     {mode === "sell" ? (
-                        <div className="rounded-[24px] border border-border bg-white p-6 shadow-sm sm:p-8">
+                        <div className="rounded-3xl border border-border bg-white p-6 shadow-sm sm:p-8">
                             <h2 className="text-[15px] font-extrabold text-ink mb-6">Selling a card</h2>
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-8">
                                 <div className="flex gap-4">
@@ -264,7 +264,7 @@ export default function GiftCardsPage() {
                             </div>
                         </div>
                     ) : (
-                        <div className="rounded-[24px] border border-border bg-white p-6 shadow-sm sm:p-8">
+                        <div className="rounded-3xl border border-border bg-white p-6 shadow-sm sm:p-8">
                             <h2 className="text-[15px] font-extrabold text-ink mb-6">Buying a card</h2>
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-8">
                                 <div className="flex gap-4">

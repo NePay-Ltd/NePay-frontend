@@ -107,7 +107,7 @@ function TransactionsContent() {
                 <div>
                     <h1 className="text-3xl font-bold text-ink">Transactions</h1>
                     <p className="mt-2 text-sm text-body">
-                        View and filter your complete transaction history.
+                        Track and manage your transfers.
                     </p>
                 </div>
 
@@ -128,15 +128,14 @@ function TransactionsContent() {
                 <div className="flex items-start gap-2 rounded-xl bg-violet-50 p-3 text-xs text-violet-800">
                     <Info className="h-4 w-4 shrink-0 mt-0.5" />
                     <p>
-                        This list only shows gift cards that have actually paid out — a card still under review or
-                        a rejected card never posts here. See{" "}
+                        Only paid-out cards appear here. Check{" "}
                         <button
                             onClick={() => router.push("/gift-cards/history")}
                             className="font-bold underline underline-offset-2"
                         >
                             My Submissions
                         </button>{" "}
-                        for the full picture, including pending and rejected cards.
+                        for pending or rejected items.
                     </p>
                 </div>
             )}

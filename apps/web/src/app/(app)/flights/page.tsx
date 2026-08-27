@@ -172,7 +172,7 @@ export default function FlightsPage() {
         <div className="space-y-8 pb-32">
             <div className="mx-auto max-w-2xl">
                 {/* ── Main Search Area ── */}
-                <Panel className="rounded-[24px]">
+                <Panel className="rounded-3xl">
                     <PanelBody className="p-4 sm:p-6 lg:p-8">
                         {/* Trip Types */}
                         <div className="flex flex-wrap items-center gap-2 mb-6">
@@ -403,7 +403,7 @@ export default function FlightsPage() {
                 successDescription={`Your flight was booked successfully! Booking Ref: ${bookingStatus?.pnr || "PENDING"}`}
                 onSuccessAction={handleModalClose}
                 errorTitle="Booking Failed"
-                errorDescription={bookingStatus?.status === "FAILED" ? "Booking failed via agency. Your wallet was not charged." : "A network error occurred."}
+                errorDescription={bookingStatus?.status === "FAILED" ? "Flight booking could not be completed. Your wallet was not charged." : "A network error occurred."}
                 onErrorAction={handleModalClose}
             />
         </div>

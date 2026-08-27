@@ -12,6 +12,7 @@ import { Panel, PanelBody } from "@/components/shared/panel";
 import { Tag } from "@/components/shared/tag";
 import { type BaseTransaction, TransactionRow } from "@/components/shared/transaction-row";
 import { TransactionDetailModal, type TransactionDetailData } from "@/components/shared/transaction-detail-modal";
+import { Skeleton } from "@/components/shared/skeletons";
 
 export default function CardPage() {
     const router = useRouter();
@@ -40,6 +41,13 @@ export default function CardPage() {
         setSelectedTransaction(detailData);
         setModalOpen(true);
     };
+
+    const [isLoading, setIsLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        const timer = setTimeout(() => setIsLoading(false), 1200);
+        return () => clearTimeout(timer);
+    }, []);
 
     return (
         <div className="relative">
@@ -75,17 +83,17 @@ export default function CardPage() {
 
                     <div className="w-full space-y-4">
                         <div className="flex gap-4">
-                            <Button className="flex-1 rounded-[16px] bg-ink hover:bg-black text-white font-bold h-14 shadow-lg">
+                            <Button className="flex-1 rounded-2xl bg-ink hover:bg-black text-white font-bold h-14 shadow-lg">
                                 <Lock className="mr-2 h-4 w-4" />
                                 Freeze Card
                             </Button>
-                            <Button className="flex-1 rounded-[16px] bg-white border border-border text-ink hover:bg-gray-50 font-bold h-14 shadow-sm">
+                            <Button className="flex-1 rounded-2xl bg-white border border-border text-ink hover:bg-gray-50 font-bold h-14 shadow-sm">
                                 <CreditCard className="mr-2 h-4 w-4" />
                                 Show Details
                             </Button>
                         </div>
                         
-                        <Panel className="rounded-[24px] overflow-hidden shadow-sm">
+                        <Panel className="rounded-3xl overflow-hidden shadow-sm">
                             <div className="divide-y divide-border/50">
                                 <div className="flex items-center justify-between p-5 hover:bg-gray-50 cursor-pointer transition-colors">
                                     <div className="flex items-center gap-4">
@@ -126,9 +134,23 @@ export default function CardPage() {
                         </Button>
                     </div>
 
-                    <Panel className="rounded-[24px]">
+                    <Panel className="rounded-3xl">
                         <div className="divide-y divide-border/50">
-                            {cardTransactions.length > 0 ? (
+                            {isLoading ? (
+                                Array.from({ length: 3 }).map((_, i) => (
+                                    <div key={i} className="p-4 flex items-center gap-4 bg-white">
+                                        <Skeleton className="h-10 w-10 rounded-full shrink-0" />
+                                        <div className="space-y-2 flex-1">
+                                            <Skeleton className="h-3.5 w-32" />
+                                            <Skeleton className="h-3 w-20" />
+                                        </div>
+                                        <div className="space-y-2 flex flex-col items-end shrink-0">
+                                            <Skeleton className="h-3.5 w-16" />
+                                            <Skeleton className="h-3 w-12" />
+                                        </div>
+                                    </div>
+                                ))
+                            ) : cardTransactions.length > 0 ? (
                                 cardTransactions.map((tx) => (
                                     <TransactionRow key={tx.id} tx={tx} onViewReceipt={handleViewReceipt} />
                                 ))

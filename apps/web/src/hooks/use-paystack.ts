@@ -51,7 +51,7 @@ export function usePaystackCheckout() {
     const initializePayment = React.useCallback(
         ({ amount, email, onSuccess, onClose }: PaystackCheckoutOptions) => {
             if (!isLoaded || !window.PaystackPop) {
-                toast.error("Payment gateway is not ready yet. Please try again in a moment.");
+                toast.error("Payment system is warming up. Please try again in a few seconds.");
                 return;
             }
 

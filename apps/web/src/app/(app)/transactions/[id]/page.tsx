@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { format } from "date-fns";
+import { formatDate, formatTime } from "@/lib/date";
 import { ArrowLeft, Copy, Check, Download, Share2, Image, ChevronDown } from "lucide-react";
 import { useTransaction } from "@/lib/queries/transactions";
 import { Button } from "@/components/shared/button";
@@ -275,12 +275,12 @@ export default function TransactionDetailPage() {
                                 <p className="text-xs font-semibold text-muted uppercase mb-2">Date & Time</p>
                                 <p className="text-sm font-semibold text-ink">
                                     {transaction.date
-                                        ? format(new Date(transaction.date), "d MMMM yyyy")
+                                        ? formatDate(transaction.date)
                                         : "—"}
                                 </p>
                                 {transaction.date && (
                                     <p className="text-xs text-muted mt-1">
-                                        {format(new Date(transaction.date), "h:mm a")}
+                                        {formatTime(transaction.date)}
                                     </p>
                                 )}
                             </div>

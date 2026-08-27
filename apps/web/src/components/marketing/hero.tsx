@@ -79,12 +79,25 @@ export function Hero() {
               </span>
             </motion.h1>
 
-            <motion.p
+            <motion.div
               variants={fadeUp}
               className="text-lg md:text-xl text-marketing-secondary max-w-2xl mb-10 leading-relaxed"
             >
-              Convert crypto instantly, book global flights, and settle your daily bills—all from one powerful balance built for Nigeria.
-            </motion.p>
+              <ul className="flex flex-col gap-3">
+                <li className="flex items-center gap-3">
+                  <span className="h-2 w-2 rounded-full bg-violet-500 shrink-0" />
+                  <span><strong className="text-marketing-text font-bold">Convert crypto</strong> instantly.</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="h-2 w-2 rounded-full bg-violet-500 shrink-0" />
+                  <span><strong className="text-marketing-text font-bold">Book flights</strong> globally.</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="h-2 w-2 rounded-full bg-violet-500 shrink-0" />
+                  <span><strong className="text-marketing-text font-bold">Settle bills</strong> effortlessly.</span>
+                </li>
+              </ul>
+            </motion.div>
 
             <motion.div
               variants={fadeUp}

@@ -138,10 +138,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   Mobile: px-4 horizontal padding, generous bottom padding to clear the floating nav + safe area, pt-5 top breathing room.
                   Desktop: px-8 generous padding, pb-8 normal.
                 */}
-                <main 
-                    className="flex-1 px-4 pt-5 lg:px-8 lg:pb-8 lg:pt-8"
-                    style={{ paddingBottom: "calc(7rem + env(safe-area-inset-bottom, 0px))" }}
-                >
+                <main className="flex-1 px-4 pt-5 pb-32 lg:px-8 lg:pb-8 lg:pt-8">
                     <div className="mx-auto max-w-7xl">{children}</div>
                 </main>
             </div>

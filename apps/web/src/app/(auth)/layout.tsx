@@ -58,7 +58,7 @@ export default function AuthLayout({
 
                 {/* Text Content */}
                 <div className="absolute bottom-20 left-16 max-w-xl z-10">
-                    <h2 className="text-5xl lg:text-6xl font-black text-violet-500 leading-[1.1] tracking-tight drop-shadow-[0_4px_32px_rgba(124,58,237,0.4)] flex flex-col">
+                    <h2 className="text-5xl lg:text-6xl font-black text-violet-500 leading-[1.1] tracking-tight drop-shadow-xl flex flex-col">
                         <span>Your Money.</span>
                         <span>Your Way.</span>
                     </h2>

@@ -43,12 +43,12 @@ import {
 } from "@/components/shared/skeletons";
 
 const QUICK_ACTIONS = [
-    { label: "Airtime", icon: Smartphone, href: "/services/airtime", bg: "bg-violet-50 hover:bg-violet-100/80 dark:bg-violet-900/20 dark:hover:bg-violet-900/40", iconBg: "bg-violet-100 dark:bg-violet-800/50", color: "text-violet-700 dark:text-violet-300" },
-    { label: "Data", icon: Wifi, href: "/services/data", bg: "bg-blue-50 hover:bg-blue-100/80 dark:bg-blue-900/20 dark:hover:bg-blue-900/40", iconBg: "bg-blue-100 dark:bg-blue-800/50", color: "text-blue-700 dark:text-blue-300" },
-    { label: "Flight", icon: Plane, href: "/flights", bg: "bg-teal-50 hover:bg-teal-100/80 dark:bg-teal-900/20 dark:hover:bg-teal-900/40", iconBg: "bg-teal-100 dark:bg-teal-800/50", color: "text-teal-700 dark:text-teal-300" },
-    { label: "TV", icon: Tv, href: "/services/tv", bg: "bg-pink-50 hover:bg-pink-100/80 dark:bg-pink-900/20 dark:hover:bg-pink-900/40", iconBg: "bg-pink-100 dark:bg-pink-800/50", color: "text-pink-700 dark:text-pink-300" },
-    { label: "Gift Card", icon: Gift, href: "/gift-cards", bg: "bg-green-50 hover:bg-green-100/80 dark:bg-green-900/20 dark:hover:bg-green-900/40", iconBg: "bg-green-100 dark:bg-green-800/50", color: "text-green-700 dark:text-green-300" },
-    { label: "More", icon: MoreHorizontal, href: "/services", bg: "bg-gray-50 hover:bg-gray-100 dark:bg-[#1A1A1A] dark:hover:bg-[#262626]", iconBg: "bg-white dark:bg-black border border-border shadow-sm", color: "text-ink" },
+    { label: "Airtime", icon: Smartphone, href: "/services/airtime", bg: "bg-zinc-900/30 hover:bg-zinc-900/60 border border-zinc-800/40 transition-all duration-200 cursor-pointer group", iconColor: "text-indigo-400" },
+    { label: "Data", icon: Wifi, href: "/services/data", bg: "bg-zinc-900/30 hover:bg-zinc-900/60 border border-zinc-800/40 transition-all duration-200 cursor-pointer group", iconColor: "text-blue-400" },
+    { label: "Flight", icon: Plane, href: "/flights", bg: "bg-zinc-900/30 hover:bg-zinc-900/60 border border-zinc-800/40 transition-all duration-200 cursor-pointer group", iconColor: "text-emerald-400" },
+    { label: "TV", icon: Tv, href: "/services/tv", bg: "bg-zinc-900/30 hover:bg-zinc-900/60 border border-zinc-800/40 transition-all duration-200 cursor-pointer group", iconColor: "text-rose-400" },
+    { label: "Gift Card", icon: Gift, href: "/gift-cards", bg: "bg-zinc-900/30 hover:bg-zinc-900/60 border border-zinc-800/40 transition-all duration-200 cursor-pointer group", iconColor: "text-amber-400" },
+    { label: "More", icon: MoreHorizontal, href: "/services", bg: "bg-zinc-900/30 hover:bg-zinc-900/60 border border-zinc-800/40 transition-all duration-200 cursor-pointer group", iconColor: "text-zinc-400 group-hover:text-zinc-200" },
 ] as const;
 
 export default function OverviewPage() {
@@ -86,11 +86,11 @@ export default function OverviewPage() {
     const kpiData = summary?.kpi;
 
     return (
-        <div className="pb-32 sm:pb-8">
+        <div className="pb-12 sm:pb-16 pt-2 sm:pt-0">
             
             {/* ── KYC Prompt Banner (Conditional) ──────────────────────── */}
             {isMounted && !user?.kycVerified && (
-                <div className="mb-6 sm:mb-8 flex items-center gap-3 rounded-[16px] border border-violet-200 bg-violet-50 px-4 py-3 shadow-sm sm:gap-4 sm:px-6 sm:py-5">
+                <div className="mb-6 sm:mb-8 flex items-center gap-3 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 shadow-sm sm:gap-4 sm:px-6 sm:py-5">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 sm:h-10 sm:w-10">
                         <ShieldCheck className="h-4 w-4 text-violet-700 sm:h-5 sm:w-5" />
                     </div>
@@ -114,9 +114,9 @@ export default function OverviewPage() {
             <div className="space-y-6 sm:space-y-8">
 
                     {/* ── Hero balance card ─────────────────────────────────────────── */}
-                    {summaryLoading ? (
-                        <HeroCardSkeleton />
-                    ) : summary ? (
+                    {summaryLoading || !summary ? (
+                        <div className="w-full h-[250px] bg-white border border-border rounded-3xl animate-pulse" />
+                    ) : (
                         <HeroCard
                             balance={summary.balance}
                             balanceUsd={summary.balanceUsd}
@@ -125,7 +125,7 @@ export default function OverviewPage() {
                             sparkline={summary.sparkline}
                             periodLabel="Last 7 days"
                         />
-                    ) : null}
+                    )}
 
                     {/* ── Quick Actions (ALL SCREENS) ──────────────────────── */}
                     <div className="space-y-4">
@@ -134,7 +134,7 @@ export default function OverviewPage() {
                         <div className="grid grid-cols-3 xl:grid-cols-6 gap-3">
                             {summaryLoading ? (
                                 [...Array(6)].map((_, i) => (
-                                    <div key={i} className="w-full h-[96px] bg-white border border-border rounded-[16px] animate-pulse" />
+                                    <div key={i} className="w-full h-[96px] bg-white border border-border rounded-2xl animate-pulse" />
                                 ))
                             ) : (
                                 <>
@@ -144,14 +144,14 @@ export default function OverviewPage() {
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => router.push(action.href)}
                                             className={cn(
-                                                "group w-full flex flex-col items-center justify-center gap-2 sm:gap-3 rounded-[20px] p-4 sm:p-5 transition-all border border-transparent shadow-sm",
+                                                "w-full flex flex-col items-center justify-center rounded-3xl p-4 sm:p-5 transition-all shadow-sm",
                                                 action.bg
                                             )}
                                         >
-                                            <div className={cn("flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-[16px]", action.iconBg)}>
-                                                <action.icon className={cn("h-6 w-6", action.color)} />
+                                            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-zinc-800/30 mb-2">
+                                                <action.icon className={cn("w-6 h-6", action.iconColor)} stroke="currentColor" />
                                             </div>
-                                            <span className={cn("text-[13px] sm:text-[15px] font-bold leading-tight", action.color)}>{action.label}</span>
+                                            <span className="text-[13px] sm:text-[15px] font-bold leading-tight text-zinc-100 transition-colors duration-200">{action.label}</span>
                                         </motion.button>
                                     ))}
                                 </>
@@ -161,7 +161,7 @@ export default function OverviewPage() {
 
 
                     {/* ── Recent Transactions ─────────────────────────────── */}
-                    <Panel className="rounded-[24px]" flush>
+                    <Panel className="rounded-3xl" flush>
                         <PanelHeader
                             className="px-4 pt-4 sm:px-6 sm:pt-6"
                             title="Recent transactions"

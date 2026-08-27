@@ -31,21 +31,11 @@ export function BottomNav() {
                     <Link
                         key={item.key}
                         href={item.href}
-
                         className={cn(
-                            "relative flex flex-1 flex-col items-center justify-center gap-1 rounded-full py-2 px-1 transition-colors z-10",
-                            active ? "text-violet-700" : "text-muted hover:text-ink",
+                            "relative flex-1 flex flex-col items-center justify-center gap-1 py-2 z-10 transition-colors duration-200",
+                            active ? "text-violet-500 font-medium" : "text-zinc-500 hover:text-zinc-400"
                         )}
                     >
-                        {active && (
-                            <motion.div
-                                layoutId="bottom-nav-active-pill"
-                                className="absolute inset-0 rounded-full bg-violet-100"
-                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                                style={{ zIndex: -1 }}
-                            />
-                        )}
-
                         <span className="relative">
                             <Icon
                                 className={cn(
@@ -61,12 +51,7 @@ export function BottomNav() {
                             ) : null}
                         </span>
 
-                        <span
-                            className={cn(
-                                "text-[10px] font-bold tracking-tight transition-all",
-                                active ? "text-violet-800" : ""
-                            )}
-                        >
+                        <span className="text-[10px] tracking-tight">
                             {item.label}
                         </span>
                     </Link>

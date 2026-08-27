@@ -38,6 +38,7 @@ import {
     useCryptoDepositStatus,
 } from "@/lib/queries/crypto";
 import { cn } from "@/lib/cn";
+import { formatNaira, formatByCurrency } from "@/lib/format";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import type { CryptoCurrencyDto } from "@/lib/types/api";
@@ -118,17 +119,7 @@ function formatCountdown(ms: number) {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-/** NGN per 1 unit of the coin, formatted for display — null (never a fabricated number) when there's no real price to show. */
-function formatNgnPrice(raw: string | null | undefined): string | null {
-    if (raw == null) {
-        return null;
-    }
-    const value = Number(raw);
-    if (!Number.isFinite(value) || value <= 0) {
-        return null;
-    }
-    return `₦${value.toLocaleString("en-NG", { maximumFractionDigits: value >= 1 ? 2 : 6 })}`;
-}
+
 
 export default function ReceiveCryptoPage() {
     const router = useRouter();
@@ -233,10 +224,7 @@ export default function ReceiveCryptoPage() {
             ? "Estimated minimum"
             : "Minimum unavailable";
 
-    const formatUsd = (amount: number | null) =>
-        amount === null || !Number.isFinite(amount)
-            ? null
-            : `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
     const formatCrypto = (amount: number | null) =>
         amount === null || !Number.isFinite(amount)
             ? null
@@ -244,7 +232,7 @@ export default function ReceiveCryptoPage() {
     const minimumDisplayValue = minimumIsExact
         ? `${formatCrypto(displayMinAmount)} ${selectedCurrency?.coin ?? ""}`.trim()
         : minAmountData?.minimumSource === "estimated"
-            ? formatUsd(displayMinAmountUsd)
+            ? (displayMinAmountUsd == null || !Number.isFinite(displayMinAmountUsd) ? null : formatByCurrency(displayMinAmountUsd, "USD"))
             : null;
     const remainingMs = useCountdown(depositData?.expiresAt ?? undefined);
     const addressExpired = depositData?.expiresAt !== undefined && remainingMs !== null && remainingMs <= 0;
@@ -265,7 +253,7 @@ export default function ReceiveCryptoPage() {
 
     return (
         <RequireKyc>
-            <div className="mx-auto max-w-5xl pb-24 space-y-6 px-6 pt-6">
+            <div className="mx-auto max-w-5xl pb-12 md:pb-20 space-y-6 px-6 pt-6">
                 <div className="mb-8">
                     <h1 className="text-3xl font-black text-ink tracking-tight">Deposit Crypto</h1>
                     <p className="mt-2 text-base font-medium text-muted">
@@ -312,7 +300,7 @@ export default function ReceiveCryptoPage() {
                                                     <ChevronDown className="h-5 w-5 text-muted" />
                                                 </button>
                                             </PopoverTrigger>
-                                            <PopoverContent className="w-[300px] sm:w-[420px] p-0 rounded-[16px] overflow-hidden border-border bg-white dark:bg-gray-900 shadow-xl" align="start">
+                                            <PopoverContent className="w-[300px] sm:w-[420px] p-0 rounded-2xl overflow-hidden border-border bg-white dark:bg-gray-900 shadow-xl" align="start">
                                                 {pickerStep === "network" && activeGroup ? (
                                                     <Command>
                                                         <div className="flex items-center gap-2 border-b border-border px-3 py-3">
@@ -436,7 +424,7 @@ export default function ReceiveCryptoPage() {
                                         <div className="text-right">
                                             <span className="text-sm font-bold text-ink">
                                                 {minAmountData?.usdNgnRate
-                                                    ? `₦${minAmountData.usdNgnRate.toLocaleString("en-NG", { maximumFractionDigits: 2 })} / $1`
+                                                    ? `${formatNaira(minAmountData.usdNgnRate)} / $1`
                                                     : "Market rate"}
                                             </span>
                                         </div>
@@ -494,9 +482,9 @@ export default function ReceiveCryptoPage() {
                                 ) : null}
 
                                 {/* QR Code Container */}
-                                <div className="relative flex h-[240px] w-[240px] items-center justify-center rounded-[32px] bg-white shadow-[0_10px_40px_-15px_rgba(139,92,246,0.2)] border border-gray-100 mb-8 p-3">
+                                <div className="relative flex h-[240px] w-[240px] items-center justify-center rounded-3xl bg-white shadow-[0_10px_40px_-15px_rgba(139,92,246,0.2)] border border-gray-100 mb-8 p-3">
                                     {addressPending ? (
-                                        <Skeleton className="h-full w-full rounded-[24px]" />
+                                        <Skeleton className="h-full w-full rounded-3xl" />
                                     ) : addressError || addressExpired ? (
                                         <EmptyState
                                             icon={AlertCircle}

@@ -59,6 +59,21 @@ export function HeroCard({
     const secondaryAmount = showPreferredAsPrimary ? balance : balanceUsd;
     const secondaryCurrency = showPreferredAsPrimary ? "NGN" : "USD";
 
+    const renderWithMicroSpacing = (str: string, currency: string) => {
+        if (currency === "NGN") {
+            const isNegative = str.startsWith('-');
+            const value = str.replace(/[₦-]/g, '');
+            return (
+                <span className="inline-flex items-baseline">
+                    {isNegative && "-"}
+                    <span className="mr-[2px] font-medium">₦</span>
+                    {value}
+                </span>
+            );
+        }
+        return str;
+    };
+
     return (
         <div className="relative overflow-hidden rounded-[24px] bg-brand-gradient p-5 sm:p-6 text-white shadow-2xl lg:p-8 border border-white/10">
             {/* Glass shine effect */}
@@ -90,7 +105,7 @@ export function HeroCard({
 
                     {/* Balance figure — headline always matches preferredCurrency */}
                     <p className="mt-2 font-sans tabular-nums tracking-tighter text-[40px] leading-none font-extrabold lg:text-[56px]">
-                        {masked ? "••••••" : formatByCurrency(primaryAmount, primaryCurrency)}
+                        {masked ? "••••••" : renderWithMicroSpacing(formatByCurrency(primaryAmount, primaryCurrency), primaryCurrency)}
                     </p>
 
                     {/* The other currency, as the quieter subscript */}
@@ -99,7 +114,7 @@ export function HeroCard({
                             {masked
                                 ? "***"
                                 : secondaryAmount !== null
-                                    ? formatByCurrency(secondaryAmount, secondaryCurrency)
+                                    ? renderWithMicroSpacing(formatByCurrency(secondaryAmount, secondaryCurrency), secondaryCurrency)
                                     : `${secondaryCurrency} rate unavailable`}
                         </p>
                     </div>

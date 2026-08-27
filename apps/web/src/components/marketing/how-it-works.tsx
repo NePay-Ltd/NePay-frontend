@@ -7,7 +7,7 @@ import { Section } from "./section";
 const steps = [
   {
     title: "Create your account & verify in minutes",
-    description: "Download the app, sign up with your phone number, and complete a quick KYC to unlock full limits.",
+    description: "Sign up in 2 minutes.",
   },
   {
     title: "Fund your wallet — bank, card, or crypto",
@@ -15,7 +15,7 @@ const steps = [
   },
   {
     title: "Convert crypto to Naira instantly",
-    description: "Receive any supported crypto and it will instantly be converted to Naira for spending, or settle your bills directly.",
+    description: "Crypto in → Naira instantly.",
   },
   {
     title: "Track everything, transparently, in one place.",
@@ -41,8 +41,8 @@ const itemVariants: Variants = {
 
 export function HowItWorks() {
   return (
-    <Section id="how-it-works" className="py-24 md:py-32 bg-marketing-surface border-t border-marketing-border overflow-hidden">
-      <div className="flex flex-col items-center text-center mb-16 md:mb-24">
+    <Section id="how-it-works" className="py-12 md:py-20 bg-marketing-surface border-t border-marketing-border overflow-hidden">
+      <div className="flex flex-col items-center text-center mb-12 md:mb-16">
         <span className="inline-block mb-4 text-sm font-bold tracking-wider text-violet-600 dark:text-violet-400 uppercase">
           Simple Process
         </span>
@@ -84,7 +84,7 @@ export function HowItWorks() {
           style={{ height: "calc(100% - 48px)" }}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-6 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-6 relative z-10">
           {steps.map((step, index) => (
             <motion.div
               key={index}

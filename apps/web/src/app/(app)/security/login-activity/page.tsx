@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
+import { formatDateTime } from "@/lib/date";
 import { ChevronLeft, Monitor, Smartphone, Globe } from "lucide-react";
 
 import { useLoginActivity } from "@/lib/queries/security";
@@ -79,7 +79,7 @@ export default function LoginActivityPage() {
                                                     <Tag variant="ok" dot>This device</Tag>
                                                 )}
                                                 <span className="text-xs text-muted">
-                                                    {format(new Date(log.timestamp), "MMM d, yyyy • h:mm a")}
+                                                    {formatDateTime(log.timestamp)}
                                                 </span>
                                                 {/* TODO: Add "Revoke" action here later per requirements (DELETE /security/devices/:id) */}
                                             </div>

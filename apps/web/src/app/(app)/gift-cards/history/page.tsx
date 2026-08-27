@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Receipt } from "lucide-react";
-import { format } from "date-fns";
+import { formatDateTime } from "@/lib/date";
 
 import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/format";
@@ -103,7 +103,7 @@ function SubmissionRow({ order, onClick }: { order: GiftCardOrderResponseDto; on
                 <p className="text-sm font-semibold text-ink truncate">
                     {order.cardBrand} · ${parseFloat(order.faceValueUsd).toFixed(2)}
                 </p>
-                <p className="text-xs text-muted mt-0.5">{format(new Date(order.createdAt), "MMM d, yyyy 'at' h:mm a")}</p>
+                <p className="text-xs text-muted mt-0.5">{formatDateTime(order.createdAt)}</p>
             </div>
             <div className="flex flex-col items-end gap-1 shrink-0">
                 <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-bold", meta.className)}>

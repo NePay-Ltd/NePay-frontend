@@ -74,7 +74,7 @@ export default function SettingsPage() {
                     
                     {activeTab === "profile" && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <Panel className="rounded-[24px]">
+                            <Panel className="rounded-3xl">
                                 <PanelHeader className="px-6 pt-6" title="Personal Information" description="Your basic profile details." />
                                 <PanelBody className="p-6">
                                     <div className="space-y-6">
@@ -118,7 +118,7 @@ export default function SettingsPage() {
 
                     {activeTab === "security" && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <Panel className="rounded-[24px]">
+                            <Panel className="rounded-3xl">
                                 <PanelHeader className="px-6 pt-6" title="Account Security" description="Manage your password and authentication methods." />
                                 <PanelBody className="p-6">
                                     <div className="space-y-6">
@@ -151,7 +151,7 @@ export default function SettingsPage() {
                                 </PanelBody>
                             </Panel>
 
-                            <Panel className="rounded-[24px]">
+                            <Panel className="rounded-3xl">
                                 <PanelHeader className="px-6 pt-6" title="Trusted Devices" description="Devices that are currently logged in." />
                                 <PanelBody className="p-0">
                                     <div className="divide-y divide-border/50">
@@ -225,7 +225,7 @@ function PreferencesTab() {
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <Panel className="rounded-[24px]">
+            <Panel className="rounded-3xl">
                 <PanelHeader className="px-6 pt-6" title="Application Preferences" description="Customize your NePay experience." />
                 <PanelBody className="p-6">
                     <div className="space-y-6">

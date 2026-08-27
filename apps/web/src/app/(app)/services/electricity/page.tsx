@@ -113,7 +113,7 @@ export default function ElectricityPage() {
 
     const handlePinSubmit = (pin: string) => {
         if (!verificationToken) {
-            toast.error("Please verify the meter number again");
+            toast.error("We couldn't find that meter number. Double-check your digits?");
             setTxState("error");
             return;
         }

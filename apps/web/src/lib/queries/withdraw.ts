@@ -94,10 +94,10 @@ export function useWithdrawalStatus(withdrawalId: string | null) {
         queryFn: async () => {
             // Ideally this would be GET /withdrawals/:id, but API docs don't define a polling endpoint for withdrawals.
             // In a real implementation we would fetch the specific withdrawal transaction.
-            // Since it's missing, we simulate polling success if we just got a successful initiation response.
+            // Since it's missing, we return a processing state until the network officially completes.
             return {
                 id: withdrawalId!,
-                status: "COMPLETED",
+                status: "PROCESSING",
                 amount: "0",
                 bankCode: "",
                 accountNumber: "",

@@ -80,7 +80,7 @@ export default function RegisterPage() {
             if (apiErr.fields?.email) {
                 setError("email", { message: apiErr.fields.email[0] });
             } else {
-                toast.error(apiErr.message ?? "Registration failed. Please try again.");
+                toast.error(apiErr.message ?? "Something went wrong on our end. Let's try that again.");
             }
         }
     };

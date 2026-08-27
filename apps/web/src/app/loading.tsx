@@ -26,7 +26,7 @@ export default function Loading() {
                 }
             `}</style>
             
-            <img src="/logo.png" alt="NePay Logo" className="h-16 w-16 object-contain drop-shadow-[0_0_60px_rgba(124,58,237,0.5)] animate-dramatic" />
+            <img src="/logo.png" alt="NePay Logo" className="h-16 w-16 object-contain drop-shadow-2xl animate-dramatic" />
             
             <div className="mt-8 overflow-hidden">
                 <h1 className="text-2xl font-black text-ink tracking-tight animate-fade-up">

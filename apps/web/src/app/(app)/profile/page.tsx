@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/date";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -160,7 +160,7 @@ export default function ProfilePage() {
                             <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
                                 <span className="text-xs text-muted">Member since</span>
                                 <span className="font-medium text-ink">
-                                    {format(new Date(profile.createdAt), "MMMM yyyy")}
+                                    {formatDate(profile.createdAt)}
                                 </span>
                             </div>
                         </div>
