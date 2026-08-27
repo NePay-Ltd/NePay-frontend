@@ -1,13 +1,26 @@
 "use client";
 
-import { ArrowUpRight, Sparkles, Target, Trophy } from "lucide-react";
+import * as React from "react";
+import { ArrowUpRight, Clock3, Sparkles, Target, Trophy } from "lucide-react";
 import { motion } from "framer-motion";
 import { Panel, PanelBody, PanelHeader } from "@/components/shared/panel";
 import { Skeleton } from "@/components/shared/skeletons";
 import { useCurrentLeaderboard } from "@/lib/queries/leaderboard";
 
+function formatResetCountdown(milliseconds: number) {
+    if (milliseconds <= 0) return "Resetting now";
+    const totalMinutes = Math.floor(milliseconds / 60000);
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+    if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+}
+
 export default function LeaderboardPage() {
     const { data, isLoading, isError } = useCurrentLeaderboard();
+    const [now, setNow] = React.useState(() => Date.now());
     const topTen = data?.topTwenty.slice(0, 10) ?? [];
     const currentUser = data?.currentUser;
     const userIsInTopTen = !!currentUser && topTen.some((entry) => entry.rank === currentUser.rank);
@@ -16,6 +29,13 @@ export default function LeaderboardPage() {
         : undefined;
     const pointsToNext = nextTarget ? Math.max(0, nextTarget.monthlyPoints - (currentUser?.monthlyPoints ?? 0)) : 0;
     const progressToNext = nextTarget ? Math.min(100, ((currentUser?.monthlyPoints ?? 0) / nextTarget.monthlyPoints) * 100) : 100;
+
+    React.useEffect(() => {
+        const timer = window.setInterval(() => setNow(Date.now()), 30000);
+        return () => window.clearInterval(timer);
+    }, []);
+
+    const resetCountdown = data ? formatResetCountdown(new Date(data.periodEndsAt).getTime() - now) : null;
 
     return (
         <div className="mx-auto max-w-3xl space-y-6 pb-12">
@@ -67,6 +87,11 @@ export default function LeaderboardPage() {
                                 </div>
                             </div>
                             <div className="relative border-t border-black/5 bg-white/45 px-6 py-4 sm:px-7">
+                                <div className="mb-4 flex items-center gap-2 rounded-xl bg-ink/5 px-3 py-2 text-sm font-semibold text-ink">
+                                    <Clock3 className="h-4 w-4 text-violet-600" />
+                                    <span>Month resets in</span>
+                                    <span className="font-mono text-violet-700">{resetCountdown}</span>
+                                </div>
                                 <div className="flex items-center justify-between gap-4">
                                     <div className="flex min-w-0 items-center gap-2">
                                         {nextTarget ? <Target className="h-4 w-4 shrink-0 text-violet-600" /> : <Sparkles className="h-4 w-4 shrink-0 text-amber-500" />}

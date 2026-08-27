@@ -11,6 +11,7 @@ export interface LeaderboardEntry {
 
 export interface LeaderboardSnapshot {
     periodKey: string;
+    periodEndsAt: string;
     entries: LeaderboardEntry[];
     topTwenty: LeaderboardEntry[];
     currentUser: LeaderboardEntry | null;
