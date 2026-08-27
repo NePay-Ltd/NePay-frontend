@@ -44,8 +44,9 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
     const rate = rates[brandId] || 0;
 
     const [faceValueUsd, setFaceValueUsd] = React.useState<string>("");
+    const [submissionType, setSubmissionType] = React.useState<"PHYSICAL" | "ECODE">("PHYSICAL");
     const [cardCode, setCardCode] = React.useState("");
-    // Live camera capture only — a captured image is required before submit.
+    // Live camera capture — required only for PHYSICAL; an ECODE submission never touches this.
     const [cardPhotoBase64, setCardPhotoBase64] = React.useState<string>("");
     const videoRef = React.useRef<HTMLVideoElement>(null);
     const streamRef = React.useRef<MediaStream | null>(null);
@@ -62,6 +63,12 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
     }, []);
 
     React.useEffect(() => stopCamera, [stopCamera]);
+
+    const handleTabChange = (value: string) => {
+        setSubmissionType(value as "PHYSICAL" | "ECODE");
+        setCardPhotoBase64("");
+        stopCamera();
+    };
 
     React.useEffect(() => {
         if (cameraOpen && videoRef.current && streamRef.current) {
@@ -96,10 +103,12 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
         stopCamera();
     };
 
-    // Validation — ALL three are required, e-codes included: typed code AND
-    // a live-captured photo of the card / its email receipt.
+    // Validation — the code is always required; the live-captured photo is
+    // required only for a PHYSICAL submission, never for an ECODE one.
     const isValid =
-        parsedValue > 0 && cardCode.trim().length > 0 && cardPhotoBase64.length > 0;
+        parsedValue > 0 &&
+        cardCode.trim().length > 0 &&
+        (submissionType === "ECODE" || cardPhotoBase64.length > 0);
 
     // Modal State
     const [modalOpen, setModalOpen] = React.useState(false);
@@ -131,10 +140,17 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
     const [submittedOrderId, setSubmittedOrderId] = React.useState<string | null>(null);
 
     const handlePinSubmit = (pin: string) => {
-        if (!currentQuoteId || !cardPhotoBase64) return;
+        if (!currentQuoteId) return;
+        if (submissionType === "PHYSICAL" && !cardPhotoBase64) return;
         setTxState("processing");
 
-        submitMutation.mutate({ quoteId: currentQuoteId, cardCode, cardPhotoBase64, pin }, {
+        submitMutation.mutate({
+            quoteId: currentQuoteId,
+            submissionType,
+            cardCode,
+            ...(submissionType === "PHYSICAL" ? { cardPhotoBase64 } : {}),
+            pin,
+        }, {
             onSuccess: (data) => {
                 setSubmittedOrderId(data.id);
 
@@ -223,58 +239,81 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
                             </div>
                         </div>
 
-                        {/* Card Input */}
+                        {/* Physical vs e-code — a physical card needs a live photo as evidence; an e-code needs only the typed code, backed by its own fraud checks instead. */}
                         <div className="space-y-3 pt-4 border-t border-border">
-                            <Label>Card Details (e-code)</Label>
-                            <textarea
-                                placeholder="Enter your alphanumeric e-code here..."
-                                className="min-h-[120px] w-full rounded-md border border-border bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 resize-none font-mono"
-                                value={cardCode}
-                                onChange={(e) => setCardCode(e.target.value)}
-                            />
-                        </div>
+                            <Tabs value={submissionType} onValueChange={handleTabChange}>
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="PHYSICAL">Physical card</TabsTrigger>
+                                    <TabsTrigger value="ECODE">E-code</TabsTrigger>
+                                </TabsList>
 
-                        {/* Camera evidence is required for physical cards and e-codes. */}
-                        <div className="space-y-3 pt-4 border-t border-border">
-                            <Label>Live Photo (required)</Label>
-                            <p className="text-xs text-body">
-                                Capture the card now with your camera — for an e-code,
-                                photograph its email or receipt instead. Screenshots and
-                                gallery uploads are not accepted.
-                            </p>
-                            {cardPhotoBase64 ? (
-                                <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-3">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img
-                                        src={`data:image/jpeg;base64,${cardPhotoBase64}`}
-                                        alt="Captured card"
-                                        className="h-16 w-16 rounded-md object-cover"
-                                    />
-                                    <div className="flex-1 text-xs text-green-700">
-                                        Photo captured. It will be reviewed alongside your code.
-                                    </div>
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => {
-                                            setCardPhotoBase64("");
-                                        }}
-                                    >
-                                        Retake
-                                    </Button>
-                                </div>
-                            ) : (
-                                cameraOpen ? (
+                                <TabsContent value="PHYSICAL" className="space-y-6 mt-4">
                                     <div className="space-y-3">
-                                        <video ref={videoRef} autoPlay playsInline muted className="aspect-video w-full rounded-xl bg-black object-cover" />
-                                        <div className="flex gap-3"><Button type="button" variant="primary" onClick={capturePhoto} className="flex-1"><Camera className="mr-2 h-4 w-4" />Capture photo</Button><Button type="button" variant="ghost" onClick={stopCamera}>Cancel</Button></div>
+                                        <Label>Card Code</Label>
+                                        <textarea
+                                            placeholder="Enter the code printed on the card..."
+                                            className="min-h-[100px] w-full rounded-md border border-border bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 resize-none font-mono"
+                                            value={cardCode}
+                                            onChange={(e) => setCardCode(e.target.value)}
+                                        />
                                     </div>
-                                ) : (
-                                    <button type="button" onClick={() => void openCamera()} className="flex w-full items-center justify-center rounded-xl border-2 border-dashed border-violet-300 bg-violet-50/50 px-4 py-6 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-100/60"><Camera className="mr-2 h-5 w-5" />Take a photo with camera</button>
-                                )
-                            )}
-                            {cameraError && <p className="text-xs text-red-600">{cameraError}</p>}
+
+                                    <div className="space-y-3">
+                                        <Label>Live Photo (required)</Label>
+                                        <p className="text-xs text-body">
+                                            Capture the card now with your camera. Screenshots and
+                                            gallery uploads are not accepted.
+                                        </p>
+                                        {cardPhotoBase64 ? (
+                                            <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-3">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img
+                                                    src={`data:image/jpeg;base64,${cardPhotoBase64}`}
+                                                    alt="Captured card"
+                                                    className="h-16 w-16 rounded-md object-cover"
+                                                />
+                                                <div className="flex-1 text-xs text-green-700">
+                                                    Photo captured. It will be reviewed alongside your code.
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setCardPhotoBase64("");
+                                                    }}
+                                                >
+                                                    Retake
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            cameraOpen ? (
+                                                <div className="space-y-3">
+                                                    <video ref={videoRef} autoPlay playsInline muted className="aspect-video w-full rounded-xl bg-black object-cover" />
+                                                    <div className="flex gap-3"><Button type="button" variant="primary" onClick={capturePhoto} className="flex-1"><Camera className="mr-2 h-4 w-4" />Capture photo</Button><Button type="button" variant="ghost" onClick={stopCamera}>Cancel</Button></div>
+                                                </div>
+                                            ) : (
+                                                <button type="button" onClick={() => void openCamera()} className="flex w-full items-center justify-center rounded-xl border-2 border-dashed border-violet-300 bg-violet-50/50 px-4 py-6 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-100/60"><Camera className="mr-2 h-5 w-5" />Take a photo with camera</button>
+                                            )
+                                        )}
+                                        {cameraError && <p className="text-xs text-red-600">{cameraError}</p>}
+                                    </div>
+                                </TabsContent>
+
+                                <TabsContent value="ECODE" className="space-y-3 mt-4">
+                                    <Label>E-code</Label>
+                                    <textarea
+                                        placeholder="Enter your alphanumeric e-code here..."
+                                        className="min-h-[100px] w-full rounded-md border border-border bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 resize-none font-mono"
+                                        value={cardCode}
+                                        onChange={(e) => setCardCode(e.target.value)}
+                                    />
+                                    <p className="text-xs text-body">
+                                        No photo needed — just the code above. Every e-code is checked
+                                        for reuse and reviewed by our team before payout.
+                                    </p>
+                                </TabsContent>
+                            </Tabs>
                         </div>
 
                         <Button 

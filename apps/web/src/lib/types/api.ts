@@ -297,12 +297,15 @@ export interface GiftCardQuoteResponseDto {
     expiresAt: string;
 }
 
+export type GiftCardSubmissionType = "PHYSICAL" | "ECODE";
+
 export interface GiftCardOrderResponseDto {
     id: string;
     cardBrand: string;
     faceValueUsd: string;
     quantity: number;
     payoutAmount: string;
+    submissionType: GiftCardSubmissionType;
     status: GiftCardOrderStatus;
     decidedAt: string | null;
     createdAt: string;

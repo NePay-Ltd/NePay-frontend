@@ -6,7 +6,7 @@ import { ArrowLeft, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { useVerifyMeter, usePayElectricity, useServiceTransactionStatus } from "@/lib/queries/services";
+import { useVerifyMeter, usePayElectricity, useSaveBeneficiary, useServiceTransactionStatus } from "@/lib/queries/services";
 
 // New Shared UI Components
 import { ProviderSelector } from "@/components/services/ProviderSelector";
@@ -15,6 +15,7 @@ import { AmountCalculator } from "@/components/services/AmountCalculator";
 import { VerificationField } from "@/components/services/VerificationField";
 import { StickyPayBar } from "@/components/services/StickyPayBar";
 import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen";
+import { Switch } from "@/components/ui/switch";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -44,6 +45,7 @@ export default function ElectricityPage() {
     const [meterType, setMeterType] = React.useState<"prepaid" | "postpaid">("prepaid");
     const [meter, setMeter] = React.useState(initialMeter);
     const [amount, setAmount] = React.useState(0);
+    const [saveBeneficiary, setSaveBeneficiary] = React.useState(true);
 
     const [resolvedName, setResolvedName] = React.useState<string | undefined>();
     const [verificationToken, setVerificationToken] = React.useState<string | undefined>();
@@ -52,6 +54,7 @@ export default function ElectricityPage() {
     // Queries & Mutations
     const verifyMeter = useVerifyMeter();
     const payElectricity = usePayElectricity();
+    const saveBeneficiaryMutation = useSaveBeneficiary();
 
     // Reset resolution if user types something new or changes provider
     React.useEffect(() => {
@@ -71,6 +74,14 @@ export default function ElectricityPage() {
     React.useEffect(() => {
         if (!txStatus) return;
         if (txStatus.status === "COMPLETED") {
+            if (saveBeneficiary) {
+                saveBeneficiaryMutation.mutate({
+                    category: "ELECTRICITY",
+                    provider: providerId,
+                    identifier: meter,
+                    label: `${activeProvider.label} ${meter}`,
+                });
+            }
             setPinModalOpen(false);
             setSuccessOpen(true);
         }
@@ -138,6 +149,14 @@ export default function ElectricityPage() {
 
     return (
         <>
+
+                    <div className="flex items-center justify-between rounded-xl border border-border bg-white p-4">
+                        <div>
+                            <p className="text-sm font-bold text-ink">Save as beneficiary</p>
+                            <p className="text-xs text-muted">Save this meter for future payments</p>
+                        </div>
+                        <Switch checked={saveBeneficiary} onCheckedChange={setSaveBeneficiary} />
+                    </div>
             <div className="mx-auto max-w-xl space-y-8 pb-32">
                 {/* Header */}
                 <div className="flex items-center gap-3 px-2 sm:px-0">

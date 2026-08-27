@@ -36,19 +36,19 @@ export default function ServicesPage() {
 
     const handlePayAgain = (biller: typeof savedBillers[0]) => {
         if (biller.serviceType === "electricity") {
-            const provider = biller.billerName.toLowerCase().replace(" ", "-");
+            const provider = biller.provider || biller.billerName.toLowerCase().replace(" ", "-");
             const identifier = biller.identifier.replace(/[^0-9]/g, ''); 
             router.push(`/services/electricity?provider=${provider}&meter=${identifier}`);
         } else if (biller.serviceType === "cable-tv") {
-            const provider = biller.billerName.toLowerCase().replace(" ", "-");
+            const provider = biller.provider || biller.billerName.toLowerCase().replace(" ", "-");
             const identifier = biller.identifier.replace(/[^0-9]/g, ''); 
             router.push(`/services/tv?provider=${provider}&meter=${identifier}`);
         } else if (biller.serviceType === "data") {
-            const network = biller.billerName.split(" ")[0] || "MTN";
+            const network = biller.provider || biller.billerName.split(" ")[0] || "MTN";
             const phone = biller.identifier.replace(/[^0-9]/g, '');
             router.push(`/services/data?network=${network}&phone=${phone}`);
         } else if (biller.serviceType === "airtime") {
-            const network = biller.billerName.split(" ")[0] || "MTN";
+            const network = biller.provider || biller.billerName.split(" ")[0] || "MTN";
             const phone = biller.identifier.replace(/[^0-9]/g, '');
             router.push(`/services/airtime?network=${network}&phone=${phone}`);
         }

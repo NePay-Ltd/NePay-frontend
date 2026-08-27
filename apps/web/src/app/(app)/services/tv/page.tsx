@@ -6,7 +6,7 @@ import { ArrowLeft, MonitorPlay } from "lucide-react";
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { useVerifySmartcard, usePayCableTv, useServiceTransactionStatus } from "@/lib/queries/services";
+import { useVerifySmartcard, usePayCableTv, useSaveBeneficiary, useServiceTransactionStatus } from "@/lib/queries/services";
 
 // New Shared UI Components
 import { ProviderSelector } from "@/components/services/ProviderSelector";
@@ -15,6 +15,7 @@ import { PlanGrid } from "@/components/services/PlanGrid";
 import { VerificationField } from "@/components/services/VerificationField";
 import { StickyPayBar } from "@/components/services/StickyPayBar";
 import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen";
+import { Switch } from "@/components/ui/switch";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -62,6 +63,7 @@ export default function TvPage() {
     const [providerId, setProviderId] = React.useState(initialProviderId);
     const [smartcard, setSmartcard] = React.useState(initialSmartcard);
     const [planId, setPlanId] = React.useState("");
+    const [saveBeneficiary, setSaveBeneficiary] = React.useState(true);
     
     const [resolvedName, setResolvedName] = React.useState<string | undefined>();
     const [verifyStatus, setVerifyStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
@@ -69,6 +71,7 @@ export default function TvPage() {
     // Queries & Mutations
     const verifySmartcard = useVerifySmartcard();
     const payCableTv = usePayCableTv();
+    const saveBeneficiaryMutation = useSaveBeneficiary();
 
     const providerPlans = MOCK_TV_PLANS[providerId] || [];
     const selectedPlan = providerPlans.find(p => p.id === planId);
@@ -91,6 +94,14 @@ export default function TvPage() {
     React.useEffect(() => {
         if (!txStatus) return;
         if (txStatus.status === "COMPLETED") {
+            if (saveBeneficiary) {
+                saveBeneficiaryMutation.mutate({
+                    category: "CABLE",
+                    provider: providerId,
+                    identifier: smartcard,
+                    label: `${PROVIDERS.find((provider) => provider.id === providerId)?.label || providerId} ${smartcard}`,
+                });
+            }
             setPinModalOpen(false);
             setSuccessOpen(true);
         }
@@ -162,6 +173,14 @@ export default function TvPage() {
 
     return (
         <>
+
+                    <div className="flex items-center justify-between rounded-xl border border-border bg-white p-4">
+                        <div>
+                            <p className="text-sm font-bold text-ink">Save as beneficiary</p>
+                            <p className="text-xs text-muted">Save this account for future subscriptions</p>
+                        </div>
+                        <Switch checked={saveBeneficiary} onCheckedChange={setSaveBeneficiary} />
+                    </div>
             <div className="mx-auto max-w-xl space-y-8 pb-32">
                 {/* Header */}
                 <div className="flex items-center gap-3 px-2 sm:px-0">

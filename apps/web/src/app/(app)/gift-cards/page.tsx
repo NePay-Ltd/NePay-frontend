@@ -10,7 +10,6 @@ import {
     Gamepad2,
     Tag,
     Receipt,
-    ArrowDownToLine,
 } from "lucide-react";
 import { Button } from "@/components/shared/button";
 import { cn } from "@/lib/cn";
@@ -63,19 +62,15 @@ const GIFT_CARDS = [
 
 export default function GiftCardsPage() {
     const router = useRouter();
-    const [mode, setMode] = React.useState<"buy" | "sell">("sell");
     const [selectedCategory, setSelectedCategory] = React.useState("all");
 
-    // Real data for the sell side — GET /giftcards/earnings and
-    // GET /giftcards/rates. No "buy" flow exists on the backend yet, so
-    // buy mode keeps its own separate, clearly-labelled placeholder below
-    // rather than being wired to sell-side data.
+    // Real data off GET /giftcards/earnings and GET /giftcards/rates.
     const { data: earnings, isLoading: earningsLoading } = useGiftCardEarnings();
     const { data: rates } = useGiftCardRates();
 
     return (
         <div className="">
-            
+
             {/* Page Header */}
             <div className="mb-6 flex flex-col items-start sm:mb-8 sm:flex-row sm:items-end sm:justify-between gap-4">
                 <div>
@@ -83,42 +78,18 @@ export default function GiftCardsPage() {
                         Gift cards
                     </h1>
                     <p className="mt-0.5 text-sm font-medium text-body">
-                        {mode === "sell" ? "Sell cards at today's rates" : "Buy cards for your subscriptions"}
+                        Sell cards at today&apos;s rates
                     </p>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <Button variant="quiet" onClick={() => router.push("/gift-cards/history")} className="gap-2">
-                        <Receipt className="h-4 w-4" />
-                        My Submissions
-                    </Button>
-
-                    {/* Buy / Sell Toggle */}
-                    <div className="flex rounded-xl border border-border bg-gray-50 p-1 shadow-sm">
-                        <button
-                            onClick={() => setMode("buy")}
-                            className={cn(
-                                "rounded-lg px-6 py-2 text-sm font-bold transition-all",
-                                mode === "buy" ? "bg-white text-ink shadow-sm ring-1 ring-black/5" : "text-muted hover:text-ink"
-                            )}
-                        >
-                            Buy Cards
-                        </button>
-                        <button
-                            onClick={() => setMode("sell")}
-                            className={cn(
-                                "rounded-lg px-6 py-2 text-sm font-bold transition-all",
-                                mode === "sell" ? "bg-white text-ink shadow-sm ring-1 ring-black/5" : "text-muted hover:text-ink"
-                            )}
-                        >
-                            Sell Cards
-                        </button>
-                    </div>
-                </div>
+                <Button variant="quiet" onClick={() => router.push("/gift-cards/history")} className="gap-2">
+                    <Receipt className="h-4 w-4" />
+                    My Submissions
+                </Button>
             </div>
 
             <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-4 xl:gap-8">
-                
+
                 {/* Left Sidebar */}
                 <div className="space-y-6">
                     {/* Navigation Menu */}
@@ -132,7 +103,7 @@ export default function GiftCardsPage() {
                                         className={cn(
                                             "flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-colors",
                                             selectedCategory === cat.id
-                                                ? "bg-violet-100 text-violet-700" 
+                                                ? "bg-violet-100 text-violet-700"
                                                 : "text-body hover:bg-violet-50 hover:text-violet-900"
                                         )}
                                     >
@@ -152,50 +123,37 @@ export default function GiftCardsPage() {
                     {/* Stats Card */}
                     <div className="rounded-3xl border border-border bg-white p-5 shadow-sm">
                         <p className="text-[10px] font-bold uppercase tracking-widest text-muted">
-                            {mode === "sell" ? "Earned this month" : "Spent this month"}
+                            Earned this month
                         </p>
-                        {mode === "sell" ? (
-                            <>
-                                <p className="mt-2 font-sans tabular-nums text-2xl font-extrabold text-ink tracking-tighter leading-none">
-                                    {earningsLoading ? "…" : formatNaira(earnings?.totalNgn ?? 0)}
-                                </p>
-                                <p className="mt-4 text-xs font-medium text-body leading-relaxed">
-                                    {earningsLoading
-                                        ? "Loading…"
-                                        : earnings && earnings.cardsSold > 0
-                                            ? `From ${earnings.cardsSold} card${earnings.cardsSold === 1 ? "" : "s"} approved this month.`
-                                            : "No cards approved yet this month."}
-                                </p>
-                            </>
-                        ) : (
-                            <>
-                                <p className="mt-2 font-sans tabular-nums text-2xl font-extrabold text-muted tracking-tighter leading-none">
-                                    —
-                                </p>
-                                <p className="mt-4 text-xs font-medium text-body leading-relaxed">
-                                    Buying gift cards isn&apos;t live yet — this figure is a placeholder.
-                                </p>
-                            </>
-                        )}
+                        <p className="mt-2 font-sans tabular-nums text-2xl font-extrabold text-ink tracking-tighter leading-none">
+                            {earningsLoading ? "…" : formatNaira(earnings?.totalNgn ?? 0)}
+                        </p>
+                        <p className="mt-4 text-xs font-medium text-body leading-relaxed">
+                            {earningsLoading
+                                ? "Loading…"
+                                : earnings && earnings.cardsSold > 0
+                                    ? `From ${earnings.cardsSold} card${earnings.cardsSold === 1 ? "" : "s"} approved this month.`
+                                    : "No cards approved yet this month."}
+                        </p>
                     </div>
                 </div>
 
                 {/* Right Content */}
                 <div className="xl:col-span-3 space-y-8">
-                    
+
                     {/* Today's Rates Section */}
                     <div className="rounded-3xl border border-border bg-white p-6 shadow-sm sm:p-8">
                         {/* Header */}
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
                             <div>
-                                <h2 className="text-[18px] font-extrabold text-ink">{mode === "sell" ? "Today's rates" : "Available to buy"}</h2>
+                                <h2 className="text-[18px] font-extrabold text-ink">Today&apos;s rates</h2>
                                 <p className="text-sm font-medium text-body mt-1">
-                                    {mode === "sell" ? "Rates refresh every hour — the rate you see is the rate you get" : "Purchase digital codes delivered instantly to your email"}
+                                    Rates refresh every hour — the rate you see is the rate you get
                                 </p>
                             </div>
-                            <Button type="button" onClick={() => { setMode("sell"); document.getElementById("gift-card-options")?.scrollIntoView({ behavior: "smooth" }); }} className="shrink-0 bg-violet-700 text-white font-bold rounded-xl px-5 py-2.5 shadow-sm hover:bg-violet-600">
+                            <Button type="button" onClick={() => document.getElementById("gift-card-options")?.scrollIntoView({ behavior: "smooth" })} className="shrink-0 bg-violet-700 text-white font-bold rounded-xl px-5 py-2.5 shadow-sm hover:bg-violet-600">
                                 <Tag className="mr-2 h-4 w-4" />
-                                {mode === "sell" ? "Sell a card" : "Buy a card"}
+                                Sell a card
                             </Button>
                         </div>
 
@@ -215,16 +173,14 @@ export default function GiftCardsPage() {
                                         <div className="mt-4 inline-flex items-center rounded-lg">
                                             <div className="text-right">
                                                 <span className="text-xs font-bold text-ink">
-                                                    {mode === "sell"
-                                                        ? (cardRate !== undefined
-                                                            ? <>{formatNaira(cardRate)}/USD</>
-                                                            : "Checking rate…")
-                                                        : "Available now"}
+                                                    {cardRate !== undefined
+                                                        ? <>{formatNaira(cardRate)}/USD</>
+                                                        : "Checking rate…"}
                                                 </span>
                                             </div>
                                         </div>
-                                        <Button type="button" variant="quiet" onClick={() => mode === "sell" && router.push(`/gift-cards/sell/${card.id}`)} disabled={mode !== "sell"} className="mt-4 w-full bg-violet-50 text-violet-700 font-bold hover:bg-violet-100 rounded-xl h-10">
-                                            {mode === "sell" ? "Sell this card" : "Buy this card"}
+                                        <Button type="button" variant="quiet" onClick={() => router.push(`/gift-cards/sell/${card.id}`)} className="mt-4 w-full bg-violet-50 text-violet-700 font-bold hover:bg-violet-100 rounded-xl h-10">
+                                            Sell this card
                                         </Button>
                                     </div>
                                 </div>
@@ -234,73 +190,38 @@ export default function GiftCardsPage() {
                     </div>
 
                     {/* Instructions Section */}
-                    {mode === "sell" ? (
-                        <div className="rounded-3xl border border-border bg-white p-6 shadow-sm sm:p-8">
-                            <h2 className="text-[15px] font-extrabold text-ink mb-6">Selling a card</h2>
-                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-8">
-                                <div className="flex gap-4">
-                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-bold text-violet-700">
-                                        1
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-bold text-ink">Pick the card and amount</h3>
-                                        <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Choose the brand, country and face value you&apos;re holding.</p>
-                                    </div>
+                    <div className="rounded-3xl border border-border bg-white p-6 shadow-sm sm:p-8">
+                        <h2 className="text-[15px] font-extrabold text-ink mb-6">Selling a card</h2>
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-8">
+                            <div className="flex gap-4">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-bold text-violet-700">
+                                    1
                                 </div>
-                                <div className="flex gap-4">
-                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-bold text-violet-700">
-                                        2
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-bold text-ink">Type in the code</h3>
-                                        <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Paste or type the e-code from your card.</p>
-                                    </div>
+                                <div>
+                                    <h3 className="text-sm font-bold text-ink">Pick the card and amount</h3>
+                                    <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Choose the brand, country and face value you&apos;re holding.</p>
                                 </div>
-                                <div className="flex gap-4">
-                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-bold text-violet-700">
-                                        3
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-bold text-ink">Get paid in naira</h3>
-                                        <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Most cards are reviewed and paid within 10 minutes.</p>
-                                    </div>
+                            </div>
+                            <div className="flex gap-4">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-bold text-violet-700">
+                                    2
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-bold text-ink">Physical or e-code</h3>
+                                    <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Take a live photo of a physical card, or just type in an e-code.</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-4">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-bold text-violet-700">
+                                    3
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-bold text-ink">Get paid in naira</h3>
+                                    <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Every submission is reviewed by our team before payout.</p>
                                 </div>
                             </div>
                         </div>
-                    ) : (
-                        <div className="rounded-3xl border border-border bg-white p-6 shadow-sm sm:p-8">
-                            <h2 className="text-[15px] font-extrabold text-ink mb-6">Buying a card</h2>
-                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-8">
-                                <div className="flex gap-4">
-                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-bold text-violet-700">
-                                        1
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-bold text-ink">Select brand and value</h3>
-                                        <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Pick the gift card you want and select the denomination.</p>
-                                    </div>
-                                </div>
-                                <div className="flex gap-4">
-                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-bold text-violet-700">
-                                        2
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-bold text-ink">Pay from wallet</h3>
-                                        <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Complete the purchase instantly using your Naira balance.</p>
-                                    </div>
-                                </div>
-                                <div className="flex gap-4">
-                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-sm font-bold text-violet-700">
-                                        3
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-bold text-ink">Get your code</h3>
-                                        <p className="mt-1 text-[13px] font-medium text-body leading-relaxed">Your digital code is revealed immediately and sent to your email.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    </div>
                 </div>
             </div>
         </div>

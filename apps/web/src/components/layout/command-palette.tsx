@@ -151,7 +151,7 @@ export function CommandPalette() {
                             </CommandItem>
                             <CommandItem onSelect={() => navigate("/gift-cards")}>
                                 <Gift className="mr-2 h-4 w-4 text-violet-600" />
-                                Buy Gift Card
+                                Sell Gift Card
                             </CommandItem>
                             <CommandItem onSelect={() => navigate("/flights")}>
                                 <Plane className="mr-2 h-4 w-4 text-violet-600" />

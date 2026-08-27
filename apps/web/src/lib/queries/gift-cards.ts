@@ -5,7 +5,7 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { ApiPaginated, ApiResponse } from "@/lib/types/api";
-import type { GiftCardOrderResponseDto, GiftCardQuoteResponseDto } from "@/lib/types/api";
+import type { GiftCardOrderResponseDto, GiftCardQuoteResponseDto, GiftCardSubmissionType } from "@/lib/types/api";
 import { GIFT_CARD_BRAND_CODES } from "@/lib/gift-card-brands";
 
 export interface GiftCardEarnings {
@@ -82,10 +82,11 @@ export function useGiftCardQuote() {
 
 interface SellPayload {
     quoteId: string;
+    submissionType: GiftCardSubmissionType;
     /** Typed by the seller — required, never OCR-derived. */
     cardCode: string;
-    /** Base64 of the LIVE camera capture — required for every submission, e-codes included. */
-    cardPhotoBase64: string;
+    /** Base64 of the LIVE camera capture — required only when submissionType is PHYSICAL. Omitted entirely for ECODE. */
+    cardPhotoBase64?: string;
     pin: string;
 }
 

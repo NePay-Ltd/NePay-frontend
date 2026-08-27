@@ -2,7 +2,7 @@
  * TanStack Query hooks for Services (Airtime, Data, Bills).
  */
 
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import {
     UtilityPurchaseResponseDto,
@@ -35,6 +35,9 @@ export function useSavedBillers() {
                 id: biller.id,
                 billerName: biller.label || biller.provider || biller.identifier,
                 identifier: biller.identifier,
+                provider: biller.provider,
+                category: biller.category,
+                label: biller.label,
                 lastPaidAmount: 0,
                 serviceType: biller.category === "AIRTIME" ? "airtime" : biller.category === "DATA" ? "data" : biller.category === "ELECTRICITY" ? "electricity" : "cable-tv",
                 iconUrl: undefined,
@@ -44,6 +47,8 @@ export function useSavedBillers() {
 }
 
 export function useSaveBeneficiary() {
+    const queryClient = useQueryClient();
+
     return useMutation<SavedBiller, Error, { category: string; provider: string; identifier: string; label?: string | null }>({
         mutationFn: async ({ category, provider, identifier, label }) => {
             const res = await apiClient.post<ApiResponse<SavedBiller>>("/utilities/beneficiaries", {
@@ -60,6 +65,9 @@ export function useSaveBeneficiary() {
                 serviceType: res.data.data.category === "AIRTIME" ? "airtime" : res.data.data.category === "DATA" ? "data" : res.data.data.category === "ELECTRICITY" ? "electricity" : "cable-tv",
                 iconUrl: undefined,
             };
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: servicesKeys.savedBillers() });
         },
     });
 }
