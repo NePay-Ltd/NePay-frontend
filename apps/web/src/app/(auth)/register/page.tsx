@@ -30,7 +30,8 @@ function RegisterPageContent() {
     // and never rendered as an input — see RegisterDto's own note on why the
     // two are distinct attribution paths.
     const refFromUrl = searchParams.get("ref")?.trim() ?? "";
-    const marketerCodeFromUrl = searchParams.get("mkt")?.trim() ?? "";
+    const marketerCodeFromUrl = searchParams.get("mkt")?.trim() || (refFromUrl.toUpperCase().startsWith("MKT-") ? refFromUrl : "");
+    const customerReferralCodeFromUrl = marketerCodeFromUrl ? "" : refFromUrl;
 
     const {
         register,
@@ -49,7 +50,7 @@ function RegisterPageContent() {
             password: "",
             confirmPassword: "",
             acceptTerms: false,
-            referralCode: refFromUrl,
+            referralCode: customerReferralCodeFromUrl,
             referredByMarketerCode: marketerCodeFromUrl,
         },
     });
