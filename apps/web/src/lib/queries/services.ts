@@ -231,22 +231,10 @@ export function useServiceTransactionStatus(transactionId: string | null) {
     return useQuery<UtilityPurchaseResponseDto>({
         queryKey: servicesKeys.status(transactionId!),
         queryFn: async () => {
-            // Ideally GET /utilities/purchase/:id, simulating success since there is no polling endpoint defined
-            return {
-                id: transactionId!,
-                category: "AIRTIME",
-                provider: "MTN",
-                identifier: "",
-                variationCode: null,
-                amount: "0",
-                status: "COMPLETED",
-                providerReference: null,
-                failureReason: null,
-                token: null,
-                createdAt: new Date().toISOString(),
-            };
+            const res = await apiClient.get<ApiResponse<UtilityPurchaseResponseDto>>(`/utilities/purchases/${transactionId}`);
+            return res.data.data;
         },
         enabled: !!transactionId,
-        refetchInterval: false,
+        refetchInterval: (query) => query.state.data?.status === "PROCESSING" ? 3000 : false,
     });
 }

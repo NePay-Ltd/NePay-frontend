@@ -66,10 +66,8 @@ export default function ElectricityPage() {
     const [pinModalOpen, setPinModalOpen] = React.useState(false);
     const [txState, setTxState] = React.useState<TransactionState>("pin");
     const [txId, setTxId] = React.useState<string | null>(null);
-    // The real purchase response — its `token` is what the receipt renders,
-    // never a client-generated placeholder. Captured separately from
-    // `txStatus` below, since that hook is only a status-polling stand-in
-    // and doesn't carry category-specific fields.
+    // The provider token is returned by the purchase endpoint and refreshed
+    // from the persisted purchase while an asynchronous payment resolves.
     const [purchaseToken, setPurchaseToken] = React.useState<string | null>(null);
     const [successOpen, setSuccessOpen] = React.useState(false);
 
@@ -77,6 +75,7 @@ export default function ElectricityPage() {
 
     React.useEffect(() => {
         if (!txStatus) return;
+        if (txStatus.token) setPurchaseToken(txStatus.token);
         if (txStatus.status === "COMPLETED") {
             if (saveBeneficiary) {
                 saveBeneficiaryMutation.mutate({
