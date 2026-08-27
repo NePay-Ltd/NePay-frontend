@@ -212,12 +212,16 @@ export default function GiftCardsPage() {
                                     <div className="p-4 bg-white">
                                         <h3 className="font-extrabold text-ink text-[15px]">{card.name}</h3>
                                         <p className="text-[11px] font-medium text-muted mt-0.5">{card.desc}</p>
-                                        <div className="mt-4 inline-flex items-center rounded-lg bg-green-50 px-2 py-1 text-[11px] font-bold text-green-700">
-                                            {mode === "sell"
-                                                ? cardRate !== undefined
-                                                    ? `${formatNaira(cardRate)}/USD`
-                                                    : "…"
-                                                : "Available now"}
+                                        <div className="mt-4 inline-flex items-center rounded-lg">
+                                            <div className="text-right">
+                                                <span className="text-xs font-bold text-ink">
+                                                    {mode === "sell"
+                                                        ? (cardRate !== undefined
+                                                            ? <>{formatNaira(cardRate)}/USD</>
+                                                            : "Checking rate…")
+                                                        : "Available now"}
+                                                </span>
+                                            </div>
                                         </div>
                                         <Button type="button" variant="quiet" onClick={() => mode === "sell" && router.push(`/gift-cards/sell/${card.id}`)} disabled={mode !== "sell"} className="mt-4 w-full bg-violet-50 text-violet-700 font-bold hover:bg-violet-100 rounded-xl h-10">
                                             {mode === "sell" ? "Sell this card" : "Buy this card"}

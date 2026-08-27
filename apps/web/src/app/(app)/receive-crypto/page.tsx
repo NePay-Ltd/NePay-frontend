@@ -424,7 +424,7 @@ export default function ReceiveCryptoPage() {
                                         <div className="text-right">
                                             <span className="text-sm font-bold text-ink">
                                                 {minAmountData?.usdNgnRate
-                                                    ? `${formatNaira(minAmountData.usdNgnRate)} / $1`
+                                                    ? <>{formatNaira(minAmountData.usdNgnRate)} / $1</>
                                                     : "Market rate"}
                                             </span>
                                         </div>

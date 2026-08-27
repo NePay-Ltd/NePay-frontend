@@ -16,7 +16,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { formatNaira } from "@/lib/format";
+import { formatNaira, formatNairaString } from "@/lib/format";
 
 /**
  * Example Add Money form demonstrating React Hook Form + Zod.
@@ -56,7 +56,7 @@ export function AddMoneyForm() {
 
     const onSubmit = async (values: AddMoneyValues) => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        toast.success(`Deposited ${formatNaira(values.amount)} successfully`);
+        toast.success(`Deposited ${formatNairaString(values.amount)} successfully`);
     };
 
     return (

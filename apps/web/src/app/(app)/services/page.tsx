@@ -25,7 +25,7 @@ import { Tile } from "@/components/shared/tile";
 import { Panel, PanelHeader, PanelBody } from "@/components/shared/panel";
 import { RowItem } from "@/components/shared/row-item";
 import { Button } from "@/components/shared/button";
-import { formatNaira } from "@/lib/format";
+import { formatNaira, formatNairaString } from "@/lib/format";
 import { useSavedBillers } from "@/lib/queries/services";
 
 export default function ServicesPage() {
@@ -154,7 +154,7 @@ export default function ServicesPage() {
                                             icon={Receipt}
                                             iconTint="violet"
                                             title={biller.billerName}
-                                            subtitle={`${biller.identifier} • last paid ${formatNaira(biller.lastPaidAmount)}`}
+                                            subtitle={`${biller.identifier} • last paid ${formatNairaString(biller.lastPaidAmount)}`}
                                             className="px-5 py-4"
                                             trailing={
                                                 <Button 

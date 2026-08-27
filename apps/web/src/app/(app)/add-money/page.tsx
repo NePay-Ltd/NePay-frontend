@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { usePaystackCheckout } from "@/hooks/use-paystack";
 import { useVirtualAccount, useSimulateDeposit, useWalletBalance } from "@/lib/queries/wallet";
 import { useTestMode } from "@/lib/queries/config";
-import { formatNaira } from "@/lib/format";
+import { formatNaira, formatNairaString } from "@/lib/format";
 
 import { Button } from "@/components/shared/button";
 import { RowItem } from "@/components/shared/row-item";
@@ -46,7 +46,7 @@ function pollForCredit(
         const current = data ? Number(data.availableBalance) : balanceBefore;
 
         if (current > balanceBefore) {
-            toast.success(`Wallet credited — new balance ${formatNaira(current)}.`);
+            toast.success(`Wallet credited — new balance ${formatNairaString(current)}.`);
             clearInterval(interval);
             return;
         }
