@@ -1,6 +1,6 @@
 export type Currency = "NGN" | "USD" | "EUR" | "GBP";
 export type LedgerDirection = "CREDIT" | "DEBIT";
-export type LedgerEntryType = "DEPOSIT" | "BANK_DEPOSIT" | "WITHDRAWAL" | "ADMIN_ADJUSTMENT" | "UTILITY_PURCHASE" | "GIFT_CARD_SALE" | "FLIGHT_BOOKING" | "FEE" | "CASHBACK" | "REFERRAL_REWARD";
+export type LedgerEntryType = "DEPOSIT" | "BANK_DEPOSIT" | "WITHDRAWAL" | "ADMIN_ADJUSTMENT" | "PROMO_CREDIT" | "GOODWILL_CREDIT" | "ERROR_CORRECTION" | "UTILITY_PURCHASE" | "GIFT_CARD_SALE" | "FLIGHT_BOOKING" | "FEE" | "CASHBACK" | "REFERRAL_REWARD";
 export type CryptoDepositStatus =
     | "waiting"
     | "confirming"

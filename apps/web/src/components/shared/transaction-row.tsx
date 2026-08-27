@@ -37,6 +37,9 @@ function getCategoryLabel(cat: TxCategory) {
         case "tv": return "TV/Cable";
         case "electricity": return "Electricity";
         case "admin": return "Adjustment";
+        case "promo-credit": return "Promo Credit";
+        case "goodwill-credit": return "Goodwill Credit";
+        case "correction": return "Correction";
         case "cashback": return "Cashback";
         default: return "Transfer";
     }

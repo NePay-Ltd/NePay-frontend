@@ -8,7 +8,10 @@ import {
     Wifi,
     Tv,
     Zap,
-    Settings,
+    Wallet,
+    Sparkles,
+    HeartHandshake,
+    Undo2,
     type LucideIcon,
 } from "lucide-react";
 
@@ -25,6 +28,9 @@ export type TxCategory =
     | "tv"
     | "electricity"
     | "admin"
+    | "promo-credit"
+    | "goodwill-credit"
+    | "correction"
     | "cashback";
 
 export interface TxIconProps {
@@ -52,7 +58,15 @@ const CATEGORY_MAP: Record<TxCategory, CategoryConfig> = {
     data: { icon: Wifi, bg: "bg-blue-100", fg: "text-blue-700" },
     tv: { icon: Tv, bg: "bg-pink-100", fg: "text-pink-700" },
     electricity: { icon: Zap, bg: "bg-amber-100", fg: "text-amber-700" },
-    admin: { icon: Settings, bg: "bg-gray-200", fg: "text-gray-700" },
+    // Deliberately NOT an administrative/gear-looking icon: a manually
+    // posted credit that doesn't fit a named category should still feel
+    // like a normal part of the wallet, not a flagged staff action — see
+    // AdminService.postAdjustment's own note on why every NAMED category
+    // (below) gets its own icon instead of ever reaching this one.
+    admin: { icon: Wallet, bg: "bg-violet-100", fg: "text-violet-700" },
+    "promo-credit": { icon: Sparkles, bg: "bg-pink-100", fg: "text-pink-700" },
+    "goodwill-credit": { icon: HeartHandshake, bg: "bg-rose-100", fg: "text-rose-700" },
+    correction: { icon: Undo2, bg: "bg-slate-100", fg: "text-slate-700" },
     cashback: { icon: Gift, bg: "bg-emerald-100", fg: "text-emerald-700" },
 };
 

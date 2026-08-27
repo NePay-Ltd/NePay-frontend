@@ -3,7 +3,7 @@ import { Copy } from "lucide-react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";
-import { useReferralLink } from "@/lib/queries/referrals";
+import { useReferralSummary } from "@/lib/queries/referrals";
 import { Panel, PanelBody } from "@/components/shared/panel";
 import { Button } from "@/components/shared/button";
 
@@ -14,7 +14,10 @@ interface ReferralBannerProps {
 }
 
 export function ReferralBanner({ className, compact = false }: ReferralBannerProps) {
-    const { data: referralLink, isLoading } = useReferralLink();
+    const { data: referral, isLoading } = useReferralSummary();
+    const referralLink = referral && typeof window !== "undefined"
+        ? `${window.location.origin}/register?ref=${encodeURIComponent(referral.referralCode)}`
+        : "";
 
     const handleCopyInviteLink = () => {
         if (!referralLink) return;
@@ -26,7 +29,7 @@ export function ReferralBanner({ className, compact = false }: ReferralBannerPro
         return (
             <div className={cn("rounded-xl bg-violet-50 p-4 text-center border border-violet-100", className)}>
                 <h3 className="text-sm font-semibold text-violet-700">
-                    Invite a friend <span className="font-normal opacity-70">→</span> earn ₦5,000
+                    Invite a friend <span className="font-normal opacity-70">→</span> earn referral points
                 </h3>
                 <Button
                     variant="ghost"
@@ -46,7 +49,7 @@ export function ReferralBanner({ className, compact = false }: ReferralBannerPro
         <Panel className={cn("border-none bg-brand-gradient text-white shadow-xl ring-1 ring-white/20", className)}>
             <PanelBody className="flex flex-col items-center justify-between gap-4 p-6 sm:flex-row sm:p-8">
                 <div className="text-center sm:text-left">
-                    <h3 className="text-lg font-bold">Invite a friend, earn ₦5,000</h3>
+                    <h3 className="text-lg font-bold">Invite a friend, earn referral points</h3>
                     <p className="mt-1 text-sm text-white/80 max-w-[250px]">
                         Share NePay with your friends and you both earn a bonus.
                     </p>

@@ -23,7 +23,15 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
             break;
         case "GIFT_CARD_SALE": category = "gift-card"; break;
         case "FLIGHT_BOOKING": category = "flight"; break;
+        // ADMIN_ADJUSTMENT is the true catch-all (AdminService's OTHER
+        // category) — everything with an actual name gets its own type and
+        // its own icon below, precisely so a customer can never tell a
+        // manual credit apart from an automated one just by looking at
+        // their own transaction list.
         case "ADMIN_ADJUSTMENT": category = "admin"; break;
+        case "PROMO_CREDIT": category = "promo-credit"; break;
+        case "GOODWILL_CREDIT": category = "goodwill-credit"; break;
+        case "ERROR_CORRECTION": category = "correction"; break;
         case "CASHBACK": category = "cashback"; break;
         case "REFERRAL_REWARD": category = "cashback"; break;
     }
@@ -32,6 +40,16 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
         ? entry.description.match(/\s([A-Za-z0-9_-]+)\s@\s/)?.[1]
         : undefined;
 
+    // ADMIN_ADJUSTMENT is the one type that's still a generic, internal
+    // name by design (AdminService's true OTHER catch-all) — every named
+    // category above already has an honest type of its own, so this is the
+    // only case left where showing the literal type would read as "Admin
+    // Adjustment" to a customer. "Account Credit"/"Account Debit" reads
+    // like a normal part of the wallet instead.
+    const meta = entry.type === "ADMIN_ADJUSTMENT"
+        ? entry.direction === "DEBIT" ? "Account Debit" : "Account Credit"
+        : entry.type.replace(/_/g, " ");
+
     return {
         id: entry.id,
         label: entry.assetQuantity && cryptoAsset
@@ -39,7 +57,7 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
             : entry.description || entry.type.replace(/_/g, " "),
         meta: entry.assetQuantity && cryptoAsset
             ? `${entry.assetQuantity} ${cryptoAsset} · Crypto deposit`
-            : entry.type.replace(/_/g, " "),
+            : meta,
         amount: entry.direction === "DEBIT" ? -parseFloat(entry.amount) : parseFloat(entry.amount),
         category,
         status: "success",
