@@ -18,7 +18,7 @@ export interface SavedBiller {
     identifier: string; // e.g., "Meter 12345"
     lastPaidAmount: number;
     iconUrl?: string; // Optional icon
-    serviceType: "electricity" | "cable-tv" | "airtime" | "data";
+    serviceType: "electricity" | "cable-tv" | "airtime" | "data" | "education";
     category?: string;
     provider?: string;
     label?: string | null;

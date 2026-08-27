@@ -12,7 +12,7 @@ export interface LeaderboardEntry {
 export interface LeaderboardSnapshot {
     periodKey: string;
     entries: LeaderboardEntry[];
-    topTen: LeaderboardEntry[];
+    topTwenty: LeaderboardEntry[];
     currentUser: LeaderboardEntry | null;
 }
 

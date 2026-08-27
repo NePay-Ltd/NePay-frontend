@@ -6,7 +6,7 @@ import { ArrowLeft, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { usePayEducation, useUtilityCategories, useUtilityServices, useUtilityVariations } from "@/lib/queries/services";
+import { usePayEducation, useSaveBeneficiary, useSavedBillers, useUtilityCategories, useUtilityServices, useUtilityVariations } from "@/lib/queries/services";
 import { UtilityPurchaseResponseDto } from "@/lib/types/api";
 
 // Shared UI Components
@@ -15,6 +15,7 @@ import { RecentNumbersRow } from "@/components/services/RecentNumbersRow";
 import { PlanGrid } from "@/components/services/PlanGrid";
 import { StickyPayBar } from "@/components/services/StickyPayBar";
 import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen";
+import { Switch } from "@/components/ui/switch";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const MOCK_RECENT_CONTACTS = [
@@ -29,6 +30,7 @@ export default function EducationPage() {
     const [examBody, setExamBody] = React.useState<string | undefined>();
     const [variationCode, setVariationCode] = React.useState("");
     const [phone, setPhone] = React.useState("");
+    const [saveBeneficiary, setSaveBeneficiary] = React.useState(true);
 
     // ─── Dynamic catalog ────────────────────────────────────────────────────
     const { data: categories = [] } = useUtilityCategories();
@@ -53,6 +55,11 @@ export default function EducationPage() {
 
     // Queries & Mutations
     const payEducation = usePayEducation();
+    const saveBeneficiaryMutation = useSaveBeneficiary();
+    const { data: savedBillers = [] } = useSavedBillers();
+    const recentContacts = savedBillers
+        .filter((b) => b.serviceType === "education")
+        .map((b) => ({ name: b.billerName, id: b.identifier }));
 
     // ─── Transaction State ────────────────────────────────────────────────
     const [pinModalOpen, setPinModalOpen] = React.useState(false);
@@ -90,6 +97,15 @@ export default function EducationPage() {
             {
                 onSuccess: (res) => {
                     setTxResult(res);
+                    if (saveBeneficiary && selectedExamBody) {
+                        saveBeneficiaryMutation.mutate({
+                            category: "EDUCATION",
+                            provider: selectedExamBody.serviceID,
+                            identifier: phone,
+                            label: `${selectedExamBody.name} ${phone}`,
+                            amount: selectedPinType?.variation_amount,
+                        });
+                    }
                     if (res.status === "FAILED") {
                         setTxState("error");
                         return;
@@ -149,9 +165,16 @@ export default function EducationPage() {
                             className="w-full h-16 rounded-2xl border-2 border-border bg-white px-5 text-xl font-bold tracking-wide outline-none focus:border-indigo-600 transition-colors"
                         />
                         <RecentNumbersRow
-                            contacts={MOCK_RECENT_CONTACTS}
+                            contacts={recentContacts}
                             onSelect={(id) => setPhone(id)}
                         />
+                        <div className="flex items-center justify-between rounded-xl bg-white p-4 border border-border">
+                            <div>
+                                <p className="text-sm font-bold text-ink">Save as beneficiary</p>
+                                <p className="text-xs text-muted">Save this number for future PIN purchases</p>
+                            </div>
+                            <Switch checked={saveBeneficiary} onCheckedChange={setSaveBeneficiary} />
+                        </div>
                     </div>
 
                     {/* PIN Type Selection */}
@@ -191,7 +214,17 @@ export default function EducationPage() {
                     txResult?.status === "PROCESSING" ? (
                         <p>Your <span className="font-bold">{selectedPinType?.name}</span> purchase is being processed.</p>
                     ) : (
-                        <p>You successfully purchased a <span className="font-bold">{selectedPinType?.name}</span>.</p>
+                        <div className="space-y-2">
+                            <p>You successfully purchased a <span className="font-bold">{selectedPinType?.name}</span>.</p>
+                            {txResult?.token && (
+                                <div className="bg-gray-50 border border-border rounded-xl p-4 mt-4">
+                                    <p className="text-xs font-bold text-muted uppercase tracking-wider mb-1">Your PIN</p>
+                                    <p className="font-mono text-xl font-bold tracking-widest text-ink">
+                                        {txResult.token}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
                     )
                 }
                 onHome={() => router.push("/overview")}

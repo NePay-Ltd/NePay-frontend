@@ -6,7 +6,7 @@ import { ArrowLeft, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { useVerifyMeter, usePayElectricity, useSaveBeneficiary, useServiceTransactionStatus } from "@/lib/queries/services";
+import { useVerifyMeter, usePayElectricity, useSaveBeneficiary, useSavedBillers, useServiceTransactionStatus } from "@/lib/queries/services";
 
 // New Shared UI Components
 import { ProviderSelector } from "@/components/services/ProviderSelector";
@@ -27,11 +27,6 @@ const PROVIDERS = [
 ];
 
 const PRESET_AMOUNTS = [2000, 5000, 10000, 20000];
-
-const MOCK_RECENT_CONTACTS = [
-    { name: "Home Prepaid", id: "01011234567" },
-    { name: "Office", id: "04298765432" },
-];
 
 export default function ElectricityPage() {
     const router = useRouter();
@@ -55,6 +50,10 @@ export default function ElectricityPage() {
     const verifyMeter = useVerifyMeter();
     const payElectricity = usePayElectricity();
     const saveBeneficiaryMutation = useSaveBeneficiary();
+    const { data: savedBillers = [] } = useSavedBillers();
+    const recentContacts = savedBillers
+        .filter((b) => b.serviceType === "electricity")
+        .map((b) => ({ name: b.billerName, id: b.identifier }));
 
     // Reset resolution if user types something new or changes provider
     React.useEffect(() => {
@@ -67,6 +66,11 @@ export default function ElectricityPage() {
     const [pinModalOpen, setPinModalOpen] = React.useState(false);
     const [txState, setTxState] = React.useState<TransactionState>("pin");
     const [txId, setTxId] = React.useState<string | null>(null);
+    // The real purchase response — its `token` is what the receipt renders,
+    // never a client-generated placeholder. Captured separately from
+    // `txStatus` below, since that hook is only a status-polling stand-in
+    // and doesn't carry category-specific fields.
+    const [purchaseToken, setPurchaseToken] = React.useState<string | null>(null);
     const [successOpen, setSuccessOpen] = React.useState(false);
 
     const { data: txStatus } = useServiceTransactionStatus(txId);
@@ -80,6 +84,7 @@ export default function ElectricityPage() {
                     provider: providerId,
                     identifier: meter,
                     label: `${activeProvider.label} ${meter}`,
+                    amount: amount.toString(),
                 });
             }
             setPinModalOpen(false);
@@ -118,6 +123,7 @@ export default function ElectricityPage() {
             return;
         }
         setTxId(null);
+        setPurchaseToken(null);
         setTxState("pin");
         setPinModalOpen(true);
     };
@@ -135,6 +141,7 @@ export default function ElectricityPage() {
             {
                 onSuccess: (res) => {
                     setTxId(res.id);
+                    setPurchaseToken(res.token);
                 },
                 onError: (err: any) => {
                     toast.error(err.response?.data?.message || "Payment failed");
@@ -219,9 +226,9 @@ export default function ElectricityPage() {
                         
                         {/* Only show recent if we haven't typed yet or verified */}
                         {verifyStatus !== "success" && (
-                            <RecentNumbersRow 
-                                contacts={MOCK_RECENT_CONTACTS} 
-                                onSelect={(id) => setMeter(id)} 
+                            <RecentNumbersRow
+                                contacts={recentContacts}
+                                onSelect={(id) => setMeter(id)}
                             />
                         )}
                     </div>
@@ -263,11 +270,11 @@ export default function ElectricityPage() {
                 description={
                     <div className="space-y-2">
                         <p>You successfully purchased electricity for <span className="font-bold">{resolvedName}</span>.</p>
-                        {meterType === 'prepaid' && (
+                        {purchaseToken && (
                             <div className="bg-gray-50 border border-border rounded-xl p-4 mt-4">
                                 <p className="text-xs font-bold text-muted uppercase tracking-wider mb-1">Your Token</p>
                                 <p className="font-mono text-xl font-bold tracking-widest text-ink">
-                                    {Math.floor(1000000000000000 + Math.random() * 9000000000000000).toString().match(/.{1,4}/g)?.join('-')}
+                                    {purchaseToken}
                                 </p>
                             </div>
                         )}

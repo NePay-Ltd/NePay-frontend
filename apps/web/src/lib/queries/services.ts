@@ -26,22 +26,52 @@ export const servicesKeys = {
     status: (id: string) => [...servicesKeys.all, "status", id] as const,
 };
 
+/** The backend's UtilityCategory enum values, mapped to this app's own display-only serviceType union. */
+function categoryToServiceType(category: string | undefined): SavedBiller["serviceType"] {
+    switch (category) {
+        case "AIRTIME": return "airtime";
+        case "DATA": return "data";
+        case "ELECTRICITY": return "electricity";
+        case "EDUCATION": return "education";
+        case "CABLE":
+        default:
+            return "cable-tv";
+    }
+}
+
+interface RawSavedBeneficiary {
+    id: string;
+    category: string;
+    provider: string;
+    identifier: string;
+    label: string | null;
+    amount: string | null;
+    lastUsedAt: string | null;
+    createdAt: string;
+}
+
+function toSavedBiller(raw: RawSavedBeneficiary): SavedBiller {
+    return {
+        id: raw.id,
+        billerName: raw.label || raw.provider || raw.identifier,
+        identifier: raw.identifier,
+        provider: raw.provider,
+        category: raw.category,
+        label: raw.label,
+        // The amount paid the most recent time this beneficiary was used —
+        // real data off GET /utilities/beneficiaries, never a placeholder.
+        lastPaidAmount: raw.amount ? parseFloat(raw.amount) : 0,
+        serviceType: categoryToServiceType(raw.category),
+        iconUrl: undefined,
+    };
+}
+
 export function useSavedBillers() {
     return useQuery<SavedBiller[]>({
         queryKey: servicesKeys.savedBillers(),
         queryFn: async () => {
-            const res = await apiClient.get<ApiResponse<SavedBiller[]>>("/utilities/beneficiaries");
-            return res.data.data.map((biller) => ({
-                id: biller.id,
-                billerName: biller.label || biller.provider || biller.identifier,
-                identifier: biller.identifier,
-                provider: biller.provider,
-                category: biller.category,
-                label: biller.label,
-                lastPaidAmount: 0,
-                serviceType: biller.category === "AIRTIME" ? "airtime" : biller.category === "DATA" ? "data" : biller.category === "ELECTRICITY" ? "electricity" : "cable-tv",
-                iconUrl: undefined,
-            }));
+            const res = await apiClient.get<ApiResponse<RawSavedBeneficiary[]>>("/utilities/beneficiaries");
+            return res.data.data.map(toSavedBiller);
         },
     });
 }
@@ -49,22 +79,16 @@ export function useSavedBillers() {
 export function useSaveBeneficiary() {
     const queryClient = useQueryClient();
 
-    return useMutation<SavedBiller, Error, { category: string; provider: string; identifier: string; label?: string | null }>({
-        mutationFn: async ({ category, provider, identifier, label }) => {
-            const res = await apiClient.post<ApiResponse<SavedBiller>>("/utilities/beneficiaries", {
+    return useMutation<SavedBiller, Error, { category: string; provider: string; identifier: string; label?: string | null; amount?: string }>({
+        mutationFn: async ({ category, provider, identifier, label, amount }) => {
+            const res = await apiClient.post<ApiResponse<RawSavedBeneficiary>>("/utilities/beneficiaries", {
                 category,
                 provider,
                 identifier,
                 label,
+                amount,
             });
-            return {
-                id: res.data.data.id,
-                billerName: res.data.data.label || res.data.data.provider || res.data.data.identifier,
-                identifier: res.data.data.identifier,
-                lastPaidAmount: 0,
-                serviceType: res.data.data.category === "AIRTIME" ? "airtime" : res.data.data.category === "DATA" ? "data" : res.data.data.category === "ELECTRICITY" ? "electricity" : "cable-tv",
-                iconUrl: undefined,
-            };
+            return toSavedBiller(res.data.data);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: servicesKeys.savedBillers() });
@@ -218,6 +242,7 @@ export function useServiceTransactionStatus(transactionId: string | null) {
                 status: "COMPLETED",
                 providerReference: null,
                 failureReason: null,
+                token: null,
                 createdAt: new Date().toISOString(),
             };
         },

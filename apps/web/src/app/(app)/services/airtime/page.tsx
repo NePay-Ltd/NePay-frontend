@@ -6,11 +6,12 @@ import { ArrowLeft, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { usePayAirtime, useSaveBeneficiary, useUtilityCategories, useUtilityServices } from "@/lib/queries/services";
+import { usePayAirtime, useSaveBeneficiary, useSavedBillers, useUtilityCategories, useUtilityServices } from "@/lib/queries/services";
 import { UtilityPurchaseResponseDto } from "@/lib/types/api";
 
 // New Shared UI Components
 import { ProviderSelector } from "@/components/services/ProviderSelector";
+import { RecentNumbersRow } from "@/components/services/RecentNumbersRow";
 import { Switch } from "@/components/ui/switch";
 import { AmountCalculator } from "@/components/services/AmountCalculator";
 import { StickyPayBar } from "@/components/services/StickyPayBar";
@@ -55,6 +56,10 @@ export default function AirtimePage() {
     // Queries & Mutations
     const payAirtime = usePayAirtime();
     const saveBeneficiaryMutation = useSaveBeneficiary();
+    const { data: savedBillers = [] } = useSavedBillers();
+    const recentContacts = savedBillers
+        .filter((b) => b.serviceType === "airtime")
+        .map((b) => ({ name: b.billerName, id: b.identifier }));
 
     // ─── Transaction State ────────────────────────────────────────────────
     const [pinModalOpen, setPinModalOpen] = React.useState(false);
@@ -108,6 +113,7 @@ export default function AirtimePage() {
                             provider: selectedNetwork.serviceID,
                             identifier: phone,
                             label: `${selectedNetwork.name} ${phone}`,
+                            amount: amount.toString(),
                         });
                     }
                     if (res.status === "FAILED") {
@@ -197,6 +203,7 @@ export default function AirtimePage() {
                                 </div>
                             )}
                         </div>
+                        <RecentNumbersRow contacts={recentContacts} onSelect={(id) => setPhone(id)} />
                         <div className="flex items-center justify-between rounded-xl bg-white p-4 border border-border">
                             <div>
                                 <p className="text-sm font-bold text-ink">Save as beneficiary</p>

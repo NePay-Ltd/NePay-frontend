@@ -252,6 +252,8 @@ export interface UtilityPurchaseResponseDto {
     status: UtilityPurchaseStatus;
     providerReference: string | null;
     failureReason: string | null;
+    /** The provider-issued redemption code (electricity token, exam PIN, ...) when this purchase's category/response carried one — null otherwise. Always render this in the receipt when present. */
+    token: string | null;
     createdAt: string;
 }
 

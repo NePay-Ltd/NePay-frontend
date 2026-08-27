@@ -6,7 +6,7 @@ import { ArrowLeft, MonitorPlay } from "lucide-react";
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { useVerifySmartcard, usePayCableTv, useSaveBeneficiary, useServiceTransactionStatus } from "@/lib/queries/services";
+import { useVerifySmartcard, usePayCableTv, useSaveBeneficiary, useSavedBillers, useServiceTransactionStatus } from "@/lib/queries/services";
 
 // New Shared UI Components
 import { ProviderSelector } from "@/components/services/ProviderSelector";
@@ -50,8 +50,6 @@ const MOCK_TV_PLANS: Record<string, { id: string; name: string; price: number }[
     ]
 };
 
-const MOCK_RECENT_CONTACTS: {name: string; id: string}[] = [];
-
 export default function TvPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -72,6 +70,10 @@ export default function TvPage() {
     const verifySmartcard = useVerifySmartcard();
     const payCableTv = usePayCableTv();
     const saveBeneficiaryMutation = useSaveBeneficiary();
+    const { data: savedBillers = [] } = useSavedBillers();
+    const recentContacts = savedBillers
+        .filter((b) => b.serviceType === "cable-tv")
+        .map((b) => ({ name: b.billerName, id: b.identifier }));
 
     const providerPlans = MOCK_TV_PLANS[providerId] || [];
     const selectedPlan = providerPlans.find(p => p.id === planId);
@@ -100,6 +102,7 @@ export default function TvPage() {
                     provider: providerId,
                     identifier: smartcard,
                     label: `${PROVIDERS.find((provider) => provider.id === providerId)?.label || providerId} ${smartcard}`,
+                    amount: selectedPlan?.price.toString(),
                 });
             }
             setPinModalOpen(false);
@@ -221,9 +224,9 @@ export default function TvPage() {
                         
                         {/* Only show recent if we haven't typed yet or verified */}
                         {verifyStatus !== "success" && (
-                            <RecentNumbersRow 
-                                contacts={MOCK_RECENT_CONTACTS} 
-                                onSelect={(id) => setSmartcard(id)} 
+                            <RecentNumbersRow
+                                contacts={recentContacts}
+                                onSelect={(id) => setSmartcard(id)}
                             />
                         )}
                     </div>

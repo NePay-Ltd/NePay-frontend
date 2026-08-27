@@ -6,11 +6,12 @@ import { ArrowLeft, Wifi } from "lucide-react";
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { usePayData, useSaveBeneficiary, useUtilityCategories, useUtilityServices, useUtilityVariations } from "@/lib/queries/services";
+import { usePayData, useSaveBeneficiary, useSavedBillers, useUtilityCategories, useUtilityServices, useUtilityVariations } from "@/lib/queries/services";
 import { UtilityPurchaseResponseDto } from "@/lib/types/api";
 
 // New Shared UI Components
 import { ProviderSelector } from "@/components/services/ProviderSelector";
+import { RecentNumbersRow } from "@/components/services/RecentNumbersRow";
 import { Switch } from "@/components/ui/switch";
 import { PlanGrid } from "@/components/services/PlanGrid";
 import { StickyPayBar } from "@/components/services/StickyPayBar";
@@ -53,6 +54,10 @@ export default function DataPage() {
     // Queries & Mutations
     const payData = usePayData();
     const saveBeneficiaryMutation = useSaveBeneficiary();
+    const { data: savedBillers = [] } = useSavedBillers();
+    const recentContacts = savedBillers
+        .filter((b) => b.serviceType === "data")
+        .map((b) => ({ name: b.billerName, id: b.identifier }));
 
     // Reset plan when network changes
     React.useEffect(() => {
@@ -111,6 +116,7 @@ export default function DataPage() {
                             provider: selectedNetwork.serviceID,
                             identifier: phone,
                             label: `${selectedNetwork.name} ${phone}`,
+                            amount: selectedPlan.variation_amount,
                         });
                     }
                     if (res.status === "FAILED") {
@@ -203,6 +209,7 @@ export default function DataPage() {
                                 </div>
                             )}
                         </div>
+                        <RecentNumbersRow contacts={recentContacts} onSelect={(id) => setPhone(id)} />
                         <div className="flex items-center justify-between rounded-xl bg-white p-4 border border-border">
                             <div>
                                 <p className="text-sm font-bold text-ink">Save as beneficiary</p>

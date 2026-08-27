@@ -15,12 +15,12 @@ export default function LeaderboardPage() {
                 <p className="mt-1 text-sm text-body">Monthly points ranking from your NePay activity.</p>
             </div>
             <Panel>
-                <PanelHeader title={data ? `Top 10 · ${data.periodKey}` : "Top 10"} />
+                <PanelHeader title={data ? `Top 20 · ${data.periodKey}` : "Top 20"} />
                 <PanelBody className="p-0">
-                    {isLoading ? <div className="space-y-3 p-5">{[1, 2, 3, 4, 5].map((item) => <Skeleton key={item} className="h-14 w-full" />)}</div> : isError ? <p className="p-5 text-sm text-red-600">Leaderboard is temporarily unavailable.</p> : !data?.topTen.length ? <div className="p-8 text-center"><Trophy className="mx-auto h-8 w-8 text-muted" /><p className="mt-3 font-semibold text-ink">No rankings yet</p><p className="mt-1 text-sm text-body">The current leaderboard will appear after points are recorded.</p></div> : <div className="divide-y divide-border">{data.topTen.map((entry) => <LeaderboardRow key={`${entry.rank}-${entry.displayName}`} entry={entry} />)}</div>}
+                    {isLoading ? <div className="space-y-3 p-5">{[1, 2, 3, 4, 5].map((item) => <Skeleton key={item} className="h-14 w-full" />)}</div> : isError ? <p className="p-5 text-sm text-red-600">Leaderboard is temporarily unavailable.</p> : !data?.topTwenty.length ? <div className="p-8 text-center"><Trophy className="mx-auto h-8 w-8 text-muted" /><p className="mt-3 font-semibold text-ink">No rankings yet</p><p className="mt-1 text-sm text-body">The current leaderboard will appear after points are recorded.</p></div> : <div className="divide-y divide-border">{data.topTwenty.map((entry) => <LeaderboardRow key={`${entry.rank}-${entry.displayName}`} entry={entry} />)}</div>}
                 </PanelBody>
             </Panel>
-            {data?.currentUser && !data.topTen.some((entry) => entry.rank === data.currentUser?.rank) && <Panel><PanelHeader title="Your spot" /><PanelBody className="p-0"><LeaderboardRow entry={data.currentUser} highlight /></PanelBody></Panel>}
+            {data?.currentUser && !data.topTwenty.some((entry) => entry.rank === data.currentUser?.rank) && <Panel><PanelHeader title="Your spot" /><PanelBody className="p-0"><LeaderboardRow entry={data.currentUser} highlight /></PanelBody></Panel>}
         </div>
     );
 }
