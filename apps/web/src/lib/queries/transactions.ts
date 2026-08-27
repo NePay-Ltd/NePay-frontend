@@ -7,6 +7,7 @@ import { apiClient } from "@/lib/api-client";
 import { LedgerEntryDto, ApiPaginated, ApiResponse } from "@/lib/types/api";
 import { BaseTransaction } from "@/components/shared/transaction-row";
 import { TxCategory } from "@/components/shared/tx-icon";
+import { UtilityPurchaseResponseDto } from "@/lib/types/api";
 
 export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
     let category: TxCategory = "payment";
@@ -87,7 +88,16 @@ export function useTransaction(id: string | null) {
         queryKey: transactionKeys.detail(id ?? ""),
         queryFn: async () => {
             const res = await apiClient.get<ApiResponse<LedgerEntryDto>>(`/wallet/transactions/${id}`);
-            return mapLedgerToTransaction(res.data.data);
+            const transaction = mapLedgerToTransaction(res.data.data);
+            if (transaction.category === "electricity") {
+                try {
+                    const utility = await apiClient.get<ApiResponse<UtilityPurchaseResponseDto>>(`/utilities/purchases/by-ledger/${id}`);
+                    transaction.utilityToken = utility.data.data.token ?? undefined;
+                } catch {
+                    // Older transactions may predate the utility-purchase link.
+                }
+            }
+            return transaction;
         },
         enabled: !!id,
     });

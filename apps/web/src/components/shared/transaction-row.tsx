@@ -17,6 +17,7 @@ export interface BaseTransaction {
     cryptoAmount?: string;
     cryptoAsset?: string;
     exchangeRate?: string;
+    utilityToken?: string;
 }
 
 export interface TransactionRowProps {

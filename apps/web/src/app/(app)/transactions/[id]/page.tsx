@@ -73,6 +73,7 @@ export default function TransactionDetailPage() {
             direction: transaction.amount > 0 ? "CREDIT" : "DEBIT",
             currency: "NGN",
             meta: transaction.meta,
+            utilityToken: transaction.utilityToken,
         };
     };
 
@@ -289,6 +290,13 @@ export default function TransactionDetailPage() {
                                 <p className="text-xs font-semibold text-muted uppercase mb-2">Currency</p>
                                 <p className="text-sm font-semibold text-ink">NGN (Nigerian Naira)</p>
                             </div>
+
+                            {transaction.utilityToken && transaction.category === "electricity" && (
+                                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 sm:col-span-2">
+                                    <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">Electricity Token</p>
+                                    <p className="mt-2 break-all font-mono text-xl font-bold tracking-widest text-ink">{transaction.utilityToken}</p>
+                                </div>
+                            )}
                         </div>
                     </div>
 
