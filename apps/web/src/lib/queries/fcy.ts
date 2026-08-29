@@ -54,10 +54,19 @@ export function useFcyAccounts() {
 /**
  * Uploads a KYC-supporting document ahead of an account request — the
  * returned id is what POST /fcy/accounts references (see
- * RequestFcyAccountDto's own note on why never a raw URL). No explicit
- * Content-Type override: axios detects a FormData body and lets the browser
- * set the correct multipart boundary itself, overriding apiClient's default
- * `application/json` header for this one call.
+ * RequestFcyAccountDto's own note on why never a raw URL).
+ *
+ * `headers: { "Content-Type": undefined }` is required, not optional —
+ * confirmed live: apiClient's instance-level default `application/json`
+ * header does NOT get silently overridden by axios just because the body
+ * is a FormData instance (an earlier assumption in this file that turned
+ * out wrong, caught live when every upload failed with "property file
+ * should not exist" — the request was going out as `application/json`
+ * with a multipart-boundary body, so Nest's body parser never handed it to
+ * Multer at all and `file` landed as a literal property on the object
+ * class-validator saw). Explicitly unsetting Content-Type per-call is what
+ * lets the browser's own XHR/fetch layer set the correct
+ * `multipart/form-data; boundary=...` header itself.
  */
 export function useUploadFcyDocument() {
     return useMutation<FcyDocumentDto, Error, { file: File; purpose: FcyDocumentPurpose }>({
@@ -66,7 +75,9 @@ export function useUploadFcyDocument() {
             formData.append("file", file);
             formData.append("purpose", purpose);
 
-            const res = await apiClient.post<ApiResponse<FcyDocumentDto>>("/fcy/documents", formData);
+            const res = await apiClient.post<ApiResponse<FcyDocumentDto>>("/fcy/documents", formData, {
+                headers: { "Content-Type": undefined },
+            });
             return res.data.data;
         },
     });
