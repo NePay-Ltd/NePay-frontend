@@ -1,4 +1,4 @@
-export type Currency = "NGN" | "USD" | "EUR" | "GBP";
+export type Currency = "NGN" | "USD" | "EUR" | "GBP" | "CAD";
 export type LedgerDirection = "CREDIT" | "DEBIT";
 export type LedgerEntryType = "DEPOSIT" | "BANK_DEPOSIT" | "WITHDRAWAL" | "ADMIN_ADJUSTMENT" | "PROMO_CREDIT" | "GOODWILL_CREDIT" | "ERROR_CORRECTION" | "UTILITY_PURCHASE" | "GIFT_CARD_SALE" | "FLIGHT_BOOKING" | "FEE" | "CASHBACK" | "REFERRAL_REWARD";
 export type CryptoDepositStatus =
@@ -310,5 +310,98 @@ export interface GiftCardOrderResponseDto {
     submissionType: GiftCardSubmissionType;
     status: GiftCardOrderStatus;
     decidedAt: string | null;
+    createdAt: string;
+}
+
+// ─── FCY (Foreign Currency) Accounts — Fincra-backed ────────────────────────
+// USD/EUR/GBP/CAD virtual accounts, collections, RFI and NGN conversion.
+// Only EUR/CAD are testable against Fincra's sandbox today (USD/GBP have no
+// sandbox account support yet, per the backend's own confirmed spec) — the
+// UI still supports requesting all four, since the code path is real.
+
+export type FcyCurrency = "USD" | "EUR" | "GBP" | "CAD";
+export type FcyAccountStatus = "REQUESTED" | "APPROVED" | "ISSUED" | "DECLINED" | "CLOSED";
+export type FcyCollectionStatus = "PENDING" | "SUCCESSFUL" | "FAILED" | "AWAITING_INFO";
+export type FcyConversionStatus = "INITIATED" | "SUCCESSFUL" | "FAILED";
+export type FcyRfiStatus = "OPEN" | "RESPONSE_SUBMITTED" | "RESOLVED" | "EXPIRED";
+export type FcyIdentityDocumentType = "PASSPORT" | "NATIONAL_ID" | "DRIVERS_LICENSE";
+
+export interface FcyAccountDto {
+    id: string;
+    userId: string;
+    currency: FcyCurrency;
+    status: FcyAccountStatus;
+    reference: string;
+    accountNumber: string | null;
+    accountName: string | null;
+    bankName: string | null;
+    /** CAD only — funds are addressed to this Interac alias, never an account number. */
+    interacEmail: string | null;
+    declineReason: string | null;
+    approvedAt: string | null;
+    issuedAt: string | null;
+    declinedAt: string | null;
+    createdAt: string;
+}
+
+/** Body of POST /fcy/accounts. USD requires PASSPORT specifically — enforced by the backend, surfaced here so the form can hint it upfront. */
+export interface RequestFcyAccountDto {
+    currency: FcyCurrency;
+    identityDocumentType: FcyIdentityDocumentType;
+    identityDocumentNumber: string;
+}
+
+export interface FcyCollectionDto {
+    id: string;
+    fcyAccountId: string;
+    currency: FcyCurrency;
+    amount: string;
+    reference: string;
+    status: FcyCollectionStatus;
+    payerName: string | null;
+    narration: string | null;
+    rfiCaseId: string | null;
+    failureReason: string | null;
+    resolvedAt: string | null;
+    createdAt: string;
+}
+
+/** Body of POST /fcy/accounts/:id/simulate-collection — sandbox-only, CAD only. Outcome is driven purely by amount (confirmed): <10,000 (and not exactly 999) -> SUCCESSFUL, exactly 999 -> FAILED, >10,000 -> AWAITING_INFO (RFI). */
+export interface SimulateCadCollectionDto {
+    amount: string;
+}
+
+export interface FcyConversionDto {
+    id: string;
+    fcyAccountId: string;
+    sourceCurrency: FcyCurrency;
+    sourceAmount: string;
+    rate: string | null;
+    convertedNgnAmount: string | null;
+    reference: string;
+    status: FcyConversionStatus;
+    failureReason: string | null;
+    completedAt: string | null;
+    createdAt: string;
+}
+
+/** Body of POST /fcy/conversions. */
+export interface InitiateFcyConversionDto {
+    fcyAccountId: string;
+    amount: string;
+}
+
+export interface FcyRfiCaseDto {
+    id: string;
+    fcyCollectionId: string;
+    status: FcyRfiStatus;
+    requestedInfo: string | null;
+    responseNote: string | null;
+    responseSubmittedAt: string | null;
+    /** Same-day/within-hours in practice (confirmed) — render prominently, never as a low-urgency multi-day countdown. */
+    deadlineAt: string;
+    returnFeeAmount: string | null;
+    returnFeeCurrency: Currency | null;
+    resolvedAt: string | null;
     createdAt: string;
 }
