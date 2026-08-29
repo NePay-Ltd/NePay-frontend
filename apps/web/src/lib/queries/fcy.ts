@@ -11,6 +11,8 @@ import {
     FcyAccountDto,
     FcyCollectionDto,
     FcyConversionDto,
+    FcyDocumentDto,
+    FcyDocumentPurpose,
     FcyRfiCaseDto,
     InitiateFcyConversionDto,
     RequestFcyAccountDto,
@@ -45,6 +47,27 @@ export function useFcyAccounts() {
                 (a) => a.status === "REQUESTED" || a.status === "APPROVED",
             );
             return stillSettling ? 5000 : false;
+        },
+    });
+}
+
+/**
+ * Uploads a KYC-supporting document ahead of an account request — the
+ * returned id is what POST /fcy/accounts references (see
+ * RequestFcyAccountDto's own note on why never a raw URL). No explicit
+ * Content-Type override: axios detects a FormData body and lets the browser
+ * set the correct multipart boundary itself, overriding apiClient's default
+ * `application/json` header for this one call.
+ */
+export function useUploadFcyDocument() {
+    return useMutation<FcyDocumentDto, Error, { file: File; purpose: FcyDocumentPurpose }>({
+        mutationFn: async ({ file, purpose }) => {
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("purpose", purpose);
+
+            const res = await apiClient.post<ApiResponse<FcyDocumentDto>>("/fcy/documents", formData);
+            return res.data.data;
         },
     });
 }

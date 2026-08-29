@@ -6,12 +6,15 @@ import {
     AlertCircle,
     ArrowRightLeft,
     Building2,
+    CheckCircle2,
     Clock,
     Copy,
     FlaskConical,
+    Loader2,
     Mail,
     Receipt,
     ShieldAlert,
+    Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -50,24 +53,33 @@ import {
     useInitiateFcyConversion,
     useFcyRfiCases,
     useSubmitRfiResponse,
+    useUploadFcyDocument,
 } from "@/lib/queries/fcy";
 import type {
     FcyAccountDto,
     FcyCurrency,
+    FcyDocumentPurpose,
+    FcyEmploymentStatus,
     FcyIdentityDocumentType,
+    FcySourceOfIncome,
+    RequestFcyAccountDto,
 } from "@/lib/types/api";
+
+/** Confirmed against Fincra's real docs: USD/GBP/CAD accept a passport only — EUR alone accepts the other document types. */
+const PASSPORT_ONLY_CURRENCIES: FcyCurrency[] = ["USD", "GBP", "CAD"];
 
 const CURRENCIES: { code: FcyCurrency; label: string; note?: string }[] = [
     { code: "USD", label: "USD", note: "Requires a passport — not testable in sandbox yet" },
     { code: "EUR", label: "EUR" },
-    { code: "GBP", label: "GBP", note: "Not testable in sandbox yet" },
-    { code: "CAD", label: "CAD", note: "Fully testable — collections can be simulated" },
+    { code: "GBP", label: "GBP", note: "Requires a passport — not testable in sandbox yet" },
+    { code: "CAD", label: "CAD", note: "Requires a passport — fully testable, collections can be simulated" },
 ];
 
-const DOCUMENT_TYPES: { value: FcyIdentityDocumentType; label: string }[] = [
+const ALL_DOCUMENT_TYPES: { value: FcyIdentityDocumentType; label: string }[] = [
     { value: "PASSPORT", label: "Passport" },
     { value: "NATIONAL_ID", label: "National ID" },
     { value: "DRIVERS_LICENSE", label: "Driver's licence" },
+    { value: "ID_CARD", label: "Identity card" },
 ];
 
 function copy(value: string, label: string) {
@@ -461,6 +473,146 @@ function SimulateCollection({ account }: { account: FcyAccountDto }) {
     );
 }
 
+const EMPLOYMENT_STATUSES: { value: FcyEmploymentStatus; label: string }[] = [
+    { value: "employed", label: "Employed" },
+    { value: "self_employed", label: "Self-employed" },
+    { value: "unemployed", label: "Unemployed" },
+    { value: "student", label: "Student" },
+    { value: "retired", label: "Retired" },
+    { value: "homemaker", label: "Homemaker" },
+    { value: "freelancer", label: "Freelancer" },
+    { value: "other", label: "Other" },
+];
+
+const SOURCES_OF_INCOME: { value: FcySourceOfIncome; label: string }[] = [
+    { value: "salary", label: "Salary" },
+    { value: "business_income", label: "Business income" },
+    { value: "investment", label: "Investment" },
+    { value: "gift", label: "Gift" },
+    { value: "inheritance", label: "Inheritance" },
+    { value: "real_estate", label: "Real estate" },
+    { value: "loan", label: "Loan" },
+    { value: "pension", label: "Pension" },
+    { value: "grant", label: "Grant" },
+    { value: "trust", label: "Trust" },
+    { value: "crypto", label: "Crypto" },
+    { value: "other", label: "Other" },
+];
+
+type FcyFormState = Omit<RequestFcyAccountDto, "currency">;
+
+function emptyFcyForm(): FcyFormState {
+    return {
+        identityDocumentType: "PASSPORT",
+        identityDocumentNumber: "",
+        identityDocumentFileId: "",
+        identityDocumentBackFileId: "",
+        identityDocumentIssuedCountryCode: "NG",
+        identityDocumentIssuedBy: "government",
+        identityDocumentIssuedDate: "",
+        identityDocumentExpirationDate: "",
+        birthDate: "",
+        nationality: "NG",
+        occupation: "",
+        employmentStatus: "employed",
+        sourceOfIncome: "salary",
+        accountDesignation: "Personal use",
+        taxCountry: "NG",
+        taxNumber: "",
+        incomeBandLower: "",
+        incomeBandUpper: "",
+        addressCountryOfResidence: "NG",
+        addressState: "",
+        addressCity: "",
+        addressStreet: "",
+        addressNumber: "",
+        addressZip: "",
+        monthlyTransactionCount: "",
+        monthlyTransactionVolume: "",
+        utilityBillFileId: "",
+        bankStatementFileId: "",
+    };
+}
+
+/**
+ * Uploads a document (PDF/JPEG/PNG, max 10MB) and hands the returned id
+ * back to the parent form — the parent never sees a URL, only the id (see
+ * RequestFcyAccountDto's own note on why: the backend resolves it to a
+ * fresh, short-lived signed URL right before submitting to Fincra).
+ */
+function DocumentUploadField({
+    label,
+    purpose,
+    fileId,
+    onUploaded,
+}: {
+    label: string;
+    purpose: FcyDocumentPurpose;
+    fileId: string;
+    onUploaded: (fileId: string) => void;
+}) {
+    const [filename, setFilename] = React.useState<string | null>(null);
+    const { mutate: upload, isPending } = useUploadFcyDocument();
+    const inputRef = React.useRef<HTMLInputElement>(null);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        upload(
+            { file, purpose },
+            {
+                onSuccess: (doc) => {
+                    setFilename(doc.originalFilename);
+                    onUploaded(doc.id);
+                    toast.success(`${label} uploaded`);
+                },
+                onError: (err) => {
+                    toast.error(err.message || `Could not upload ${label.toLowerCase()}.`);
+                },
+            },
+        );
+        // Allow re-selecting the same file (e.g. after an error) to retry.
+        e.target.value = "";
+    };
+
+    return (
+        <Field label={label} hint="PDF, JPEG or PNG — max 10MB">
+            <input
+                ref={inputRef}
+                type="file"
+                accept="application/pdf,image/jpeg,image/png"
+                className="hidden"
+                onChange={handleFileChange}
+            />
+            <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                disabled={isPending}
+                className="flex h-11 w-full items-center gap-2.5 rounded-sm border border-border bg-white px-3 text-sm text-ink transition-colors hover:border-violet-400 disabled:opacity-50"
+            >
+                {isPending ? (
+                    <>
+                        <Loader2 className="h-4 w-4 shrink-0 animate-spin text-violet-600" />
+                        <span className="text-muted">Uploading…</span>
+                    </>
+                ) : fileId && filename ? (
+                    <>
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600" />
+                        <span className="truncate font-medium text-ink">{filename}</span>
+                        <span className="ml-auto shrink-0 text-xs font-semibold text-violet-600">Replace</span>
+                    </>
+                ) : (
+                    <>
+                        <Upload className="h-4 w-4 shrink-0 text-muted" />
+                        <span className="text-muted">Choose a file to upload</span>
+                    </>
+                )}
+            </button>
+        </Field>
+    );
+}
+
 function RequestAccountForm({
     currency,
     previousDecline,
@@ -468,18 +620,58 @@ function RequestAccountForm({
     currency: FcyCurrency;
     previousDecline: FcyAccountDto | null;
 }) {
-    const defaultDocType: FcyIdentityDocumentType = currency === "USD" ? "PASSPORT" : "NATIONAL_ID";
-    const [docType, setDocType] = React.useState<FcyIdentityDocumentType>(defaultDocType);
-    const [docNumber, setDocNumber] = React.useState("");
+    const passportOnly = PASSPORT_ONLY_CURRENCIES.includes(currency);
+    const [form, setForm] = React.useState<FcyFormState>(() => ({
+        ...emptyFcyForm(),
+        identityDocumentType: passportOnly ? "PASSPORT" : "NATIONAL_ID",
+    }));
     const { mutate: requestAccount, isPending } = useRequestFcyAccount();
 
+    const update = <K extends keyof FcyFormState>(key: K, value: FcyFormState[K]) =>
+        setForm((f) => ({ ...f, [key]: value }));
+
+    const availableDocTypes = passportOnly
+        ? ALL_DOCUMENT_TYPES.filter((d) => d.value === "PASSPORT")
+        : ALL_DOCUMENT_TYPES;
+
+    const REQUIRED_FIELDS: { key: keyof FcyFormState; label: string }[] = [
+        { key: "identityDocumentNumber", label: "Document number" },
+        { key: "identityDocumentFileId", label: "Document scan" },
+        { key: "utilityBillFileId", label: "Utility bill" },
+        { key: "identityDocumentIssuedDate", label: "Document issue date" },
+        { key: "birthDate", label: "Date of birth" },
+        { key: "occupation", label: "Occupation" },
+        { key: "incomeBandLower", label: "Income band (lower)" },
+        { key: "incomeBandUpper", label: "Income band (upper)" },
+        { key: "addressState", label: "State" },
+        { key: "addressCity", label: "City" },
+        { key: "addressStreet", label: "Street" },
+        { key: "addressNumber", label: "House/building number" },
+        { key: "addressZip", label: "Postal/ZIP code" },
+        { key: "monthlyTransactionCount", label: "Expected monthly transaction count" },
+        { key: "monthlyTransactionVolume", label: "Expected monthly transaction volume" },
+    ];
+
     const handleSubmit = () => {
-        if (!docNumber.trim()) {
-            toast.error("Enter your identity document number.");
+        for (const field of REQUIRED_FIELDS) {
+            if (!String(form[field.key] ?? "").trim()) {
+                toast.error(`Enter ${field.label.toLowerCase()}.`);
+                return;
+            }
+        }
+        // Confirmed live 2026-08-29: Fincra needs a front+back pair for every
+        // document type except PASSPORT.
+        if (form.identityDocumentType !== "PASSPORT" && !form.identityDocumentBackFileId?.trim()) {
+            toast.error("Upload the back of the document.");
             return;
         }
+        if (form.taxCountry === "US" && !form.taxNumber?.trim()) {
+            toast.error("A US tax country requires a tax number.");
+            return;
+        }
+
         requestAccount(
-            { currency, identityDocumentType: docType, identityDocumentNumber: docNumber.trim() },
+            { currency, ...form },
             {
                 onSuccess: () => toast.success(`${currency} account requested — this updates automatically.`),
                 onError: (err) => toast.error(err.message || "Could not request this account."),
@@ -488,7 +680,7 @@ function RequestAccountForm({
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-5">
             {previousDecline ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 dark:border-red-900/30 dark:bg-red-900/10 p-4 flex items-start gap-3">
                     <AlertCircle className="h-4 w-4 shrink-0 text-red-600 dark:text-red-400 mt-0.5" />
@@ -501,28 +693,179 @@ function RequestAccountForm({
                 </div>
             ) : null}
 
-            <Field label="Identity document type">
-                <Select value={docType} onValueChange={(v) => setDocType(v as FcyIdentityDocumentType)}>
-                    <SelectTrigger>
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {DOCUMENT_TYPES.map((d) => (
-                            <SelectItem key={d.value} value={d.value}>
-                                {d.label}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </Field>
+            {/* ── Identity document ── */}
+            <div className="space-y-3">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted">Identity document</p>
 
-            {currency === "USD" && docType !== "PASSPORT" ? (
-                <p className="text-xs font-semibold text-amber-600">A USD account requires a passport specifically.</p>
-            ) : null}
+                <Field label="Document type">
+                    <Select
+                        value={form.identityDocumentType}
+                        onValueChange={(v) => update("identityDocumentType", v as FcyIdentityDocumentType)}
+                    >
+                        <SelectTrigger>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {availableDocTypes.map((d) => (
+                                <SelectItem key={d.value} value={d.value}>
+                                    {d.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </Field>
+                {passportOnly ? (
+                    <p className="text-xs font-semibold text-amber-600">A {currency} account requires a passport specifically.</p>
+                ) : null}
 
-            <Field label="Document number">
-                <Input value={docNumber} onChange={(e) => setDocNumber(e.target.value)} placeholder="e.g. A1234567" />
-            </Field>
+                <Field label="Document number">
+                    <Input value={form.identityDocumentNumber} onChange={(e) => update("identityDocumentNumber", e.target.value)} placeholder="e.g. A1234567" />
+                </Field>
+
+                <DocumentUploadField
+                    label={form.identityDocumentType === "PASSPORT" ? "Document scan" : "Document scan (front)"}
+                    purpose="IDENTITY_DOCUMENT"
+                    fileId={form.identityDocumentFileId}
+                    onUploaded={(id) => update("identityDocumentFileId", id)}
+                />
+
+                {form.identityDocumentType !== "PASSPORT" ? (
+                    <DocumentUploadField
+                        label="Document scan (back)"
+                        purpose="IDENTITY_DOCUMENT"
+                        fileId={form.identityDocumentBackFileId ?? ""}
+                        onUploaded={(id) => update("identityDocumentBackFileId", id)}
+                    />
+                ) : null}
+
+                <DocumentUploadField
+                    label="Utility bill"
+                    purpose="UTILITY_BILL"
+                    fileId={form.utilityBillFileId}
+                    onUploaded={(id) => update("utilityBillFileId", id)}
+                />
+
+                <div className="grid grid-cols-2 gap-3">
+                    <Field label="Issued country">
+                        <Input value={form.identityDocumentIssuedCountryCode} onChange={(e) => update("identityDocumentIssuedCountryCode", e.target.value.toUpperCase())} maxLength={2} placeholder="NG" />
+                    </Field>
+                    <Field label="Issued by">
+                        <Input value={form.identityDocumentIssuedBy} onChange={(e) => update("identityDocumentIssuedBy", e.target.value)} placeholder="government" />
+                    </Field>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                    <Field label="Issue date">
+                        <Input type="date" value={form.identityDocumentIssuedDate} onChange={(e) => update("identityDocumentIssuedDate", e.target.value)} />
+                    </Field>
+                    <Field label="Expiry date" hint={form.identityDocumentType === "NATIONAL_ID" ? "Optional" : undefined}>
+                        <Input type="date" value={form.identityDocumentExpirationDate} onChange={(e) => update("identityDocumentExpirationDate", e.target.value)} />
+                    </Field>
+                </div>
+            </div>
+
+            {/* ── Personal details ── */}
+            <div className="space-y-3">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted">Personal details</p>
+
+                <div className="grid grid-cols-2 gap-3">
+                    <Field label="Date of birth">
+                        <Input type="date" value={form.birthDate} onChange={(e) => update("birthDate", e.target.value)} />
+                    </Field>
+                    <Field label="Nationality">
+                        <Input value={form.nationality} onChange={(e) => update("nationality", e.target.value.toUpperCase())} maxLength={2} placeholder="NG" />
+                    </Field>
+                </div>
+
+                <Field label="Occupation">
+                    <Input value={form.occupation} onChange={(e) => update("occupation", e.target.value)} placeholder="e.g. Software Engineer" />
+                </Field>
+
+                <Field label="Employment status">
+                    <Select value={form.employmentStatus} onValueChange={(v) => update("employmentStatus", v as FcyEmploymentStatus)}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            {EMPLOYMENT_STATUSES.map((s) => (
+                                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </Field>
+
+                <Field label="Source of income">
+                    <Select value={form.sourceOfIncome} onValueChange={(v) => update("sourceOfIncome", v as FcySourceOfIncome)}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            {SOURCES_OF_INCOME.map((s) => (
+                                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </Field>
+
+                <Field label="Account designation">
+                    <Input value={form.accountDesignation} onChange={(e) => update("accountDesignation", e.target.value)} placeholder="Personal use" />
+                </Field>
+
+                <div className="grid grid-cols-2 gap-3">
+                    <Field label="Tax country">
+                        <Input value={form.taxCountry} onChange={(e) => update("taxCountry", e.target.value.toUpperCase())} maxLength={2} placeholder="NG" />
+                    </Field>
+                    <Field label="Tax number" hint={form.taxCountry === "US" ? "Required" : "Only if tax country is US"}>
+                        <Input value={form.taxNumber} onChange={(e) => update("taxNumber", e.target.value)} />
+                    </Field>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                    <Field label="Income band — lower">
+                        <Input type="number" value={form.incomeBandLower} onChange={(e) => update("incomeBandLower", e.target.value)} placeholder="1000" />
+                    </Field>
+                    <Field label="Income band — upper">
+                        <Input type="number" value={form.incomeBandUpper} onChange={(e) => update("incomeBandUpper", e.target.value)} placeholder="6460" />
+                    </Field>
+                </div>
+            </div>
+
+            {/* ── Address ── */}
+            <div className="space-y-3">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted">Residential address</p>
+
+                <div className="grid grid-cols-2 gap-3">
+                    <Field label="Country of residence">
+                        <Input value={form.addressCountryOfResidence} onChange={(e) => update("addressCountryOfResidence", e.target.value.toUpperCase())} maxLength={2} placeholder="NG" />
+                    </Field>
+                    <Field label="State">
+                        <Input value={form.addressState} onChange={(e) => update("addressState", e.target.value)} placeholder="Lagos" />
+                    </Field>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                    <Field label="City">
+                        <Input value={form.addressCity} onChange={(e) => update("addressCity", e.target.value)} />
+                    </Field>
+                    <Field label="Postal/ZIP code">
+                        <Input value={form.addressZip} onChange={(e) => update("addressZip", e.target.value)} />
+                    </Field>
+                </div>
+                <Field label="Street">
+                    <Input value={form.addressStreet} onChange={(e) => update("addressStreet", e.target.value)} />
+                </Field>
+                <Field label="House/building number">
+                    <Input value={form.addressNumber} onChange={(e) => update("addressNumber", e.target.value)} />
+                </Field>
+            </div>
+
+            {/* ── Expected usage ── */}
+            <div className="space-y-3">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted">Expected usage</p>
+                <div className="grid grid-cols-2 gap-3">
+                    <Field label="Monthly transaction count">
+                        <Input type="number" value={form.monthlyTransactionCount} onChange={(e) => update("monthlyTransactionCount", e.target.value)} placeholder="5" />
+                    </Field>
+                    <Field label={`Monthly volume (${currency})`}>
+                        <Input type="number" value={form.monthlyTransactionVolume} onChange={(e) => update("monthlyTransactionVolume", e.target.value)} placeholder="10000" />
+                    </Field>
+                </div>
+            </div>
 
             <Button fullWidth variant="primary" loading={isPending} onClick={handleSubmit}>
                 <Building2 className="mr-2 h-4 w-4" />

@@ -4,69 +4,48 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
     Layers,
-    ShoppingBag,
-    Music,
-    Play,
-    Gamepad2,
+    Gift,
     Tag,
     Receipt,
 } from "lucide-react";
 import { Button } from "@/components/shared/button";
+import { EmptyState } from "@/components/shared/empty-state";
 import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/format";
-import { useGiftCardEarnings, useGiftCardRates } from "@/lib/queries/gift-cards";
-
-// Dummy data
-const CATEGORIES = [
-    { id: "all", label: "All cards", icon: Layers, count: 4, active: true },
-    { id: "amazon", label: "Amazon", icon: ShoppingBag, count: 1 },
-    { id: "itunes", label: "iTunes", icon: Music, count: 1 },
-    { id: "google-play", label: "Google Play", icon: Play, count: 1 },
-    { id: "steam", label: "Steam", icon: Gamepad2, count: 1 },
-];
-
-const GIFT_CARDS = [
-    {
-        id: "amazon",
-        name: "Amazon",
-        desc: "USA · physical & e-code",
-        rate: "Up to 92%",
-        bgColor: "bg-[#1E293B]", // Slate 900
-        icon: ShoppingBag,
-    },
-    {
-        id: "itunes",
-        name: "iTunes",
-        desc: "USA · e-code only",
-        rate: "Up to 90%",
-        bgColor: "bg-[#A855F7]", // Purple 500
-        icon: Music,
-    },
-    {
-        id: "google-play",
-        name: "Google Play",
-        desc: "USA · e-code only",
-        rate: "Up to 90%",
-        bgColor: "bg-[#22C55E]", // Green 500
-        icon: Play,
-    },
-    {
-        id: "steam",
-        name: "Steam Wallet",
-        desc: "USA · e-code only",
-        rate: "Up to 88%",
-        bgColor: "bg-[#334155]", // Slate 700
-        icon: Gamepad2,
-    },
-];
+import { useGiftCardEarnings, useGiftCardCatalog } from "@/lib/queries/gift-cards";
 
 export default function GiftCardsPage() {
     const router = useRouter();
-    const [selectedCategory, setSelectedCategory] = React.useState("all");
+    const [selectedBrand, setSelectedBrand] = React.useState<string>("all");
 
-    // Real data off GET /giftcards/earnings and GET /giftcards/rates.
+    // Real data off GET /giftcards/earnings and GET /giftcards/catalog —
+    // no hardcoded brand list. Only status = active listings are ever
+    // returned by the catalog endpoint.
     const { data: earnings, isLoading: earningsLoading } = useGiftCardEarnings();
-    const { data: rates } = useGiftCardRates();
+    const { data: catalog, isLoading: catalogLoading } = useGiftCardCatalog();
+
+    const listings = catalog ?? [];
+
+    // Categories derived from whatever brands are actually live today —
+    // counts can never go stale the way a hardcoded array's counts could.
+    const categories = React.useMemo(() => {
+        const byBrand = new Map<string, number>();
+        for (const listing of listings) {
+            byBrand.set(listing.brandName, (byBrand.get(listing.brandName) ?? 0) + 1);
+        }
+        return [
+            { id: "all", label: "All cards", count: listings.length },
+            ...Array.from(byBrand.entries()).map(([brandName, count]) => ({
+                id: brandName,
+                label: brandName,
+                count,
+            })),
+        ];
+    }, [listings]);
+
+    const visibleListings = listings.filter(
+        (listing) => selectedBrand === "all" || listing.brandName === selectedBrand,
+    );
 
     return (
         <div className="">
@@ -93,32 +72,38 @@ export default function GiftCardsPage() {
                 {/* Left Sidebar */}
                 <div className="space-y-6">
                     {/* Navigation Menu */}
-                    <nav className="rounded-3xl border border-border bg-white p-3 shadow-sm">
-                        <ul className="space-y-1">
-                            {CATEGORIES.map((cat) => (
-                                <li key={cat.id}>
-                                    <button
-                                        type="button"
-                                        onClick={() => setSelectedCategory(cat.id)}
-                                        className={cn(
-                                            "flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-colors",
-                                            selectedCategory === cat.id
-                                                ? "bg-violet-100 text-violet-700"
-                                                : "text-body hover:bg-violet-50 hover:text-violet-900"
-                                        )}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <cat.icon className={cn("h-4 w-4", cat.active ? "text-violet-700" : "text-muted")} />
-                                            {cat.label}
-                                        </div>
-                                        <span className={cn("text-xs font-bold", cat.active ? "text-violet-700" : "text-muted")}>
-                                            {cat.count}
-                                        </span>
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </nav>
+                    {categories.length > 1 && (
+                        <nav className="rounded-3xl border border-border bg-white p-3 shadow-sm">
+                            <ul className="space-y-1">
+                                {categories.map((cat) => (
+                                    <li key={cat.id}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedBrand(cat.id)}
+                                            className={cn(
+                                                "flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-colors",
+                                                selectedBrand === cat.id
+                                                    ? "bg-violet-100 text-violet-700"
+                                                    : "text-body hover:bg-violet-50 hover:text-violet-900"
+                                            )}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                {cat.id === "all" ? (
+                                                    <Layers className={cn("h-4 w-4", selectedBrand === cat.id ? "text-violet-700" : "text-muted")} />
+                                                ) : (
+                                                    <Gift className={cn("h-4 w-4", selectedBrand === cat.id ? "text-violet-700" : "text-muted")} />
+                                                )}
+                                                {cat.label}
+                                            </div>
+                                            <span className={cn("text-xs font-bold", selectedBrand === cat.id ? "text-violet-700" : "text-muted")}>
+                                                {cat.count}
+                                            </span>
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </nav>
+                    )}
 
                     {/* Stats Card */}
                     <div className="rounded-3xl border border-border bg-white p-5 shadow-sm">
@@ -151,42 +136,56 @@ export default function GiftCardsPage() {
                                     Rates refresh every hour — the rate you see is the rate you get
                                 </p>
                             </div>
-                            <Button type="button" onClick={() => document.getElementById("gift-card-options")?.scrollIntoView({ behavior: "smooth" })} className="shrink-0 bg-violet-700 text-white font-bold rounded-xl px-5 py-2.5 shadow-sm hover:bg-violet-600">
-                                <Tag className="mr-2 h-4 w-4" />
-                                Sell a card
-                            </Button>
+                            {visibleListings.length > 0 && (
+                                <Button type="button" onClick={() => document.getElementById("gift-card-options")?.scrollIntoView({ behavior: "smooth" })} className="shrink-0 bg-violet-700 text-white font-bold rounded-xl px-5 py-2.5 shadow-sm hover:bg-violet-600">
+                                    <Tag className="mr-2 h-4 w-4" />
+                                    Sell a card
+                                </Button>
+                            )}
                         </div>
 
-                        {/* Cards Grid */}
-                        <div id="gift-card-options" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                            {GIFT_CARDS.map((card) => {
-                                if (selectedCategory !== "all" && selectedCategory !== card.id) return null;
-                                const cardRate = rates?.[card.id];
-                                return (
-                                <div key={card.id} className="overflow-hidden rounded-2xl border border-border shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md">
-                                    <div className={cn("flex h-[120px] items-center justify-center text-white", card.bgColor)}>
-                                        <card.icon className="h-10 w-10 opacity-90" />
-                                    </div>
-                                    <div className="p-4 bg-white">
-                                        <h3 className="font-extrabold text-ink text-[15px]">{card.name}</h3>
-                                        <p className="text-[11px] font-medium text-muted mt-0.5">{card.desc}</p>
-                                        <div className="mt-4 inline-flex items-center rounded-lg">
-                                            <div className="text-right">
+                        {catalogLoading ? (
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                                {[...Array(4)].map((_, i) => (
+                                    <div key={i} className="h-[220px] animate-pulse rounded-2xl bg-gray-100" />
+                                ))}
+                            </div>
+                        ) : visibleListings.length === 0 ? (
+                            <EmptyState
+                                icon={Gift}
+                                heading="No gift cards available right now"
+                                description="Check back soon — we're always adding more brands to sell."
+                            />
+                        ) : (
+                            <div id="gift-card-options" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                                {visibleListings.map((listing) => (
+                                    <div key={listing.id} className="overflow-hidden rounded-2xl border border-border shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md">
+                                        <div className="flex h-[120px] items-center justify-center bg-gray-50">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                src={listing.cardImageUrl}
+                                                alt={listing.brandName}
+                                                className="h-full w-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="p-4 bg-white">
+                                            <h3 className="font-extrabold text-ink text-[15px]">{listing.brandName}</h3>
+                                            <p className="text-[11px] font-medium text-muted mt-0.5">
+                                                {listing.countries.join(", ")}
+                                            </p>
+                                            <div className="mt-4 inline-flex items-center rounded-lg">
                                                 <span className="text-xs font-bold text-ink">
-                                                    {cardRate !== undefined
-                                                        ? <>{formatNaira(cardRate)}/USD</>
-                                                        : "Checking rate…"}
+                                                    {formatNaira(listing.rate)}/USD
                                                 </span>
                                             </div>
+                                            <Button type="button" variant="quiet" onClick={() => router.push(`/gift-cards/sell/${listing.slug}`)} className="mt-4 w-full bg-violet-50 text-violet-700 font-bold hover:bg-violet-100 rounded-xl h-10">
+                                                Sell this card
+                                            </Button>
                                         </div>
-                                        <Button type="button" variant="quiet" onClick={() => router.push(`/gift-cards/sell/${card.id}`)} className="mt-4 w-full bg-violet-50 text-violet-700 font-bold hover:bg-violet-100 rounded-xl h-10">
-                                            Sell this card
-                                        </Button>
                                     </div>
-                                </div>
-                                );
-                            })}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Instructions Section */}

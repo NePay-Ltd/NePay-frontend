@@ -4,10 +4,6 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
     ArrowLeft,
-    ShoppingCart,
-    Smartphone,
-    Tag,
-    Gamepad2,
     Loader2,
     Camera,
 } from "lucide-react";
@@ -15,8 +11,7 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/format";
-import { brandSlugToCode } from "@/lib/gift-card-brands";
-import { useGiftCardRates, useGiftCardQuote, useSubmitGiftCard } from "@/lib/queries/gift-cards";
+import { useGiftCardCatalog, useGiftCardQuote, useSubmitGiftCard } from "@/lib/queries/gift-cards";
 
 import { Panel, PanelBody } from "@/components/shared/panel";
 import { Button } from "@/components/shared/button";
@@ -25,23 +20,23 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
 
-const BRAND_META: Record<string, any> = {
-    amazon: { label: "Amazon", icon: ShoppingCart, color: "text-orange-500", bg: "bg-orange-50" },
-    itunes: { label: "iTunes / Apple", icon: Smartphone, color: "text-ink", bg: "bg-gray-100" },
-    "google-play": { label: "Google Play", icon: Tag, color: "text-blue-500", bg: "bg-blue-50" },
-    steam: { label: "Steam", icon: Gamepad2, color: "text-indigo-900", bg: "bg-indigo-50" },
-};
-
+/**
+ * `params.brand` is actually the catalog listing's `slug` (route folder
+ * kept its original name to avoid a churn-only rename) — the brand/rate/
+ * image shown here always comes from the live GET /giftcards/catalog
+ * entry, never a hardcoded map, so a listing admin adds shows up here
+ * immediately with no code change.
+ */
 export default function SellGiftCardPage({ params }: { params: { brand: string } }) {
     const router = useRouter();
-    const brandId = params.brand;
-    const meta = BRAND_META[brandId];
+    const slug = params.brand;
 
-    const { data: rates = {} } = useGiftCardRates();
+    const { data: catalog, isLoading: catalogLoading } = useGiftCardCatalog();
+    const listing = catalog?.find((item) => item.slug === slug);
     const quoteMutation = useGiftCardQuote();
     const submitMutation = useSubmitGiftCard();
 
-    const rate = rates[brandId] || 0;
+    const rate = listing ? Number(listing.rate) : 0;
 
     const [faceValueUsd, setFaceValueUsd] = React.useState<string>("");
     const [submissionType, setSubmissionType] = React.useState<"PHYSICAL" | "ECODE">("PHYSICAL");
@@ -122,8 +117,10 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
         setTxState("processing");
         setModalOpen(true);
 
+        if (!listing) return;
+
         quoteMutation.mutate(
-            { cardBrand: brandSlugToCode(brandId), faceValueUsd: parsedValue.toFixed(2), quantity: 1 },
+            { cardBrand: listing.brandName, faceValueUsd: parsedValue.toFixed(2), quantity: 1 },
             {
                 onSuccess: (data: { quoteId: string }) => {
                     setCurrentQuoteId(data.quoteId);
@@ -164,7 +161,15 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
         });
     };
 
-    if (!meta) {
+    if (catalogLoading) {
+        return (
+            <div className="mx-auto max-w-xl space-y-6">
+                <div className="h-[400px] animate-pulse rounded-3xl bg-gray-100" />
+            </div>
+        );
+    }
+
+    if (!listing) {
         return (
             <div className="flex flex-col items-center justify-center py-20">
                 <p className="text-muted">Brand not found.</p>
@@ -174,8 +179,6 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
             </div>
         );
     }
-
-    const BrandIcon = meta.icon;
 
     return (
         <div className="mx-auto max-w-xl space-y-6">
@@ -194,12 +197,13 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
                     {/* Brand Header */}
                     <div className="flex items-center justify-between border-b border-border bg-gray-50/50 p-6">
                         <div className="flex items-center gap-4">
-                            <div className={cn("flex h-12 w-12 items-center justify-center rounded-lg", meta.bg)}>
-                                <BrandIcon className={cn("h-6 w-6", meta.color)} />
+                            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-white">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={listing.cardImageUrl} alt={listing.brandName} className="h-full w-full object-cover" />
                             </div>
                             <div>
-                                <h2 className="font-semibold text-ink">{meta.label}</h2>
-                                <p className="text-xs text-muted">Current Rate</p>
+                                <h2 className="font-semibold text-ink">{listing.brandName}</h2>
+                                <p className="text-xs text-muted">{listing.countries.join(", ")} · Current Rate</p>
                             </div>
                         </div>
                         <div className="text-right">

@@ -313,6 +313,29 @@ export interface GiftCardOrderResponseDto {
     createdAt: string;
 }
 
+/**
+ * A single entry in the admin-managed gift card display catalog — off
+ * GET /giftcards/catalog (public, no auth). This is the storefront's only
+ * source of which brands are sellable; `cardType` is included for
+ * completeness but must never be rendered on the storefront card face.
+ */
+export interface GiftCardListingDto {
+    id: string;
+    brandName: string;
+    slug: string;
+    cardImageUrl: string;
+    cardType: "PHYSICAL" | "ECODE" | "BOTH";
+    countries: string[];
+    denominations: number[] | null;
+    rate: string;
+    rateCurrency: string;
+    description: string;
+    redemptionNotes: string | null;
+    restrictions: string | null;
+    status: "draft" | "active" | "inactive";
+    sortOrder: number;
+}
+
 // ─── FCY (Foreign Currency) Accounts — Fincra-backed ────────────────────────
 // USD/EUR/GBP/CAD virtual accounts, collections, RFI and NGN conversion.
 // Only EUR/CAD are testable against Fincra's sandbox today (USD/GBP have no
@@ -324,7 +347,8 @@ export type FcyAccountStatus = "REQUESTED" | "APPROVED" | "ISSUED" | "DECLINED" 
 export type FcyCollectionStatus = "PENDING" | "SUCCESSFUL" | "FAILED" | "AWAITING_INFO";
 export type FcyConversionStatus = "INITIATED" | "SUCCESSFUL" | "FAILED";
 export type FcyRfiStatus = "OPEN" | "RESPONSE_SUBMITTED" | "RESOLVED" | "EXPIRED";
-export type FcyIdentityDocumentType = "PASSPORT" | "NATIONAL_ID" | "DRIVERS_LICENSE";
+/** USD/GBP/CAD accept PASSPORT only — confirmed against Fincra's real docs; EUR alone accepts the other three. */
+export type FcyIdentityDocumentType = "PASSPORT" | "NATIONAL_ID" | "DRIVERS_LICENSE" | "ID_CARD";
 
 export interface FcyAccountDto {
     id: string;
@@ -344,11 +368,106 @@ export interface FcyAccountDto {
     createdAt: string;
 }
 
-/** Body of POST /fcy/accounts. USD requires PASSPORT specifically — enforced by the backend, surfaced here so the form can hint it upfront. */
+export type FcyEmploymentStatus =
+    | "employed"
+    | "self_employed"
+    | "unemployed"
+    | "student"
+    | "retired"
+    | "homemaker"
+    | "freelancer"
+    | "other";
+
+export type FcySourceOfIncome =
+    | "salary"
+    | "business_income"
+    | "investment"
+    | "gift"
+    | "inheritance"
+    | "real_estate"
+    | "loan"
+    | "pension"
+    | "grant"
+    | "trust"
+    | "crypto"
+    | "other";
+
+export type FcyDocumentPurpose = "IDENTITY_DOCUMENT" | "UTILITY_BILL" | "BANK_STATEMENT";
+
+/** Response of POST /fcy/documents — never a URL, see RequestFcyAccountDto's own note on why. */
+export interface FcyDocumentDto {
+    id: string;
+    purpose: FcyDocumentPurpose;
+    originalFilename: string;
+    createdAt: string;
+}
+
+/**
+ * Body of POST /fcy/accounts — the full KYCInformation block Fincra's real
+ * individual-account API requires (confirmed against Fincra's docs
+ * 2026-08-29, after a real sandbox VALIDATION_FAILED traced to a much
+ * narrower original DTO). USD/GBP/CAD accept `passport` ONLY — enforced by
+ * the backend, surfaced here so the form can hint it upfront; EUR alone
+ * accepts the other document types.
+ *
+ * `identityDocumentFileId`/`utilityBillFileId` reference a document already
+ * uploaded via POST /fcy/documents — never a raw URL. Confirmed live
+ * 2026-08-29: Fincra's server actually fetches whatever URL it's given
+ * ("Unable to retrieve one or more documents from url." on a dead one,
+ * even Fincra's own docs example value), so the backend resolves each id to
+ * a fresh, short-lived signed URL right before submitting — see
+ * FcyDocumentService.getSignedUrl on the backend.
+ *
+ * `identityDocumentBackFileId` is required for every document type EXCEPT
+ * PASSPORT — confirmed live 2026-08-29: Fincra needs a front+back pair
+ * (`meansOfId`) for nationalId/driverLicense/idCard, one file only for a
+ * passport.
+ */
 export interface RequestFcyAccountDto {
     currency: FcyCurrency;
+
     identityDocumentType: FcyIdentityDocumentType;
     identityDocumentNumber: string;
+    /** Front of the document — id from POST /fcy/documents (purpose: IDENTITY_DOCUMENT). */
+    identityDocumentFileId: string;
+    /** Back of the document — required unless identityDocumentType is PASSPORT. */
+    identityDocumentBackFileId?: string;
+    /** ISO 3166-1 alpha-2, e.g. "NG". */
+    identityDocumentIssuedCountryCode: string;
+    identityDocumentIssuedBy: string;
+    /** ISO date (yyyy-MM-dd). */
+    identityDocumentIssuedDate: string;
+    /** Optional only when identityDocumentType is NATIONAL_ID. */
+    identityDocumentExpirationDate?: string;
+
+    /** ISO date (yyyy-MM-dd). */
+    birthDate: string;
+    /** ISO 3166-1 alpha-2, e.g. "NG". */
+    nationality: string;
+    occupation: string;
+    employmentStatus: FcyEmploymentStatus;
+    sourceOfIncome: FcySourceOfIncome;
+    accountDesignation: string;
+    /** ISO 3166-1 alpha-2. taxNumber is only required when this is "US". */
+    taxCountry: string;
+    taxNumber?: string;
+    incomeBandLower: string;
+    incomeBandUpper: string;
+
+    addressCountryOfResidence: string;
+    addressState: string;
+    addressCity: string;
+    addressStreet: string;
+    addressNumber: string;
+    addressZip: string;
+
+    monthlyTransactionCount: string;
+    monthlyTransactionVolume: string;
+
+    /** Confirmed REQUIRED live 2026-08-29 ("utilityBill is required"). id from POST /fcy/documents (purpose: UTILITY_BILL). */
+    utilityBillFileId: string;
+    /** Still unconfirmed whether Fincra requires this — utilityBill alone was sufficient in a real sandbox call. id from POST /fcy/documents (purpose: BANK_STATEMENT). */
+    bankStatementFileId?: string;
 }
 
 export interface FcyCollectionDto {
