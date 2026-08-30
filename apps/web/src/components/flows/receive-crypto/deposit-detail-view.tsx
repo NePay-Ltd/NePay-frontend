@@ -188,9 +188,11 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                             ) : depositData?.address ? (
                                 <>
                                     <AddressQrCode address={depositData.address} size={190} />
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-1 rounded-full shadow-md border border-gray-100 flex items-center justify-center font-bold text-violet-700 h-10 w-10">
-                                        {selectedCurrency?.network?.[0]?.toUpperCase() ?? "?"}
-                                    </div>
+                                    {selectedCurrency && (
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-1 rounded-full shadow-md border border-gray-100 flex items-center justify-center h-10 w-10">
+                                            <CurrencyAvatar currency={selectedCurrency} className="h-full w-full text-sm" />
+                                        </div>
+                                    )}
                                 </>
                             ) : null}
                         </div>
