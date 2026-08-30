@@ -57,6 +57,9 @@ import { Label } from "@/components/ui/label";
 const editProfileSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
+    phoneNumber: z
+        .string()
+        .regex(/^\+?[1-9]\d{7,14}$/, "Enter a valid phone number, e.g. +2348012345678"),
 });
 
 type EditProfileFormValues = z.infer<typeof editProfileSchema>;
@@ -85,12 +88,17 @@ export default function ProfilePage() {
         defaultValues: {
             firstName: "",
             lastName: "",
+            phoneNumber: "",
         },
     });
 
     React.useEffect(() => {
         if (profile) {
-            form.reset({ firstName: profile.firstName, lastName: profile.lastName });
+            form.reset({
+                firstName: profile.firstName,
+                lastName: profile.lastName,
+                phoneNumber: profile.phoneNumber ?? "",
+            });
         }
     }, [profile, form]);
 
@@ -320,6 +328,17 @@ export default function ProfilePage() {
                             />
                             {form.formState.errors.lastName && (
                                 <p className="text-xs text-red-500">{form.formState.errors.lastName.message}</p>
+                            )}
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-phone-number">Phone Number</Label>
+                            <Input
+                                id="edit-phone-number"
+                                placeholder="+2348012345678"
+                                {...form.register("phoneNumber")}
+                            />
+                            {form.formState.errors.phoneNumber && (
+                                <p className="text-xs text-red-500">{form.formState.errors.phoneNumber.message}</p>
                             )}
                         </div>
 

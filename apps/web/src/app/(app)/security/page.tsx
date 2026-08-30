@@ -174,22 +174,25 @@ export default function SecurityPage() {
                                 }
                                 className="px-5"
                             />
-                            <RowItem
-                                icon={Key}
-                                title="Set transaction PIN"
-                                subtitle="Create your 4-digit payment PIN"
-                                trailing={<ChevronRight className="h-5 w-5 text-muted" />}
-                                onClick={() => router.push("/security/change-pin?mode=setup")}
-                                className="cursor-pointer px-5 hover:bg-gray-50"
-                            />
-                            <RowItem
-                                icon={Key}
-                                title="Change transaction PIN"
-                                subtitle="Update your existing 4-digit PIN"
-                                trailing={<ChevronRight className="h-5 w-5 text-muted" />}
-                                onClick={() => router.push("/security/change-pin?mode=change")}
-                                className="cursor-pointer px-5 hover:bg-gray-50"
-                            />
+                            {settings.pinSet ? (
+                                <RowItem
+                                    icon={Key}
+                                    title="Change transaction PIN"
+                                    subtitle="Update your existing 4-digit PIN"
+                                    trailing={<ChevronRight className="h-5 w-5 text-muted" />}
+                                    onClick={() => router.push("/security/change-pin?mode=change")}
+                                    className="cursor-pointer px-5 hover:bg-gray-50"
+                                />
+                            ) : (
+                                <RowItem
+                                    icon={Key}
+                                    title="Set transaction PIN"
+                                    subtitle="Create your 4-digit payment PIN"
+                                    trailing={<ChevronRight className="h-5 w-5 text-muted" />}
+                                    onClick={() => router.push("/security/change-pin?mode=setup")}
+                                    className="cursor-pointer px-5 hover:bg-gray-50"
+                                />
+                            )}
                             <RowItem
                                 icon={Lock}
                                 title="Change Password"

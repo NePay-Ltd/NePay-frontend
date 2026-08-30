@@ -105,10 +105,15 @@ export function useDisable2FA() {
 }
 
 export function useChangePin() {
+    const queryClient = useQueryClient();
+
     return useMutation<void, Error, { currentPin?: string; newPin: string }>({
         mutationFn: async (payload) => {
             const requestBody = payload.currentPin ? payload : { newPin: payload.newPin };
             await apiClient.post("/security/change-pin", requestBody);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: securityKeys.settings() });
         },
     });
 }
@@ -124,12 +129,40 @@ export function useChangePassword() {
     });
 }
 
+/**
+ * Polls so a login from another device shows up without a manual refresh —
+ * the closest thing to "live" this read-only history can offer, since the
+ * backend writes each row at login time rather than pushing updates.
+ */
 export function useLoginActivity() {
     return useQuery<LoginActivity[]>({
         queryKey: securityKeys.loginActivity(),
         queryFn: async () => {
             const res = await apiClient.get<ApiResponse<{ items: LoginActivity[] }>>("/security/login-activity");
             return res.data.data.items;
+        },
+        refetchInterval: 20_000,
+        refetchOnWindowFocus: true,
+    });
+}
+
+/**
+ * Revokes one device session. The account only ever has one live session — a
+ * later login always replaces the one before it — so this can only actually
+ * end the entry flagged `isCurrentSession`; the backend reports
+ * `revoked: false` for anything older without erroring, since that session
+ * already ended on its own.
+ */
+export function useRevokeLoginActivity() {
+    const queryClient = useQueryClient();
+
+    return useMutation<{ revoked: boolean }, Error, string>({
+        mutationFn: async (id) => {
+            const res = await apiClient.delete<ApiResponse<{ revoked: boolean }>>(`/security/devices/${id}`);
+            return res.data.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: securityKeys.loginActivity() });
         },
     });
 }
