@@ -108,25 +108,6 @@ export default function AddMoneyPage() {
         toast.success("Account number copied!");
     };
 
-    const handleDebitCard = () => {
-        if (!isReady) {
-            toast.error("Payment gateway is still loading.");
-            return;
-        }
-        // Demo: default to a fixed amount for the prototype
-        initializePayment({
-            amount: 50000,
-            email: "demo@nepay.com", // Normally from user context
-            onSuccess: (reference) => {
-                toast.success(`Payment successful! Ref: ${reference}`);
-                router.push("/wallet");
-            },
-            onClose: () => {
-                toast.info("Payment cancelled.");
-            }
-        });
-    };
-
     return (
         <div className="mx-auto max-w-2xl space-y-6">
             {/* ── Page Header ────────────────────────────────────────────── */}
@@ -265,17 +246,6 @@ export default function AddMoneyPage() {
                             subtitle="USD / EUR / GBP / CAD — convert to Naira anytime"
                             showChevron
                             onClick={() => router.push("/foreign-accounts")}
-                            className="rounded-lg px-3 hover:bg-violet-050"
-                        />
-
-                        {/* Option 3: Debit Card */}
-                        <RowItem
-                            icon={CreditCard}
-                            iconTint="violet"
-                            title="Debit Card"
-                            subtitle="Fund instantly with any Nigerian card"
-                            showChevron
-                            onClick={handleDebitCard}
                             className="rounded-lg px-3 hover:bg-violet-050"
                         />
 

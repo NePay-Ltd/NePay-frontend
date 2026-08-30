@@ -110,19 +110,19 @@ export function HeroCard({
                     <div className="mt-7 grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:gap-4">
                         <Button
                             size="md"
-                            onClick={() => router.push("/add-money")}
+                            onClick={() => router.push("/withdraw")}
                             className="bg-white text-violet-700 hover:bg-violet-50 font-bold shadow-sm rounded-xl h-12 px-2 text-[13px] sm:text-sm sm:px-6 sm:w-auto active:scale-95 transition-transform min-w-0"
                         >
-                            <Plus className="mr-1.5 h-4 w-4 shrink-0" />
-                            Add money
+                            <ArrowLeftRight className="mr-1.5 h-4 w-4 shrink-0" />
+                            Transfer
                         </Button>
                         <Button
                             size="md"
-                            onClick={() => router.push("/withdraw")}
+                            onClick={() => router.push("/add-money")}
                             className="border border-white/20 bg-white/10 text-white backdrop-blur-md hover:bg-white/20 transition-all font-bold rounded-xl h-12 px-2 text-[13px] sm:text-sm sm:px-6 sm:w-auto active:scale-95 min-w-0"
                         >
-                            <Building2 className="mr-1.5 h-4 w-4 shrink-0" />
-                            Withdraw
+                            <Plus className="mr-1.5 h-4 w-4 shrink-0" />
+                            Add money
                         </Button>
                     </div>
                 </div>
