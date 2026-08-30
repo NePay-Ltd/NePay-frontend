@@ -52,9 +52,11 @@ export interface UserResponseDto {
     firstName: string;
     lastName: string;
     email: string;
+    username: string;
     phoneNumber: string;
-    role: "customer"; // strictly customer for this app
+    role: string;
     preferredCurrency: Currency;
+    referralCode: string;
     /** True once this account has an APPROVED BVN verification. */
     kycVerified: boolean;
     isActive: boolean;

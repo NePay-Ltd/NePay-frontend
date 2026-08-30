@@ -55,8 +55,10 @@ export const registerStepTwoSchema = z
     .object({
         username: z
             .string()
-            .min(3, "Username must be at least 3 characters")
-            .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+            .trim()
+            .min(3, "Username must be 3-20 characters: letters, numbers and underscores only")
+            .max(20, "Username must be 3-20 characters: letters, numbers and underscores only")
+            .regex(/^[a-zA-Z0-9_]+$/, "Username must be 3-20 characters: letters, numbers and underscores only"),
         email: emailSchema,
         password: passwordSchema,
         confirmPassword: z.string().min(1, "Confirm your password"),

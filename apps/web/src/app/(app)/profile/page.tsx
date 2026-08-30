@@ -147,16 +147,24 @@ export default function ProfilePage() {
                             )}
                         </div>
 
-                        <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="mt-6"
-                            onClick={() => setEditModalOpen(true)}
-                        >
-                            Edit Profile
-                        </Button>
+                        <div className="mt-6 flex flex-col items-center gap-2">
+                            <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => setEditModalOpen(true)}
+                            >
+                                Edit Profile
+                            </Button>
+                            <p className="text-center text-xs text-muted">
+                                Username is fixed at signup and cannot be edited from here.
+                            </p>
+                        </div>
 
-                        <div className="mt-8 grid w-full grid-cols-2 gap-4 rounded-xl border border-border bg-white p-4 text-sm sm:grid-cols-3">
+                        <div className="mt-8 grid w-full grid-cols-2 gap-4 rounded-xl border border-border bg-white p-4 text-sm sm:grid-cols-4">
+                            <div className="flex flex-col gap-1">
+                                <span className="text-xs text-muted">Username</span>
+                                <span className="truncate font-medium text-ink" title={profile.username}>@{profile.username}</span>
+                            </div>
                             <div className="flex flex-col gap-1">
                                 <span className="text-xs text-muted">Email</span>
                                 <span className="truncate font-medium text-ink" title={profile.email}>{profile.email}</span>

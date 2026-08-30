@@ -124,6 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     firstName: values.firstName,
                     lastName: values.lastName,
                     email: values.email,
+                    username: values.username,
                     phoneNumber: values.phone,
                     password: values.password,
                     // Best-effort fraud signal — see FraudDetectionService's

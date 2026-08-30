@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, AtSign, UserPlus } from "lucide-react";
 import Link from "next/link";
 
+import { apiClient } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
 import { registerStepTwoSchema, type RegisterStepTwoValues } from "@/lib/schemas/auth";
 import { Button } from "@/components/shared/button";
@@ -35,6 +36,8 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
         register,
         handleSubmit,
         watch,
+        setError,
+        clearErrors,
         formState: { errors },
     } = useForm<RegisterStepTwoValues>({
         resolver: zodResolver(registerStepTwoSchema),
@@ -48,7 +51,44 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
     });
 
     const passwordValue = watch("password") || "";
+    const usernameValue = watch("username") || "";
     const strength = calculateStrength(passwordValue);
+
+    React.useEffect(() => {
+        const username = usernameValue.trim();
+        if (!username || username.length < 3 || username.length > 20 || !/^[a-zA-Z0-9_]+$/.test(username)) {
+            clearErrors("username");
+            return;
+        }
+
+        let cancelled = false;
+        const timeout = setTimeout(async () => {
+            try {
+                const res = await apiClient.post<{ success: boolean; data: { username: string; available: boolean } }>(
+                    "/auth/check-username",
+                    { username },
+                );
+
+                if (!cancelled && !res.data.data.available) {
+                    setError("username", {
+                        type: "manual",
+                        message: "This username is already taken",
+                    });
+                } else if (!cancelled) {
+                    clearErrors("username");
+                }
+            } catch {
+                if (!cancelled) {
+                    clearErrors("username");
+                }
+            }
+        }, 500);
+
+        return () => {
+            cancelled = true;
+            clearTimeout(timeout);
+        };
+    }, [usernameValue, clearErrors, setError]);
 
     return (
         <form id="step-two-form" onSubmit={handleSubmit(onSubmitFinal)} className="space-y-6">
@@ -61,6 +101,12 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
                     aria-invalid={!!errors.username}
                     className="pr-10"
                 />
+                <p className="mt-2 text-xs text-muted">
+                    Must be 3–20 letters, numbers, or underscores. It is set once at signup and cannot be changed later.
+                </p>
+                {usernameValue.trim().length >= 3 && !errors.username && (
+                    <p className="mt-1 text-xs text-emerald-600">Availability is checked live before submit.</p>
+                )}
             </Field>
 
             <Field label="Email Address" htmlFor="reg-email" error={errors.email?.message} trailing={<AtSign className="h-4 w-4" aria-hidden />}>
