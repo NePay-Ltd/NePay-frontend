@@ -8,7 +8,7 @@ import { Mail, ArrowLeft, Send, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { forgotPasswordSchema, type ForgotPasswordValues } from "@/lib/schemas/auth";
-import { mockForgotPassword } from "@/lib/mock-api";
+import { apiClient } from "@/lib/api-client";
 import { Button } from "@/components/shared/button";
 import { Field } from "@/components/shared/field";
 import { Input } from "@/components/ui/input";
@@ -31,7 +31,7 @@ export default function ForgotPasswordPage() {
 
     const onSubmit = async (values: ForgotPasswordValues) => {
         try {
-            await mockForgotPassword(values.identifier);
+            await apiClient.post("/auth/forgot-password", { identifier: values.identifier });
             setIdentifier(values.identifier);
             setSubmitted(true);
         } catch (err) {
@@ -135,13 +135,7 @@ export default function ForgotPasswordPage() {
                 Back to sign in
             </Link>
 
-            {process.env.NEXT_PUBLIC_PROTOTYPE_MODE === "true" && (
-                <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-center text-xs text-amber-700">
-                    Mock mode — use{" "}
-                    <code className="font-mono">notfound@example.com</code> to test the
-                    &ldquo;account not found&rdquo; error.
-                </p>
-            )}
+
         </div>
     );
 }

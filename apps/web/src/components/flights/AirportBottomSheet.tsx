@@ -3,7 +3,7 @@
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Search, MapPin, Check, History } from "lucide-react";
-import { AIRPORTS, type Airport } from "@/lib/mock-flights";
+import { AIRPORTS, type Airport } from "@/lib/queries/flights";
 
 interface AirportBottomSheetProps {
     open: boolean;

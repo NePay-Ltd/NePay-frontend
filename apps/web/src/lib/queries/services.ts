@@ -12,10 +12,17 @@ import {
     UtilityVariationDto,
     ApiResponse,
 } from "@/lib/types/api";
-import {
-    mockVerifySmartcard,
-    type SavedBiller,
-} from "@/lib/mock-services";
+export interface SavedBiller {
+    id: string;
+    billerName: string;
+    identifier: string;
+    provider: string;
+    category: string;
+    label: string | null;
+    lastPaidAmount: number;
+    serviceType: "airtime" | "data" | "electricity" | "cable-tv" | "education";
+    iconUrl?: string;
+}
 
 export const servicesKeys = {
     all: ["services"] as const,
@@ -149,7 +156,12 @@ export function useVerifyMeter() {
 
 export function useVerifySmartcard() {
     return useMutation<{ customerName: string; package: string }, Error, { provider: string; smartcardNumber: string }>({
-        mutationFn: ({ provider, smartcardNumber }) => mockVerifySmartcard(provider, smartcardNumber),
+        mutationFn: async ({ provider, smartcardNumber }) => {
+            const res = await apiClient.get<ApiResponse<{ customerName: string; package: string }>>("/utilities/verify-smartcard", {
+                params: { provider, smartcardNumber },
+            });
+            return res.data.data;
+        }
     });
 }
 
@@ -231,22 +243,10 @@ export function useServiceTransactionStatus(transactionId: string | null) {
     return useQuery<UtilityPurchaseResponseDto>({
         queryKey: servicesKeys.status(transactionId!),
         queryFn: async () => {
-            // Ideally GET /utilities/purchase/:id, simulating success since there is no polling endpoint defined
-            return {
-                id: transactionId!,
-                category: "AIRTIME",
-                provider: "MTN",
-                identifier: "",
-                variationCode: null,
-                amount: "0",
-                status: "COMPLETED",
-                providerReference: null,
-                failureReason: null,
-                token: null,
-                createdAt: new Date().toISOString(),
-            };
+            const res = await apiClient.get<ApiResponse<UtilityPurchaseResponseDto>>(`/utilities/purchase/${transactionId}`);
+            return res.data.data;
         },
         enabled: !!transactionId,
-        refetchInterval: false,
+        refetchInterval: 3000,
     });
 }

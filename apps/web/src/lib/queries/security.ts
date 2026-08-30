@@ -5,13 +5,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { ApiResponse } from "@/lib/types/api";
-import {
-    mockGetSecuritySettings,
-    mockToggleBiometrics,
-    mockGetLoginActivity,
-    type SecuritySettings,
-    type LoginActivity,
-} from "@/lib/mock-security";
+export interface SecuritySettings {
+    twoFactorEnabled: boolean;
+    biometricsEnabled: boolean;
+    pinSet: boolean;
+}
+
+export interface LoginActivity {
+    id: string;
+    device: string;
+    location: string;
+    ipAddress: string;
+    timestamp: string;
+    isCurrentSession: boolean;
+}
 
 export const securityKeys = {
     all: ["security"] as const,
@@ -19,11 +26,13 @@ export const securityKeys = {
     loginActivity: () => [...securityKeys.all, "loginActivity"] as const,
 };
 
-// Security settings and login activity remain mocked as they are not explicitly provided in the API docs.
 export function useSecuritySettings() {
     return useQuery<SecuritySettings>({
         queryKey: securityKeys.settings(),
-        queryFn: mockGetSecuritySettings,
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<SecuritySettings>>("/security/settings");
+            return res.data.data;
+        },
     });
 }
 

@@ -16,7 +16,15 @@ import {
 
 import { useUiStore } from "@/lib/stores/ui-store";
 import { SIDEBAR_GROUPS } from "@/lib/navigation";
-import { fetchSearch, type SearchHit } from "@/lib/mock-overview";
+import { apiClient } from "@/lib/api-client";
+import { ApiResponse } from "@/lib/types/api";
+
+export interface SearchHit {
+    id: string;
+    label: string;
+    meta?: string;
+    href: string;
+}
 import {
     CommandDialog,
     CommandEmpty,
@@ -89,11 +97,16 @@ export function CommandPalette() {
     React.useEffect(() => {
         let cancelled = false;
         const run = async () => {
-            if (!open) return;
+            if (!open || !debouncedQuery.trim()) {
+                setResults(EMPTY_RESULTS);
+                return;
+            }
             setIsSearching(true);
             try {
-                const data = await fetchSearch(debouncedQuery);
-                if (!cancelled) setResults(data);
+                const res = await apiClient.get<ApiResponse<SearchState>>(`/search?q=${encodeURIComponent(debouncedQuery)}`);
+                if (!cancelled) setResults(res.data.data);
+            } catch (err) {
+                if (!cancelled) setResults(EMPTY_RESULTS);
             } finally {
                 if (!cancelled) setIsSearching(false);
             }

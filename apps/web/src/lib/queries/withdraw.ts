@@ -5,14 +5,22 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { ResolveAccountResponseDto, WithdrawalResponseDto, ApiResponse } from "@/lib/types/api";
-import {
-    mockGetBankList,
-    mockGetSavedBankAccounts,
-    mockSaveBankAccount,
-    mockDeleteBankAccount,
-    type Bank,
-    type SavedBankAccount,
-} from "@/lib/mock-withdraw";
+export interface Bank {
+    id: number;
+    code: string;
+    name: string;
+    logoUrl?: string;
+}
+
+export interface SavedBankAccount {
+    id: string;
+    accountName: string;
+    accountNumber: string;
+    bankName: string;
+    bankCode: string;
+    iconUrl?: string;
+    lastUsedAt?: string;
+}
 
 export const withdrawKeys = {
     all: ["withdraw"] as const,
@@ -21,11 +29,13 @@ export const withdrawKeys = {
     status: (id: string) => [...withdrawKeys.all, "status", id] as const,
 };
 
-// Bank lists and saved accounts are kept mocked as they are not provided in the API docs yet.
 export function useBankList() {
     return useQuery<Bank[]>({
         queryKey: withdrawKeys.bankList(),
-        queryFn: mockGetBankList,
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<Bank[]>>("/withdrawals/banks");
+            return res.data.data;
+        },
         staleTime: Infinity,
     });
 }
@@ -33,7 +43,10 @@ export function useBankList() {
 export function useSavedBankAccounts() {
     return useQuery<SavedBankAccount[]>({
         queryKey: withdrawKeys.savedAccounts(),
-        queryFn: mockGetSavedBankAccounts,
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<SavedBankAccount[]>>("/withdrawals/accounts");
+            return res.data.data;
+        },
     });
 }
 
@@ -51,7 +64,10 @@ export function useResolveBankAccount() {
 export function useSaveBankAccount() {
     const queryClient = useQueryClient();
     return useMutation<SavedBankAccount, Error, { accountNumber: string; bankCode: string; accountName: string }>({
-        mutationFn: ({ accountNumber, bankCode, accountName }) => mockSaveBankAccount(accountNumber, bankCode, accountName),
+        mutationFn: async ({ accountNumber, bankCode, accountName }) => {
+            const res = await apiClient.post<ApiResponse<SavedBankAccount>>("/withdrawals/accounts", { accountNumber, bankCode, accountName });
+            return res.data.data;
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: withdrawKeys.savedAccounts() });
         },
@@ -61,7 +77,9 @@ export function useSaveBankAccount() {
 export function useDeleteBankAccount() {
     const queryClient = useQueryClient();
     return useMutation<void, Error, string>({
-        mutationFn: mockDeleteBankAccount,
+        mutationFn: async (accountId) => {
+            await apiClient.delete(`/withdrawals/accounts/${accountId}`);
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: withdrawKeys.savedAccounts() });
         },
@@ -92,23 +110,10 @@ export function useWithdrawalStatus(withdrawalId: string | null) {
     return useQuery<WithdrawalResponseDto>({
         queryKey: withdrawKeys.status(withdrawalId!),
         queryFn: async () => {
-            // Ideally this would be GET /withdrawals/:id, but API docs don't define a polling endpoint for withdrawals.
-            // In a real implementation we would fetch the specific withdrawal transaction.
-            // Since it's missing, we return a processing state until the network officially completes.
-            return {
-                id: withdrawalId!,
-                status: "PROCESSING",
-                amount: "0",
-                bankCode: "",
-                accountNumber: "",
-                accountName: "",
-                providerReference: "",
-                failureReason: null,
-                completedAt: new Date().toISOString(),
-                createdAt: new Date().toISOString(),
-            };
+            const res = await apiClient.get<ApiResponse<WithdrawalResponseDto>>(`/withdrawals/${withdrawalId}`);
+            return res.data.data;
         },
         enabled: !!withdrawalId,
-        refetchInterval: false,
+        refetchInterval: 3000,
     });
 }

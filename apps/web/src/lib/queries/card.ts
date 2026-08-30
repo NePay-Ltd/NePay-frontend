@@ -3,10 +3,8 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-    mockGetWaitlistStatus,
-    mockJoinWaitlist,
-} from "@/lib/mock-card";
+import { apiClient } from "@/lib/api-client";
+import { ApiResponse } from "@/lib/types/api";
 
 export const cardKeys = {
     all: ["card"] as const,
@@ -16,7 +14,10 @@ export const cardKeys = {
 export function useWaitlistStatus() {
     return useQuery<boolean>({
         queryKey: cardKeys.waitlist(),
-        queryFn: mockGetWaitlistStatus,
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<{ inWaitlist: boolean }>>("/card/waitlist");
+            return res.data.data.inWaitlist;
+        },
     });
 }
 
@@ -24,7 +25,9 @@ export function useJoinWaitlist() {
     const queryClient = useQueryClient();
 
     return useMutation<void, Error, void>({
-        mutationFn: mockJoinWaitlist,
+        mutationFn: async () => {
+            await apiClient.post("/card/waitlist");
+        },
         onSuccess: () => {
             // Update UI to reflect the joined status immediately
             queryClient.setQueryData(cardKeys.waitlist(), true);

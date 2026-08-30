@@ -9,7 +9,7 @@ import { Eye, EyeOff, KeyRound, CheckCircle2, AlertTriangle } from "lucide-react
 import { toast } from "sonner";
 
 import { resetPasswordSchema, type ResetPasswordValues } from "@/lib/schemas/auth";
-import { mockResetPassword } from "@/lib/mock-api";
+import { apiClient } from "@/lib/api-client";
 import { Button } from "@/components/shared/button";
 import { Field } from "@/components/shared/field";
 import { Input } from "@/components/ui/input";
@@ -40,7 +40,7 @@ export default function ResetPasswordPage() {
 
     const onSubmit = async (values: ResetPasswordValues) => {
         try {
-            await mockResetPassword(token, values.password);
+            await apiClient.post("/auth/reset-password", { token, newPassword: values.password });
             toast.success("Password updated successfully!");
             setDone(true);
         } catch (err) {
@@ -222,12 +222,6 @@ export default function ResetPasswordPage() {
             >
                 Back to sign in
             </Link>
-
-            {process.env.NEXT_PUBLIC_PROTOTYPE_MODE === "true" && (
-                <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-center text-xs text-amber-700">
-                    Mock mode — add <code className="font-mono">?token=expired</code> to the URL to test the expired-token state.
-                </p>
-            )}
         </div>
     );
 }

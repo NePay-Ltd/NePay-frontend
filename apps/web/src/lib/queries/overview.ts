@@ -5,8 +5,32 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { WalletBalanceDto, ApiPaginated, LedgerEntryDto, ApiResponse } from "@/lib/types/api";
-import { type OverviewSummary } from "@/lib/mock-overview";
+import { type TxCategory } from "@/components/shared/tx-icon";
 import { mapLedgerToTransaction } from "./transactions";
+
+export interface OverviewSummary {
+    balance: number;
+    balanceUsd: number | null;
+    preferredCurrency: string;
+    preferredCurrencyEquivalent: number | null;
+    sparkline: number[];
+    kpi: {
+        moneyIn: number;
+        moneyOut: number;
+        netChange: number;
+        pending: number;
+    };
+    recentTransactions: Transaction[];
+}
+
+export interface Transaction {
+    id: string;
+    label: string;
+    meta: string;
+    amount: number;
+    category: TxCategory;
+    status: "success" | "pending" | "failed";
+}
 
 export const overviewKeys = {
     all: ["overview"] as const,
@@ -46,19 +70,12 @@ export function useOverviewSummary() {
                 // `!= null` (loose) catches both null and undefined — same reasoning.
                 preferredCurrencyEquivalent:
                     preferredCurrencyEquivalent != null ? parseFloat(preferredCurrencyEquivalent) : null,
-                // STILL HARDCODED — unlike balance/balanceUsd above, these are not
-                // wired to anything real. `sparkline` is six literal figures plus
-                // today's real balance tacked on the end; `moneyIn`/`moneyOut`/
-                // `netChange` are flat constants, not derived from this wallet's
-                // actual ledger history at all. No backend analytics endpoint
-                // exists yet to compute either for real — flagging rather than
-                // quietly leaving it, since this sits in the same hook the
-                // balanceUsd fix lives in.
-                sparkline: [340_000, 355_200, 348_900, 362_100, 370_500, 378_200, balance],
+                // Backend currently lacks analytics for sparkline and these specific KPIs
+                sparkline: [],
                 kpi: {
-                    moneyIn: 142_500,
-                    moneyOut: 97_800,
-                    netChange: 44_700,
+                    moneyIn: 0,
+                    moneyOut: 0,
+                    netChange: 0,
                     pending: parseFloat(balanceRes.data.data.pendingBalance) || 0,
                 },
                 recentTransactions: txRes.data.data.items.map(mapLedgerToTransaction),

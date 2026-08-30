@@ -23,7 +23,7 @@ import {
     useBookFlight,
     useFlightBookingStatus 
 } from "@/lib/queries/flights";
-import { AIRPORTS, type FlightOffer, type FlightSearchRequest } from "@/lib/mock-flights";
+import { AIRPORTS, type FlightOffer, type FlightSearchRequest } from "@/lib/queries/flights";
 
 import { Panel, PanelBody } from "@/components/shared/panel";
 import { Button } from "@/components/shared/button";

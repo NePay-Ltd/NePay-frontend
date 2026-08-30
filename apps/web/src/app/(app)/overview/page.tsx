@@ -22,7 +22,7 @@ import {
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-context";
-import { useOverviewSummary } from "@/lib/queries/overview";
+import { useOverviewSummary, type Transaction } from "@/lib/queries/overview";
 import { formatNaira } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
@@ -194,7 +194,7 @@ export default function OverviewPage() {
                                 </div>
                             ) : summary?.recentTransactions?.length ? (
                                 <div className="space-y-1 mt-2">
-                                    {summary.recentTransactions.slice(0, 5).map((tx) => (
+                                    {summary.recentTransactions.slice(0, 5).map((tx: Transaction) => (
                                         <TransactionRow key={tx.id} tx={tx} variant="compact" onViewReceipt={handleViewReceipt} />
                                     ))}
                                 </div>

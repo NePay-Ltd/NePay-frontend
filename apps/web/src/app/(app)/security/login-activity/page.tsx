@@ -6,7 +6,7 @@ import { formatDateTime } from "@/lib/date";
 import { ChevronLeft, Monitor, Smartphone, Globe } from "lucide-react";
 
 import { useLoginActivity } from "@/lib/queries/security";
-import type { LoginActivity } from "@/lib/mock-security";
+import type { LoginActivity } from "@/lib/queries/security";
 
 import { Button } from "@/components/shared/button";
 import { Panel, PanelBody } from "@/components/shared/panel";
