@@ -41,6 +41,8 @@ export default function RegisterPage() {
                 firstName: stepOneData.firstName,
                 lastName: stepOneData.lastName,
                 phone: formattedPhone,
+                otpVerified: stepOneData.otpVerified,
+                username: stepTwoData.username,
                 email: stepTwoData.email,
                 password: stepTwoData.password,
             });

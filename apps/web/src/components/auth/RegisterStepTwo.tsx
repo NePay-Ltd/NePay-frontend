@@ -6,10 +6,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, AtSign, UserPlus } from "lucide-react";
 import Link from "next/link";
 
+import { cn } from "@/lib/cn";
 import { registerStepTwoSchema, type RegisterStepTwoValues } from "@/lib/schemas/auth";
 import { Button } from "@/components/shared/button";
 import { Field } from "@/components/shared/field";
 import { Input } from "@/components/ui/input";
+
+function calculateStrength(password: string): number {
+    let strength = 0;
+    if (password.length > 0) strength += 1;
+    if (password.length >= 8) strength += 1;
+    if (/[A-Z]/.test(password) && /[a-z]/.test(password)) strength += 1;
+    if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) strength += 1;
+    return strength;
+}
 
 interface RegisterStepTwoProps {
     isSubmitting: boolean;
@@ -29,35 +39,30 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
     } = useForm<RegisterStepTwoValues>({
         resolver: zodResolver(registerStepTwoSchema),
         defaultValues: {
+            username: "",
             email: "",
             password: "",
             confirmPassword: "",
-            acceptTerms: false,
+            acceptTerms: true,
         },
     });
 
-    const email = watch("email");
-    const password = watch("password");
-
-    const hasLength = password.length >= 6;
-    const hasNumber = /\d/.test(password);
-    const hasUpper = /[A-Z]/.test(password);
-    const hasSpecial = /[^A-Za-z0-9]/.test(password);
-
-    let strengthScore = 0;
-    if (password.length > 0) {
-        if (hasLength) strengthScore += 1;
-        if (hasNumber) strengthScore += 1;
-        if (hasUpper) strengthScore += 1;
-        if (hasSpecial) strengthScore += 1;
-    }
-
-    const strengthLabels = ["Weak", "Weak", "Fair", "Good", "Strong"];
-    const strengthColors = ["bg-red-500", "bg-red-500", "bg-amber-500", "bg-blue-500", "bg-green-500"];
-    const strengthColorText = ["text-red-500", "text-red-500", "text-amber-500", "text-blue-500", "text-green-500"];
+    const passwordValue = watch("password") || "";
+    const strength = calculateStrength(passwordValue);
 
     return (
-        <form id="register-step-two" onSubmit={handleSubmit(onSubmitFinal)} className="space-y-4" noValidate>
+        <form id="step-two-form" onSubmit={handleSubmit(onSubmitFinal)} className="space-y-6">
+            <Field label="Username" htmlFor="reg-username" error={errors.username?.message} trailing={<UserPlus className="h-4 w-4" aria-hidden />}>
+                <Input
+                    id="reg-username"
+                    placeholder="e.g. okafor99"
+                    autoComplete="username"
+                    {...register("username")}
+                    aria-invalid={!!errors.username}
+                    className="pr-10"
+                />
+            </Field>
+
             <Field label="Email Address" htmlFor="reg-email" error={errors.email?.message} trailing={<AtSign className="h-4 w-4" aria-hidden />}>
                 <Input
                     id="reg-email"
@@ -89,40 +94,21 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
                 <Input
                     id="reg-password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Minimum 6 characters"
+                    placeholder="Minimum 8 characters"
                     autoComplete="new-password"
                     {...register("password")}
                     aria-invalid={!!errors.password}
                     className="pr-10"
                 />
-            </Field>
-
-            {/* Password strength hints */}
-            {password.length > 0 && (
-                <div className="space-y-2 px-1">
-                    <div className="flex gap-1 h-1.5 w-full">
-                        {[1, 2, 3, 4].map((level) => (
-                            <div
-                                key={level}
-                                className={`h-full flex-1 rounded-full transition-colors ${strengthScore >= level ? strengthColors[strengthScore] : "bg-border"}`}
-                            />
-                        ))}
-                    </div>
-                    <div className="flex justify-between text-[11px] mb-2 uppercase tracking-widest">
-                        <span className={`font-bold ${strengthScore > 0 ? strengthColorText[strengthScore] : 'text-muted'}`}>
-                            {strengthLabels[strengthScore]}
-                        </span>
-                    </div>
-                    <div className="flex flex-col gap-1.5 text-xs">
-                        <span className={hasLength ? "text-green-600 font-bold" : "text-muted"}>
-                            {hasLength ? "✓" : "○"} At least 6 characters
-                        </span>
-                        <span className={hasNumber ? "text-green-600 font-bold" : "text-muted"}>
-                            {hasNumber ? "✓" : "○"} Contains a number
-                        </span>
-                    </div>
+                
+                {/* Strength Indicator */}
+                <div className="mt-2 flex h-1 w-full gap-1">
+                    <div className={cn("h-full flex-1 rounded-full transition-colors", strength >= 1 ? "bg-red-500" : "bg-gray-200")} />
+                    <div className={cn("h-full flex-1 rounded-full transition-colors", strength >= 2 ? "bg-amber-500" : "bg-gray-200")} />
+                    <div className={cn("h-full flex-1 rounded-full transition-colors", strength >= 3 ? "bg-green-500" : "bg-gray-200")} />
+                    <div className={cn("h-full flex-1 rounded-full transition-colors", strength >= 4 ? "bg-green-600" : "bg-gray-200")} />
                 </div>
-            )}
+            </Field>
 
             <Field
                 label="Confirm Password"

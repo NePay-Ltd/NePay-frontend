@@ -36,7 +36,7 @@ export function RegisterStepOne({ defaultValues, onSuccess }: RegisterStepOnePro
             firstName: "",
             lastName: "",
             phone: "",
-            otpVerified: false,
+            otpVerified: true, // TEMPORARILY TRUE TO SKIP OTP
         },
     });
 
@@ -98,10 +98,10 @@ export function RegisterStepOne({ defaultValues, onSuccess }: RegisterStepOnePro
     };
 
     const onSubmit = (values: RegisterStepOneValues) => {
-        if (!values.otpVerified) {
-            toast.error("Please verify your phone number to continue.");
-            return;
-        }
+        // if (!values.otpVerified) {
+        //     toast.error("Please verify your phone number to continue.");
+        //     return;
+        // }
         onSuccess(values);
     };
 
@@ -142,6 +142,7 @@ export function RegisterStepOne({ defaultValues, onSuccess }: RegisterStepOnePro
                 />
             </Field>
 
+            {/* OTP TEMPORARILY DISABLED 
             {!otpVerified && (
                 <div className="flex items-center gap-3 mt-2">
                     <Button
@@ -156,8 +157,9 @@ export function RegisterStepOne({ defaultValues, onSuccess }: RegisterStepOnePro
                     </Button>
                 </div>
             )}
+            */}
 
-            {/* OTP Input UI */}
+            {/* OTP Input UI (TEMPORARILY DISABLED) 
             {otpSent && !otpVerified && (
                 <div className="rounded-lg border border-border p-4 bg-gray-50 mt-4 space-y-3 animate-in fade-in slide-in-from-top-2">
                     <label htmlFor="reg-otp" className="block text-sm font-medium text-ink">
@@ -186,13 +188,16 @@ export function RegisterStepOne({ defaultValues, onSuccess }: RegisterStepOnePro
                     </div>
                 </div>
             )}
+            */}
 
+            {/* OTP SUCCESS (TEMPORARILY DISABLED)
             {otpVerified && (
                 <div className="rounded-lg border border-green-500/20 bg-green-500/10 px-3 py-2 mt-4 text-green-700 text-sm font-medium flex items-center gap-2 animate-in fade-in">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-white text-xs">✓</span>
                     Phone number verified
                 </div>
             )}
+            */}
 
             <input type="hidden" {...register("otpVerified")} />
             {errors.otpVerified && (
@@ -204,7 +209,7 @@ export function RegisterStepOne({ defaultValues, onSuccess }: RegisterStepOnePro
                 variant="primary"
                 size="lg"
                 fullWidth
-                disabled={!otpVerified}
+                // disabled={!otpVerified}
                 className="mt-6"
             >
                 Next Step
