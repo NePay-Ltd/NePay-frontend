@@ -43,11 +43,16 @@ const attributionCodeSchema = z
     .refine((v) => v.length === 0 || (v.length >= 4 && v.length <= 20), "Code must be 4-20 characters")
     .optional();
 
-export const registerSchema = z
+export const registerStepOneSchema = z.object({
+    firstName: z.string().min(1, "First name is required").max(80, "First name is too long"),
+    lastName: z.string().min(1, "Last name is required").max(80, "Last name is too long"),
+    phone: nigerianPhoneSchema,
+    otpVerified: z.boolean().refine((v) => v === true, "You must verify your phone number"),
+});
+export type RegisterStepOneValues = z.infer<typeof registerStepOneSchema>;
+
+export const registerStepTwoSchema = z
     .object({
-        firstName: z.string().min(1, "First name is required").max(80, "First name is too long"),
-        lastName: z.string().min(1, "Last name is required").max(80, "Last name is too long"),
-        phone: nigerianPhoneSchema,
         email: emailSchema,
         password: passwordSchema,
         confirmPassword: z.string().min(1, "Confirm your password"),
@@ -63,6 +68,9 @@ export const registerSchema = z
         message: "Passwords do not match",
         path: ["confirmPassword"],
     });
+export type RegisterStepTwoValues = z.infer<typeof registerStepTwoSchema>;
+
+export const registerSchema = registerStepOneSchema.and(registerStepTwoSchema);
 export type RegisterValues = z.infer<typeof registerSchema>;
 
 // ─── Forgot Password ──────────────────────────────────────────────────

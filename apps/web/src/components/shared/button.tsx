@@ -18,9 +18,9 @@ const buttonVariants = cva(
                 primary:
                     "bg-brand-gradient text-white shadow-sm hover:brightness-110 active:brightness-95",
                 quiet:
-                    "bg-white border border-border text-ink hover:bg-violet-050 active:bg-violet-100",
+                    "bg-white border border-border text-ink hover:bg-violet-050 dark:hover:bg-gray-100 active:bg-violet-100 dark:active:bg-gray-100/80",
                 ghost:
-                    "bg-transparent text-ink hover:bg-violet-100 active:bg-violet-100/70",
+                    "bg-transparent text-ink hover:bg-violet-100 dark:hover:bg-gray-100 active:bg-violet-100/70 dark:active:bg-gray-100/80",
                 danger:
                     "bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 active:bg-red-500/25",
             },
