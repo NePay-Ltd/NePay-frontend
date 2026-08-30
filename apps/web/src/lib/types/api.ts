@@ -173,7 +173,7 @@ export interface CryptoCurrencyDto {
     iconUrl: string | null;
     requiresExtraId: boolean; // true for memo/tag-based coins (XRP, XLM, ...)
     recommended: boolean; // true for exactly one network per coin group — the lowest-fee/fastest one, among curated variants only
-    curated: boolean; // true when name/iconUrl/requiresExtraId are real, reviewed metadata rather than a generic fallback (raw ticker, no icon)
+    curated: boolean; // true when name/requiresExtraId are real, reviewed metadata rather than a generic fallback (raw ticker). iconUrl is derived for every coin regardless of curated.
 }
 
 export interface CryptoPricesDto {

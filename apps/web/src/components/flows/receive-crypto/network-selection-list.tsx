@@ -3,7 +3,7 @@
 import * as React from "react";
 import { ArrowLeft, ChevronRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { CoinGroup } from "./shared";
+import { CoinGroup, CurrencyAvatar } from "./shared";
 
 interface NetworkSelectionListProps {
     coinGroup: CoinGroup | null;
@@ -28,12 +28,13 @@ export function NetworkSelectionList({ coinGroup, onSelectNetwork, onBack, isMob
         <div className={cn("mx-auto w-full", isMobile ? "" : "flex flex-col h-full")}>
             {/* Header */}
             <div className={cn("flex items-center gap-4 mb-8", !isMobile && "px-6 pt-6")}>
-                <button 
+                <button
                     onClick={onBack}
                     className="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-white/5 border border-border text-ink hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
                 >
                     <ArrowLeft className="h-5 w-5" />
                 </button>
+                <CurrencyAvatar currency={coinGroup.representative} className="h-10 w-10 text-base shadow-sm shrink-0" />
                 <div>
                     <h1 className={cn("font-black text-ink tracking-tight", isMobile ? "text-2xl" : "text-xl")}>Receive {coinName}</h1>
                     <p className="text-sm font-medium text-muted mt-1">Choose the network to deposit on</p>

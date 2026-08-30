@@ -152,15 +152,20 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                 <div className={cn("flex items-center justify-between mb-4 shrink-0", !isMobile && "px-6 pt-6")}>
                     <div className="flex items-center gap-4">
                         {isMobile && (
-                            <button 
+                            <button
                                 onClick={onBack}
                                 className="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-white/5 border border-border text-ink hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
                             >
                                 <ArrowLeft className="h-5 w-5" />
                             </button>
                         )}
+                        {selectedCurrency && (
+                            <CurrencyAvatar currency={selectedCurrency} className="h-10 w-10 text-base shadow-sm shrink-0" />
+                        )}
                         <div>
-                            <h1 className={cn("font-black text-ink tracking-tight", isMobile ? "text-2xl" : "text-xl")}>Deposit</h1>
+                            <h1 className={cn("font-black text-ink tracking-tight", isMobile ? "text-2xl" : "text-xl")}>
+                                Deposit {selectedCurrency?.name ?? selectedCurrency?.coin ?? ""}
+                            </h1>
                             <p className="text-sm font-medium text-muted mt-0.5">Scan or copy address below</p>
                         </div>
                     </div>
