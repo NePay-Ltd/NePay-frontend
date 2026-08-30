@@ -66,10 +66,8 @@ export default function ElectricityPage() {
     const [pinModalOpen, setPinModalOpen] = React.useState(false);
     const [txState, setTxState] = React.useState<TransactionState>("pin");
     const [txId, setTxId] = React.useState<string | null>(null);
-    // The real purchase response — its `token` is what the receipt renders,
-    // never a client-generated placeholder. Captured separately from
-    // `txStatus` below, since that hook is only a status-polling stand-in
-    // and doesn't carry category-specific fields.
+    // The provider token is returned by the purchase endpoint and refreshed
+    // from the persisted purchase while an asynchronous payment resolves.
     const [purchaseToken, setPurchaseToken] = React.useState<string | null>(null);
     const [successOpen, setSuccessOpen] = React.useState(false);
 
@@ -77,6 +75,7 @@ export default function ElectricityPage() {
 
     React.useEffect(() => {
         if (!txStatus) return;
+        if (txStatus.token) setPurchaseToken(txStatus.token);
         if (txStatus.status === "COMPLETED") {
             if (saveBeneficiary) {
                 saveBeneficiaryMutation.mutate({
@@ -140,8 +139,22 @@ export default function ElectricityPage() {
             { disco: providerId, meterNumber: meter, meterType, verificationToken, amountNgn: amount, pin },
             {
                 onSuccess: (res) => {
-                    setTxId(res.id);
                     setPurchaseToken(res.token);
+                    if (res.status === "COMPLETED") {
+                        if (saveBeneficiary) {
+                            saveBeneficiaryMutation.mutate({
+                                category: "ELECTRICITY",
+                                provider: providerId,
+                                identifier: meter,
+                                label: `${activeProvider.label} ${meter}`,
+                                amount: amount.toString(),
+                            });
+                        }
+                        setPinModalOpen(false);
+                        setSuccessOpen(true);
+                        return;
+                    }
+                    setTxId(res.id);
                 },
                 onError: (err: any) => {
                     toast.error(err.response?.data?.message || "Payment failed");
@@ -156,14 +169,6 @@ export default function ElectricityPage() {
 
     return (
         <>
-
-                    <div className="flex items-center justify-between rounded-xl border border-border bg-white p-4">
-                        <div>
-                            <p className="text-sm font-bold text-ink">Save as beneficiary</p>
-                            <p className="text-xs text-muted">Save this meter for future payments</p>
-                        </div>
-                        <Switch checked={saveBeneficiary} onCheckedChange={setSaveBeneficiary} />
-                    </div>
             <div className="mx-auto max-w-xl space-y-8 pb-32">
                 {/* Header */}
                 <div className="flex items-center gap-3 px-2 sm:px-0">
@@ -231,6 +236,14 @@ export default function ElectricityPage() {
                                 onSelect={(id) => setMeter(id)}
                             />
                         )}
+
+                        <div className="flex items-center justify-between rounded-xl border border-border bg-white p-4">
+                            <div>
+                                <p className="text-sm font-bold text-ink">Save as beneficiary</p>
+                                <p className="text-xs text-muted">Save this meter for future payments</p>
+                            </div>
+                            <Switch checked={saveBeneficiary} onCheckedChange={setSaveBeneficiary} />
+                        </div>
                     </div>
 
                     {/* Amount Calculator (Only show if verified) */}

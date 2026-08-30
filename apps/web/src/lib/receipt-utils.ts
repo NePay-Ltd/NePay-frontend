@@ -11,6 +11,7 @@ export interface ReceiptData {
     direction: string;
     currency: string;
     meta: string;
+    utilityToken?: string;
 }
 
 /**
@@ -31,6 +32,7 @@ Description: ${receipt.label}
 Amount: ${amountStr}
 Direction: ${receipt.direction === "CREDIT" ? "Received" : "Sent"}
 Status: ${receipt.status.toUpperCase()}
+${receipt.utilityToken ? `Electricity Token: ${receipt.utilityToken}` : ""}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Powered by NePay
@@ -202,6 +204,7 @@ async function generateReceiptHTML(receipt: ReceiptData): Promise<string> {
                 <span class="detail-label">Currency</span>
                 <span class="detail-value">${receipt.currency}</span>
             </div>
+            ${receipt.utilityToken ? `<div class="detail-row"><span class="detail-label">Electricity Token</span><span class="detail-value" style="font-family: monospace; letter-spacing: 1px;">${receipt.utilityToken}</span></div>` : ''}
         </div>
 
         <div class="footer">

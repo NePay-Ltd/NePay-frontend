@@ -243,10 +243,10 @@ export function useServiceTransactionStatus(transactionId: string | null) {
     return useQuery<UtilityPurchaseResponseDto>({
         queryKey: servicesKeys.status(transactionId!),
         queryFn: async () => {
-            const res = await apiClient.get<ApiResponse<UtilityPurchaseResponseDto>>(`/utilities/purchase/${transactionId}`);
+            const res = await apiClient.get<ApiResponse<UtilityPurchaseResponseDto>>(`/utilities/purchases/${transactionId}`);
             return res.data.data;
         },
         enabled: !!transactionId,
-        refetchInterval: 3000,
+        refetchInterval: (query) => query.state.data?.status === "PROCESSING" ? 3000 : false,
     });
 }

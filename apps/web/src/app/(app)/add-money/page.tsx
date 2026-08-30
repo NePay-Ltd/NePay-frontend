@@ -10,7 +10,8 @@ import {
     Copy,
     AlertCircle,
     Loader2,
-    FlaskConical
+    FlaskConical,
+    Globe
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -255,6 +256,17 @@ export default function AddMoneyPage() {
                                     </div>
                                 )}
                         </div>
+
+                        {/* Option 2b: Foreign Currency Account */}
+                        <RowItem
+                            icon={Globe}
+                            iconTint="green"
+                            title="Foreign Currency Account"
+                            subtitle="USD / EUR / GBP / CAD — convert to Naira anytime"
+                            showChevron
+                            onClick={() => router.push("/foreign-accounts")}
+                            className="rounded-lg px-3 hover:bg-violet-050"
+                        />
 
                         {/* Option 3: Debit Card */}
                         <RowItem

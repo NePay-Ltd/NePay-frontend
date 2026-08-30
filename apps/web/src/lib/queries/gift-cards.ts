@@ -5,20 +5,17 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { ApiPaginated, ApiResponse } from "@/lib/types/api";
-import type { GiftCardOrderResponseDto, GiftCardQuoteResponseDto, GiftCardSubmissionType } from "@/lib/types/api";
-import { GIFT_CARD_BRAND_CODES } from "@/lib/gift-card-brands";
+import type { GiftCardListingDto, GiftCardOrderResponseDto, GiftCardQuoteResponseDto, GiftCardSubmissionType } from "@/lib/types/api";
 
 export interface GiftCardEarnings {
     totalNgn: number;
     cardsSold: number;
 }
 
-export type GiftCardRates = Record<string, number>;
-
 export const giftCardKeys = {
     all: ["gift-cards"] as const,
     earnings: () => [...giftCardKeys.all, "earnings"] as const,
-    rates: () => [...giftCardKeys.all, "rates"] as const,
+    catalog: () => [...giftCardKeys.all, "catalog"] as const,
     order: (id: string) => [...giftCardKeys.all, "order", id] as const,
     history: (page: number) => [...giftCardKeys.all, "history", page] as const,
 };
@@ -43,23 +40,20 @@ export function useGiftCardEarnings() {
 }
 
 /**
- * Per-brand payout rate off GET /giftcards/rates, keyed by this app's
- * slug (amazon, itunes, google-play, steam) via GIFT_CARD_BRAND_CODES —
- * the backend returns its own canonical codes (AMAZON, GOOGLE_PLAY, ...).
- * A preview only; POST /giftcards/quote is the figure that actually binds.
+ * The admin-managed gift card display catalog — GET /giftcards/catalog,
+ * public, no auth. This is the storefront's only source of which brands are
+ * sellable, their images, countries, and advertised rate. The rate shown
+ * here is a preview only; POST /giftcards/quote is the figure that actually
+ * binds (it's computed independently by the sell-approval workflow, which
+ * this catalog never touches — see GiftCardListingService's own doc comment
+ * on why the two are separate modules).
  */
-export function useGiftCardRates() {
-    return useQuery<GiftCardRates>({
-        queryKey: giftCardKeys.rates(),
+export function useGiftCardCatalog() {
+    return useQuery<GiftCardListingDto[]>({
+        queryKey: giftCardKeys.catalog(),
         queryFn: async () => {
-            const res = await apiClient.get<ApiResponse<Record<string, string>>>("/giftcards/rates");
-            const rates: GiftCardRates = {};
-            for (const [slug, code] of Object.entries(GIFT_CARD_BRAND_CODES)) {
-                if (res.data.data[code] !== undefined) {
-                    rates[slug] = parseFloat(res.data.data[code]);
-                }
-            }
-            return rates;
+            const res = await apiClient.get<ApiResponse<GiftCardListingDto[]>>("/giftcards/catalog");
+            return res.data.data;
         },
         staleTime: 60 * 1000,
     });
