@@ -107,3 +107,12 @@ export const resetPasswordSchema = z
         path: ["confirmPassword"],
     });
 export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
+
+// ─── MFA Login Verification ───────────────────────────────────────────
+export const verifyMfaSchema = z.object({
+    code: z
+        .string()
+        .min(1, "Enter the 6-digit code")
+        .regex(/^\d{6}$/, "Code must be 6 digits"),
+});
+export type VerifyMfaValues = z.infer<typeof verifyMfaSchema>;

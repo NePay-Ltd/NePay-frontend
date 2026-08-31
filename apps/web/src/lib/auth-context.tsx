@@ -37,6 +37,8 @@ export interface AuthContextValue {
     isMutating: boolean;
 
     login: (values: LoginValues) => Promise<void>;
+    /** Completes a login that was paused by a 2FA challenge — see login()'s `mfaRequired` branch. */
+    verifyMfa: (mfaToken: string, code: string) => Promise<void>;
     register: (values: Omit<RegisterValues, "confirmPassword" | "acceptTerms">) => Promise<void>;
     logout: () => Promise<void>;
     /** Locally flip kycVerified to true after a successful BVN submission. */
@@ -77,6 +79,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return () => { cancelled = true; };
     }, []);
 
+    /** Shared by login() and verifyMfa() — both end with a real token pair. */
+    const completeLogin = React.useCallback((data: AuthTokensDto) => {
+        setTokens(data);
+        setUser(data.user);
+
+        document.cookie = "nepay_refresh=true; path=/; max-age=86400";
+        toast.success(`Welcome back, ${data.user.firstName}!`);
+
+        const searchParams = new URLSearchParams(window.location.search);
+        const returnTo = searchParams.get("returnTo") || "/overview";
+        window.location.href = returnTo;
+    }, []);
+
     const login = React.useCallback(
         async (values: LoginValues) => {
             setIsMutating(true);
@@ -85,25 +100,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     email: values.identifier,
                     password: values.password,
                 });
-                
+
                 const data = res.data.data;
-                
+
                 if ('mfaRequired' in data) {
-                    // Route to MFA verification page (not built yet)
                     toast.info("Two-factor authentication required.");
-                    router.push(`/verify-mfa?token=${data.mfaToken}`);
+                    const returnTo = new URLSearchParams(window.location.search).get("returnTo");
+                    const params = new URLSearchParams({ token: data.mfaToken });
+                    if (returnTo) params.set("returnTo", returnTo);
+                    router.push(`/verify-mfa?${params.toString()}`);
                     return;
                 }
 
-                setTokens(data);
-                setUser(data.user);
-                
-                document.cookie = "nepay_refresh=true; path=/; max-age=86400";
-                toast.success(`Welcome back, ${data.user.firstName}!`);
-                
-                const searchParams = new URLSearchParams(window.location.search);
-                const returnTo = searchParams.get("returnTo") || "/overview";
-                window.location.href = returnTo;
+                completeLogin(data);
             } catch (err: any) {
                 // Handle API error structure if available
                 const msg = err.response?.data?.message || "Invalid credentials.";
@@ -113,7 +122,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setIsMutating(false);
             }
         },
-        [router],
+        [router, completeLogin],
+    );
+
+    const verifyMfa = React.useCallback(
+        async (mfaToken: string, code: string) => {
+            setIsMutating(true);
+            try {
+                const res = await apiClient.post<ApiResponse<AuthTokensDto>>("/auth/2fa/verify-login", {
+                    mfaToken,
+                    code,
+                });
+
+                completeLogin(res.data.data);
+            } catch (err: any) {
+                // No toast here — the verify-mfa page shows a wrong-code error
+                // inline next to the input, the same way login() and the login
+                // page split password errors between setError and toast.
+                throw err;
+            } finally {
+                setIsMutating(false);
+            }
+        },
+        [completeLogin],
     );
 
     const register = React.useCallback(
@@ -184,6 +215,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         isMutating,
         login,
+        verifyMfa,
         register,
         logout,
         markKycVerified,
