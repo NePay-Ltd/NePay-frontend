@@ -99,7 +99,7 @@ export function ComingSoon({
                                 {isWaitlisted ? (
                                     <>
                                         <BellRing className="mr-2 h-5 w-5" />
-                                        You're on the waitlist!
+                                        You&apos;re on the waitlist!
                                     </>
                                 ) : (
                                     <>
