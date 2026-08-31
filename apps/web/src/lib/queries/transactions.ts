@@ -22,6 +22,7 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
             if (entry.description?.toLowerCase().includes("tv") || entry.description?.toLowerCase().includes("cable")) category = "tv";
             if (entry.description?.toLowerCase().includes("electricity") || entry.description?.toLowerCase().includes("power")) category = "electricity";
             break;
+        case "UTILITY_DISCOUNT": category = "cashback"; break;
         case "GIFT_CARD_SALE": category = "gift-card"; break;
         case "FLIGHT_BOOKING": category = "flight"; break;
         // ADMIN_ADJUSTMENT is the true catch-all (AdminService's OTHER

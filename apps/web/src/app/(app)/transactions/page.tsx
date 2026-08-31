@@ -18,7 +18,7 @@ import { formatNaira } from "@/lib/format";
 import { TransactionDetailModal, type TransactionDetailData } from "@/components/shared/transaction-detail-modal";
 import { BaseTransaction } from "@/components/shared/transaction-row";
 
-const FILTERS = ["All", "Deposits", "Withdrawals", "Payments", "Gift Cards", "Flights"] as const;
+const FILTERS = ["All", "Credits", "Debits"] as const;
 
 function TransactionsContent() {
     const router = useRouter();
@@ -32,7 +32,11 @@ function TransactionsContent() {
     // ─── Modal State ──────────────────────────────────────────────────────
     const [selectedTransaction, setSelectedTransaction] = React.useState<TransactionDetailData | null>(null);
     const [modalOpen, setModalOpen] = React.useState(false);
+    const [mounted, setMounted] = React.useState(false);
 
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // ─── Data Fetching ────────────────────────────────────────────────────
     const { 
@@ -84,21 +88,13 @@ function TransactionsContent() {
     // Apply client-side filter since API currently doesn't support ?type=
     const filteredItems = React.useMemo(() => {
         if (currentType === "All") return allItems;
-        const targetCategory = currentType.toLowerCase();
-        // The URL params match the UI labels. E.g. "Gift Cards". 
-        // Our TxCategory is 'gift-card'. Let's do a simple fuzzy match or exact map:
-        const map: Record<string, string> = {
-            "deposits": "deposit",
-            "withdrawals": "withdrawal",
-            "payments": "payment",
-            "gift cards": "gift-card",
-            "flights": "flight"
-        };
-        const cat = map[targetCategory] || targetCategory;
-        return allItems.filter(tx => tx.category === cat);
+        if (currentType === "Credits") return allItems.filter(tx => tx.amount > 0);
+        if (currentType === "Debits") return allItems.filter(tx => tx.amount < 0);
+        return allItems;
     }, [allItems, currentType]);
 
-    const isEmpty = !isLoading && filteredItems.length === 0;
+    const isTrulyLoading = !mounted || isLoading;
+    const isEmpty = !isTrulyLoading && filteredItems.length === 0;
 
     return (
         <div className="mx-auto max-w-5xl space-y-6">
@@ -124,26 +120,12 @@ function TransactionsContent() {
                 ))}
             </div>
 
-            {currentType.toLowerCase() === "gift cards" && (
-                <div className="flex items-start gap-2 rounded-xl bg-violet-50 p-3 text-xs text-violet-800">
-                    <Info className="h-4 w-4 shrink-0 mt-0.5" />
-                    <p>
-                        Only paid-out cards appear here. Check{" "}
-                        <button
-                            onClick={() => router.push("/gift-cards/history")}
-                            className="font-bold underline underline-offset-2"
-                        >
-                            My Submissions
-                        </button>{" "}
-                        for pending or rejected items.
-                    </p>
-                </div>
-            )}
+
 
             <Panel>
                 {/* Unified Card List View */}
                 <div className="w-full divide-y divide-border">
-                    {isLoading ? (
+                    {isTrulyLoading ? (
                         Array.from({ length: 6 }).map((_, i) => (
                             <div key={i} className="p-4 flex items-center gap-4 bg-transparent">
                                 <Skeleton className="h-12 w-12 rounded-full shrink-0" />
@@ -164,7 +146,9 @@ function TransactionsContent() {
                                 heading="No transactions yet"
                                 description={currentType === "All" 
                                     ? "Your activity will show up here once you make your first transaction." 
-                                    : `No ${currentType.toLowerCase()} found.`}
+                                    : hasNextPage
+                                        ? `No ${currentType.toLowerCase()} found in recent activity.`
+                                        : `No ${currentType.toLowerCase()} found.`}
                             />
                         </div>
                     ) : (
@@ -192,7 +176,7 @@ function TransactionsContent() {
                 </div>
                 
                 {/* Footer Load More */}
-                {hasNextPage && !isFetchingNextPage && !isEmpty && (
+                {hasNextPage && !isFetchingNextPage && (
                     <div className="p-4 flex justify-center border-t border-border">
                         <Button 
                             variant="quiet"

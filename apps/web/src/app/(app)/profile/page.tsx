@@ -209,13 +209,6 @@ export default function ProfilePage() {
                             className="cursor-pointer px-5 hover:bg-gray-50"
                         />
                         <RowItem
-                            icon={Landmark}
-                            title="Bank Accounts"
-                            trailing={<ChevronRight className="h-5 w-5 text-muted" />}
-                            onClick={() => router.push("/profile/bank-accounts")}
-                            className="cursor-pointer px-5 hover:bg-gray-50"
-                        />
-                        <RowItem
                             icon={ShieldCheck}
                             iconTint={profile?.kycVerified ? "green" : "violet"}
                             title="KYC Verification"

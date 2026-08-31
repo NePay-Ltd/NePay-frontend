@@ -15,8 +15,8 @@ export function useWaitlistStatus() {
     return useQuery<boolean>({
         queryKey: cardKeys.waitlist(),
         queryFn: async () => {
-            const res = await apiClient.get<ApiResponse<{ inWaitlist: boolean }>>("/card/waitlist");
-            return res.data.data.inWaitlist;
+            const res = await apiClient.get<ApiResponse<{ onWaitlist: boolean }>>("/card/waitlist/status");
+            return res.data.data.onWaitlist;
         },
     });
 }
