@@ -46,7 +46,7 @@ export const useUiStore = create<UiState>()(
             setCommandOpen: (open) => set({ commandOpen: open }),
             toggleCommand: () => set((state) => ({ commandOpen: !state.commandOpen })),
 
-            masked: false,
+            masked: true,
             toggleMasked: () => set((state) => ({ masked: !state.masked })),
         }),
         {
