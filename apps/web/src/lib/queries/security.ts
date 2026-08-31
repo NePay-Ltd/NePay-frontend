@@ -71,11 +71,8 @@ export function useToggleBiometrics() {
 export function useEnable2FA() {
     return useMutation<{ qrCodeUri: string; secret: string }, Error, void>({
         mutationFn: async () => {
-            const res = await apiClient.post<ApiResponse<{ otpauth_url: string; qrData: string; temporarySecret: string }>>("/security/2fa/enable");
-            return {
-                qrCodeUri: res.data.data.qrData,
-                secret: res.data.data.temporarySecret,
-            };
+            const res = await apiClient.post<ApiResponse<{ qrCodeUri: string; secret: string }>>("/security/2fa/enable");
+            return res.data.data;
         },
     });
 }
