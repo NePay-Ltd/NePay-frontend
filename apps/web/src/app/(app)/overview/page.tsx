@@ -43,12 +43,12 @@ import {
 } from "@/components/shared/skeletons";
 
 const QUICK_ACTIONS = [
-    { label: "Airtime", icon: Smartphone, href: "/services/airtime", bg: "bg-zinc-900/30 hover:bg-zinc-900/60 border border-zinc-800/40 transition-all duration-200 cursor-pointer group", iconColor: "text-indigo-400" },
-    { label: "Data", icon: Wifi, href: "/services/data", bg: "bg-zinc-900/30 hover:bg-zinc-900/60 border border-zinc-800/40 transition-all duration-200 cursor-pointer group", iconColor: "text-blue-400" },
-    { label: "Flight", icon: Plane, href: "/flights", bg: "bg-zinc-900/30 hover:bg-zinc-900/60 border border-zinc-800/40 transition-all duration-200 cursor-pointer group", iconColor: "text-emerald-400" },
-    { label: "TV", icon: Tv, href: "/services/tv", bg: "bg-zinc-900/30 hover:bg-zinc-900/60 border border-zinc-800/40 transition-all duration-200 cursor-pointer group", iconColor: "text-rose-400" },
-    { label: "Gift Card", icon: Gift, href: "/gift-cards", bg: "bg-zinc-900/30 hover:bg-zinc-900/60 border border-zinc-800/40 transition-all duration-200 cursor-pointer group", iconColor: "text-amber-400" },
-    { label: "More", icon: MoreHorizontal, href: "/services", bg: "bg-zinc-900/30 hover:bg-zinc-900/60 border border-zinc-800/40 transition-all duration-200 cursor-pointer group", iconColor: "text-zinc-400 group-hover:text-zinc-200" },
+    { label: "Airtime", icon: Smartphone, href: "/services/airtime", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-indigo-600 dark:text-indigo-400" },
+    { label: "Data", icon: Wifi, href: "/services/data", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-blue-600 dark:text-blue-400" },
+    { label: "Flight", icon: Plane, href: "/flights", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-emerald-600 dark:text-emerald-400" },
+    { label: "TV", icon: Tv, href: "/services/tv", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-rose-600 dark:text-rose-400" },
+    { label: "Gift Card", icon: Gift, href: "/gift-cards", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-amber-600 dark:text-amber-400" },
+    { label: "More", icon: MoreHorizontal, href: "/services", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-zinc-500 group-hover:text-zinc-900 dark:text-zinc-400 dark:group-hover:text-zinc-200" },
 ] as const;
 
 export default function OverviewPage() {
@@ -115,7 +115,7 @@ export default function OverviewPage() {
 
                     {/* ── Hero balance card ─────────────────────────────────────────── */}
                     {summaryLoading || !summary ? (
-                        <div className="w-full h-[250px] bg-white border border-border rounded-3xl animate-pulse" />
+                        <div className="w-full h-[250px] bg-white dark:bg-gray-800/50 border border-border rounded-3xl animate-pulse" />
                     ) : (
                         <HeroCard
                             balance={summary.balance}
@@ -134,7 +134,7 @@ export default function OverviewPage() {
                         <div className="grid grid-cols-3 xl:grid-cols-6 gap-3">
                             {summaryLoading ? (
                                 [...Array(6)].map((_, i) => (
-                                    <div key={i} className="w-full h-[96px] bg-white border border-border rounded-2xl animate-pulse" />
+                                    <div key={i} className="w-full h-[96px] bg-black/5 dark:bg-white/5 rounded-3xl animate-pulse" />
                                 ))
                             ) : (
                                 <>
@@ -148,10 +148,10 @@ export default function OverviewPage() {
                                                 action.bg
                                             )}
                                         >
-                                            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-zinc-800/30 mb-2">
+                                            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-black/5 dark:bg-zinc-800/30 mb-2">
                                                 <action.icon className={cn("w-6 h-6", action.iconColor)} stroke="currentColor" />
                                             </div>
-                                            <span className="text-[13px] sm:text-[15px] font-bold leading-tight text-zinc-100 transition-colors duration-200">{action.label}</span>
+                                            <span className="text-[13px] sm:text-[15px] font-bold leading-tight text-ink dark:text-zinc-100 transition-colors duration-200">{action.label}</span>
                                         </motion.button>
                                     ))}
                                 </>

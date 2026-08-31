@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { X, LogOut } from "lucide-react";
+import { X, LogOut, Moon, Sun, Monitor } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
 
 import { cn } from "@/lib/cn";
 import { useUiStore } from "@/lib/stores/ui-store";
@@ -114,6 +115,18 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
 function UserProfileCard() {
     const { user, logout, isMutating } = useAuth();
     const router = useRouter();
+    const { theme, setTheme } = useTheme();
+    const [mounted, setMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const cycleTheme = () => {
+        if (theme === "light") setTheme("dark");
+        else if (theme === "dark") setTheme("system");
+        else setTheme("light");
+    };
     
     const displayName = user ? `${user.firstName} ${user.lastName}` : "Ugochukwu Nebeani";
     const status = user?.kycVerified ? "Verified account" : "Verification pending";
@@ -127,18 +140,38 @@ function UserProfileCard() {
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-200 text-sm font-extrabold text-orange-900">
                     {displayName.substring(0, 2).toUpperCase()}
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col hidden xl:flex">
                     <span className="text-sm font-bold text-trueWhite">{displayName}</span>
                     <span className="text-[11px] font-medium text-violet-300 dark:text-muted">{status}</span>
                 </div>
             </button>
-            <button
-                onClick={() => logout()}
-                disabled={isMutating}
-                className="flex h-8 w-8 items-center justify-center rounded-xl text-violet-300 dark:text-muted hover:bg-trueWhite/10 hover:text-trueWhite transition-colors disabled:opacity-50"
-            >
-                <LogOut className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-1">
+                <button
+                    onClick={cycleTheme}
+                    className="flex h-8 w-8 items-center justify-center rounded-xl text-violet-300 dark:text-muted hover:bg-trueWhite/10 hover:text-trueWhite transition-colors"
+                    title={mounted ? `Theme: ${theme}` : "Toggle theme"}
+                >
+                    {mounted ? (
+                        theme === "light" ? (
+                            <Sun className="h-4 w-4" />
+                        ) : theme === "dark" ? (
+                            <Moon className="h-4 w-4" />
+                        ) : (
+                            <Monitor className="h-4 w-4" />
+                        )
+                    ) : (
+                        <span className="h-4 w-4" />
+                    )}
+                </button>
+                <button
+                    onClick={() => logout()}
+                    disabled={isMutating}
+                    className="flex h-8 w-8 items-center justify-center rounded-xl text-violet-300 dark:text-muted hover:bg-trueWhite/10 hover:text-trueWhite transition-colors disabled:opacity-50"
+                    title="Log out"
+                >
+                    <LogOut className="h-4 w-4" />
+                </button>
+            </div>
         </div>
     );
 }

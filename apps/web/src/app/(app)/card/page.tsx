@@ -1,176 +1,46 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
-import { Gift, ShieldCheck, Globe, CreditCard, Lock } from "lucide-react";
-import { toast } from "sonner";
-
+import { CreditCard, Lock } from "lucide-react";
+import { ComingSoon } from "@/components/shared/coming-soon";
 import { useWaitlistStatus, useJoinWaitlist } from "@/lib/queries/card";
-import { NePayCardVisual } from "@/components/shared/nepay-card-visual";
-import { Button } from "@/components/shared/button";
-import { Panel, PanelBody } from "@/components/shared/panel";
-import { Tag } from "@/components/shared/tag";
-import { type BaseTransaction, TransactionRow } from "@/components/shared/transaction-row";
-import { TransactionDetailModal, type TransactionDetailData } from "@/components/shared/transaction-detail-modal";
-import { Skeleton } from "@/components/shared/skeletons";
 
 export default function CardPage() {
-    const router = useRouter();
-    const [selectedTransaction, setSelectedTransaction] = React.useState<TransactionDetailData | null>(null);
-    const [modalOpen, setModalOpen] = React.useState(false);
+    const { data: isWaitlisted } = useWaitlistStatus();
+    const { mutate: joinWaitlist, isPending: isWaitlisting } = useJoinWaitlist();
 
-    const cardTransactions: BaseTransaction[] = [
-        { id: "c1", label: "Spotify Premium", meta: "Entertainment", amount: -900, category: "payment", status: "success", date: new Date().toISOString() },
-        { id: "c2", label: "Uber", meta: "Transport", amount: -2500, category: "payment", status: "success", date: new Date().toISOString() },
-        { id: "c3", label: "Netflix", meta: "Entertainment", amount: -4000, category: "payment", status: "success", date: new Date().toISOString() },
-    ];
-
-    const handleViewReceipt = (tx: BaseTransaction) => {
-        const detailData: TransactionDetailData = {
-            id: tx.id,
-            label: tx.label,
-            meta: tx.meta,
-            amount: tx.amount,
-            category: tx.category,
-            status: tx.status,
-            date: tx.date,
-            type: tx.meta,
-            direction: tx.amount > 0 ? "CREDIT" : "DEBIT",
-            currency: "NGN",
-        };
-        setSelectedTransaction(detailData);
-        setModalOpen(true);
-    };
-
-    const [isLoading, setIsLoading] = React.useState(true);
-
-    React.useEffect(() => {
-        const timer = setTimeout(() => setIsLoading(false), 1200);
-        return () => clearTimeout(timer);
-    }, []);
+    const CardIllustration = (
+        <div className="relative w-full h-32 flex items-center justify-center group mb-6">
+            {/* Background blurred cards for depth */}
+            <div className="absolute w-24 h-16 rounded-lg bg-indigo-500/20 dark:bg-indigo-500/30 blur-md transform -rotate-12 -translate-x-8 translate-y-2 z-0" />
+            <div className="absolute w-24 h-16 rounded-lg bg-fuchsia-500/20 dark:bg-fuchsia-500/30 blur-md transform rotate-12 translate-x-8 translate-y-2 z-0" />
+            
+            {/* Main card element */}
+            <div className="w-24 h-16 sm:w-28 sm:h-20 rounded-xl flex items-center justify-center bg-gradient-to-br from-violet-600 to-indigo-900 shadow-xl shadow-violet-500/40 border border-white/20 z-10 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-translate-y-4 group-hover:rotate-6">
+                <CreditCard className="w-8 h-8 sm:w-10 sm:h-10 text-white opacity-90" />
+                
+                {/* Simulated card chip */}
+                <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-3 sm:w-5 sm:h-4 rounded-[2px] sm:rounded bg-amber-200/80 border border-amber-400/50" />
+            </div>
+            
+            {/* Lock badge */}
+            <div className="absolute -bottom-2 sm:-bottom-4 z-20 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white dark:bg-gray-800 border-4 border-white dark:border-gray-900 shadow-md flex items-center justify-center transition-transform duration-500 group-hover:scale-110">
+                <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 dark:text-indigo-400" />
+            </div>
+        </div>
+    );
 
     return (
-        <div className="relative">
-            {/* Coming Soon Overlay */}
-            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/40 dark:bg-bg/60 backdrop-blur-[2px] rounded-3xl">
-                <div className="flex flex-col items-center bg-white dark:bg-gray-100 p-6 rounded-2xl shadow-xl ring-1 ring-border text-center max-w-sm">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 text-violet-700 mb-4">
-                        <Lock className="h-6 w-6" />
-                    </div>
-                    <h2 className="text-xl font-extrabold text-ink">Coming Soon</h2>
-                    <p className="mt-2 text-sm font-medium text-muted">
-                        We are working hard to bring you the NePay Verve Card. Stay tuned!
-                    </p>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-8 xl:grid-cols-12 xl:gap-12 opacity-40 pointer-events-none select-none filter grayscale-[30%]">
-                
-                {/* ── Left Column: Card Visual & Controls ── */}
-                <div className="flex flex-col items-center space-y-8 xl:col-span-5">
-                    <div className="w-full text-center lg:text-left">
-                        <h1 className="text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
-                            NePay Card
-                        </h1>
-                        <p className="mt-1 text-sm font-medium text-body">
-                            Your global spending power.
-                        </p>
-                    </div>
-
-                    <div className="relative w-full max-w-sm drop-shadow-2xl transition-transform hover:scale-105 duration-500 ease-out py-8">
-                        <NePayCardVisual />
-                    </div>
-
-                    <div className="w-full space-y-4">
-                        <div className="flex gap-4">
-                            <Button className="flex-1 rounded-2xl bg-ink hover:bg-black text-white font-bold h-14 shadow-lg">
-                                <Lock className="mr-2 h-4 w-4" />
-                                Freeze Card
-                            </Button>
-                            <Button className="flex-1 rounded-2xl bg-white border border-border text-ink hover:bg-gray-50 font-bold h-14 shadow-sm">
-                                <CreditCard className="mr-2 h-4 w-4" />
-                                Show Details
-                            </Button>
-                        </div>
-                        
-                        <Panel className="rounded-3xl overflow-hidden shadow-sm">
-                            <div className="divide-y divide-border/50">
-                                <div className="flex items-center justify-between p-5 hover:bg-gray-50 cursor-pointer transition-colors">
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-100 text-violet-700">
-                                            <ShieldCheck className="h-5 w-5" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-ink">Card Settings</p>
-                                            <p className="text-xs font-medium text-muted">PIN, Limits, Security</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex items-center justify-between p-5 hover:bg-gray-50 cursor-pointer transition-colors">
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-                                            <Globe className="h-5 w-5" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-ink">International Spending</p>
-                                            <p className="text-xs font-medium text-muted">Enabled · 0% FX Markup</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </Panel>
-                    </div>
-                </div>
-
-                {/* ── Right Column: Card Transactions ── */}
-                <div className="xl:col-span-7 space-y-6">
-                    <div className="flex items-end justify-between">
-                        <div>
-                            <h2 className="text-xl font-extrabold text-ink">Card Transactions</h2>
-                            <p className="text-sm font-medium text-body mt-1">Recent activity on your virtual card</p>
-                        </div>
-                        <Button variant="quiet" className="font-bold text-violet-700 hover:bg-violet-50">
-                            View All
-                        </Button>
-                    </div>
-
-                    <Panel className="rounded-3xl">
-                        <div className="divide-y divide-border/50">
-                            {isLoading ? (
-                                Array.from({ length: 3 }).map((_, i) => (
-                                    <div key={i} className="p-4 flex items-center gap-4 bg-white">
-                                        <Skeleton className="h-10 w-10 rounded-full shrink-0" />
-                                        <div className="space-y-2 flex-1">
-                                            <Skeleton className="h-3.5 w-32" />
-                                            <Skeleton className="h-3 w-20" />
-                                        </div>
-                                        <div className="space-y-2 flex flex-col items-end shrink-0">
-                                            <Skeleton className="h-3.5 w-16" />
-                                            <Skeleton className="h-3 w-12" />
-                                        </div>
-                                    </div>
-                                ))
-                            ) : cardTransactions.length > 0 ? (
-                                cardTransactions.map((tx) => (
-                                    <TransactionRow key={tx.id} tx={tx} onViewReceipt={handleViewReceipt} />
-                                ))
-                            ) : (
-                                <div className="p-8 text-center text-sm font-medium text-muted">
-                                    No card transactions yet.
-                                </div>
-                            )}
-                        </div>
-                    </Panel>
-                </div>
-            </div>
-
-            {/* Transaction Detail Modal */}
-            <TransactionDetailModal
-                open={modalOpen}
-                onOpenChange={setModalOpen}
-                transaction={selectedTransaction}
-                onViewFullDetail={(txId) => router.push(`/transactions/${txId}`)}
-            />
-        </div>
+        <ComingSoon 
+            title="NePay Virtual Card"
+            description="Your passport to global payments. Spend anywhere online instantly with zero FX markup on your transactions."
+            icon={CreditCard}
+            timeframe="Q1 2027"
+            isWaitlisted={!!isWaitlisted}
+            isWaitlisting={isWaitlisting}
+            onJoinWaitlist={() => joinWaitlist()}
+            glowColorHex="rgba(79, 70, 229, 0.15)" // Indigo glow
+            illustration={CardIllustration}
+        />
     );
 }
