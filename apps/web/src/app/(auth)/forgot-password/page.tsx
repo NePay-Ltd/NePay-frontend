@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, ArrowLeft, Send, CheckCircle2 } from "lucide-react";
@@ -15,8 +16,9 @@ import { Input } from "@/components/ui/input";
 import type { ApiError } from "@/lib/api";
 
 export default function ForgotPasswordPage() {
+    const router = useRouter();
     const [submitted, setSubmitted] = React.useState(false);
-    const [identifier, setIdentifier] = React.useState("");
+    const [email, setEmail] = React.useState("");
 
     const {
         register,
@@ -26,20 +28,20 @@ export default function ForgotPasswordPage() {
         getValues,
     } = useForm<ForgotPasswordValues>({
         resolver: zodResolver(forgotPasswordSchema),
-        defaultValues: { identifier: "" },
+        defaultValues: { email: "" },
     });
 
     const onSubmit = async (values: ForgotPasswordValues) => {
         try {
-            await apiClient.post("/auth/forgot-password", { identifier: values.identifier });
-            setIdentifier(values.identifier);
+            await apiClient.post("/auth/forgot-password", { email: values.email });
+            setEmail(values.email);
             setSubmitted(true);
         } catch (err) {
             const apiErr = err as ApiError;
             if (apiErr.code === "ACCOUNT_NOT_FOUND") {
-                setError("identifier", { message: apiErr.message });
+                setError("email", { message: apiErr.message });
             } else {
-                toast.error(apiErr.message ?? "Failed to send reset link. Please try again.");
+                toast.error(apiErr.message ?? "Failed to send reset code. Please try again.");
             }
         }
     };
@@ -55,12 +57,19 @@ export default function ForgotPasswordPage() {
                 <div className="space-y-2">
                     <h1 className="text-2xl font-bold text-ink">Check your inbox</h1>
                     <p className="text-sm text-body">
-                        We&apos;ve sent a password reset link to{" "}
-                        <span className="font-semibold text-ink">{identifier}</span>.
+                        We&apos;ve sent a 6-digit reset code to{" "}
+                        <span className="font-semibold text-ink">{email}</span>.
                         It expires in 15 minutes.
                     </p>
                 </div>
                 <div className="space-y-3">
+                    <Button
+                        variant="primary"
+                        fullWidth
+                        onClick={() => router.push(`/reset-password?email=${encodeURIComponent(email)}`)}
+                    >
+                        Enter code
+                    </Button>
                     <Button
                         variant="quiet"
                         fullWidth
@@ -86,8 +95,8 @@ export default function ForgotPasswordPage() {
                     Forgot password?
                 </h1>
                 <p className="text-sm text-body">
-                    Enter the email or phone number linked to your account and we&apos;ll
-                    send you a reset link.
+                    Enter the email linked to your account and we&apos;ll
+                    send you a reset code.
                 </p>
             </div>
 
@@ -98,19 +107,19 @@ export default function ForgotPasswordPage() {
                 noValidate
             >
                 <Field
-                    label="Email or Phone"
-                    htmlFor="forgot-identifier"
-                    error={errors.identifier?.message}
+                    label="Email"
+                    htmlFor="forgot-email"
+                    error={errors.email?.message}
                     trailing={<Mail className="h-4 w-4" aria-hidden />}
                 >
                     <Input
-                        id="forgot-identifier"
-                        type="text"
-                        placeholder="name@example.com or 080…"
+                        id="forgot-email"
+                        type="email"
+                        placeholder="name@example.com"
                         inputMode="email"
-                        autoComplete="username"
-                        {...register("identifier")}
-                        aria-invalid={!!errors.identifier}
+                        autoComplete="email"
+                        {...register("email")}
+                        aria-invalid={!!errors.email}
                         className="pr-10"
                     />
                 </Field>
@@ -123,7 +132,7 @@ export default function ForgotPasswordPage() {
                     loading={isSubmitting}
                 >
                     <Send className="h-4 w-4" />
-                    Send Reset Link
+                    Send Reset Code
                 </Button>
             </form>
 

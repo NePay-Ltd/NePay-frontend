@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, KeyRound, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Eye, EyeOff, KeyRound, CheckCircle2, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 import { resetPasswordSchema, type ResetPasswordValues } from "@/lib/schemas/auth";
@@ -18,86 +18,65 @@ import type { ApiError } from "@/lib/api";
 export default function ResetPasswordPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const token = searchParams.get("token") ?? "";
+    const emailFromQuery = searchParams.get("email") ?? "";
     const [done, setDone] = React.useState(false);
     const [showPassword, setShowPassword] = React.useState(false);
     const [showConfirm, setShowConfirm] = React.useState(false);
-    const [tokenError, setTokenError] = React.useState<string | null>(null);
+    const [resending, setResending] = React.useState(false);
 
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
         watch,
+        setError,
+        getValues,
     } = useForm<ResetPasswordValues>({
         resolver: zodResolver(resetPasswordSchema),
-        defaultValues: { password: "", confirmPassword: "" },
+        defaultValues: { email: emailFromQuery, code: "", password: "", confirmPassword: "" },
     });
 
     const password = watch("password");
     const hasNumber = /\d/.test(password);
     const hasLength = password.length >= 8;
 
+    const codeField = register("code");
+
     const onSubmit = async (values: ResetPasswordValues) => {
         try {
-            await apiClient.post("/auth/reset-password", { token, newPassword: values.password });
+            await apiClient.post("/auth/reset-password", {
+                email: values.email,
+                code: values.code,
+                newPassword: values.password,
+            });
             toast.success("Password updated successfully!");
             setDone(true);
         } catch (err) {
             const apiErr = err as ApiError;
-            if (apiErr.code === "TOKEN_EXPIRED") {
-                setTokenError(apiErr.message);
+            if (apiErr.code === "VALIDATION_FAILED") {
+                setError("code", { message: apiErr.message || "Invalid or expired code" });
             } else {
                 toast.error(apiErr.message ?? "Failed to reset password. Please try again.");
             }
         }
     };
 
-    // No token in URL
-    if (!token) {
-        return (
-            <div className="space-y-6 text-center">
-                <span className="flex h-16 w-16 mx-auto items-center justify-center rounded-full bg-red-500/10 text-red-500">
-                    <AlertTriangle className="h-8 w-8" />
-                </span>
-                <div>
-                    <h1 className="text-xl font-bold text-ink">Invalid reset link</h1>
-                    <p className="mt-1 text-sm text-body">
-                        This link is missing a reset token. Please request a new one.
-                    </p>
-                </div>
-                <Button
-                    variant="primary"
-                    onClick={() => router.push("/forgot-password")}
-                    fullWidth
-                >
-                    Request new link
-                </Button>
-            </div>
-        );
-    }
-
-    // Token expired
-    if (tokenError) {
-        return (
-            <div className="space-y-6 text-center">
-                <span className="flex h-16 w-16 mx-auto items-center justify-center rounded-full bg-amber-500/10 text-amber-500">
-                    <AlertTriangle className="h-8 w-8" />
-                </span>
-                <div>
-                    <h1 className="text-xl font-bold text-ink">Link expired</h1>
-                    <p className="mt-1 text-sm text-body">{tokenError}</p>
-                </div>
-                <Button
-                    variant="primary"
-                    onClick={() => router.push("/forgot-password")}
-                    fullWidth
-                >
-                    Request new link
-                </Button>
-            </div>
-        );
-    }
+    const onResend = async () => {
+        const email = getValues("email");
+        if (!email) {
+            setError("email", { message: "Enter your email first" });
+            return;
+        }
+        setResending(true);
+        try {
+            await apiClient.post("/auth/forgot-password", { email });
+            toast.success("A new code has been sent to your email.");
+        } catch {
+            toast.error("Failed to resend code. Please try again.");
+        } finally {
+            setResending(false);
+        }
+    };
 
     // Success state
     if (done) {
@@ -130,7 +109,7 @@ export default function ResetPasswordPage() {
                     Reset your password
                 </h1>
                 <p className="text-sm text-body">
-                    Choose a strong new password for your NePay account.
+                    Enter the code we sent to your email, along with your new password.
                 </p>
             </div>
 
@@ -140,6 +119,58 @@ export default function ResetPasswordPage() {
                 className="space-y-4"
                 noValidate
             >
+                <Field
+                    label="Email"
+                    htmlFor="reset-email"
+                    error={errors.email?.message}
+                    trailing={<Mail className="h-4 w-4" aria-hidden />}
+                >
+                    <Input
+                        id="reset-email"
+                        type="email"
+                        placeholder="name@example.com"
+                        inputMode="email"
+                        autoComplete="email"
+                        {...register("email")}
+                        aria-invalid={!!errors.email}
+                        className="pr-10"
+                    />
+                </Field>
+
+                <Field
+                    label="6-digit code"
+                    htmlFor="reset-code"
+                    error={errors.code?.message}
+                >
+                    <Input
+                        id="reset-code"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={6}
+                        placeholder="000000"
+                        autoComplete="one-time-code"
+                        {...codeField}
+                        onChange={(e) => {
+                            e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                            codeField.onChange(e);
+                        }}
+                        aria-invalid={!!errors.code}
+                        className="text-center text-lg tracking-[0.5em] font-mono"
+                    />
+                </Field>
+
+                <div className="text-right">
+                    <button
+                        type="button"
+                        onClick={onResend}
+                        disabled={resending}
+                        className="text-xs font-semibold text-violet-600 hover:underline disabled:opacity-50"
+                    >
+                        {resending ? "Sending…" : "Resend code"}
+                    </button>
+                </div>
+
                 <Field
                     label="New Password"
                     htmlFor="reset-password"

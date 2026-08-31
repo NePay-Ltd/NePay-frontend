@@ -81,15 +81,24 @@ export type RegisterValues = z.infer<typeof registerSchema>;
 
 // ─── Forgot Password ──────────────────────────────────────────────────
 export const forgotPasswordSchema = z.object({
-    identifier: z
+    email: z
         .string()
-        .min(1, "Enter your email or phone number"),
+        .min(1, "Enter your email address")
+        .email("Enter a valid email address"),
 });
 export type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
 
 // ─── Reset Password ───────────────────────────────────────────────────
 export const resetPasswordSchema = z
     .object({
+        email: z
+            .string()
+            .min(1, "Enter your email address")
+            .email("Enter a valid email address"),
+        code: z
+            .string()
+            .min(1, "Enter the 6-digit code")
+            .regex(/^\d{6}$/, "Code must be 6 digits"),
         password: passwordSchema,
         confirmPassword: z.string().min(1, "Confirm your password"),
     })
