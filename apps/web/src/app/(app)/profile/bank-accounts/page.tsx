@@ -271,8 +271,8 @@ export default function BankAccountsPage() {
                                         <div className="p-2 text-sm text-muted">Loading banks...</div>
                                     ) : (
                                         banks?.map((bank) => (
-                                            <SelectItem key={bank.code} value={bank.code}>
-                                                {bank.name}
+                                            <SelectItem key={bank.bankCode} value={bank.bankCode}>
+                                                {bank.bankName}
                                             </SelectItem>
                                         ))
                                     )}

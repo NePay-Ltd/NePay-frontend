@@ -6,10 +6,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { ResolveAccountResponseDto, WithdrawalResponseDto, ApiResponse } from "@/lib/types/api";
 export interface Bank {
-    id: number;
-    code: string;
-    name: string;
-    logoUrl?: string;
+    bankCode: string;
+    bankName: string;
 }
 
 export interface SavedBankAccount {

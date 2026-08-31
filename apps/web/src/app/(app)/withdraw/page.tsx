@@ -301,7 +301,7 @@ export default function WithdrawPage() {
                                                         >
                                                             <option value="" disabled>Select a bank</option>
                                                             {bankList.map(b => (
-                                                                <option key={b.code} value={b.code}>{b.name}</option>
+                                                                <option key={b.bankCode} value={b.bankCode}>{b.bankName}</option>
                                                             ))}
                                                         </select>
                                                     </div>
