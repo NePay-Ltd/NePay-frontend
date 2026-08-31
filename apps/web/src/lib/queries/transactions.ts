@@ -13,7 +13,10 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
     let category: TxCategory = "payment";
     switch (entry.type) {
         case "DEPOSIT":
-        case "BANK_DEPOSIT": category = "deposit"; break;
+        case "BANK_DEPOSIT":
+        // The NGN credit from a completed FCY conversion — same category as
+        // any other deposit into the wallet, just a different source.
+        case "FCY_CONVERSION_CREDIT": category = "deposit"; break;
         case "WITHDRAWAL": category = "withdrawal"; break;
         case "UTILITY_PURCHASE": 
             category = "payment"; 

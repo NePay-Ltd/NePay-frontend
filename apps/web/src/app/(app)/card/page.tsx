@@ -128,7 +128,7 @@ export default function CardPage() {
                             {isWaitlisted ? (
                                 <>
                                     <BellRing className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                                    You're on the waitlist!
+                                    You&apos;re on the waitlist!
                                 </>
                             ) : (
                                 <>
