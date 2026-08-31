@@ -27,7 +27,7 @@ export function useUpdateProfile() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (data: { firstName?: string; lastName?: string; phoneNumber?: string }) => {
+        mutationFn: async (data: { firstName?: string; lastName?: string; phoneNumber?: string; emailReceipts?: boolean }) => {
             const res = await apiClient.patch<ApiResponse<UserResponseDto>>("/users/me", data);
             return res.data.data;
         },

@@ -61,6 +61,7 @@ export interface UserResponseDto {
     kycVerified: boolean;
     isActive: boolean;
     emailVerified: boolean;
+    emailReceipts: boolean;
     phoneVerified: boolean;
     createdAt: string;
     updatedAt: string;

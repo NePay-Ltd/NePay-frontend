@@ -74,9 +74,9 @@ export default function ProfilePage() {
     const { data: profile, isLoading } = useProfile();
     const { mutate: updateProfile, isPending: isUpdatingProfile } = useUpdateProfile();
 
-    // Mock local state for preferences since backend doesn't support them yet
+    // Preference state mirrors the profile response and persists through the profile API.
     const [pushEnabled, setPushEnabled] = React.useState(true);
-    const [emailEnabled, setEmailEnabled] = React.useState(true);
+    const [emailEnabled, setEmailEnabled] = React.useState(false);
 
     // State
     const [editModalOpen, setEditModalOpen] = React.useState(false);
@@ -94,6 +94,7 @@ export default function ProfilePage() {
 
     React.useEffect(() => {
         if (profile) {
+            setEmailEnabled(profile.emailReceipts);
             form.reset({
                 firstName: profile.firstName,
                 lastName: profile.lastName,
@@ -101,6 +102,11 @@ export default function ProfilePage() {
             });
         }
     }, [profile, form]);
+
+    const onEmailReceiptsChange = (enabled: boolean) => {
+        setEmailEnabled(enabled);
+        updateProfile({ emailReceipts: enabled });
+    };
 
     // Handlers
     const onEditSubmit = form.handleSubmit((data) => {
@@ -261,7 +267,7 @@ export default function ProfilePage() {
                             trailing={
                                 <Switch 
                                     checked={emailEnabled}
-                                    onCheckedChange={setEmailEnabled}
+                                    onCheckedChange={onEmailReceiptsChange}
                                 />
                             }
                             className="px-5"
