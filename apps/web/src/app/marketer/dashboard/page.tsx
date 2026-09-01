@@ -48,10 +48,10 @@ export default function MarketerDashboardPage() {
 
     if (!data) {
         return (
-            <main className="mx-auto max-w-4xl space-y-6 p-6 sm:p-10">
-                <Skeleton className="h-8 w-56" />
-                <Skeleton className="h-24 w-full rounded-xl" />
-                <div className="grid grid-cols-3 gap-4">
+            <main className="mx-auto max-w-4xl space-y-6 p-5 sm:p-10">
+                <Skeleton className="h-8 w-48 sm:w-56" />
+                <Skeleton className="h-32 w-full rounded-xl sm:h-24" />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <Skeleton className="h-24 rounded-xl" />
                     <Skeleton className="h-24 rounded-xl" />
                     <Skeleton className="h-24 rounded-xl" />
@@ -71,18 +71,18 @@ export default function MarketerDashboardPage() {
     return (
         <main className="mx-auto max-w-4xl space-y-6 p-5 sm:p-10">
             {/* Header */}
-            <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-gradient shadow-sm">
                         <Megaphone className="h-5 w-5 text-white" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                         <p className="text-xs font-bold uppercase tracking-widest text-muted">Partner dashboard</p>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-2xl font-extrabold text-ink sm:text-3xl">{data.marketerCode}</h1>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <h1 className="break-all text-xl font-extrabold text-ink sm:text-2xl md:text-3xl">{data.marketerCode}</h1>
                             <span
                                 className={
-                                    "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold " +
+                                    "inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-xs font-bold " +
                                     (isActive
                                         ? "bg-green-100 text-green-700"
                                         : "bg-gray-100 text-gray-600")
@@ -93,7 +93,7 @@ export default function MarketerDashboardPage() {
                         </div>
                     </div>
                 </div>
-                <Button variant="quiet" size="sm" onClick={signOut}>
+                <Button variant="quiet" size="sm" className="shrink-0" onClick={signOut}>
                     <LogOut className="h-4 w-4" />
                     Sign out
                 </Button>
@@ -141,9 +141,9 @@ export default function MarketerDashboardPage() {
                     ) : (
                         <div className="divide-y divide-border">
                             {data.recentVerified.map((item) => (
-                                <div className="flex items-center justify-between py-3 text-sm" key={`${item.displayName}-${item.firstDepositAt}`}>
-                                    <span className="font-medium text-ink">{item.displayName}</span>
-                                    <span className="text-muted">{new Date(item.firstDepositAt).toLocaleDateString()}</span>
+                                <div className="flex items-center justify-between gap-3 py-3 text-sm" key={`${item.displayName}-${item.firstDepositAt}`}>
+                                    <span className="min-w-0 truncate font-medium text-ink">{item.displayName}</span>
+                                    <span className="shrink-0 text-muted">{new Date(item.firstDepositAt).toLocaleDateString()}</span>
                                 </div>
                             ))}
                         </div>
