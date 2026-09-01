@@ -25,18 +25,18 @@ export function NetworkSelectionList({ coinGroup, onSelectNetwork, onBack, isMob
     const coinName = coinGroup.representative.name ?? coinGroup.coin;
 
     return (
-        <div className={cn("mx-auto w-full", isMobile ? "" : "flex flex-col h-full")}>
+        <div className={cn("mx-auto w-full", isMobile ? "pb-12 md:pb-20 px-4 sm:px-6 pt-4 sm:pt-6 min-h-screen" : "flex flex-col h-full")}>
             {/* Header */}
-            <div className={cn("flex items-center gap-4 mb-8", !isMobile && "px-6 pt-6")}>
+            <div className={cn("flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8", !isMobile && "px-6 pt-6")}>
                 <button
                     onClick={onBack}
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-white/5 border border-border text-ink hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white dark:bg-white/5 border border-border text-ink hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
                 >
                     <ArrowLeft className="h-5 w-5" />
                 </button>
                 <CurrencyAvatar currency={coinGroup.representative} className="h-10 w-10 text-base shadow-sm shrink-0" />
-                <div>
-                    <h1 className={cn("font-black text-ink tracking-tight", isMobile ? "text-2xl" : "text-xl")}>Receive {coinName}</h1>
+                <div className="min-w-0">
+                    <h1 className={cn("font-black text-ink tracking-tight truncate", isMobile ? "text-xl sm:text-2xl" : "text-xl")}>Receive {coinName}</h1>
                     <p className="text-sm font-medium text-muted mt-1">Choose the network to deposit on</p>
                 </div>
             </div>
@@ -48,29 +48,29 @@ export function NetworkSelectionList({ coinGroup, onSelectNetwork, onBack, isMob
                         <button
                             key={currency.code}
                             onClick={() => onSelectNetwork(currency.code)}
-                            className="w-full flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-white/5 border border-border hover:border-violet-400 hover:shadow-md dark:hover:bg-white/10 transition-all group/item text-left"
+                            className="w-full flex items-center justify-between gap-2 p-3 sm:p-4 rounded-2xl bg-white dark:bg-white/5 border border-border hover:border-violet-400 hover:shadow-md dark:hover:bg-white/10 transition-all group/item text-left"
                         >
-                            <div className="flex items-center gap-4">
-                                <div className="h-11 w-11 rounded-full bg-violet-50 flex items-center justify-center font-bold text-violet-700 text-lg shadow-sm shrink-0 border border-violet-100">
+                            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                                <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-violet-50 flex items-center justify-center font-bold text-violet-700 text-lg shadow-sm shrink-0 border border-violet-100">
                                     {currency.network?.[0]?.toUpperCase() ?? "N"}
                                 </div>
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-base font-bold text-ink">
+                                <div className="min-w-0">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <span className="text-base font-bold text-ink truncate">
                                             {currency.network ?? "Mainnet"}
                                         </span>
                                         {currency.recommended && (
-                                            <span className="text-[10px] font-black bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                            <span className="shrink-0 text-[10px] font-black bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 px-2 py-0.5 rounded-full uppercase tracking-wider">
                                                 Recommended
                                             </span>
                                         )}
                                     </div>
-                                    <span className="text-[11px] font-bold text-muted uppercase tracking-wider block mt-1">
+                                    <span className="text-[11px] font-bold text-muted uppercase tracking-wider block mt-1 truncate">
                                         {currency.code}
                                     </span>
                                 </div>
                             </div>
-                            <ChevronRight className="h-5 w-5 text-muted group-hover/item:text-violet-600 transition-colors" />
+                            <ChevronRight className="h-5 w-5 shrink-0 text-muted group-hover/item:text-violet-600 transition-colors" />
                         </button>
                     ))}
                 </div>

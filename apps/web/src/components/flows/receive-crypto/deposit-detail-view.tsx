@@ -19,6 +19,7 @@ import { AddressQrCode } from "@/components/shared/address-qr-code";
 import { Button } from "@/components/shared/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/shared/skeletons";
+import { useMediaQuery } from "@/lib/hooks/use-media-query";
 import {
     useCryptoCurrencies,
     useCryptoPrices,
@@ -54,14 +55,35 @@ function useCountdown(expiresAt: string | undefined) {
     return remainingMs;
 }
 
+/**
+ * Address validity windows run in days here, not minutes — a raw mm:ss
+ * countdown would show something like "4320:00". Days (+ hours once under
+ * a day) is the readable unit at that scale; mm:ss only kicks back in once
+ * there's genuinely under an hour left, when seconds-level precision is
+ * what the user actually needs.
+ */
 function formatCountdown(ms: number) {
-    const totalSeconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
+    const totalMinutes = Math.floor(ms / 60_000);
+    const days = Math.floor(totalMinutes / (60 * 24));
+    const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+    const minutes = totalMinutes % 60;
+
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+
+    const seconds = Math.floor((ms % 60_000) / 1000);
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
 export function DepositDetailView({ assetCode, onBack, isMobile = false }: DepositDetailViewProps) {
+    // The QR box sizes itself in CSS (180px below `sm`, 220px at/above it —
+    // see the box's own className), but QRCodeSVG needs its pixel size as a
+    // literal prop; AddressQrCode also wraps it in its own 16px padding, so
+    // this is that breakpoint's box size minus that padding minus this
+    // box's own p-2, sized to actually fit rather than overflow its corners.
+    const isSmUp = useMediaQuery("(min-width: 640px)");
+    const qrSize = isSmUp ? 170 : 130;
+
     const { data: currencies } = useCryptoCurrencies();
     const { data: pricesData } = useCryptoPrices();
 
@@ -147,14 +169,14 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
 
     return (
         <RequireKyc>
-            <div className={cn("mx-auto w-full", isMobile ? "" : "flex flex-col h-full")}>
+            <div className={cn("mx-auto w-full", isMobile ? "pb-12 md:pb-20 px-4 sm:px-6 pt-4 sm:pt-6 min-h-screen" : "flex flex-col h-full")}>
                 {/* Header */}
-                <div className={cn("flex items-center justify-between mb-4 shrink-0", !isMobile && "px-6 pt-6")}>
-                    <div className="flex items-center gap-4">
+                <div className={cn("flex items-center justify-between gap-2 mb-4 shrink-0", !isMobile && "px-6 pt-6")}>
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                         {isMobile && (
                             <button
                                 onClick={onBack}
-                                className="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-white/5 border border-border text-ink hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
+                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white dark:bg-white/5 border border-border text-ink hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
                             >
                                 <ArrowLeft className="h-5 w-5" />
                             </button>
@@ -162,8 +184,8 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                         {selectedCurrency && (
                             <CurrencyAvatar currency={selectedCurrency} className="h-10 w-10 text-base shadow-sm shrink-0" />
                         )}
-                        <div>
-                            <h1 className={cn("font-black text-ink tracking-tight", isMobile ? "text-2xl" : "text-xl")}>
+                        <div className="min-w-0">
+                            <h1 className={cn("font-black text-ink tracking-tight truncate", isMobile ? "text-xl sm:text-2xl" : "text-xl")}>
                                 Deposit {selectedCurrency?.name ?? selectedCurrency?.coin ?? ""}
                             </h1>
                             <p className="text-sm font-medium text-muted mt-0.5">Scan or copy address below</p>
@@ -173,8 +195,8 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
 
                 <div className={cn("flex flex-col gap-6 flex-1", !isMobile && "overflow-y-auto px-6 pb-6")}>
                     {/* QR Code and Address Section */}
-                    <div className="rounded-3xl bg-white dark:bg-gray-900/50 p-6 sm:p-8 border-2 border-violet-100 dark:border-violet-900/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] flex flex-col items-center">
-                        <div className="relative flex h-[220px] w-[220px] items-center justify-center rounded-3xl bg-white shadow-sm border-2 border-violet-100 mb-6 p-2">
+                    <div className="rounded-3xl bg-white dark:bg-gray-900/50 p-4 sm:p-8 border-2 border-violet-100 dark:border-violet-900/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] flex flex-col items-center">
+                        <div className="relative flex h-[180px] w-[180px] sm:h-[220px] sm:w-[220px] items-center justify-center rounded-3xl bg-white shadow-sm border-2 border-violet-100 mb-6 p-2">
                             {addressPending ? (
                                 <Skeleton className="h-full w-full rounded-3xl" />
                             ) : addressError || addressExpired ? (
@@ -187,7 +209,7 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                                 />
                             ) : depositData?.address ? (
                                 <>
-                                    <AddressQrCode address={depositData.address} size={190} />
+                                    <AddressQrCode address={depositData.address} size={qrSize} />
                                     {selectedCurrency && (
                                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-1 rounded-full shadow-md border border-gray-100 flex items-center justify-center h-10 w-10">
                                             <CurrencyAvatar currency={selectedCurrency} className="h-full w-full text-sm" />
@@ -260,18 +282,18 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                     </div>
 
                     {/* Stats Row */}
-                    <div className="grid grid-cols-3 gap-3">
-                        <div className="rounded-2xl bg-white dark:bg-white/5 border border-border p-4 text-center">
-                            <span className="block text-[11px] font-bold text-muted uppercase tracking-widest mb-1">Min Deposit</span>
-                            <span className="text-sm font-black text-ink">{displayMinAmountLoading ? "..." : (minimumDisplayValue ?? "—")}</span>
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                        <div className="rounded-2xl bg-white dark:bg-white/5 border border-border p-2 sm:p-4 text-center">
+                            <span className="block text-[9px] sm:text-[11px] font-bold text-muted uppercase tracking-tight sm:tracking-widest mb-1">Min Deposit</span>
+                            <span className="text-xs sm:text-sm font-black text-ink">{displayMinAmountLoading ? "..." : (minimumDisplayValue ?? "—")}</span>
                         </div>
-                        <div className="rounded-2xl bg-white dark:bg-white/5 border border-border p-4 text-center">
-                            <span className="block text-[11px] font-bold text-muted uppercase tracking-widest mb-1">Network Fee</span>
-                            <span className="text-sm font-black text-green-600 dark:text-green-400">Free</span>
+                        <div className="rounded-2xl bg-white dark:bg-white/5 border border-border p-2 sm:p-4 text-center">
+                            <span className="block text-[9px] sm:text-[11px] font-bold text-muted uppercase tracking-tight sm:tracking-widest mb-1">Network Fee</span>
+                            <span className="text-xs sm:text-sm font-black text-green-600 dark:text-green-400">Free</span>
                         </div>
-                        <div className="rounded-2xl bg-white dark:bg-white/5 border border-border p-4 text-center">
-                            <span className="block text-[11px] font-bold text-muted uppercase tracking-widest mb-1">Deposit Limit</span>
-                            <span className="text-sm font-black text-ink">Unlimited</span>
+                        <div className="rounded-2xl bg-white dark:bg-white/5 border border-border p-2 sm:p-4 text-center">
+                            <span className="block text-[9px] sm:text-[11px] font-bold text-muted uppercase tracking-tight sm:tracking-widest mb-1">Deposit Limit</span>
+                            <span className="text-xs sm:text-sm font-black text-ink">Unlimited</span>
                         </div>
                     </div>
 
