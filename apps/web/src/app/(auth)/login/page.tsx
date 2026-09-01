@@ -5,19 +5,21 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { IconEye as Eye, IconEyeOff as EyeOff } from "@/components/icons";;
+import axios from "axios";
+import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
 import { loginSchema, type LoginValues } from "@/lib/schemas/auth";
 import { useAuth } from "@/lib/auth-context";
+import { getApiErrorMessage } from "@/lib/api-client";
 import { Button } from "@/components/shared/button";
 import { Input } from "@/components/ui/input";
-import type { ApiError } from "@/lib/api";
 
 export default function LoginPage() {
     const { login } = useAuth();
     const searchParams = useSearchParams();
     const [showPassword, setShowPassword] = React.useState(false);
+    const [suspended, setSuspended] = React.useState(false);
 
     React.useEffect(() => {
         if (searchParams.get("reason") === "inactivity") {
@@ -41,6 +43,7 @@ export default function LoginPage() {
     });
 
     const onSubmit = async (values: LoginValues) => {
+        setSuspended(false);
         try {
             let formattedIdentifier = values.identifier.trim();
             if (/^0\d{9,10}$/.test(formattedIdentifier)) {
@@ -48,11 +51,17 @@ export default function LoginPage() {
             }
             await login({ ...values, identifier: formattedIdentifier });
         } catch (err) {
-            const apiErr = err as ApiError;
-            if (apiErr.code === "INVALID_CREDENTIALS") {
-                setError("password", { message: apiErr.message });
+            // `login()` throws the raw Axios error — the backend's business code
+            // lives at err.response.data.code, never on the Axios error itself
+            // (that `.code`, e.g. "ERR_BAD_REQUEST", is a transport-level code).
+            const code = axios.isAxiosError(err) ? (err.response?.data as { code?: string } | undefined)?.code : undefined;
+
+            if (code === "ACCOUNT_SUSPENDED") {
+                setSuspended(true);
+            } else if (code === "INVALID_CREDENTIALS") {
+                setError("password", { message: getApiErrorMessage(err) });
             } else {
-                toast.error(apiErr.message ?? "Something went wrong. Please try again.");
+                toast.error(getApiErrorMessage(err));
             }
         }
     };
@@ -68,6 +77,19 @@ export default function LoginPage() {
                     Please type in the email address linked to your NePay account.
                 </p>
             </div>
+
+            {suspended && (
+                <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <p className="font-bold">Your account has been suspended</p>
+                    <p className="mt-1 font-medium">
+                        Please contact support at{" "}
+                        <a href="mailto:info@nepay.com.ng" className="font-bold underline hover:text-red-800">
+                            info@nepay.com.ng
+                        </a>{" "}
+                        for help restoring access.
+                    </p>
+                </div>
+            )}
 
             {/* Form */}
             <form

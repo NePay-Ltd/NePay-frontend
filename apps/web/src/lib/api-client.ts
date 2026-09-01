@@ -112,8 +112,10 @@ apiClient.interceptors.response.use(
 
         // Handle 401 Unauthorized
         if (error.response?.status === 401 && !originalRequest._retry) {
-            
-            // If the code is INVALID_CREDENTIALS, it's a login failure, not an expiry.
+
+            // A login-endpoint failure, not a session expiry — let the caller's own
+            // catch handler show it inline instead of hard-redirecting to /login,
+            // which would wipe out that handler's state before it can render.
             const data = error.response.data as any;
             if (data?.code === "INVALID_CREDENTIALS" || data?.code === "UNAUTHENTICATED") {
                 // If the request was made to an auth endpoint (like login or verify-mfa), 
@@ -155,10 +157,10 @@ apiClient.interceptors.response.use(
 
                 const newTokens = refreshResponse.data.data;
                 setTokens(newTokens);
-                
+
                 originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
                 processQueue(null, newTokens.accessToken);
-                
+
                 return apiClient(originalRequest);
             } catch (refreshError) {
                 processQueue(refreshError, null);

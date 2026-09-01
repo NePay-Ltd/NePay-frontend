@@ -1,3 +1,4 @@
+import { ApiError } from './api';
 import type { ApiResponse } from './types/api';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://nepay-backend.onrender.com/api/v1';
@@ -18,8 +19,29 @@ export function clearMarketerToken() { localStorage.removeItem(TOKEN_KEY); }
 export async function marketerLogin(email: string, password: string) {
     const response = await fetch(`${BASE_URL}/marketer/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
     const body = await response.json();
-    if (!response.ok) throw new Error(body.message || 'Invalid credentials');
+    if (!response.ok) {
+        throw new ApiError({ status: response.status, code: body.code || 'UNKNOWN_ERROR', message: body.message || 'Invalid credentials' });
+    }
     localStorage.setItem(TOKEN_KEY, body.data.accessToken);
+}
+
+/**
+ * A locked-out marketer's "I forgot my password" report. There is no
+ * self-service reset here — this just records the reason and emails an
+ * admin (see MarketersService.requestPasswordReset on the backend); the
+ * response is the same whether or not the email matched an account, so it
+ * carries no signal either way.
+ */
+export async function requestMarketerPasswordReset(email: string, reason: string) {
+    const response = await fetch(`${BASE_URL}/marketer/auth/password-reset-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, reason }),
+    });
+    const body = await response.json();
+    if (!response.ok) {
+        throw new ApiError({ status: response.status, code: body.code || 'UNKNOWN_ERROR', message: body.message || 'Could not submit your request' });
+    }
 }
 
 export async function getMarketerDashboard() {

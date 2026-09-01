@@ -31,11 +31,24 @@ const PUBLIC_PATHS = new Set([
 /** Paths that start with these prefixes are always public (static, marketing). */
 const PUBLIC_PREFIXES = ["/_next", "/favicon", "/api/auth/callback"];
 
+/**
+ * Marketer routes run their own auth system (a bearer token in localStorage,
+ * checked client-side — see marketer-api.ts), entirely separate from the
+ * `nepay_refresh` cookie used by the main app. They must be excluded here or
+ * this middleware bounces marketer visitors to the main /login page.
+ */
+const MARKETER_PREFIX = "/marketer";
+
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Always pass through Next.js internals and static files
     if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
+        return NextResponse.next();
+    }
+
+    // Marketer routes handle their own auth; never gate them on the main app cookie.
+    if (pathname === MARKETER_PREFIX || pathname.startsWith(`${MARKETER_PREFIX}/`)) {
         return NextResponse.next();
     }
 

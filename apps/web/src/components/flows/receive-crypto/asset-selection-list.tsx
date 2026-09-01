@@ -16,48 +16,57 @@ interface AssetSelectionListProps {
 
 export function AssetSelectionList({ onSelectGroup, onBack, isMobile = false }: AssetSelectionListProps) {
     const [search, setSearch] = React.useState("");
-    
+
     const { data: currencies, refetch: refetchCurrencies } = useCryptoCurrencies();
     const { data: pricesData, isFetching: pricesFetching, refetch: refetchPrices } = useCryptoPrices();
-    
+
     const handleRefresh = () => {
         refetchCurrencies();
         refetchPrices();
     };
 
     const coinGroups = React.useMemo(() => groupByCoin(currencies ?? []), [currencies]);
-    
+
+    // The default view is the curated shortlist only — hundreds of raw
+    // NOWPayments-supported tickers would otherwise all render at once.
+    // Searching intentionally reaches into the full, uncurated set below,
+    // since that's the whole point of a search escape hatch.
+    const curatedGroups = React.useMemo(
+        () => coinGroups.filter((g) => g.variants.some((v) => v.curated)),
+        [coinGroups],
+    );
+
     const searchResults = React.useMemo(() => {
         const query = search.trim().toLowerCase();
-        if (!query) return coinGroups;
-        
+        if (!query) return curatedGroups;
+
         return coinGroups.filter(g => {
             if (g.coin.toLowerCase().includes(query)) return true;
             if (g.representative.name?.toLowerCase().includes(query)) return true;
             return g.variants.some((v) => v.code.toLowerCase().includes(query));
         });
-    }, [coinGroups, search]);
+    }, [coinGroups, curatedGroups, search]);
 
     return (
         <div className={cn("mx-auto", isMobile ? "w-full px-3 pb-12 md:pb-20 pt-6 min-h-screen" : "w-full flex flex-col h-full")}>
             {/* Header */}
-            <div className={cn("flex items-center justify-between mb-8", !isMobile && "px-6 pt-6")}>
-                <div className="flex items-center gap-4">
+            <div className={cn("flex items-center justify-between gap-2 mb-6 sm:mb-8", !isMobile && "px-6 pt-6")}>
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                     {isMobile && (
-                        <button 
+                        <button
                             onClick={onBack}
-                            className="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-white/5 border border-border text-ink hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white dark:bg-white/5 border border-border text-ink hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
                         >
                             <ArrowLeft className="h-5 w-5" />
                         </button>
                     )}
-                    <div>
-                        <h1 className={cn("font-black text-ink tracking-tight", isMobile ? "text-2xl" : "text-xl")}>Select Asset</h1>
+                    <div className="min-w-0">
+                        <h1 className={cn("font-black text-ink tracking-tight truncate", isMobile ? "text-xl sm:text-2xl" : "text-xl")}>Select Asset</h1>
                     </div>
                 </div>
-                
-                <div className="flex items-center gap-2">
-                    <button 
+
+                <div className="flex items-center gap-2 shrink-0">
+                    <button
                         onClick={handleRefresh}
                         className={cn("flex h-9 w-9 items-center justify-center rounded-full bg-white dark:bg-white/5 border border-border text-ink hover:bg-gray-50 dark:hover:bg-white/10 transition-colors", pricesFetching && "opacity-50")}
                         disabled={pricesFetching}
@@ -77,7 +86,7 @@ export function AssetSelectionList({ onSelectGroup, onBack, isMobile = false }: 
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search all coins..."
-                    className="block w-full rounded-2xl border border-border bg-white dark:bg-gray-900/50 py-4 pl-12 pr-4 text-sm font-semibold text-ink placeholder:text-muted focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10 transition-all shadow-sm"
+                    className="block w-full rounded-2xl border border-border bg-white dark:bg-gray-900/50 py-3.5 sm:py-4 pl-12 pr-4 text-sm font-semibold text-ink placeholder:text-muted focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10 transition-all shadow-sm"
                 />
             </div>
 
@@ -99,7 +108,7 @@ export function AssetSelectionList({ onSelectGroup, onBack, isMobile = false }: 
                     <div className="space-y-3">
                         {searchResults.map((group) => {
                             const price = pricesData?.prices[group.coin];
-                            
+
                             return (
                                 <button
                                     key={group.coin}
@@ -115,17 +124,19 @@ export function AssetSelectionList({ onSelectGroup, onBack, isMobile = false }: 
                                                     {group.representative.name ?? group.coin}
                                                 </span>
                                                 <span className="text-xs font-bold text-muted shrink-0">
-                                                    {group.coin}
-                                                </span>
-                                                {group.representative.recommended && !search.trim() && (
-                                                    <span className="text-[10px] font-black bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
-                                                        Popular
+                                                    <span className="text-xs font-bold text-muted shrink-0">
+                                                        {group.coin}
                                                     </span>
-                                                )}
+                                                    {group.representative.recommended && !search.trim() && (
+                                                        <span className="text-[10px] font-black bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
+                                                            Popular
+                                                        </span>
+                                                    )}
                                             </div>
                                             <span className="text-[11px] font-bold text-muted uppercase tracking-wider block mt-1 truncate">
-                                                {group.variants.length > 1 ? `${group.variants.length} Networks` : (group.representative.network ?? "Mainnet")}
-                                            </span>
+                                                <span className="text-[11px] font-bold text-muted uppercase tracking-wider block mt-1 truncate">
+                                                    {group.variants.length > 1 ? `${group.variants.length} Networks` : (group.representative.network ?? "Mainnet")}
+                                                </span>
                                         </div>
                                     </div>
                                     {/* Right Zone: Fixed width, right aligned, tabular numbers */}

@@ -523,10 +523,12 @@ function emptyFcyForm(): FcyFormState {
 }
 
 /**
- * Uploads a document (PDF/JPEG/PNG, max 10MB) and hands the returned id
- * back to the parent form — the parent never sees a URL, only the id (see
- * RequestFcyAccountDto's own note on why: the backend resolves it to a
- * fresh, short-lived signed URL right before submitting to Fincra).
+ * Uploads a document (JPEG/PNG only, max 10MB — PDF deliberately excluded,
+ * see the backend's FcyDocument class-level note for why) and hands the
+ * returned id back to the parent form — the parent never sees a URL, only
+ * the id. Confirmed live 2026-08-31: the backend stores this as a plain
+ * public Cloudinary URL, not a signed/private one — a real, deliberate
+ * privacy tradeoff, not an oversight.
  */
 function DocumentUploadField({
     label,
@@ -565,11 +567,11 @@ function DocumentUploadField({
     };
 
     return (
-        <Field label={label} hint="PDF, JPEG or PNG — max 10MB">
+        <Field label={label} hint="JPEG or PNG — max 10MB">
             <input
                 ref={inputRef}
                 type="file"
-                accept="application/pdf,image/jpeg,image/png"
+                accept="image/jpeg,image/png"
                 className="hidden"
                 onChange={handleFileChange}
             />

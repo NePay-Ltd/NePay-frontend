@@ -114,9 +114,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
                 completeLogin(data);
             } catch (err: any) {
-                // Handle API error structure if available
-                const msg = err.response?.data?.message || "Invalid credentials.";
-                toast.error(msg);
+                // ACCOUNT_SUSPENDED and INVALID_CREDENTIALS are shown inline by the
+                // login page itself (a persistent banner / field error respectively)
+                // — a toast here would be redundant, and for a suspended account is
+                // actively harmful: toasts auto-dismiss, so a message the user needs
+                // to actually act on (contact support) must not be a toast.
+                const code = err.response?.data?.code;
+                if (code !== "ACCOUNT_SUSPENDED" && code !== "INVALID_CREDENTIALS") {
+                    const msg = err.response?.data?.message || "Invalid credentials.";
+                    toast.error(msg);
+                }
                 throw err;
             } finally {
                 setIsMutating(false);
