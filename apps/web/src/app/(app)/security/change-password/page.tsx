@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronLeft, Eye, EyeOff } from "lucide-react";
+import { IconEye as Eye, IconEyeOff as EyeOff } from "@/components/icons";
+import { ChevronLeft } from "lucide-react";;
 import { toast } from "sonner";
 import { cn } from "@/lib/cn";
 

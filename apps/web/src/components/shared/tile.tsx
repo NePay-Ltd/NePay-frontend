@@ -25,7 +25,7 @@ export function Tile({
     label,
     comingSoon = false,
     badge,
-    iconBg = "bg-violet-50",
+    iconBg = "bg-transparent",
     iconColor = "text-violet-600",
     className,
     disabled,
@@ -50,7 +50,7 @@ export function Tile({
                 </span>
             )}
             <span className={cn("flex h-9 w-9 items-center justify-center rounded-xl", iconBg)}>
-                <Icon className={cn("h-5 w-5", iconColor)} aria-hidden="true" />
+                <Icon className={cn("h-6 w-6", iconColor)} strokeWidth={2} aria-hidden="true" />
             </span>
             <span className="text-sm font-bold leading-tight text-ink">{label}</span>
 

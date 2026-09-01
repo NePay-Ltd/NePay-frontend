@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { ArrowLeft, ChevronRight, Loader2 } from "lucide-react";
+import { IconArrowLeft as ArrowLeft, IconChevronRight as ChevronRight } from "@/components/icons";
+import { Loader2 } from "lucide-react";;
 import { cn } from "@/lib/cn";
 import { CoinGroup, CurrencyAvatar } from "./shared";
 

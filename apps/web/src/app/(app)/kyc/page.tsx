@@ -4,15 +4,8 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-    ShieldCheck,
-    AlertCircle,
-    CreditCard,
-    ArrowRight,
-    Lock,
-    BadgeCheck,
-    XCircle,
-} from "lucide-react";
+import { IconCard as CreditCard, IconLock as Lock } from "@/components/icons";
+import { ShieldCheck, AlertCircle, ArrowRight, BadgeCheck, XCircle } from "lucide-react";;
 import { toast } from "sonner";
 
 import {

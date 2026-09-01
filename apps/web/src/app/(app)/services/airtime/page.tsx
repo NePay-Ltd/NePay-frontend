@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Smartphone } from "lucide-react";
+import { IconArrowLeft as ArrowLeft, IconAirtime as Smartphone } from "@/components/icons";;
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
@@ -145,9 +145,6 @@ export default function AirtimePage() {
                         <ArrowLeft className="h-5 w-5" />
                     </button>
                     <div className="flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-100 text-violet-700">
-                            <Smartphone className="h-4 w-4" />
-                        </div>
                         <h1 className="text-2xl font-black text-ink tracking-tight">Airtime</h1>
                     </div>
                 </div>

@@ -1,4 +1,5 @@
-import { TrendingUp, TrendingDown, Scale, History } from "lucide-react";
+import { IconHistory as History } from "@/components/icons";
+import { TrendingUp, TrendingDown, Scale } from "lucide-react";;
 
 import { cn } from "@/lib/cn";
 import { useUiStore } from "@/lib/stores/ui-store";

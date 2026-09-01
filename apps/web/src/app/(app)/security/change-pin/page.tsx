@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";;
 import { toast } from "sonner";
 
 import { useChangePin } from "@/lib/queries/security";

@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { User, Shield, Sliders, Smartphone, LogOut, ShieldCheck, Mail, Lock } from "lucide-react";
+import { IconUser as User, IconShield as Shield, IconSliders as Sliders, IconAirtime as Smartphone, IconLogOut as LogOut, IconLock as Lock } from "@/components/icons";
+import { ShieldCheck, Mail } from "lucide-react";;
 import { Button } from "@/components/shared/button";
 import { Panel, PanelBody, PanelHeader } from "@/components/shared/panel";
 import { useAuth } from "@/lib/auth-context";
@@ -82,11 +83,6 @@ export default function SettingsPage() {
                                             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-violet-100 text-2xl font-bold text-violet-700">
                                                 {user?.firstName?.charAt(0) || "U"}
                                             </div>
-                                            <div>
-                                                <Button variant="quiet" className="font-bold text-violet-700 hover:bg-violet-50">
-                                                    Change avatar
-                                                </Button>
-                                            </div>
                                         </div>
                                         
                                         <div className="grid gap-6 sm:grid-cols-2">
@@ -100,6 +96,10 @@ export default function SettingsPage() {
                                                     <Mail className="absolute left-4 top-3.5 h-4 w-4 text-muted" />
                                                     <input type="email" defaultValue={user?.email || "ugo@example.com"} className="w-full rounded-xl border border-border bg-gray-50 pl-11 pr-4 py-3 text-sm font-bold text-ink focus:border-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-600" />
                                                 </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[11px] font-bold uppercase tracking-widest text-muted">Username</label>
+                                                <input type="text" readOnly defaultValue={user?.username ? `@${user.username}` : "—"} className="w-full rounded-xl border border-border bg-gray-100 px-4 py-3 text-sm font-bold text-muted cursor-not-allowed" />
                                             </div>
                                             <div className="space-y-2">
                                                 <label className="text-[11px] font-bold uppercase tracking-widest text-muted">Phone Number</label>

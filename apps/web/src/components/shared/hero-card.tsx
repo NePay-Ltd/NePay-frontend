@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Plus, Building2, ArrowLeftRight } from "lucide-react";
+import { IconEye as Eye, IconEyeOff as EyeOff, IconPlus as Plus, IconBuilding as Building2 } from "@/components/icons";
+import { ArrowLeftRight } from "lucide-react";;
 
 import { Button } from "@/components/shared/button";
 import { Sparkline } from "@/components/shared/sparkline";

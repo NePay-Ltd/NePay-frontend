@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Search, MapPin, Check, History } from "lucide-react";
+import { IconClose as X, IconSearch as Search, IconCheck as Check, IconHistory as History } from "@/components/icons";
+import { MapPin } from "lucide-react";;
 import { AIRPORTS, type Airport } from "@/lib/queries/flights";
 
 interface AirportBottomSheetProps {

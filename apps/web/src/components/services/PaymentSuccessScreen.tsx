@@ -3,7 +3,7 @@
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Check } from "lucide-react";
+import { IconCheck as Check } from "@/components/icons";;
 import { Button } from "@/components/shared/button";
 import { formatNaira } from "@/lib/format";
 

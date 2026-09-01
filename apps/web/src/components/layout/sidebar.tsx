@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { X, LogOut, Moon, Sun, Monitor } from "lucide-react";
+import { IconClose as X, IconLogOut as LogOut, IconMoon as Moon, IconSun as Sun } from "@/components/icons";
+import { Monitor } from "lucide-react";;
 import { useRouter, usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 

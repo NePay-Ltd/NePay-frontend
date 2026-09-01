@@ -2,15 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import {
-    Check,
-    Clock,
-    X,
-    ArrowDownToLine,
-    Search,
-    Banknote,
-    ArrowLeft
-} from "lucide-react";
+import { IconCheck as Check, IconClock as Clock, IconClose as X, IconSearch as Search, IconArrowLeft as ArrowLeft } from "@/components/icons";
+import { ArrowDownToLine, Banknote } from "lucide-react";;
 
 import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/format";

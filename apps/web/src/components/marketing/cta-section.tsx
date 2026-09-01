@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Apple, Play } from "lucide-react";
+import { Apple, Play } from "lucide-react";;
 import { Section } from "./section";
 
 export function CtaSection() {

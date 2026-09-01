@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "lucide-react";
+import { IconEye as Eye, IconEyeOff as EyeOff } from "@/components/icons";;
 import { toast } from "sonner";
 
 import { loginSchema, type LoginValues } from "@/lib/schemas/auth";

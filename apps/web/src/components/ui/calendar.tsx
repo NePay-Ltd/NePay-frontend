@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { IconChevronRight as ChevronRight } from "@/components/icons";
+import { ChevronLeft } from "lucide-react";
 import { DayPicker } from "react-day-picker"
 
 import { cn } from "@/lib/cn"

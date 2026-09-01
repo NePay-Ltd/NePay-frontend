@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Search, ArrowLeft, Calculator, RefreshCcw } from "lucide-react";
+import { IconSearch as Search, IconArrowLeft as ArrowLeft } from "@/components/icons";
+import { Calculator, RefreshCcw } from "lucide-react";;
 import { cn } from "@/lib/cn";
 import { useCryptoCurrencies, useCryptoPrices } from "@/lib/queries/crypto";
 import { formatNaira } from "@/lib/format";
@@ -38,7 +39,7 @@ export function AssetSelectionList({ onSelectGroup, onBack, isMobile = false }: 
     }, [coinGroups, search]);
 
     return (
-        <div className={cn("mx-auto w-full", isMobile ? "pb-12 md:pb-20 px-6 pt-6 min-h-screen" : "flex flex-col h-full")}>
+        <div className={cn("mx-auto", isMobile ? "w-full px-3 pb-12 md:pb-20 pt-6 min-h-screen" : "w-full flex flex-col h-full")}>
             {/* Header */}
             <div className={cn("flex items-center justify-between mb-8", !isMobile && "px-6 pt-6")}>
                 <div className="flex items-center gap-4">
@@ -103,32 +104,34 @@ export function AssetSelectionList({ onSelectGroup, onBack, isMobile = false }: 
                                 <button
                                     key={group.coin}
                                     onClick={() => onSelectGroup(group)}
-                                    className="w-full flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-white/5 border border-border hover:border-violet-400 hover:shadow-md dark:hover:bg-white/10 transition-all group/item text-left"
+                                    className="w-full flex items-center justify-between p-4 h-[72px] rounded-2xl bg-white dark:bg-white/5 border border-border hover:border-violet-400 hover:shadow-md dark:hover:bg-white/10 transition-all group/item text-left"
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <CurrencyAvatar currency={group.representative} className="h-11 w-11 text-lg shadow-sm" />
-                                        <div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm font-bold text-ink">
+                                    {/* Left Zone: Flexible width, truncates long text */}
+                                    <div className="flex items-center gap-4 flex-1 min-w-0 pr-4">
+                                        <CurrencyAvatar currency={group.representative} className="h-11 w-11 shrink-0 text-lg shadow-sm" />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <span className="text-sm font-bold text-ink truncate">
                                                     {group.representative.name ?? group.coin}
                                                 </span>
-                                                <span className="text-xs font-bold text-muted">
+                                                <span className="text-xs font-bold text-muted shrink-0">
                                                     {group.coin}
                                                 </span>
                                                 {group.representative.recommended && !search.trim() && (
-                                                    <span className="text-[10px] font-black bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                                    <span className="text-[10px] font-black bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
                                                         Popular
                                                     </span>
                                                 )}
                                             </div>
-                                            <span className="text-[11px] font-bold text-muted uppercase tracking-wider block mt-1">
+                                            <span className="text-[11px] font-bold text-muted uppercase tracking-wider block mt-1 truncate">
                                                 {group.variants.length > 1 ? `${group.variants.length} Networks` : (group.representative.network ?? "Mainnet")}
                                             </span>
                                         </div>
                                     </div>
-                                    <div className="text-right">
+                                    {/* Right Zone: Fixed width, right aligned, tabular numbers */}
+                                    <div className="w-[120px] shrink-0 text-right">
                                         {price ? (
-                                            <span className="block font-mono text-sm font-bold text-ink">
+                                            <span className="block font-mono text-sm font-bold text-ink tabular-nums">
                                                 {formatNaira(Number(price))}
                                             </span>
                                         ) : (

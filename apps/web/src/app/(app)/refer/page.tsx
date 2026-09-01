@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Copy, MessageCircle, Twitter, Users, UserCheck } from "lucide-react";
+import { IconCopy as Copy, IconUsers as Users } from "@/components/icons";
+import { MessageCircle, Twitter, UserCheck } from "lucide-react";;
 import { toast } from "sonner";
 
 import { useReferralSummary } from "@/lib/queries/referrals";

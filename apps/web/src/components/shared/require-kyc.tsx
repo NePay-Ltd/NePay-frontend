@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Lock } from "lucide-react";
+import { IconLock as Lock } from "@/components/icons";;
 
 import { useAuth } from "@/lib/auth-context";
 import { EmptyState } from "@/components/shared/empty-state";

@@ -1,17 +1,8 @@
 "use client";
 
 import * as React from "react";
-import {
-    Copy,
-    AlertCircle,
-    Info,
-    Clock,
-    CheckCircle2,
-    XCircle,
-    Loader2,
-    RotateCcw,
-    ArrowLeft,
-} from "lucide-react";
+import { IconCopy as Copy, IconClock as Clock, IconArrowLeft as ArrowLeft } from "@/components/icons";
+import { AlertCircle, Info, CheckCircle2, XCircle, Loader2, RotateCcw, Wallet } from "lucide-react";;
 import { toast } from "sonner";
 
 import { RequireKyc } from "@/components/shared/require-kyc";
@@ -55,9 +46,18 @@ function useCountdown(expiresAt: string | undefined) {
 }
 
 function formatCountdown(ms: number) {
+    if (ms <= 0) return "0sec";
     const totalSeconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
+
+    if (days > 0) {
+        return `${days}d:${hours}hr:${minutes}min:${seconds}sec`;
+    } else if (hours > 0) {
+        return `${hours}hr:${minutes}min:${seconds}sec`;
+    }
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
@@ -136,11 +136,12 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
     if (!assetCode) {
         return (
             <div className="flex flex-col items-center justify-center p-12 h-full bg-gray-50/50 dark:bg-white-[0.02]">
-                <div className="h-16 w-16 rounded-full bg-violet-100 dark:bg-violet-900/20 flex items-center justify-center mb-4">
-                    <Loader2 className="h-8 w-8 text-violet-300" />
+                <div className="relative h-32 w-32 rounded-full bg-violet-100 dark:bg-violet-900/20 flex items-center justify-center mb-6 shadow-inner">
+                    <div className="absolute inset-2 rounded-full border-2 border-dashed border-violet-200 dark:border-violet-800/50" />
+                    <Wallet className="h-12 w-12 text-violet-400 dark:text-violet-500" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-lg font-bold text-ink">Select an Asset</h3>
-                <p className="text-sm text-muted mt-1 text-center max-w-[250px]">Choose a cryptocurrency and network from the list to view deposit details.</p>
+                <h3 className="text-xl font-black text-ink">Select an Asset</h3>
+                <p className="text-[15px] font-medium text-muted mt-2 text-center max-w-[280px]">Choose a cryptocurrency and network from the list to view deposit details.</p>
             </div>
         );
     }

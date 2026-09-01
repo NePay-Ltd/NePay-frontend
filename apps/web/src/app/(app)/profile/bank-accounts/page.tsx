@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Building2, ChevronLeft, Trash2, Plus, AlertCircle } from "lucide-react";
+import { IconBuilding as Building2, IconPlus as Plus } from "@/components/icons";
+import { ChevronLeft, Trash2, AlertCircle } from "lucide-react";;
 import { toast } from "sonner";
 
 import { 

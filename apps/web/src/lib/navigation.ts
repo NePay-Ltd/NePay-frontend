@@ -1,24 +1,5 @@
-import {
-    LayoutDashboard,
-    Wallet,
-    LayoutGrid,
-    Receipt,
-    Gift,
-    Plane,
-    CreditCard,
-    Download,
-    Building2,
-    Bell,
-    User,
-    ShieldCheck,
-    Home,
-    Users,
-    PlusCircle,
-    Trophy,
-    UserPlus,
-    Globe,
-    type LucideIcon,
-} from "lucide-react";
+import { IconWallet as Wallet, IconGrid as LayoutGrid, IconGift as Gift, IconPlane as Plane, IconCard as CreditCard, IconBuilding as Building2, IconBell as Bell, IconUser as User, IconHome as Home, IconUsers as Users, IconTrophy as Trophy, IconData as Globe } from "@/components/icons";
+import { LayoutDashboard, Receipt, Download, ShieldCheck, PlusCircle, UserPlus, type LucideIcon } from "lucide-react";;
 
 export interface NavItem {
     key: string;

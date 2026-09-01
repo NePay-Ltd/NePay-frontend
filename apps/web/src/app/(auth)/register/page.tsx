@@ -4,7 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, UserPlus, Phone, AtSign, Lock, Check } from "lucide-react";
+import { IconEye as Eye, IconEyeOff as EyeOff, IconLock as Lock, IconCheck as Check } from "@/components/icons";
+import { UserPlus, Phone, AtSign } from "lucide-react";;
 import { toast } from "sonner";
 
 import { registerSchema, type RegisterValues } from "@/lib/schemas/auth";

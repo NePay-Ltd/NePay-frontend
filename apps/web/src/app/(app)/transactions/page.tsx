@@ -3,7 +3,8 @@
 import * as React from "react";
 import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Receipt, ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { IconChevronRight as ChevronRight } from "@/components/icons";
+import { Receipt, ChevronLeft, Info } from "lucide-react";;
 
 import { useInfiniteTransactions } from "@/lib/queries/transactions";
 

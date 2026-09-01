@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { ArrowUpRight, Clock3, Sparkles, Target, Trophy, PartyPopper, Rocket } from "lucide-react";
+import { IconArrowUpRight as ArrowUpRight, IconTrophy as Trophy } from "@/components/icons";
+import { Clock3, Sparkles, Target, PartyPopper, Rocket } from "lucide-react";;
 import { motion, AnimatePresence } from "framer-motion";
 import { Panel, PanelBody, PanelHeader } from "@/components/shared/panel";
 import { Skeleton } from "@/components/shared/skeletons";

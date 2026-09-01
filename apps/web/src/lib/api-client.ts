@@ -115,8 +115,12 @@ apiClient.interceptors.response.use(
             
             // If the code is INVALID_CREDENTIALS, it's a login failure, not an expiry.
             const data = error.response.data as any;
-            if (data?.code === "INVALID_CREDENTIALS") {
-                return Promise.reject(error);
+            if (data?.code === "INVALID_CREDENTIALS" || data?.code === "UNAUTHENTICATED") {
+                // If the request was made to an auth endpoint (like login or verify-mfa), 
+                // do not attempt to refresh or redirect, let the page handle it.
+                if (originalRequest.url?.includes("/auth/login") || originalRequest.url?.includes("/auth/2fa/verify-login")) {
+                    return Promise.reject(error);
+                }
             }
 
             const tokens = getTokens();

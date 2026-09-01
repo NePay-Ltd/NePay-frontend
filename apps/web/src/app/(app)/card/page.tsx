@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Lock, ArrowRight, Eye, Plus, Settings, FileText, Smartphone, Bell, BellRing } from "lucide-react";
+import { IconLock as Lock, IconEye as Eye, IconPlus as Plus, IconAirtime as Smartphone, IconBell as Bell } from "@/components/icons";
+import { ArrowRight, Settings, FileText, BellRing } from "lucide-react";;
 import { Button } from "@/components/shared/button";
 import { NePayCardVisual } from "@/components/shared/nepay-card-visual";
 import { Panel } from "@/components/shared/panel";

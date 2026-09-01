@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { format } from "date-fns";
-import { X, Copy, Check, Download, Share2, ChevronDown, AlertTriangle, Clock, ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { IconClose as X, IconCopy as Copy, IconCheck as Check, IconChevronDown as ChevronDown, IconAlertTriangle as AlertTriangle, IconClock as Clock, IconArrowUpRight as ArrowUpRight } from "@/components/icons";
+import { Download, Share2, ArrowDownLeft } from "lucide-react";;
 import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 import { TxIcon, type TxCategory } from "./tx-icon";
 import { formatNaira } from "@/lib/format";

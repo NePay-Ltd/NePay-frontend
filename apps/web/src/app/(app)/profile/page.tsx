@@ -6,20 +6,8 @@ import { formatDate } from "@/lib/date";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-    User as UserIcon,
-    Landmark,
-    ShieldCheck,
-    Lock,
-    LifeBuoy,
-    Info,
-    LogOut,
-    ChevronRight,
-    Bell,
-    Mail,
-    AlertCircle,
-    Receipt
-} from "lucide-react";
+import { IconUser as UserIcon, IconBuilding as Landmark, IconLock as Lock, IconLogOut as LogOut, IconChevronRight as ChevronRight, IconBell as Bell } from "@/components/icons";
+import { ShieldCheck, LifeBuoy, Info, Mail, AlertCircle, Receipt } from "lucide-react";;
 
 import { useAuth } from "@/lib/auth-context";
 import { useProfile, useUpdateProfile } from "@/lib/queries/profile";
@@ -59,10 +47,12 @@ const editProfileSchema = z.object({
     lastName: z.string().min(1, "Last name is required"),
     phoneNumber: z
         .string()
-        .regex(/^\+?[1-9]\d{7,14}$/, "Enter a valid phone number, e.g. +2348012345678"),
+        .regex(/^\+?[1-9]\d{7,14}$/, "Enter a valid phone number, e.g. +2348012345678")
+        .optional()
+        .or(z.literal("")),
 });
 
-type EditProfileFormValues = z.infer<typeof editProfileSchema>;
+export type EditProfileFormValues = z.infer<typeof editProfileSchema>;
 
 // ─── Main Page ──────────────────────────────────────────────────────────────
 
@@ -379,7 +369,7 @@ export default function ProfilePage() {
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={onLogout}
-                            className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
+                            className="bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
                         >
                             Log out
                         </AlertDialogAction>

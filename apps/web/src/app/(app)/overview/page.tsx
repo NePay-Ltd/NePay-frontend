@@ -4,21 +4,8 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-    Plus,
-    Smartphone,
-    Lightbulb,
-    Gift,
-    Plane,
-    ShieldCheck,
-    ArrowRight,
-    Clock,
-    Dices,
-    Tv,
-    Wifi,
-    MoreHorizontal,
-    ChevronRight,
-} from "lucide-react";
+import { IconPlus as Plus, IconAirtime as Smartphone, IconGift as Gift, IconPlane as Plane, IconClock as Clock, IconTv as Tv, IconData as Wifi, IconChevronRight as ChevronRight } from "@/components/icons";
+import { Lightbulb, ShieldCheck, ArrowRight, Dices, MoreHorizontal } from "lucide-react";;
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-context";
@@ -43,12 +30,11 @@ import {
 } from "@/components/shared/skeletons";
 
 const QUICK_ACTIONS = [
-    { label: "Airtime", icon: Smartphone, href: "/services/airtime", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-indigo-600 dark:text-indigo-400" },
-    { label: "Data", icon: Wifi, href: "/services/data", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-blue-600 dark:text-blue-400" },
-    { label: "Flight", icon: Plane, href: "/flights", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-emerald-600 dark:text-emerald-400" },
-    { label: "TV", icon: Tv, href: "/services/tv", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-rose-600 dark:text-rose-400" },
-    { label: "Gift Card", icon: Gift, href: "/gift-cards", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-amber-600 dark:text-amber-400" },
-    { label: "More", icon: MoreHorizontal, href: "/services", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-zinc-500 group-hover:text-zinc-900 dark:text-zinc-400 dark:group-hover:text-zinc-200" },
+    { label: "Airtime", icon: Smartphone, href: "/services/airtime", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-violet-600" },
+    { label: "Data", icon: Wifi, href: "/services/data", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-violet-600" },
+    { label: "Gift Card", icon: Gift, href: "/gift-cards", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-violet-600" },
+    { label: "Electricity", icon: Lightbulb, href: "/services/electricity", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-violet-600" },
+    { label: "More", icon: MoreHorizontal, href: "/services", bg: "bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group", iconColor: "text-violet-600" },
 ] as const;
 
 export default function OverviewPage() {
@@ -86,7 +72,7 @@ export default function OverviewPage() {
     const kpiData = summary?.kpi;
 
     return (
-        <div className="pb-12 sm:pb-16 pt-2 sm:pt-0">
+        <div className="pb-4 sm:pb-6 pt-2 sm:pt-0">
             
             {/* ── KYC Prompt Banner (Conditional) ──────────────────────── */}
             {isMounted && !user?.kycVerified && (
@@ -131,10 +117,10 @@ export default function OverviewPage() {
                     <div className="space-y-4">
                         <h2 className="text-[15px] font-extrabold text-ink px-1">Quick actions</h2>
 
-                        <div className="grid grid-cols-3 xl:grid-cols-6 gap-3">
+                        <div className="grid grid-cols-5 gap-1 sm:gap-3">
                             {summaryLoading ? (
-                                [...Array(6)].map((_, i) => (
-                                    <div key={i} className="w-full h-[96px] bg-black/5 dark:bg-white/5 rounded-3xl animate-pulse" />
+                                [...Array(5)].map((_, i) => (
+                                    <div key={i} className="w-full h-[80px] bg-black/5 dark:bg-white/5 rounded-2xl animate-pulse" />
                                 ))
                             ) : (
                                 <>
@@ -144,14 +130,14 @@ export default function OverviewPage() {
                                             whileTap={{ scale: 0.95 }}
                                             onClick={() => router.push(action.href)}
                                             className={cn(
-                                                "w-full flex flex-col items-center justify-center rounded-3xl p-4 sm:p-5 transition-all shadow-sm",
+                                                "w-full flex flex-col items-center justify-start rounded-2xl p-2 sm:p-4 transition-all",
                                                 action.bg
                                             )}
                                         >
-                                            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-black/5 dark:bg-zinc-800/30 mb-2">
-                                                <action.icon className={cn("w-6 h-6", action.iconColor)} stroke="currentColor" />
+                                            <div className="flex items-center justify-center w-10 h-10 mb-1 sm:mb-2">
+                                                <action.icon className={cn("w-6 h-6 sm:w-7 sm:h-7", action.iconColor)} stroke="currentColor" strokeWidth={2} />
                                             </div>
-                                            <span className="text-[13px] sm:text-[15px] font-bold leading-tight text-ink dark:text-zinc-100 transition-colors duration-200">{action.label}</span>
+                                            <span className="text-[11px] sm:text-[14px] font-bold leading-tight text-ink dark:text-zinc-100 transition-colors duration-200 text-center">{action.label}</span>
                                         </motion.button>
                                     ))}
                                 </>

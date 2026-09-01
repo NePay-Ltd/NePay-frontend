@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, MonitorPlay } from "lucide-react";
+import { IconArrowLeft as ArrowLeft } from "@/components/icons";
+import { MonitorPlay } from "lucide-react";;
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
@@ -194,9 +195,6 @@ export default function TvPage() {
                         <ArrowLeft className="h-5 w-5" />
                     </button>
                     <div className="flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-100 text-pink-700">
-                            <MonitorPlay className="h-4 w-4" />
-                        </div>
                         <h1 className="text-2xl font-black text-ink tracking-tight">TV Subscription</h1>
                     </div>
                 </div>

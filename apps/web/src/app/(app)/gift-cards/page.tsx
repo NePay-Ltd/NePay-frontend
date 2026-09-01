@@ -2,12 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import {
-    Layers,
-    Gift,
-    Tag,
-    Receipt,
-} from "lucide-react";
+import { IconGift as Gift } from "@/components/icons";
+import { Layers, Tag, Receipt } from "lucide-react";;
 import { Button } from "@/components/shared/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { cn } from "@/lib/cn";

@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, GraduationCap } from "lucide-react";
+import { IconArrowLeft as ArrowLeft } from "@/components/icons";
+import { GraduationCap } from "lucide-react";;
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
@@ -136,9 +137,6 @@ export default function EducationPage() {
                         <ArrowLeft className="h-5 w-5" />
                     </button>
                     <div className="flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
-                            <GraduationCap className="h-4 w-4" />
-                        </div>
                         <h1 className="text-2xl font-black text-ink tracking-tight">Education</h1>
                     </div>
                 </div>

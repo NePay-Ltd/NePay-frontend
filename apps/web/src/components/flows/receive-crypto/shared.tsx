@@ -34,6 +34,8 @@ export function CurrencyAvatar({ currency, className }: { currency: Pick<CryptoC
                 alt="" 
                 className={cn("rounded-full bg-violet-50 object-contain", className)} 
                 onError={() => setImageError(true)}
+                loading="lazy"
+                decoding="async"
             />
         );
     }

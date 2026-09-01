@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Receipt } from "lucide-react";
+import { IconArrowLeft as ArrowLeft } from "@/components/icons";
+import { Receipt } from "lucide-react";;
 import { formatDateTime } from "@/lib/date";
 
 import { cn } from "@/lib/cn";

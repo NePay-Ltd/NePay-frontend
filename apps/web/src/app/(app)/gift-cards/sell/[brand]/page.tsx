@@ -2,11 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import {
-    ArrowLeft,
-    Loader2,
-    Camera,
-} from "lucide-react";
+import { IconArrowLeft as ArrowLeft } from "@/components/icons";
+import { Loader2, Camera } from "lucide-react";;
 import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";

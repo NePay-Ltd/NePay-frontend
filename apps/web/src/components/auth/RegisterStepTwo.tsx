@@ -3,7 +3,8 @@
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, AtSign, UserPlus } from "lucide-react";
+import { IconEye as Eye, IconEyeOff as EyeOff } from "@/components/icons";
+import { AtSign, UserPlus } from "lucide-react";;
 import Link from "next/link";
 
 import { apiClient } from "@/lib/api-client";

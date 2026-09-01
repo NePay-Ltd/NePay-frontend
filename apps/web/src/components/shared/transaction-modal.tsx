@@ -1,5 +1,6 @@
 import * as React from "react";
-import { CheckCircle2, AlertCircle, Loader2, Clock } from "lucide-react";
+import { IconClock as Clock } from "@/components/icons";
+import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";;
 
 import { Modal } from "./modal";
 import { Button } from "./button";

@@ -1,5 +1,6 @@
 import * as React from "react";
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { IconChevronRight as ChevronRight } from "@/components/icons";
+import { type LucideIcon } from "lucide-react";;
 
 import { cn } from "@/lib/cn";
 
