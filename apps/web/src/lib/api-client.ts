@@ -113,9 +113,11 @@ apiClient.interceptors.response.use(
         // Handle 401 Unauthorized
         if (error.response?.status === 401 && !originalRequest._retry) {
             
-            // If the code is INVALID_CREDENTIALS, it's a login failure, not an expiry.
+            // A login-endpoint failure, not a session expiry — let the caller's own
+            // catch handler show it inline instead of hard-redirecting to /login,
+            // which would wipe out that handler's state before it can render.
             const data = error.response.data as any;
-            if (data?.code === "INVALID_CREDENTIALS") {
+            if (data?.code === "INVALID_CREDENTIALS" || data?.code === "ACCOUNT_SUSPENDED") {
                 return Promise.reject(error);
             }
 

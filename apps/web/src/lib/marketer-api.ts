@@ -1,3 +1,4 @@
+import { ApiError } from './api';
 import type { ApiResponse } from './types/api';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://nepay-backend.onrender.com/api/v1';
@@ -18,7 +19,9 @@ export function clearMarketerToken() { localStorage.removeItem(TOKEN_KEY); }
 export async function marketerLogin(email: string, password: string) {
     const response = await fetch(`${BASE_URL}/marketer/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
     const body = await response.json();
-    if (!response.ok) throw new Error(body.message || 'Invalid credentials');
+    if (!response.ok) {
+        throw new ApiError({ status: response.status, code: body.code || 'UNKNOWN_ERROR', message: body.message || 'Invalid credentials' });
+    }
     localStorage.setItem(TOKEN_KEY, body.data.accessToken);
 }
 

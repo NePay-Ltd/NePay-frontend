@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Megaphone } from "lucide-react";
 
+import { ApiError } from "@/lib/api";
 import { marketerLogin } from "@/lib/marketer-api";
 import { Button } from "@/components/shared/button";
 import { Input } from "@/components/ui/input";
@@ -14,17 +15,23 @@ export default function MarketerLoginPage() {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [suspended, setSuspended] = useState(false);
     const [busy, setBusy] = useState(false);
 
     const submit = async (event: FormEvent) => {
         event.preventDefault();
         setBusy(true);
         setError(null);
+        setSuspended(false);
         try {
             await marketerLogin(email, password);
             router.push("/marketer/dashboard");
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Sign in failed");
+            if (err instanceof ApiError && err.code === "ACCOUNT_SUSPENDED") {
+                setSuspended(true);
+            } else {
+                setError(err instanceof Error ? err.message : "Sign in failed");
+            }
         } finally {
             setBusy(false);
         }
@@ -91,6 +98,19 @@ export default function MarketerLoginPage() {
                             </button>
                         </div>
                     </div>
+
+                    {suspended && (
+                        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                            <p className="font-bold">This partner account has been deactivated</p>
+                            <p className="mt-1 font-medium">
+                                Please contact support at{" "}
+                                <a href="mailto:info@nepay.com.ng" className="font-bold underline hover:text-red-800">
+                                    info@nepay.com.ng
+                                </a>{" "}
+                                for help restoring access.
+                            </p>
+                        </div>
+                    )}
 
                     {error && (
                         <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
