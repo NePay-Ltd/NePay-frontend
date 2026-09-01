@@ -124,19 +124,17 @@ export function AssetSelectionList({ onSelectGroup, onBack, isMobile = false }: 
                                                     {group.representative.name ?? group.coin}
                                                 </span>
                                                 <span className="text-xs font-bold text-muted shrink-0">
-                                                    <span className="text-xs font-bold text-muted shrink-0">
-                                                        {group.coin}
+                                                    {group.coin}
+                                                </span>
+                                                {group.representative.recommended && !search.trim() && (
+                                                    <span className="text-[10px] font-black bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
+                                                        Popular
                                                     </span>
-                                                    {group.representative.recommended && !search.trim() && (
-                                                        <span className="text-[10px] font-black bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
-                                                            Popular
-                                                        </span>
-                                                    )}
+                                                )}
                                             </div>
                                             <span className="text-[11px] font-bold text-muted uppercase tracking-wider block mt-1 truncate">
-                                                <span className="text-[11px] font-bold text-muted uppercase tracking-wider block mt-1 truncate">
-                                                    {group.variants.length > 1 ? `${group.variants.length} Networks` : (group.representative.network ?? "Mainnet")}
-                                                </span>
+                                                {group.variants.length > 1 ? `${group.variants.length} Networks` : (group.representative.network ?? "Mainnet")}
+                                            </span>
                                         </div>
                                     </div>
                                     {/* Right Zone: Fixed width, right aligned, tabular numbers */}
