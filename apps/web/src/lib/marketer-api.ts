@@ -25,6 +25,25 @@ export async function marketerLogin(email: string, password: string) {
     localStorage.setItem(TOKEN_KEY, body.data.accessToken);
 }
 
+/**
+ * A locked-out marketer's "I forgot my password" report. There is no
+ * self-service reset here — this just records the reason and emails an
+ * admin (see MarketersService.requestPasswordReset on the backend); the
+ * response is the same whether or not the email matched an account, so it
+ * carries no signal either way.
+ */
+export async function requestMarketerPasswordReset(email: string, reason: string) {
+    const response = await fetch(`${BASE_URL}/marketer/auth/password-reset-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, reason }),
+    });
+    const body = await response.json();
+    if (!response.ok) {
+        throw new ApiError({ status: response.status, code: body.code || 'UNKNOWN_ERROR', message: body.message || 'Could not submit your request' });
+    }
+}
+
 export async function getMarketerDashboard() {
     const response = await fetch(`${BASE_URL}/marketer/me/dashboard`, { headers: { Authorization: `Bearer ${getMarketerToken()}` } });
     const body = await response.json() as ApiResponse<MarketerDashboard> & { message?: string };

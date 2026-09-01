@@ -5,9 +5,16 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Megaphone } from "lucide-react";
 
 import { ApiError } from "@/lib/api";
-import { marketerLogin } from "@/lib/marketer-api";
+import { marketerLogin, requestMarketerPasswordReset } from "@/lib/marketer-api";
 import { Button } from "@/components/shared/button";
 import { Input } from "@/components/ui/input";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function MarketerLoginPage() {
     const router = useRouter();
@@ -17,6 +24,13 @@ export default function MarketerLoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [suspended, setSuspended] = useState(false);
     const [busy, setBusy] = useState(false);
+
+    const [forgotOpen, setForgotOpen] = useState(false);
+    const [resetEmail, setResetEmail] = useState("");
+    const [resetReason, setResetReason] = useState("");
+    const [resetBusy, setResetBusy] = useState(false);
+    const [resetError, setResetError] = useState<string | null>(null);
+    const [resetSubmitted, setResetSubmitted] = useState(false);
 
     const submit = async (event: FormEvent) => {
         event.preventDefault();
@@ -34,6 +48,28 @@ export default function MarketerLoginPage() {
             }
         } finally {
             setBusy(false);
+        }
+    };
+
+    const openForgotPassword = () => {
+        setResetEmail(email);
+        setResetReason("");
+        setResetError(null);
+        setResetSubmitted(false);
+        setForgotOpen(true);
+    };
+
+    const submitForgotPassword = async (event: FormEvent) => {
+        event.preventDefault();
+        setResetBusy(true);
+        setResetError(null);
+        try {
+            await requestMarketerPasswordReset(resetEmail, resetReason);
+            setResetSubmitted(true);
+        } catch (err) {
+            setResetError(err instanceof Error ? err.message : "Could not submit your request");
+        } finally {
+            setResetBusy(false);
         }
     };
 
@@ -97,6 +133,15 @@ export default function MarketerLoginPage() {
                                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                             </button>
                         </div>
+                        <div className="text-right">
+                            <button
+                                type="button"
+                                onClick={openForgotPassword}
+                                className="text-xs font-bold text-violet-700 hover:text-violet-600 hover:underline"
+                            >
+                                Forgot your password?
+                            </button>
+                        </div>
                     </div>
 
                     {suspended && (
@@ -135,6 +180,85 @@ export default function MarketerLoginPage() {
                     </a>
                 </p>
             </div>
+
+            <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
+                <DialogContent className="sm:max-w-md">
+                    {resetSubmitted ? (
+                        <>
+                            <DialogHeader>
+                                <DialogTitle>Request received</DialogTitle>
+                                <DialogDescription>
+                                    You&apos;ll receive a new password from the admin within 24 hours or less.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <Button
+                                type="button"
+                                variant="primary"
+                                className="mt-2 h-11 w-full font-bold"
+                                onClick={() => setForgotOpen(false)}
+                            >
+                                Done
+                            </Button>
+                        </>
+                    ) : (
+                        <>
+                            <DialogHeader>
+                                <DialogTitle>Reset your password</DialogTitle>
+                                <DialogDescription>
+                                    There&apos;s no self-service reset for partner accounts. Tell us why, and an admin will
+                                    verify and issue you a new password.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <form onSubmit={submitForgotPassword} className="space-y-4">
+                                <div className="space-y-2">
+                                    <label htmlFor="reset-email" className="text-sm font-bold text-ink">
+                                        Email
+                                    </label>
+                                    <Input
+                                        id="reset-email"
+                                        type="email"
+                                        required
+                                        autoComplete="username"
+                                        placeholder="name@example.com"
+                                        value={resetEmail}
+                                        onChange={(e) => setResetEmail(e.target.value)}
+                                        className="h-11 text-base"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="reset-reason" className="text-sm font-bold text-ink">
+                                        Why are you requesting a reset?
+                                    </label>
+                                    <textarea
+                                        id="reset-reason"
+                                        required
+                                        minLength={3}
+                                        maxLength={1000}
+                                        rows={3}
+                                        placeholder="e.g. I forgot my password and no longer have access to reset it myself."
+                                        value={resetReason}
+                                        onChange={(e) => setResetReason(e.target.value)}
+                                        className="flex w-full rounded-sm border border-border bg-white px-3 py-2 text-sm text-ink placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-1"
+                                    />
+                                </div>
+                                {resetError && (
+                                    <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
+                                        {resetError}
+                                    </p>
+                                )}
+                                <Button
+                                    type="submit"
+                                    variant="primary"
+                                    className="h-11 w-full font-bold"
+                                    loading={resetBusy}
+                                >
+                                    {resetBusy ? "Submitting…" : "Request reset"}
+                                </Button>
+                            </form>
+                        </>
+                    )}
+                </DialogContent>
+            </Dialog>
         </main>
     );
 }
