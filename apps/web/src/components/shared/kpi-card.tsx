@@ -38,7 +38,7 @@ export function KpiCard({ label, value, change, className }: KpiCardProps) {
             </div>
             
             <p className="font-sans tabular-nums text-[24px] font-extrabold text-ink tracking-tighter leading-none mb-4 break-words">
-                {masked ? "••••••" : value}
+                {masked ? "******" : value}
             </p>
             
             {change ? (

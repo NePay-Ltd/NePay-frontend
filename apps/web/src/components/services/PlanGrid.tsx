@@ -90,12 +90,12 @@ export function PlanGrid({ plans, selectedId, onChange, isLoading }: PlanGridPro
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
                 <h4 className="text-sm font-bold text-ink">Data Bundles</h4>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
-                    <TabsList className="flex w-full overflow-x-auto no-scrollbar sm:grid sm:grid-flow-col sm:auto-cols-fr bg-gray-100 rounded-xl p-1 h-10 shrink-0">
-                        <TabsTrigger value="All" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:shadow-sm">All</TabsTrigger>
-                        {hasDaily && <TabsTrigger value="Daily" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:shadow-sm">Daily</TabsTrigger>}
-                        {hasWeekly && <TabsTrigger value="Weekly" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:shadow-sm">Weekly</TabsTrigger>}
-                        {hasMonthly && <TabsTrigger value="Monthly" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:shadow-sm">Monthly</TabsTrigger>}
-                        {hasOther && <TabsTrigger value="Other" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:shadow-sm">Other</TabsTrigger>}
+                    <TabsList className="flex w-full overflow-x-auto no-scrollbar sm:grid sm:grid-flow-col sm:auto-cols-fr bg-gray-100 dark:bg-[#1C1C1E] rounded-xl p-1 h-10 shrink-0">
+                        <TabsTrigger value="All" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:bg-white dark:data-[state=active]:bg-white/10 data-[state=active]:text-ink data-[state=active]:shadow-sm">All</TabsTrigger>
+                        {hasDaily && <TabsTrigger value="Daily" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:bg-white dark:data-[state=active]:bg-white/10 data-[state=active]:text-ink data-[state=active]:shadow-sm">Daily</TabsTrigger>}
+                        {hasWeekly && <TabsTrigger value="Weekly" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:bg-white dark:data-[state=active]:bg-white/10 data-[state=active]:text-ink data-[state=active]:shadow-sm">Weekly</TabsTrigger>}
+                        {hasMonthly && <TabsTrigger value="Monthly" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:bg-white dark:data-[state=active]:bg-white/10 data-[state=active]:text-ink data-[state=active]:shadow-sm">Monthly</TabsTrigger>}
+                        {hasOther && <TabsTrigger value="Other" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:bg-white dark:data-[state=active]:bg-white/10 data-[state=active]:text-ink data-[state=active]:shadow-sm">Other</TabsTrigger>}
                     </TabsList>
                 </Tabs>
             </div>
@@ -110,10 +110,10 @@ export function PlanGrid({ plans, selectedId, onChange, isLoading }: PlanGridPro
                             type="button"
                             onClick={() => onChange(plan.id)}
                             whileTap={{ scale: 0.96 }}
-                            className={`relative flex flex-col items-start justify-between text-left p-3 min-h-[100px] w-full rounded-2xl border-2 transition-all ${
+                            className={`relative flex flex-col items-start justify-between text-left p-3 min-h-[85px] w-full rounded-2xl border-2 transition-all ${
                                 isSelected
-                                    ? "border-violet-600 bg-violet-50/50 shadow-sm"
-                                    : "border-border bg-white hover:border-violet-200 hover:bg-gray-50"
+                                    ? "border-violet-600 bg-violet-50/50 dark:bg-violet-900/20 shadow-sm"
+                                    : "border-border bg-white dark:bg-white/5 hover:border-violet-200 dark:hover:border-white/20 hover:bg-gray-50 dark:hover:bg-white/10"
                             }`}
                         >
                             {plan.recommended && (
@@ -123,13 +123,13 @@ export function PlanGrid({ plans, selectedId, onChange, isLoading }: PlanGridPro
                             )}
                             
                             {isSelected && (
-                                <div className="absolute right-2 top-2 h-4 w-4 bg-violet-600 rounded-full flex items-center justify-center shadow-sm">
+                                <div className="absolute right-2 top-2 h-4 w-4 bg-violet-600 dark:bg-violet-500 rounded-full flex items-center justify-center shadow-sm">
                                     <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
                                 </div>
                             )}
 
                             <div>
-                                <span className={`text-lg sm:text-xl font-black tracking-tight w-full break-words ${isSelected ? 'text-violet-900' : 'text-ink'}`}>
+                                <span className={`text-base sm:text-lg font-black tracking-tight w-full break-words ${isSelected ? 'text-violet-700 dark:text-violet-300' : 'text-ink'}`}>
                                     {plan.parsedData}
                                 </span>
                                 {plan.parsedValidity && (
@@ -139,7 +139,7 @@ export function PlanGrid({ plans, selectedId, onChange, isLoading }: PlanGridPro
                                 )}
                             </div>
                             
-                            <div className={`mt-3 text-sm font-bold ${isSelected ? 'text-violet-700' : 'text-ink/80'}`}>
+                            <div className={`mt-3 text-[13px] font-bold ${isSelected ? 'text-violet-700 dark:text-violet-400' : 'text-ink/80'}`}>
                                 {formatNaira(plan.price)}
                             </div>
                         </motion.button>

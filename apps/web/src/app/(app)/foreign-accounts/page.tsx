@@ -340,7 +340,7 @@ function CurrencyPanel({
     return (
         <div className="space-y-5">
             <AccountDetails account={account} />
-            {currency === "CAD" ? <SimulateCollection account={account} /> : null}
+            {currency === "CAD" && process.env.NODE_ENV !== "production" ? <SimulateCollection account={account} /> : null}
             <Button fullWidth variant="primary" onClick={() => onConvert(account)}>
                 <ArrowRightLeft className="mr-2 h-4 w-4" />
                 Convert to Naira

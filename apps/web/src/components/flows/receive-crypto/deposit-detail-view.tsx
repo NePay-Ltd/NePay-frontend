@@ -164,7 +164,7 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
 
     return (
         <RequireKyc>
-            <div className={cn("mx-auto w-full", isMobile ? "pb-12 md:pb-20 px-4 sm:px-6 pt-4 sm:pt-6 min-h-screen" : "flex flex-col h-full")}>
+            <div className={cn("mx-auto w-full", isMobile ? "w-full pt-4" : "flex flex-col h-full")}>
                 {/* Header */}
                 <div className={cn("flex items-center justify-between gap-2 mb-4 shrink-0", !isMobile && "px-6 pt-6")}>
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -190,7 +190,7 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
 
                 <div className={cn("flex flex-col gap-6 flex-1", !isMobile && "overflow-y-auto px-6 pb-6")}>
                     {/* QR Code and Address Section */}
-                    <div className="rounded-3xl bg-white dark:bg-gray-900/50 p-4 sm:p-8 border-2 border-violet-100 dark:border-violet-900/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] flex flex-col items-center">
+                    <div className="rounded-3xl bg-white dark:bg-gray-900/50 p-3 sm:p-6 border-2 border-violet-100 dark:border-violet-900/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] flex flex-col items-center">
                         <div className="relative flex h-[180px] w-[180px] sm:h-[220px] sm:w-[220px] items-center justify-center rounded-3xl bg-white shadow-sm border-2 border-violet-100 mb-6 p-2">
                             {addressPending ? (
                                 <Skeleton className="h-full w-full rounded-3xl" />
@@ -232,12 +232,11 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                                 <Button
                                     variant="primary"
                                     size="sm"
-                                    className="shrink-0 rounded-xl px-4 h-11 font-bold bg-violet-700 hover:bg-violet-600 text-white transition-colors"
+                                    className="shrink-0 flex items-center justify-center rounded-xl w-11 h-11 bg-violet-700 hover:bg-violet-600 text-white transition-colors p-0"
                                     onClick={() => depositData?.address && handleCopy(depositData.address, "Address")}
                                     disabled={!depositData?.address || addressPending || addressExpired}
                                 >
-                                    <Copy className="mr-2 h-4 w-4" />
-                                    Copy
+                                    <Copy className="h-5 w-5" />
                                 </Button>
                             </div>
                         </div>

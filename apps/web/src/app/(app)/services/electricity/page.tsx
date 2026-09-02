@@ -3,14 +3,14 @@
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { IconArrowLeft as ArrowLeft } from "@/components/icons";
-import { Lightbulb } from "lucide-react";;
+import { Lightbulb, Check } from "lucide-react";
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
 import { useVerifyMeter, usePayElectricity, useSaveBeneficiary, useSavedBillers, useServiceTransactionStatus } from "@/lib/queries/services";
 
 // New Shared UI Components
-import { ProviderSelector } from "@/components/services/ProviderSelector";
+import { ProviderRowButton } from "@/components/services/ProviderRowButton";
 import { RecentNumbersRow } from "@/components/services/RecentNumbersRow";
 import { AmountCalculator } from "@/components/services/AmountCalculator";
 import { VerificationField } from "@/components/services/VerificationField";
@@ -184,38 +184,48 @@ export default function ElectricityPage() {
                     </div>
                 </div>
 
-                <div className="px-2 sm:px-0 space-y-8">
+                <div className="px-2 sm:px-0 space-y-4">
                     {/* Provider Selection */}
-                    <ProviderSelector 
+                    <ProviderRowButton 
                         providers={PROVIDERS}
                         selectedId={providerId}
                         onChange={setProviderId}
                     />
 
                     {/* Meter Type Toggle */}
-                    <div className="flex rounded-xl bg-gray-100 p-1">
+                    <div className="flex rounded-2xl border-2 border-border p-1 bg-white dark:bg-white/5">
                         <button
                             type="button"
                             onClick={() => setMeterType("prepaid")}
-                            className={`flex-1 rounded-lg py-2.5 text-sm font-bold transition-all ${
-                                meterType === "prepaid" ? "bg-white shadow-sm text-ink" : "text-muted hover:text-ink"
+                            className={`flex-1 rounded-xl py-2.5 text-sm font-bold transition-all ${
+                                meterType === "prepaid" ? "bg-emerald-600 text-white shadow-sm" : "text-muted hover:bg-gray-50 dark:hover:bg-white/5"
                             }`}
                         >
                             Prepaid
+                            {meterType === "prepaid" && (
+                                <span className="absolute bottom-1.5 right-2 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white">
+                                    <Check className="h-2.5 w-2.5 text-emerald-600" strokeWidth={4} />
+                                </span>
+                            )}
                         </button>
                         <button
                             type="button"
                             onClick={() => setMeterType("postpaid")}
-                            className={`flex-1 rounded-lg py-2.5 text-sm font-bold transition-all ${
-                                meterType === "postpaid" ? "bg-white shadow-sm text-ink" : "text-muted hover:text-ink"
+                            className={`flex-1 rounded-xl py-2.5 text-sm font-bold transition-all relative ${
+                                meterType === "postpaid" ? "bg-emerald-600 text-white shadow-sm" : "text-muted hover:bg-gray-50 dark:hover:bg-white/5"
                             }`}
                         >
                             Postpaid
+                            {meterType === "postpaid" && (
+                                <span className="absolute bottom-1.5 right-2 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white">
+                                    <Check className="h-2.5 w-2.5 text-emerald-600" strokeWidth={4} />
+                                </span>
+                            )}
                         </button>
                     </div>
 
                     {/* Meter Number & Verification */}
-                    <div className="space-y-4">
+                    <div className="space-y-4 pt-4">
                         <VerificationField 
                             label={`${meterType === 'prepaid' ? 'Prepaid' : 'Postpaid'} Meter Number`}
                             placeholder="Enter meter number"

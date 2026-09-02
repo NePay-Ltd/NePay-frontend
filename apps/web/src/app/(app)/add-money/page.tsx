@@ -100,7 +100,7 @@ export default function AddMoneyPage() {
     };
 
     return (
-        <div className="mx-auto max-w-2xl space-y-6">
+        <div className="w-full space-y-6">
             {/* ── Page Header ────────────────────────────────────────────── */}
             <div className="flex items-center gap-3">
                 <button
@@ -118,22 +118,24 @@ export default function AddMoneyPage() {
             </div>
 
             {/* ── Options Panel ──────────────────────────────────────────── */}
-            <Panel>
+            <Panel className="relative overflow-hidden">
                 <PanelBody className="p-2">
                     <div className="flex flex-col space-y-1">
                         {/* Option 1: Crypto Deposit */}
-                        <RowItem
-                            icon={Bitcoin}
-                            iconTint="amber"
-                            title="Crypto Deposit"
-                            subtitle="USDT / USDC — instant conversion"
-                            showChevron
-                            onClick={() => router.push("/receive-crypto")}
-                            className="rounded-lg px-3 hover:bg-violet-050"
-                        />
+                        <div className="rounded-lg overflow-hidden">
+                            <RowItem
+                                icon={Bitcoin}
+                                iconTint="amber"
+                                title="Crypto Deposit"
+                                subtitle="USDT / USDC — instant conversion"
+                                showChevron
+                                onClick={() => router.push("/receive-crypto")}
+                                className="px-3 hover:bg-violet-050 dark:hover:bg-violet-900/10"
+                            />
+                        </div>
 
                         {/* Option 2: Bank Transfer */}
-                        <div className="rounded-lg bg-white overflow-hidden">
+                        <div className="rounded-lg bg-transparent overflow-hidden">
                             <RowItem
                                 icon={Landmark}
                                 iconTint="blue"
@@ -141,12 +143,12 @@ export default function AddMoneyPage() {
                                 subtitle="Use your dedicated virtual account"
                                 showChevron={!bankExpanded}
                                 onClick={() => setBankExpanded(!bankExpanded)}
-                                className={`px-3 transition-colors hover:bg-violet-050 ${bankExpanded ? "bg-violet-050" : ""}`}
+                                className={`px-3 transition-colors hover:bg-violet-050 dark:hover:bg-violet-900/10 ${bankExpanded ? "bg-violet-050 dark:bg-violet-900/10" : ""}`}
                             />
                             
                             {bankExpanded && (
-                                    <div className="overflow-hidden bg-violet-050/50 transition-all duration-300 ease-in-out">
-                                        <div className="p-5 pl-16 border-t border-violet-100">
+                                    <div className="overflow-hidden bg-violet-050/50 dark:bg-violet-900/5 transition-all duration-300 ease-in-out">
+                                        <div className="p-4 sm:p-5 sm:pl-16 border-t border-violet-100 dark:border-violet-900/20">
                                             {vaLoading ? (
                                                 <div className="flex items-center gap-2 text-sm text-muted">
                                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -173,17 +175,17 @@ export default function AddMoneyPage() {
                                                         </div>
                                                         <div className="col-span-2">
                                                             <p className="text-xs text-muted">Account Number</p>
-                                                            <div className="mt-1 flex items-center justify-between rounded-md border border-border bg-white px-3 py-2">
-                                                                <span className="font-mono text-lg font-bold tracking-wider text-ink">
+                                                            <div className="mt-1 flex items-center justify-between gap-2 rounded-md border border-border bg-white px-3 py-2">
+                                                                <span className="font-mono text-base sm:text-lg font-bold tracking-widest text-ink min-w-0 break-all">
                                                                     {virtualAccount.accountNumber}
                                                                 </span>
                                                                 <Button
                                                                     variant="quiet"
                                                                     size="sm"
-                                                                    className="h-8 px-2 text-violet-600"
+                                                                    className="h-8 px-2 text-violet-600 shrink-0"
                                                                     onClick={() => handleCopy(virtualAccount.accountNumber)}
                                                                 >
-                                                                    <Copy className="mr-1.5 h-3.5 w-3.5" />
+                                                                    <Copy className="mr-1.5 h-3.5 w-3.5 shrink-0" />
                                                                     Copy
                                                                 </Button>
                                                             </div>
@@ -230,15 +232,17 @@ export default function AddMoneyPage() {
                         </div>
 
                         {/* Option 2b: Foreign Currency Account */}
-                        <RowItem
-                            icon={Globe}
-                            iconTint="green"
-                            title="Foreign Currency Account"
-                            subtitle="USD / EUR / GBP / CAD — convert to Naira anytime"
-                            showChevron
-                            onClick={() => router.push("/foreign-accounts")}
-                            className="rounded-lg px-3 hover:bg-violet-050"
-                        />
+                        <div className="rounded-lg overflow-hidden">
+                            <RowItem
+                                icon={Globe}
+                                iconTint="green"
+                                title="Foreign Currency Account"
+                                subtitle="USD / EUR / GBP / CAD — convert to Naira anytime"
+                                showChevron
+                                onClick={() => router.push("/foreign-accounts")}
+                                className="px-3 hover:bg-violet-050 dark:hover:bg-violet-900/10"
+                            />
+                        </div>
 
                         {/*
                             Option 4: Simulate Deposit — test mode only. The
@@ -248,8 +252,8 @@ export default function AddMoneyPage() {
                             loading and false in a live build, so this only
                             ever renders `=== true`.
                         */}
-                        {testMode === true && (
-                            <div className="rounded-lg bg-white overflow-hidden">
+                        {process.env.NODE_ENV !== "production" && testMode === true && (
+                            <div className="rounded-lg bg-transparent overflow-hidden">
                                 <RowItem
                                     icon={FlaskConical}
                                     iconTint="amber"
@@ -257,12 +261,12 @@ export default function AddMoneyPage() {
                                     subtitle="Test mode — credits your wallet via a real Korapay sandbox transfer"
                                     showChevron={!simulateExpanded}
                                     onClick={() => setSimulateExpanded(!simulateExpanded)}
-                                    className={`px-3 transition-colors hover:bg-violet-050 ${simulateExpanded ? "bg-violet-050" : ""}`}
+                                    className={`px-3 transition-colors hover:bg-violet-050 dark:hover:bg-violet-900/10 ${simulateExpanded ? "bg-violet-050 dark:bg-violet-900/10" : ""}`}
                                 />
 
                                 {simulateExpanded && (
-                                    <div className="overflow-hidden bg-violet-050/50 transition-all duration-300 ease-in-out">
-                                        <div className="space-y-4 p-5 pl-16 border-t border-violet-100">
+                                    <div className="overflow-hidden bg-violet-050/50 dark:bg-violet-900/5 transition-all duration-300 ease-in-out">
+                                        <div className="space-y-4 p-4 sm:p-5 sm:pl-16 border-t border-violet-100 dark:border-violet-900/20">
                                             <Field label="Amount">
                                                 <div className="relative">
                                                     <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-base text-muted">

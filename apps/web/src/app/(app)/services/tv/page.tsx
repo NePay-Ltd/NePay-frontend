@@ -10,7 +10,7 @@ import { TransactionModal, type TransactionState } from "@/components/shared/tra
 import { useVerifySmartcard, usePayCableTv, useSaveBeneficiary, useSavedBillers, useServiceTransactionStatus } from "@/lib/queries/services";
 
 // New Shared UI Components
-import { ProviderSelector } from "@/components/services/ProviderSelector";
+import { ProviderRowButton } from "@/components/services/ProviderRowButton";
 import { RecentNumbersRow } from "@/components/services/RecentNumbersRow";
 import { PlanGrid } from "@/components/services/PlanGrid";
 import { VerificationField } from "@/components/services/VerificationField";
@@ -177,14 +177,6 @@ export default function TvPage() {
 
     return (
         <>
-
-                    <div className="flex items-center justify-between rounded-xl border border-border bg-white p-4">
-                        <div>
-                            <p className="text-sm font-bold text-ink">Save as beneficiary</p>
-                            <p className="text-xs text-muted">Save this account for future subscriptions</p>
-                        </div>
-                        <Switch checked={saveBeneficiary} onCheckedChange={setSaveBeneficiary} />
-                    </div>
             <div className="mx-auto max-w-xl space-y-8 pb-32">
                 {/* Header */}
                 <div className="flex items-center gap-3 px-2 sm:px-0">
@@ -199,16 +191,16 @@ export default function TvPage() {
                     </div>
                 </div>
 
-                <div className="px-2 sm:px-0 space-y-8">
+                <div className="px-2 sm:px-0 space-y-4">
                     {/* Provider Selection */}
-                    <ProviderSelector 
+                    <ProviderRowButton 
                         providers={PROVIDERS}
                         selectedId={providerId}
                         onChange={setProviderId}
                     />
 
                     {/* Smartcard Number & Verification */}
-                    <div className="space-y-4">
+                    <div className="space-y-4 pt-4">
                         <VerificationField 
                             label="Smartcard / IUC Number"
                             placeholder="Enter smartcard number"
@@ -227,6 +219,14 @@ export default function TvPage() {
                                 onSelect={(id) => setSmartcard(id)}
                             />
                         )}
+
+                        <div className="flex items-center justify-between rounded-2xl border-2 border-border bg-white dark:bg-white/5 p-4">
+                            <div>
+                                <p className="text-sm font-bold text-ink">Save as beneficiary</p>
+                                <p className="text-xs text-muted">Save this account for future subscriptions</p>
+                            </div>
+                            <Switch checked={saveBeneficiary} onCheckedChange={setSaveBeneficiary} />
+                        </div>
                     </div>
 
                     {/* Subscription Plans */}

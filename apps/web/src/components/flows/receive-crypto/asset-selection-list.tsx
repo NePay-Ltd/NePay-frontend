@@ -48,7 +48,7 @@ export function AssetSelectionList({ onSelectGroup, onBack, isMobile = false }: 
     }, [coinGroups, curatedGroups, search]);
 
     return (
-        <div className={cn("mx-auto", isMobile ? "w-full px-3 pb-12 md:pb-20 pt-6 min-h-screen" : "w-full flex flex-col h-full")}>
+        <div className={cn("mx-auto", isMobile ? "w-full pt-6" : "w-full flex flex-col h-full")}>
             {/* Header */}
             <div className={cn("flex items-center justify-between gap-2 mb-6 sm:mb-8", !isMobile && "px-6 pt-6")}>
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -126,25 +126,27 @@ export function AssetSelectionList({ onSelectGroup, onBack, isMobile = false }: 
                                                 <span className="text-xs font-bold text-muted shrink-0">
                                                     {group.coin}
                                                 </span>
-                                                {group.representative.recommended && !search.trim() && (
-                                                    <span className="text-[10px] font-black bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
-                                                        Popular
-                                                    </span>
-                                                )}
                                             </div>
-                                            <span className="text-[11px] font-bold text-muted uppercase tracking-wider block mt-1 truncate">
-                                                {group.variants.length > 1 ? `${group.variants.length} Networks` : (group.representative.network ?? "Mainnet")}
-                                            </span>
+                                            <div className="flex items-center gap-2 mt-1 min-w-0">
+                                                <span className="text-[11px] font-bold text-muted uppercase tracking-wider truncate">
+                                                    {group.variants.length > 1 ? `${group.variants.length} Networks` : (group.representative.network ?? "Mainnet")}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                    {/* Right Zone: Fixed width, right aligned, tabular numbers */}
-                                    <div className="w-[120px] shrink-0 text-right">
+                                    {/* Right Zone: Non-overlapping reserved space, right aligned, tabular numbers */}
+                                    <div className="shrink-0 text-right pl-3 flex flex-col items-end justify-center">
                                         {price ? (
                                             <span className="block font-mono text-sm font-bold text-ink tabular-nums">
                                                 {formatNaira(Number(price))}
                                             </span>
                                         ) : (
                                             <span className="text-xs font-bold text-muted">Unavailable</span>
+                                        )}
+                                        {group.representative.recommended && !search.trim() && (
+                                            <span className="mt-1.5 text-[9px] font-black bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 px-2 py-0.5 rounded-md uppercase tracking-widest shrink-0">
+                                                Popular
+                                            </span>
                                         )}
                                     </div>
                                 </button>

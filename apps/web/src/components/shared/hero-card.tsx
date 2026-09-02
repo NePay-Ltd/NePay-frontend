@@ -96,7 +96,7 @@ export function HeroCard({
 
                     {/* Balance figure — headline always matches preferredCurrency */}
                     <p className="mt-2 font-sans tabular-nums tracking-tighter text-[40px] leading-none font-extrabold lg:text-[56px]">
-                        {masked ? "••••••" : formatByCurrency(primaryAmount, primaryCurrency)}
+                        {masked ? "******" : formatByCurrency(primaryAmount, primaryCurrency)}
                     </p>
 
                     {/* The other currency, as the quieter subscript */}

@@ -196,7 +196,7 @@ export default function WithdrawPage() {
                                     <p className="text-xs font-medium uppercase tracking-wider text-violet-700/70">
                                         Available Balance
                                     </p>
-                                    <p className="mt-1 font-mono text-3xl font-bold tracking-tight text-violet-700">
+                                    <p className="mt-1 font-mono text-2xl sm:text-3xl font-bold tracking-tight text-violet-700 break-all">
                                         {formatNaira(withdrawable)}
                                     </p>
                                 </div>
