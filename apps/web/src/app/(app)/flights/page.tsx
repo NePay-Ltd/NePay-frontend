@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plane } from "lucide-react";
+import { IconPlane as Plane } from "@/components/icons";;
 import { ComingSoon } from "@/components/shared/coming-soon";
 import { useWaitlistStatus, useJoinWaitlist } from "@/lib/queries/card";
 

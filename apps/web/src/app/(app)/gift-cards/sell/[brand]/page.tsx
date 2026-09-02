@@ -2,11 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import {
-    ArrowLeft,
-    Loader2,
-    Camera,
-} from "lucide-react";
+import { IconArrowLeft as ArrowLeft } from "@/components/icons";
+import { Loader2, Camera } from "lucide-react";;
 import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";
@@ -197,9 +194,9 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
                     {/* Brand Header */}
                     <div className="flex items-center justify-between border-b border-border bg-gray-50/50 p-6">
                         <div className="flex items-center gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-white">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-white dark:bg-white/10 p-1.5 shadow-sm">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={listing.cardImageUrl} alt={listing.brandName} className="h-full w-full object-cover" />
+                                <img src={listing.cardImageUrl} alt={listing.brandName} className="h-full w-full object-contain" />
                             </div>
                             <div>
                                 <h2 className="font-semibold text-ink">{listing.brandName}</h2>
@@ -235,9 +232,9 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-between rounded-xl bg-green-50 p-4">
-                                <span className="text-sm font-medium text-green-800">Estimated Payout</span>
-                                <span className="font-mono text-2xl font-bold text-green-600">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-xl bg-green-50 dark:bg-green-900/20 p-4 gap-1">
+                                <span className="text-sm font-medium text-green-800 dark:text-green-400">Estimated Payout</span>
+                                <span className="font-mono text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 break-all w-full sm:w-auto sm:text-right">
                                     {formatNaira(payoutNgn)}
                                 </span>
                             </div>

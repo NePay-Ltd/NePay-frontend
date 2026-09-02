@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check } from "lucide-react";
+import { IconCheck as Check } from "@/components/icons";;
 
 export interface Provider {
     id: string;

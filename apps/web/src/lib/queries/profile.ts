@@ -42,6 +42,7 @@ export function useUpdateProfile() {
     });
 }
 
+
 /**
  * Restricted to NGN/USD, matching the backend's own UpdateCurrencyDto — see
  * its class-level note on why EUR/GBP were dropped rather than built out

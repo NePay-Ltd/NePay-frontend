@@ -37,37 +37,41 @@ export function AmountCalculator({ amount, onChange, presets }: AmountCalculator
     };
 
     return (
-        <div className="space-y-6 pt-4">
-            {/* The Big Number Display */}
-            <div className="relative mx-auto flex max-w-xs items-center justify-center border-b-2 border-transparent transition-colors focus-within:border-violet-600">
-                <span className="text-4xl sm:text-5xl font-black text-ink">₦</span>
+        <div className="pt-2">
+            <h4 className="text-sm font-bold text-ink mb-3 px-1">Top up</h4>
+            <div className="grid grid-cols-3 gap-3">
+                {presets.map((preset) => {
+                    const isSelected = amount === preset;
+                    return (
+                        <motion.button
+                            key={preset}
+                            type="button"
+                            whileTap={{ scale: 0.96 }}
+                            onClick={() => handlePreset(preset)}
+                            className={`flex flex-col items-center justify-center rounded-2xl border-2 p-3 min-h-[72px] transition-all ${
+                                isSelected
+                                    ? "border-violet-600 bg-violet-50/50 dark:bg-violet-900/20 shadow-sm"
+                                    : "border-border bg-white dark:bg-white/5 hover:border-violet-200 dark:hover:border-white/20 hover:bg-gray-50 dark:hover:bg-white/10"
+                            }`}
+                        >
+                            <span className={`text-[15px] sm:text-[17px] font-black tabular-nums tracking-tight ${isSelected ? 'text-violet-700 dark:text-violet-300' : 'text-ink'}`}>
+                                {formatNaira(preset)}
+                            </span>
+                        </motion.button>
+                    );
+                })}
+            </div>
+
+            <div className="relative flex items-center h-[56px] w-full rounded-2xl border-2 border-border bg-white dark:bg-white/5 focus-within:border-violet-600 transition-colors overflow-hidden px-5 mt-6">
+                <span className="text-lg font-black text-ink mr-1">₦</span>
                 <input
                     type="text"
                     inputMode="numeric"
                     value={localVal}
                     onChange={handleChange}
-                    placeholder="0"
-                    className="w-full bg-transparent text-center font-sans text-5xl sm:text-6xl font-black tabular-nums tracking-tighter text-ink outline-none placeholder:text-muted"
+                    placeholder="50 - 500,000"
+                    className="flex-1 h-full bg-transparent text-lg font-bold tabular-nums tracking-wide outline-none placeholder:font-medium placeholder:text-muted"
                 />
-            </div>
-
-            {/* Presets */}
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-                {presets.map((preset) => (
-                    <motion.button
-                        key={preset}
-                        type="button"
-                        whileTap={{ scale: 0.94 }}
-                        onClick={() => handlePreset(preset)}
-                        className={`rounded-full px-5 py-2.5 text-[15px] font-bold transition-colors tabular-nums ${
-                            amount === preset
-                                ? "bg-violet-600 text-white shadow-md shadow-violet-600/20"
-                                : "bg-gray-100 text-ink hover:bg-gray-200"
-                        }`}
-                    >
-                        {formatNaira(preset)}
-                    </motion.button>
-                ))}
             </div>
         </div>
     );

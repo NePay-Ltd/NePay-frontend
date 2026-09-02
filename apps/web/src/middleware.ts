@@ -25,6 +25,7 @@ const PUBLIC_PATHS = new Set([
     "/forgot-password",
     "/reset-password",
     "/verify-mfa",
+    "/icons-preview",
 ]);
 
 /** Paths that start with these prefixes are always public (static, marketing). */

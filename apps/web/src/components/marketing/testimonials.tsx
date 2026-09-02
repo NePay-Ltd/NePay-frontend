@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { motion, type Variants } from "framer-motion";
-import { Star } from "lucide-react";
+import { Star } from "lucide-react";;
 import { Section } from "./section";
 
 const testimonials = [

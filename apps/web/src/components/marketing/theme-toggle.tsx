@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Moon, Sun, Monitor } from "lucide-react";
+import { IconMoon as Moon, IconSun as Sun } from "@/components/icons";
+import { Monitor } from "lucide-react";;
 import { useTheme } from "next-themes";
 
 export function ThemeToggle() {

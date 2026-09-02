@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion, type Variants } from "framer-motion";
-import { Smartphone, Wifi, Zap, Tv, Gift, Plane } from "lucide-react";
+import { IconAirtime as Smartphone, IconData as Wifi, IconElectricity as Zap, IconTv as Tv, IconGift as Gift, IconPlane as Plane } from "@/components/icons";;
 import { Section } from "./section";
 
 export function BillsFeature() {

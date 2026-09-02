@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Minus, Plus } from "lucide-react";
+import { IconClose as X, IconPlus as Plus } from "@/components/icons";
+import { Minus } from "lucide-react";;
 import { Button } from "@/components/shared/button";
 
 interface TravelerBottomSheetProps {

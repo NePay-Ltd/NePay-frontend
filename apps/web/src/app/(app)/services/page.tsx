@@ -2,23 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { 
-    Smartphone, 
-    Wifi, 
-    Lightbulb, 
-    Gift, 
-    Plane, 
-    Landmark, 
-    Bitcoin, 
-    GraduationCap,
-    Shield,
-    Droplet, 
-    Car, 
-    HeartHandshake, 
-    MoreHorizontal,
-    Receipt,
-    Tv
-} from "lucide-react";
+import { IconAirtime as Smartphone, IconData as Wifi, IconGift as Gift, IconPlane as Plane, IconBuilding as Landmark, IconCoin as Bitcoin, IconShield as Shield, IconTv as Tv } from "@/components/icons";
+import { Lightbulb, GraduationCap, Droplet, Car, HeartHandshake, MoreHorizontal, Receipt } from "lucide-react";;
 import { toast } from "sonner";
 
 import { Tile } from "@/components/shared/tile";
@@ -73,49 +58,41 @@ export default function ServicesPage() {
                             <Tile 
                                 icon={Smartphone} 
                                 label="Airtime" 
-                                iconBg="bg-violet-50" iconColor="text-violet-600"
                                 onClick={() => router.push("/services/airtime")} 
                             />
                             <Tile 
                                 icon={Tv} 
                                 label="Cable TV" 
-                                iconBg="bg-pink-50" iconColor="text-pink-600"
                                 onClick={() => router.push("/services/tv")} 
                             />
                             <Tile 
                                 icon={Wifi} 
                                 label="Data" 
-                                iconBg="bg-blue-50" iconColor="text-blue-600"
                                 onClick={() => router.push("/services/data")} 
                             />
                             <Tile 
                                 icon={Lightbulb} 
                                 label="Electricity" 
-                                iconBg="bg-amber-50" iconColor="text-amber-500"
                                 onClick={() => router.push("/services/electricity")} 
                             />
                             <Tile 
                                 icon={Plane} 
                                 label="Flights" 
-                                iconBg="bg-teal-50" iconColor="text-teal-600"
                                 onClick={() => router.push("/flights")} 
                             />
                             <Tile 
                                 icon={Gift} 
                                 label="Gift Cards" 
-                                iconBg="bg-green-50" iconColor="text-green-600"
                                 onClick={() => router.push("/gift-cards")} 
                             />
                             <Tile 
                                 icon={Bitcoin} 
                                 label="Receive Crypto" 
-                                iconBg="bg-orange-50" iconColor="text-orange-500"
                                 onClick={() => router.push("/receive-crypto")} 
                             />
                             <Tile 
                                 icon={Landmark} 
                                 label="Withdraw" 
-                                iconBg="bg-rose-50" iconColor="text-rose-600"
                                 onClick={() => router.push("/withdraw")} 
                             />
                         </div>
@@ -127,14 +104,13 @@ export default function ServicesPage() {
                             <Tile
                                 icon={GraduationCap}
                                 label="Education"
-                                iconBg="bg-indigo-50" iconColor="text-indigo-600"
                                 onClick={() => router.push("/services/education")}
                             />
-                            <Tile icon={Shield} label="Insurance" iconBg="bg-cyan-50" iconColor="text-cyan-600" comingSoon onClick={handleComingSoon} />
-                            <Tile icon={Droplet} label="Water" iconBg="bg-sky-50" iconColor="text-sky-600" comingSoon onClick={handleComingSoon} />
-                            <Tile icon={Car} label="Car Hire" iconBg="bg-slate-50" iconColor="text-slate-600" comingSoon onClick={handleComingSoon} />
-                            <Tile icon={HeartHandshake} label="Donations" iconBg="bg-pink-50" iconColor="text-pink-600" comingSoon onClick={handleComingSoon} />
-                            <Tile icon={MoreHorizontal} label="More" iconBg="bg-gray-100" iconColor="text-muted" comingSoon onClick={handleComingSoon} />
+                            <Tile icon={Shield} label="Insurance" comingSoon onClick={handleComingSoon} />
+                            <Tile icon={Droplet} label="Water" comingSoon onClick={handleComingSoon} />
+                            <Tile icon={Car} label="Car Hire" comingSoon onClick={handleComingSoon} />
+                            <Tile icon={HeartHandshake} label="Donations" comingSoon onClick={handleComingSoon} />
+                            <Tile icon={MoreHorizontal} label="More" comingSoon onClick={handleComingSoon} />
                         </div>
                     </section>
                 </div>

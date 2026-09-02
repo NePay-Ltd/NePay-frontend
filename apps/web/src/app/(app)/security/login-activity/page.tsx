@@ -3,7 +3,8 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { formatDateTime } from "@/lib/date";
-import { ChevronLeft, Monitor, Smartphone, Globe, ShieldOff } from "lucide-react";
+import { IconAirtime as Smartphone, IconData as Globe } from "@/components/icons";
+import { ChevronLeft, Monitor, ShieldOff } from "lucide-react";;
 import { toast } from "sonner";
 
 import { useLoginActivity, useRevokeLoginActivity } from "@/lib/queries/security";
@@ -25,7 +26,8 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-function getDeviceIcon(device: string) {
+function getDeviceIcon(device?: string | null) {
+    if (!device) return Globe;
     const d = device.toLowerCase();
     if (d.includes("iphone") || d.includes("android") || d.includes("mobile") || d.includes("ios")) {
         return Smartphone;
@@ -99,7 +101,7 @@ export default function LoginActivityPage() {
                                     <RowItem
                                         key={log.id}
                                         icon={Icon}
-                                        title={log.device}
+                                        title={log.device || "Unknown Device"}
                                         subtitle={`${log.location} • ${log.ipAddress}`}
                                         className="px-5 py-4"
                                         trailing={

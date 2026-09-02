@@ -32,7 +32,7 @@ export function StickyPayBar({
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: 100, opacity: 0 }}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    className="sticky bottom-0 z-[100] w-full -mx-4 px-4 sm:-mx-8 sm:px-8 bg-white border-t border-border py-4 pb-safe sm:py-6 shadow-[0_-8px_30px_rgba(0,0,0,0.04)]"
+                    className="sticky bottom-0 z-40 w-full -mx-4 px-4 sm:-mx-8 sm:px-8 bg-white dark:bg-[#121212] border-t border-border py-4 pb-safe sm:py-6 shadow-[0_-8px_30px_rgba(0,0,0,0.04)]"
                 >
                     <div className="mx-auto max-w-xl flex items-center justify-between gap-4">
                         <div className="flex flex-col min-w-0 flex-1">

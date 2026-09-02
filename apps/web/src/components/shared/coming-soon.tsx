@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Clock, Bell, BellRing, ArrowRight } from "lucide-react";
+import { IconClock as Clock, IconBell as Bell } from "@/components/icons";
+import { BellRing, ArrowRight } from "lucide-react";;
 import { Panel, PanelBody } from "@/components/shared/panel";
 import { Button } from "@/components/shared/button";
 import { cn } from "@/lib/cn";

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";;
 import { useMediaQuery } from "@/lib/hooks/use-media-query";
 import { Dialog, DialogContent, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
 
@@ -79,7 +79,7 @@ function ReceiveCryptoInner() {
                 <DialogPortal>
                     <DialogOverlay />
                     <DialogContent 
-                        className="max-w-5xl h-[85vh] p-0 overflow-hidden flex gap-0 border-0 bg-gray-50/50 dark:bg-black/20"
+                        className="max-w-4xl h-[85vh] p-0 overflow-hidden flex gap-0 border-0 bg-gray-50/50 dark:bg-black/20"
                         hideCloseButton
                     >
                         {/* Left Pane (List) */}

@@ -1,19 +1,5 @@
-import {
-    ArrowDownLeft,
-    ArrowUpRight,
-    CreditCard,
-    Gift,
-    Plane,
-    Smartphone,
-    Wifi,
-    Tv,
-    Zap,
-    Wallet,
-    Sparkles,
-    HeartHandshake,
-    Undo2,
-    type LucideIcon,
-} from "lucide-react";
+import { IconArrowUpRight as ArrowUpRight, IconCard as CreditCard, IconGift as Gift, IconPlane as Plane, IconAirtime as Smartphone, IconData as Wifi, IconTv as Tv, IconElectricity as Zap, IconWallet as Wallet } from "@/components/icons";
+import { ArrowDownLeft, Sparkles, HeartHandshake, Undo2, type LucideIcon } from "lucide-react";;
 
 import { cn } from "@/lib/cn";
 

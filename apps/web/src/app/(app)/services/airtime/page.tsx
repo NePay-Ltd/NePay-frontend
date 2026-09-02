@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Smartphone } from "lucide-react";
+import { IconArrowLeft as ArrowLeft, IconAirtime as Smartphone } from "@/components/icons";;
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
@@ -10,7 +10,7 @@ import { usePayAirtime, useSaveBeneficiary, useSavedBillers, useUtilityCategorie
 import { UtilityPurchaseResponseDto } from "@/lib/types/api";
 
 // New Shared UI Components
-import { ProviderSelector } from "@/components/services/ProviderSelector";
+import { PhoneNetworkInput } from "@/components/services/PhoneNetworkInput";
 import { RecentNumbersRow } from "@/components/services/RecentNumbersRow";
 import { Switch } from "@/components/ui/switch";
 import { AmountCalculator } from "@/components/services/AmountCalculator";
@@ -49,7 +49,13 @@ export default function AirtimePage() {
     const airtimeCategory = categories.find((c) => c.name.toLowerCase().includes("airtime"));
     const { data: networks = [], isLoading: networksLoading } = useUtilityServices(airtimeCategory?.identifier);
 
-    // Default to the first available network once the catalog loads
+    // Default to MTN on load if available
+    React.useEffect(() => {
+        if (!network && networks.length > 0) {
+            const mtn = networks.find(n => n.serviceID.toLowerCase().includes('mtn'));
+            setNetwork(mtn ? mtn.serviceID : (networks[0]?.serviceID || ""));
+        }
+    }, [network, networks]);
 
     const selectedNetwork = networks.find((n) => n.serviceID === network);
 
@@ -145,64 +151,41 @@ export default function AirtimePage() {
                         <ArrowLeft className="h-5 w-5" />
                     </button>
                     <div className="flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-100 text-violet-700">
-                            <Smartphone className="h-4 w-4" />
-                        </div>
-                        <h1 className="text-2xl font-black text-ink tracking-tight">Airtime</h1>
+                        <h1 className="text-xl font-black text-ink tracking-tight">Airtime</h1>
                     </div>
                 </div>
 
                 <div className="px-2 sm:px-0 space-y-8">
-                    {/* Provider Selection */}
-                    <ProviderSelector
-                        providers={networks.map((n) => {
-                            let label = n.name.replace(/airtime/i, '').replace(/vtu/i, '').trim();
-                            let logoUrl = n.image;
-                            const id = n.serviceID.toLowerCase();
-                            
-                            if (id.includes('mtn')) {
-                                label = 'MTN';
-                                logoUrl = '/images/providers/mtn.png';
-                            } else if (id.includes('glo')) {
-                                label = 'GLO';
-                                logoUrl = '/images/providers/glo.png';
-                            } else if (id.includes('airtel')) {
-                                label = 'Airtel';
-                                logoUrl = '/images/providers/airtel.png';
-                            } else if (id.includes('etisalat') || id.includes('9mobile')) {
-                                label = '9mobile';
-                                logoUrl = '/images/providers/9mobile.png';
-                            } else if (id.includes('foreign')) {
-                                label = 'International';
-                            }
-                            return { id: n.serviceID, label, color: "bg-violet-600", logoUrl };
-                        })}
-                        selectedId={network ?? ""}
-                        onChange={setNetwork}
-                    />
-                    {networksLoading && (
-                        <p className="-mt-6 px-1 text-xs font-medium text-muted">Loading networks…</p>
-                    )}
-
-                    {/* Phone Number & Recent */}
+                    {/* Phone Network Input & Recent */}
                     <div className="space-y-4">
-                        <div className="relative">
-                            <input
-                                type="tel"
-                                placeholder="Phone Number"
-                                value={phone}
-                                maxLength={11}
-                                onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                                className="w-full h-16 rounded-2xl border-2 border-border bg-white px-5 text-xl font-bold tracking-wide outline-none focus:border-violet-600 transition-colors"
-                            />
-                            {/* Auto-detected badge */}
-                            {phone.length >= 4 && selectedNetwork && (
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-green-50 border border-green-200">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                                    <span className="text-[10px] font-bold text-green-700 uppercase tracking-wider">{selectedNetwork.name} detected</span>
-                                </div>
-                            )}
-                        </div>
+                        <PhoneNetworkInput
+                            phone={phone}
+                            onChangePhone={setPhone}
+                            providers={networks.map((n) => {
+                                let label = n.name.replace(/airtime/i, '').replace(/vtu/i, '').trim();
+                                let logoUrl = n.image;
+                                const id = n.serviceID.toLowerCase();
+                                
+                                if (id.includes('mtn')) {
+                                    label = 'MTN';
+                                    logoUrl = '/images/providers/mtn.png';
+                                } else if (id.includes('glo')) {
+                                    label = 'GLO';
+                                    logoUrl = '/images/providers/glo.png';
+                                } else if (id.includes('airtel')) {
+                                    label = 'Airtel';
+                                    logoUrl = '/images/providers/airtel.png';
+                                } else if (id.includes('etisalat') || id.includes('9mobile')) {
+                                    label = '9mobile';
+                                    logoUrl = '/images/providers/9mobile.png';
+                                } else if (id.includes('foreign')) {
+                                    label = 'International';
+                                }
+                                return { id: n.serviceID, label, color: "bg-violet-600", logoUrl };
+                            })}
+                            selectedProviderId={network ?? ""}
+                            onChangeProvider={setNetwork}
+                        />
                         <RecentNumbersRow contacts={recentContacts} onSelect={(id) => setPhone(id)} />
                         <div className="flex items-center justify-between rounded-xl bg-white p-4 border border-border">
                             <div>

@@ -2,7 +2,8 @@
 
 import React from "react";
 import { motion, type Variants } from "framer-motion";
-import { ShieldCheck, Fingerprint, Search, Landmark } from "lucide-react";
+import { IconFingerprint as Fingerprint, IconSearch as Search, IconBuilding as Landmark } from "@/components/icons";
+import { ShieldCheck } from "lucide-react";;
 import { Section } from "./section";
 import { Grain } from "./grain";
 

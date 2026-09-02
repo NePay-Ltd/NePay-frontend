@@ -4,7 +4,8 @@ import React, { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform, type Variants } from "framer-motion";
-import { ArrowRight, LayoutGrid, Smartphone, Zap, Plane, Gift, ArrowUpRight, ArrowDownRight, Activity } from "lucide-react";
+import { IconGrid as LayoutGrid, IconAirtime as Smartphone, IconElectricity as Zap, IconPlane as Plane, IconGift as Gift, IconArrowUpRight as ArrowUpRight } from "@/components/icons";
+import { ArrowRight, ArrowDownRight, Activity } from "lucide-react";;
 import { Section } from "./section";
 
 const staggerContainer: Variants = {

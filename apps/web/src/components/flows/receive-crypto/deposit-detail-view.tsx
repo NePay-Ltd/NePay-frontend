@@ -1,17 +1,8 @@
 "use client";
 
 import * as React from "react";
-import {
-    Copy,
-    AlertCircle,
-    Info,
-    Clock,
-    CheckCircle2,
-    XCircle,
-    Loader2,
-    RotateCcw,
-    ArrowLeft,
-} from "lucide-react";
+import { IconCopy as Copy, IconClock as Clock, IconArrowLeft as ArrowLeft } from "@/components/icons";
+import { AlertCircle, Info, CheckCircle2, XCircle, Loader2, RotateCcw, Wallet } from "lucide-react";;
 import { toast } from "sonner";
 
 import { RequireKyc } from "@/components/shared/require-kyc";
@@ -63,15 +54,18 @@ function useCountdown(expiresAt: string | undefined) {
  * what the user actually needs.
  */
 function formatCountdown(ms: number) {
-    const totalMinutes = Math.floor(ms / 60_000);
-    const days = Math.floor(totalMinutes / (60 * 24));
-    const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
-    const minutes = totalMinutes % 60;
+    if (ms <= 0) return "0sec";
+    const totalSeconds = Math.floor(ms / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
 
-    if (days > 0) return `${days}d ${hours}h`;
-    if (hours > 0) return `${hours}h ${minutes}m`;
-
-    const seconds = Math.floor((ms % 60_000) / 1000);
+    if (days > 0) {
+        return `${days}d:${hours}hr:${minutes}min:${seconds}sec`;
+    } else if (hours > 0) {
+        return `${hours}hr:${minutes}min:${seconds}sec`;
+    }
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
@@ -131,13 +125,13 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
         amount === null || !Number.isFinite(amount)
             ? null
             : amount.toLocaleString("en-US", { maximumFractionDigits: 8 });
-            
+
     const minimumDisplayValue = minimumIsExact
         ? `${formatCrypto(displayMinAmount)} ${selectedCurrency?.coin ?? ""}`.trim()
         : minAmountData?.minimumSource === "estimated"
             ? (displayMinAmountUsd == null || !Number.isFinite(displayMinAmountUsd) ? null : formatByCurrency(displayMinAmountUsd, "USD"))
             : null;
-            
+
     const remainingMs = useCountdown(depositData?.expiresAt ?? undefined);
     const addressExpired = depositData?.expiresAt !== undefined && remainingMs !== null && remainingMs <= 0;
 
@@ -158,18 +152,19 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
     if (!assetCode) {
         return (
             <div className="flex flex-col items-center justify-center p-12 h-full bg-gray-50/50 dark:bg-white-[0.02]">
-                <div className="h-16 w-16 rounded-full bg-violet-100 dark:bg-violet-900/20 flex items-center justify-center mb-4">
-                    <Loader2 className="h-8 w-8 text-violet-300" />
+                <div className="relative h-32 w-32 rounded-full bg-violet-100 dark:bg-violet-900/20 flex items-center justify-center mb-6 shadow-inner">
+                    <div className="absolute inset-2 rounded-full border-2 border-dashed border-violet-200 dark:border-violet-800/50" />
+                    <Wallet className="h-12 w-12 text-violet-400 dark:text-violet-500" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-lg font-bold text-ink">Select an Asset</h3>
-                <p className="text-sm text-muted mt-1 text-center max-w-[250px]">Choose a cryptocurrency and network from the list to view deposit details.</p>
+                <h3 className="text-xl font-black text-ink">Select an Asset</h3>
+                <p className="text-[15px] font-medium text-muted mt-2 text-center max-w-[280px]">Choose a cryptocurrency and network from the list to view deposit details.</p>
             </div>
         );
     }
 
     return (
         <RequireKyc>
-            <div className={cn("mx-auto w-full", isMobile ? "pb-12 md:pb-20 px-4 sm:px-6 pt-4 sm:pt-6 min-h-screen" : "flex flex-col h-full")}>
+            <div className={cn("mx-auto w-full", isMobile ? "w-full pt-4" : "flex flex-col h-full")}>
                 {/* Header */}
                 <div className={cn("flex items-center justify-between gap-2 mb-4 shrink-0", !isMobile && "px-6 pt-6")}>
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -195,7 +190,7 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
 
                 <div className={cn("flex flex-col gap-6 flex-1", !isMobile && "overflow-y-auto px-6 pb-6")}>
                     {/* QR Code and Address Section */}
-                    <div className="rounded-3xl bg-white dark:bg-gray-900/50 p-4 sm:p-8 border-2 border-violet-100 dark:border-violet-900/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] flex flex-col items-center">
+                    <div className="rounded-3xl bg-white dark:bg-gray-900/50 p-3 sm:p-6 border-2 border-violet-100 dark:border-violet-900/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] flex flex-col items-center">
                         <div className="relative flex h-[180px] w-[180px] sm:h-[220px] sm:w-[220px] items-center justify-center rounded-3xl bg-white shadow-sm border-2 border-violet-100 mb-6 p-2">
                             {addressPending ? (
                                 <Skeleton className="h-full w-full rounded-3xl" />
@@ -223,7 +218,7 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                             <span className="inline-block px-3 py-1 rounded-full bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 text-xs font-bold uppercase tracking-wider mb-2">
                                 {acceptedCoinsLabel}
                             </span>
-                            
+
                             <div className="flex w-full items-center justify-between rounded-2xl border-2 border-border bg-gray-50 dark:bg-white/5 p-1.5 transition-colors focus-within:border-violet-400">
                                 <div className="flex-1 overflow-x-auto px-3 scrollbar-hide py-3 text-left">
                                     {addressPending ? (
@@ -237,12 +232,11 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                                 <Button
                                     variant="primary"
                                     size="sm"
-                                    className="shrink-0 rounded-xl px-4 h-11 font-bold bg-violet-700 hover:bg-violet-600 text-white transition-colors"
+                                    className="shrink-0 flex items-center justify-center rounded-xl w-11 h-11 bg-violet-700 hover:bg-violet-600 text-white transition-colors p-0"
                                     onClick={() => depositData?.address && handleCopy(depositData.address, "Address")}
                                     disabled={!depositData?.address || addressPending || addressExpired}
                                 >
-                                    <Copy className="mr-2 h-4 w-4" />
-                                    Copy
+                                    <Copy className="h-5 w-5" />
                                 </Button>
                             </div>
                         </div>
@@ -273,7 +267,7 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                                 Address valid for {formatCountdown(remainingMs)}
                             </div>
                         ) : null}
-                        
+
                         {status ? (
                             <div className="w-full mt-6">
                                 <StatusBanner status={status} statusData={statusData} onRetry={handleRetry} />

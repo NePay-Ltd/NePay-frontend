@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plane, PlaneTakeoff, PlaneLanding, Calendar, User, CheckCircle2, ChevronRight, ArrowRight } from "lucide-react";
+import { IconPlane as Plane, IconUser as User, IconChevronRight as ChevronRight } from "@/components/icons";
+import { PlaneTakeoff, PlaneLanding, Calendar, CheckCircle2, ArrowRight } from "lucide-react";;
 import { Section } from "./section";
 
 export function FlightsFeature() {

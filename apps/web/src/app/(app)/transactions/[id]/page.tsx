@@ -3,7 +3,8 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { formatDate, formatTime } from "@/lib/date";
-import { ArrowLeft, Copy, Check, Download, Share2, Image, ChevronDown } from "lucide-react";
+import { IconArrowLeft as ArrowLeft, IconCopy as Copy, IconCheck as Check, IconChevronDown as ChevronDown } from "@/components/icons";
+import { Download, Share2, Image } from "lucide-react";;
 import { useTransaction } from "@/lib/queries/transactions";
 import { Button } from "@/components/shared/button";
 import { Panel, PanelBody } from "@/components/shared/panel";

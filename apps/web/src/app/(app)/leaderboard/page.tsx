@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { ArrowUpRight, Clock3, Sparkles, Target, Trophy, PartyPopper, Rocket } from "lucide-react";
+import { IconArrowUpRight as ArrowUpRight, IconTrophy as Trophy } from "@/components/icons";
+import { Clock3, Sparkles, Target, PartyPopper, Rocket } from "lucide-react";;
 import { motion, AnimatePresence } from "framer-motion";
 import { Panel, PanelBody, PanelHeader } from "@/components/shared/panel";
 import { Skeleton } from "@/components/shared/skeletons";
@@ -151,12 +152,12 @@ export default function LeaderboardPage() {
                         </div>
                     ) : (
                         <div className="flex flex-col">
-                            {/* Podium (top 3) */}
+                            {/* Podium (top 3) — only render when we have at least 3 entries */}
                             {topEntries.length >= 3 && <LeaderboardPodium entries={topEntries.slice(0, 3)} currentUserRank={currentUser?.rank} />}
 
-                            {/* Ranks 4–10 flat list */}
+                            {/* Ranks 4–10 flat list. When < 3 entries, start from 0 so nothing is skipped. */}
                             <div className="divide-y divide-border">
-                                {topEntries.slice(3).map((entry, index) => (
+                                {topEntries.slice(topEntries.length >= 3 ? 3 : 0).map((entry, index) => (
                                     <motion.div key={`${entry.rank}-${entry.displayName}`} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.045, duration: 0.3 }}>
                                         <LeaderboardRow entry={entry} isCurrentUser={entry.rank === currentUser?.rank} />
                                     </motion.div>

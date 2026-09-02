@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Plus, Building2, ArrowLeftRight } from "lucide-react";
+import { IconEye as Eye, IconEyeOff as EyeOff, IconPlus as Plus, IconBuilding as Building2 } from "@/components/icons";
+import { ArrowLeftRight } from "lucide-react";;
 
 import { Button } from "@/components/shared/button";
 import { Sparkline } from "@/components/shared/sparkline";
@@ -95,7 +96,7 @@ export function HeroCard({
 
                     {/* Balance figure — headline always matches preferredCurrency */}
                     <p className="mt-2 font-sans tabular-nums tracking-tighter text-[40px] leading-none font-extrabold lg:text-[56px]">
-                        {masked ? "••••••" : formatByCurrency(primaryAmount, primaryCurrency)}
+                        {masked ? "******" : formatByCurrency(primaryAmount, primaryCurrency)}
                     </p>
 
                     {/* The other currency, as the quieter subscript */}

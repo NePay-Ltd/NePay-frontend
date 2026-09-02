@@ -5,14 +5,22 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";;
 import { toast } from "sonner";
 
-import { verifyMfaSchema, type VerifyMfaValues } from "@/lib/schemas/auth";
+import { z } from "zod";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/shared/button";
 import { Field } from "@/components/shared/field";
 import { Input } from "@/components/ui/input";
+
+const verifyMfaSchema = z.object({
+    code: z
+        .string()
+        .min(1, "Enter the 6-digit code")
+        .regex(/^\d{6}$/, "Code must be 6 digits"),
+});
+export type VerifyMfaValues = z.infer<typeof verifyMfaSchema>;
 
 /**
  * Second step of a 2FA login. Reached only via the redirect in

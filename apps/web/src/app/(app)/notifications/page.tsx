@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Bell } from "lucide-react";
+import { IconBell as Bell } from "@/components/icons";;
 import { useNotifications, useMarkAllRead } from "@/lib/queries/notifications";
 
 import { Panel } from "@/components/shared/panel";

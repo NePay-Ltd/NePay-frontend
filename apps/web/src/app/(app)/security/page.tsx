@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Shield, Smartphone, Key, Lock, Activity, ChevronRight, Fingerprint, Copy, Check } from "lucide-react";
+import { IconShield as Shield, IconAirtime as Smartphone, IconKey as Key, IconLock as Lock, IconChevronRight as ChevronRight, IconFingerprint as Fingerprint, IconCopy as Copy, IconCheck as Check } from "@/components/icons";
+import { Activity } from "lucide-react";;
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 

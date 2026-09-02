@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";;
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -30,30 +30,32 @@ export function VerificationField({
     maxLength
 }: VerificationFieldProps) {
     return (
-        <div className="space-y-3 relative z-10">
-            <Label className="text-sm font-bold text-ink">{label}</Label>
+        <div className="space-y-4 relative z-10 p-4 rounded-2xl border-2 border-border bg-white dark:bg-white/5">
+            <div className="flex items-center px-1">
+                <Label className="text-[13px] font-bold text-ink">{label}</Label>
+            </div>
             <div className="relative">
-                <Input
+                <input
                     type="text"
                     inputMode="numeric"
                     placeholder={placeholder}
                     value={value}
                     maxLength={maxLength}
                     onChange={(e) => onChange(e.target.value)}
-                    className={`h-14 rounded-2xl pl-4 pr-[100px] text-lg font-bold placeholder:font-medium transition-colors ${
-                        status === "error" ? "border-red-500 focus-visible:ring-red-500" :
-                        status === "success" ? "border-green-500 focus-visible:ring-green-500" : ""
+                    className={`w-full h-12 bg-transparent text-lg font-bold tracking-wide placeholder:font-medium placeholder:text-muted outline-none border-b border-border/50 focus:border-violet-600 transition-colors pr-[100px] ${
+                        status === "error" ? "border-red-500 text-red-500" :
+                        status === "success" ? "border-green-500" : ""
                     }`}
                 />
-                <div className="absolute right-1.5 top-1.5 bottom-1.5 flex">
+                <div className="absolute right-0 top-0 bottom-0 flex items-center py-1">
                     <button
                         type="button"
                         onClick={onVerify}
                         disabled={!value || status === "loading"}
-                        className="h-full px-5 rounded-xl bg-gray-100 text-ink text-[13px] font-bold hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[80px]"
+                        className="h-full px-4 rounded-xl bg-violet-50 text-violet-600 dark:bg-white/10 dark:text-white text-[13px] font-bold hover:bg-violet-100 dark:hover:bg-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[70px]"
                     >
                         {status === "loading" ? (
-                            <Loader2 className="h-4 w-4 animate-spin text-violet-600" />
+                            <Loader2 className="h-4 w-4 animate-spin" />
                         ) : status === "success" ? (
                             "Verified"
                         ) : (

@@ -1,14 +1,8 @@
 "use client";
 
 import * as React from "react";
-import {
-    Bell,
-    Menu,
-    Plus,
-    Search,
-    ArrowUpRight,
-    HelpCircle,
-} from "lucide-react";
+import { IconBell as Bell, IconPlus as Plus, IconSearch as Search, IconArrowUpRight as ArrowUpRight } from "@/components/icons";
+import { Menu, HelpCircle } from "lucide-react";;
 import { usePathname, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { toast } from "sonner";

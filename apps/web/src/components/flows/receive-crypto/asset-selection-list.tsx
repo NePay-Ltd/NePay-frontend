@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Search, ArrowLeft, Calculator, RefreshCcw } from "lucide-react";
+import { IconSearch as Search, IconArrowLeft as ArrowLeft } from "@/components/icons";
+import { Calculator, RefreshCcw } from "lucide-react";;
 import { cn } from "@/lib/cn";
 import { useCryptoCurrencies, useCryptoPrices } from "@/lib/queries/crypto";
 import { formatByCurrency } from "@/lib/format";
@@ -15,10 +16,10 @@ interface AssetSelectionListProps {
 
 export function AssetSelectionList({ onSelectGroup, onBack, isMobile = false }: AssetSelectionListProps) {
     const [search, setSearch] = React.useState("");
-    
+
     const { data: currencies, refetch: refetchCurrencies } = useCryptoCurrencies();
     const { data: pricesData, isFetching: pricesFetching, refetch: refetchPrices } = useCryptoPrices();
-    
+
     const handleRefresh = () => {
         refetchCurrencies();
         refetchPrices();
@@ -47,7 +48,7 @@ export function AssetSelectionList({ onSelectGroup, onBack, isMobile = false }: 
     }, [coinGroups, curatedGroups, search]);
 
     return (
-        <div className={cn("mx-auto w-full", isMobile ? "pb-12 md:pb-20 px-4 sm:px-6 pt-4 sm:pt-6 min-h-screen" : "flex flex-col h-full")}>
+        <div className={cn("mx-auto", isMobile ? "w-full pt-6" : "w-full flex flex-col h-full")}>
             {/* Header */}
             <div className={cn("flex items-center justify-between gap-2 mb-6 sm:mb-8", !isMobile && "px-6 pt-6")}>
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -117,41 +118,52 @@ export function AssetSelectionList({ onSelectGroup, onBack, isMobile = false }: 
                                 <button
                                     key={group.coin}
                                     onClick={() => onSelectGroup(group)}
-                                    className="w-full flex items-center justify-between gap-2 p-3 sm:p-4 rounded-2xl bg-white dark:bg-white/5 border border-border hover:border-violet-400 hover:shadow-md dark:hover:bg-white/10 transition-all group/item text-left"
+                                    className="w-full flex items-center justify-between p-4 h-[72px] rounded-2xl bg-white dark:bg-white/5 border border-border hover:border-violet-400 hover:shadow-md dark:hover:bg-white/10 transition-all group/item text-left"
                                 >
-                                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                                        <CurrencyAvatar currency={group.representative} className="h-10 w-10 sm:h-11 sm:w-11 text-lg shadow-sm shrink-0" />
-                                        <div className="min-w-0">
-                                            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                                    {/* Left Zone: Flexible width, truncates long text */}
+                                    <div className="flex items-center gap-4 flex-1 min-w-0 pr-4">
+                                        <CurrencyAvatar currency={group.representative} className="h-11 w-11 shrink-0 text-lg shadow-sm" />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 min-w-0">
                                                 <span className="text-sm font-bold text-ink truncate">
                                                     {group.representative.name ?? group.coin}
                                                 </span>
                                                 <span className="text-xs font-bold text-muted shrink-0">
                                                     {group.coin}
                                                 </span>
-                                                {group.representative.recommended && !search.trim() && (
-                                                    <span className="hidden sm:inline-block shrink-0 text-[10px] font-black bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                                        Popular
-                                                    </span>
-                                                )}
                                             </div>
-                                            <span className="text-[11px] font-bold text-muted uppercase tracking-wider block mt-1 truncate">
-                                                {group.variants.length > 1 ? `${group.variants.length} Networks` : (group.representative.network ?? "Mainnet")}
-                                            </span>
+                                            <div className="flex items-center gap-2 mt-1 min-w-0">
+                                                <span className="text-[11px] font-bold text-muted uppercase tracking-wider truncate">
+                                                    {group.variants.length > 1 ? `${group.variants.length} Networks` : (group.representative.network ?? "Mainnet")}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="text-right shrink-0">
+                                    {/* Right Zone: Non-overlapping reserved space, right aligned, tabular numbers */}
+                                    <div className="shrink-0 text-right pl-3 flex flex-col items-end justify-center">
                                         {priceUsd !== null ? (
-                                            <span className="block font-mono text-xs sm:text-sm font-bold text-ink">
+                                            <span className="block font-mono text-sm font-bold text-ink tabular-nums">
                                                 {formatByCurrency(priceUsd, "USD")}
                                             </span>
                                         ) : (
                                             <span className="text-xs font-bold text-muted">Unavailable</span>
                                         )}
+                                        {group.representative.recommended && !search.trim() && (
+                                            <span className="mt-1.5 text-[9px] font-black bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 px-2 py-0.5 rounded-md uppercase tracking-widest shrink-0">
+                                                Popular
+                                            </span>
+                                        )}
                                     </div>
                                 </button>
                             );
                         })}
+                        
+                        {!search.trim() && (
+                            <div className="mt-4 p-4 rounded-2xl border border-dashed border-border bg-gray-50/50 dark:bg-white/[0.02] text-center animate-in fade-in">
+                                <p className="text-sm font-bold text-ink">Can't find your coin?</p>
+                                <p className="text-xs text-muted mt-1 font-medium">Use the search bar above to browse over 300+ supported assets.</p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

@@ -2,17 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import {
-    Plus,
-    ArrowUpRight,
-    Gift,
-    Plane,
-    Receipt,
-    LayoutGrid,
-    Building2,
-    Search,
-    Loader2,
-} from "lucide-react";
+import { IconPlus as Plus, IconArrowUpRight as ArrowUpRight, IconGift as Gift, IconPlane as Plane, IconGrid as LayoutGrid, IconBuilding as Building2, IconSearch as Search } from "@/components/icons";
+import { Receipt, Loader2 } from "lucide-react";;
 
 import { useUiStore } from "@/lib/stores/ui-store";
 import { SIDEBAR_GROUPS } from "@/lib/navigation";

@@ -47,7 +47,6 @@ export const registerStepOneSchema = z.object({
     firstName: z.string().min(1, "First name is required").max(80, "First name is too long"),
     lastName: z.string().min(1, "Last name is required").max(80, "Last name is too long"),
     phone: nigerianPhoneSchema,
-    otpVerified: z.boolean().refine((v) => v === true, "You must verify your phone number"),
 });
 export type RegisterStepOneValues = z.infer<typeof registerStepOneSchema>;
 
@@ -62,6 +61,7 @@ export const registerStepTwoSchema = z
         email: emailSchema,
         password: passwordSchema,
         confirmPassword: z.string().min(1, "Confirm your password"),
+        otpVerified: z.boolean().refine((v) => v === true, "You must verify your email address"),
         acceptTerms: z
             .boolean()
             .refine((v) => v === true, "You must accept the terms of service"),

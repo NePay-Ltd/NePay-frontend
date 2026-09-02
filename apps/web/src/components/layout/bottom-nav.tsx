@@ -12,6 +12,25 @@ import { BOTTOM_NAV } from "@/lib/navigation";
 export function BottomNav() {
 
     const pathname = usePathname();
+    const navRef = React.useRef<HTMLElement>(null);
+
+    React.useEffect(() => {
+        if (!navRef.current) {
+            document.documentElement.style.removeProperty('--bottom-nav-height');
+            return;
+        }
+        const observer = new ResizeObserver((entries) => {
+            if (!entries || entries.length === 0) return;
+            const height = entries[0]?.borderBoxSize?.[0]?.blockSize ?? entries[0]?.contentRect.height ?? 0;
+            document.documentElement.style.setProperty('--bottom-nav-height', `${height}px`);
+        });
+        observer.observe(navRef.current);
+        return () => {
+            observer.disconnect();
+            document.documentElement.style.removeProperty('--bottom-nav-height');
+        };
+    }, [pathname]); // re-run if it remounts or changes
+
 
     // Hide the bottom navigation on service pages to allow the StickyPayBar to take over the screen
     if (pathname.includes("/services/")) {
@@ -20,6 +39,7 @@ export function BottomNav() {
 
     return (
         <nav
+            ref={navRef}
             className="fixed inset-x-4 z-50 flex items-center justify-between rounded-[32px] border border-border/50 bg-white/80 p-1.5 backdrop-blur-[20px] shadow-[0_8px_24px_rgba(0,0,0,0.12)] lg:hidden"
             style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}
         >

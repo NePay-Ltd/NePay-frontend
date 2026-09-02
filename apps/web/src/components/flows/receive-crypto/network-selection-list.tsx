@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { ArrowLeft, ChevronRight, Loader2 } from "lucide-react";
+import { IconArrowLeft as ArrowLeft, IconChevronRight as ChevronRight } from "@/components/icons";
+import { Loader2 } from "lucide-react";;
 import { cn } from "@/lib/cn";
 import { CoinGroup, CurrencyAvatar } from "./shared";
 
@@ -25,7 +26,7 @@ export function NetworkSelectionList({ coinGroup, onSelectNetwork, onBack, isMob
     const coinName = coinGroup.representative.name ?? coinGroup.coin;
 
     return (
-        <div className={cn("mx-auto w-full", isMobile ? "pb-12 md:pb-20 px-4 sm:px-6 pt-4 sm:pt-6 min-h-screen" : "flex flex-col h-full")}>
+        <div className={cn("mx-auto w-full", isMobile ? "w-full pt-4" : "flex flex-col h-full")}>
             {/* Header */}
             <div className={cn("flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8", !isMobile && "px-6 pt-6")}>
                 <button
@@ -35,9 +36,9 @@ export function NetworkSelectionList({ coinGroup, onSelectNetwork, onBack, isMob
                     <ArrowLeft className="h-5 w-5" />
                 </button>
                 <CurrencyAvatar currency={coinGroup.representative} className="h-10 w-10 text-base shadow-sm shrink-0" />
-                <div className="min-w-0">
-                    <h1 className={cn("font-black text-ink tracking-tight truncate", isMobile ? "text-xl sm:text-2xl" : "text-xl")}>Receive {coinName}</h1>
-                    <p className="text-sm font-medium text-muted mt-1">Choose the network to deposit on</p>
+                <div className="min-w-0 flex-1">
+                    <h1 className={cn("font-black text-ink tracking-tight truncate", isMobile ? "text-base sm:text-lg" : "text-base")}>Receive {coinName}</h1>
+                    <p className="text-xs sm:text-sm font-medium text-muted truncate">Choose the network to deposit on</p>
                 </div>
             </div>
 

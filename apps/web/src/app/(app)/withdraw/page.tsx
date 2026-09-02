@@ -5,14 +5,8 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-    Check,
-    ChevronsUpDown,
-    Plus,
-    Landmark,
-    Loader2,
-    Building2
-} from "lucide-react";
+import { IconCheck as Check, IconPlus as Plus, IconBuilding as Landmark, IconBuilding as Building2 } from "@/components/icons";
+import { ChevronsUpDown, Loader2 } from "lucide-react";;
 import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";
@@ -202,7 +196,7 @@ export default function WithdrawPage() {
                                     <p className="text-xs font-medium uppercase tracking-wider text-violet-700/70">
                                         Available Balance
                                     </p>
-                                    <p className="mt-1 font-mono text-3xl font-bold tracking-tight text-violet-700">
+                                    <p className="mt-1 font-mono text-2xl sm:text-3xl font-bold tracking-tight text-violet-700 break-all">
                                         {formatNaira(withdrawable)}
                                     </p>
                                 </div>

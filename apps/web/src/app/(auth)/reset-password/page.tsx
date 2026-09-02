@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, KeyRound, CheckCircle2, Mail } from "lucide-react";
+import { IconEye as Eye, IconEyeOff as EyeOff } from "@/components/icons";
+import { KeyRound, CheckCircle2, Mail } from "lucide-react";;
 import { toast } from "sonner";
 
 import { resetPasswordSchema, type ResetPasswordValues } from "@/lib/schemas/auth";

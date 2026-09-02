@@ -1,6 +1,7 @@
 import * as React from "react";
 import { formatDistanceToNow } from "date-fns";
-import { Wallet, ArrowUpRight, Gift, Lock, Zap, Smartphone, Tv, CreditCard, Plane, Tag, BadgeCheck } from "lucide-react";
+import { IconWallet as Wallet, IconArrowUpRight as ArrowUpRight, IconGift as Gift, IconLock as Lock, IconElectricity as Zap, IconAirtime as Smartphone, IconTv as Tv, IconCard as CreditCard, IconPlane as Plane } from "@/components/icons";
+import { Tag, BadgeCheck } from "lucide-react";;
 import { cn } from "@/lib/cn";
 import type { Notification, NotificationType } from "@/lib/queries/notifications";
 

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { User2 } from "lucide-react";
+import { User2 } from "lucide-react";;
 
 export interface RecentContact {
     name: string;

@@ -1,4 +1,5 @@
-import { TrendingUp, TrendingDown, Scale, History } from "lucide-react";
+import { IconHistory as History } from "@/components/icons";
+import { TrendingUp, TrendingDown, Scale } from "lucide-react";;
 
 import { cn } from "@/lib/cn";
 import { useUiStore } from "@/lib/stores/ui-store";
@@ -37,7 +38,7 @@ export function KpiCard({ label, value, change, className }: KpiCardProps) {
             </div>
             
             <p className="font-sans tabular-nums text-[24px] font-extrabold text-ink tracking-tighter leading-none mb-4 break-words">
-                {masked ? "••••••" : value}
+                {masked ? "******" : value}
             </p>
             
             {change ? (

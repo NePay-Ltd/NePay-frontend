@@ -2,20 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import {
-    AlertCircle,
-    ArrowRightLeft,
-    Building2,
-    CheckCircle2,
-    Clock,
-    Copy,
-    FlaskConical,
-    Loader2,
-    Mail,
-    Receipt,
-    ShieldAlert,
-    Upload,
-} from "lucide-react";
+import { IconBuilding as Building2, IconClock as Clock, IconCopy as Copy } from "@/components/icons";
+import { AlertCircle, ArrowRightLeft, CheckCircle2, FlaskConical, Loader2, Mail, Receipt, ShieldAlert, Upload } from "lucide-react";;
 import { toast } from "sonner";
 
 import { RequireKyc } from "@/components/shared/require-kyc";
@@ -352,7 +340,7 @@ function CurrencyPanel({
     return (
         <div className="space-y-5">
             <AccountDetails account={account} />
-            {currency === "CAD" ? <SimulateCollection account={account} /> : null}
+            {currency === "CAD" && process.env.NODE_ENV !== "production" ? <SimulateCollection account={account} /> : null}
             <Button fullWidth variant="primary" onClick={() => onConvert(account)}>
                 <ArrowRightLeft className="mr-2 h-4 w-4" />
                 Convert to Naira
