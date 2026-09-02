@@ -47,7 +47,10 @@ export function PhoneNetworkInput({ phone, onChangePhone, providers, selectedPro
     };
 
     return (
-        <div className="relative flex items-center h-16 w-full rounded-2xl border-2 border-border bg-white dark:bg-white/5 focus-within:border-violet-600 transition-colors overflow-hidden">
+        <div 
+            className="relative flex items-center h-16 w-full rounded-2xl border-2 border-border bg-white dark:bg-white/5 focus-within:border-violet-600 transition-colors overflow-hidden"
+            onClick={() => document.getElementById('phone-input')?.focus()}
+        >
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <button type="button" className="flex items-center gap-2 h-full pl-4 pr-3 border-r border-border hover:bg-gray-50 dark:hover:bg-white/5 transition-colors outline-none">
@@ -75,12 +78,13 @@ export function PhoneNetworkInput({ phone, onChangePhone, providers, selectedPro
             </Popover>
             
             <input
+                id="phone-input"
                 type="tel"
                 placeholder="Phone Number"
                 value={phone}
                 maxLength={11}
                 onChange={(e) => onChangePhone(e.target.value.replace(/\D/g, ''))}
-                className="flex-1 h-full bg-transparent px-4 text-xl font-bold tracking-wide outline-none placeholder:font-medium placeholder:text-muted"
+                className="flex-1 h-full w-full bg-transparent px-4 text-xl font-bold tracking-wide outline-none placeholder:font-medium placeholder:text-muted relative z-10"
             />
         </div>
     );

@@ -152,6 +152,13 @@ export function AssetSelectionList({ onSelectGroup, onBack, isMobile = false }: 
                                 </button>
                             );
                         })}
+                        
+                        {!search.trim() && (
+                            <div className="mt-4 p-4 rounded-2xl border border-dashed border-border bg-gray-50/50 dark:bg-white/[0.02] text-center animate-in fade-in">
+                                <p className="text-sm font-bold text-ink">Can't find your coin?</p>
+                                <p className="text-xs text-muted mt-1 font-medium">Use the search bar above to browse over 300+ supported assets.</p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
