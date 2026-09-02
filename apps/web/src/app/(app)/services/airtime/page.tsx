@@ -53,7 +53,7 @@ export default function AirtimePage() {
     React.useEffect(() => {
         if (!network && networks.length > 0) {
             const mtn = networks.find(n => n.serviceID.toLowerCase().includes('mtn'));
-            setNetwork(mtn ? mtn.serviceID : networks[0].serviceID);
+            setNetwork(mtn ? mtn.serviceID : (networks[0]?.serviceID || ""));
         }
     }, [network, networks]);
 

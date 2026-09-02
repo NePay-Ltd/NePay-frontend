@@ -20,7 +20,8 @@ export function BottomNav() {
             return;
         }
         const observer = new ResizeObserver((entries) => {
-            const height = entries[0].borderBoxSize?.[0]?.blockSize ?? entries[0].contentRect.height;
+            if (!entries || entries.length === 0) return;
+            const height = entries[0]?.borderBoxSize?.[0]?.blockSize ?? entries[0]?.contentRect.height ?? 0;
             document.documentElement.style.setProperty('--bottom-nav-height', `${height}px`);
         });
         observer.observe(navRef.current);
