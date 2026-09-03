@@ -5,9 +5,19 @@ import { IconUser as User, IconShield as Shield, IconSliders as Sliders, IconAir
 import { ShieldCheck, Mail } from "lucide-react";;
 import { Button } from "@/components/shared/button";
 import { Panel, PanelBody, PanelHeader } from "@/components/shared/panel";
-import { useAuth } from "@/lib/auth-context";
 import { useProfile, useUpdatePreferredCurrency } from "@/lib/queries/profile";
+import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/cn";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import type { Currency } from "@/lib/types/api";
 
 // Restricted to NGN/USD — matching the backend's own UpdateCurrencyDto. GBP
@@ -60,13 +70,22 @@ export default function SettingsPage() {
                     </nav>
 
                     <div className="hidden md:block pt-6 border-t border-border">
-                        <button
-                            onClick={logout}
-                            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-red-600 transition-colors hover:bg-red-50"
-                        >
-                            <LogOut className="h-4 w-4" />
-                            Log out of NePay
-                        </button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <button className="flex w-full items-center justify-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-red-600 transition-colors hover:bg-red-50 border border-transparent hover:border-red-100">
+                                    Sign Out
+                                </button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle className="text-center">Are you sure to log out of NePay?</AlertDialogTitle>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter className="flex flex-row justify-center gap-4 mt-2 sm:space-x-0 sm:justify-center">
+                                    <AlertDialogCancel className="mt-0 flex-1 h-12 rounded-full border-0 bg-violet-100 text-base font-bold text-violet-700 hover:bg-violet-200 hover:text-violet-800">No</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => logout()} className="flex-1 h-12 rounded-full border-0 bg-violet-600 text-base font-bold text-white hover:bg-violet-700 hover:text-white">Yes</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </div>
                 </div>
 
@@ -179,13 +198,22 @@ export default function SettingsPage() {
             
             {/* Mobile Logout Button */}
             <div className="md:hidden mt-8 border-t border-border pt-8">
-                <button
-                    onClick={logout}
-                    className="flex w-full items-center justify-center gap-3 rounded-xl px-4 py-4 text-sm font-bold text-red-600 transition-colors bg-red-50 hover:bg-red-100"
-                >
-                    <LogOut className="h-4 w-4" />
-                    Log out of NePay
-                </button>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <button className="flex w-full items-center justify-center gap-3 rounded-xl px-4 py-4 text-sm font-bold text-red-600 transition-colors bg-red-50 hover:bg-red-100">
+                            Sign Out
+                        </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle className="text-center">Are you sure to log out of NePay?</AlertDialogTitle>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="flex flex-row justify-center gap-4 mt-2 sm:space-x-0 sm:justify-center">
+                            <AlertDialogCancel className="mt-0 flex-1 h-12 rounded-full border-0 bg-violet-100 text-base font-bold text-violet-700 hover:bg-violet-200 hover:text-violet-800">No</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => logout()} className="flex-1 h-12 rounded-full border-0 bg-violet-600 text-base font-bold text-white hover:bg-violet-700 hover:text-white">Yes</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </div>
     );

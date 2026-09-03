@@ -12,6 +12,16 @@ import { useUiStore } from "@/lib/stores/ui-store";
 import { SIDEBAR_GROUPS, type NavItem } from "@/lib/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useReferralSummary } from "@/lib/queries/referrals";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 function Logo() {
     return (
@@ -164,14 +174,26 @@ function UserProfileCard() {
                         <span className="h-4 w-4" />
                     )}
                 </button>
-                <button
-                    onClick={() => logout()}
-                    disabled={isMutating}
-                    className="flex h-8 w-8 items-center justify-center rounded-xl text-violet-300 dark:text-muted hover:bg-trueWhite/10 hover:text-trueWhite transition-colors disabled:opacity-50"
-                    title="Log out"
-                >
-                    <LogOut className="h-4 w-4" />
-                </button>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <button
+                            disabled={isMutating}
+                            className="flex h-8 w-8 items-center justify-center rounded-xl text-violet-300 dark:text-muted hover:bg-trueWhite/10 hover:text-trueWhite transition-colors disabled:opacity-50"
+                            title="Log out"
+                        >
+                            <LogOut className="h-4 w-4" />
+                        </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle className="text-center sm:text-left">Are you sure to log out of NePay?</AlertDialogTitle>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="flex flex-row justify-center gap-4 mt-2 sm:space-x-0 sm:justify-center">
+                            <AlertDialogCancel className="mt-0 flex-1 h-12 rounded-full border-0 bg-violet-100 text-base font-bold text-violet-700 hover:bg-violet-200 hover:text-violet-800">No</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => logout()} className="flex-1 h-12 rounded-full border-0 bg-violet-600 text-base font-bold text-white hover:bg-violet-700 hover:text-white">Yes</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </div>
     );

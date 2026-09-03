@@ -119,7 +119,7 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="mx-auto max-w-2xl space-y-6">
+        <div className="mx-auto max-w-2xl space-y-6 pb-32 lg:pb-12">
             {/* ── Profile Header ── */}
             <div className="flex flex-col items-center py-6">
                 {isLoading || !profile ? (
@@ -283,18 +283,13 @@ export default function ProfilePage() {
             </Panel>
 
             {/* ── Logout Action ── */}
-            <div className="pt-4">
-                <Panel>
-                    <PanelBody className="p-0">
-                        <RowItem
-                            icon={LogOut}
-                            iconTint="red"
-                            title={<span className="text-red-500 font-medium">Log out</span>}
-                            onClick={() => setLogoutModalOpen(true)}
-                            className="cursor-pointer px-5 hover:bg-red-50/50"
-                        />
-                    </PanelBody>
-                </Panel>
+            <div className="pt-8 pb-4 flex justify-center">
+                <button
+                    onClick={() => setLogoutModalOpen(true)}
+                    className="w-full max-w-sm rounded-2xl bg-gray-50 py-3 text-base font-extrabold text-ink transition-colors hover:bg-gray-100"
+                >
+                    Sign Out
+                </button>
             </div>
 
             {/* ── Edit Profile Modal ── */}
@@ -357,22 +352,11 @@ export default function ProfilePage() {
             <AlertDialog open={logoutModalOpen} onOpenChange={setLogoutModalOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
-                            <AlertCircle className="h-6 w-6" />
-                        </div>
-                        <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            You will need to sign back in with your email or biometrics to access your account again.
-                        </AlertDialogDescription>
+                        <AlertDialogTitle className="text-center">Are you sure to log out of NePay?</AlertDialogTitle>
                     </AlertDialogHeader>
-                    <AlertDialogFooter className="mt-4">
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={onLogout}
-                            className="bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
-                        >
-                            Log out
-                        </AlertDialogAction>
+                    <AlertDialogFooter className="flex flex-row justify-center gap-4 mt-2 sm:space-x-0 sm:justify-center">
+                        <AlertDialogCancel className="mt-0 flex-1 h-12 rounded-full border-0 bg-violet-100 text-base font-bold text-violet-700 hover:bg-violet-200 hover:text-violet-800">No</AlertDialogCancel>
+                        <AlertDialogAction onClick={onLogout} className="flex-1 h-12 rounded-full border-0 bg-violet-600 text-base font-bold text-white hover:bg-violet-700 hover:text-white">Yes</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
