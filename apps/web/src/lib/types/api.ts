@@ -183,6 +183,8 @@ export interface CryptoPricesDto {
     currency: Currency; // always NGN — the platform's own settlement currency
     /** Keyed by coin symbol (CryptoCurrencyDto.coin), NGN per 1 unit of the coin, as a decimal string. Null (never a fabricated number) for an uncurated coin or a coin with a temporarily-unavailable rate — missing from this map entirely means the same thing. */
     prices: Record<string, string | null>;
+    /** The current manual USD→NGN rate (NGN per 1 USD) — divide a price above by this to get a USD display figure. Null when no manual rate is configured. */
+    usdNgnRate: number | null;
 }
 
 export interface CryptoMinAmountDto {

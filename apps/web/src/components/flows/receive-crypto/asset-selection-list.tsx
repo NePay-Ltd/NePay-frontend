@@ -5,7 +5,7 @@ import { IconSearch as Search, IconArrowLeft as ArrowLeft } from "@/components/i
 import { Calculator, RefreshCcw } from "lucide-react";;
 import { cn } from "@/lib/cn";
 import { useCryptoCurrencies, useCryptoPrices } from "@/lib/queries/crypto";
-import { formatNaira } from "@/lib/format";
+import { formatByCurrency } from "@/lib/format";
 import { CoinGroup, groupByCoin, CurrencyAvatar } from "./shared";
 
 interface AssetSelectionListProps {
@@ -107,7 +107,12 @@ export function AssetSelectionList({ onSelectGroup, onBack, isMobile = false }: 
                 ) : (
                     <div className="space-y-3">
                         {searchResults.map((group) => {
-                            const price = pricesData?.prices[group.coin];
+                            const priceNgn = pricesData?.prices[group.coin];
+                            const usdNgnRate = pricesData?.usdNgnRate;
+                            // Prices come from the backend in NGN — convert to USD for
+                            // display here rather than changing what the backend quotes,
+                            // since NGN stays the platform's real settlement currency.
+                            const priceUsd = priceNgn && usdNgnRate ? Number(priceNgn) / usdNgnRate : null;
 
                             return (
                                 <button
@@ -136,9 +141,9 @@ export function AssetSelectionList({ onSelectGroup, onBack, isMobile = false }: 
                                     </div>
                                     {/* Right Zone: Non-overlapping reserved space, right aligned, tabular numbers */}
                                     <div className="shrink-0 text-right pl-3 flex flex-col items-end justify-center">
-                                        {price ? (
+                                        {priceUsd !== null ? (
                                             <span className="block font-mono text-sm font-bold text-ink tabular-nums">
-                                                {formatNaira(Number(price))}
+                                                {formatByCurrency(priceUsd, "USD")}
                                             </span>
                                         ) : (
                                             <span className="text-xs font-bold text-muted">Unavailable</span>
