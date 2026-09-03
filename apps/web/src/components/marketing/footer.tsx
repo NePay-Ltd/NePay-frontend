@@ -65,6 +65,8 @@ export function Footer() {
         <div className="pt-8 border-t border-marketing-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-marketing-secondary text-center md:text-left">
             &copy; {new Date().getFullYear()} NePay. All rights reserved.
+            <br className="md:hidden" />
+            <span className="md:before:content-['_·_']">NePay is a product of Circle Technology Limited.</span>
           </p>
           <p className="text-[10px] sm:text-xs text-marketing-secondary/60 text-center md:text-right max-w-xl leading-relaxed">
             Important: Any crypto conversion cashback offered is a variable, execution-linked bonus and should never be considered a guaranteed return, yield, or interest.

@@ -31,12 +31,19 @@ export function Navbar() {
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <img src="/logo.png" alt="NePay Logo" className="h-8 w-8 object-contain transition-transform group-hover:scale-105" />
-          <span className="font-heading text-xl font-bold tracking-tight text-marketing-text">
-            NePay
+        <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-2 group">
+            <img src="/logo.png" alt="NePay Logo" className="h-8 w-8 object-contain transition-transform group-hover:scale-105" />
+            <span className="font-heading text-xl font-bold tracking-tight text-marketing-text">
+              NePay
+            </span>
+          </Link>
+          <span className="hidden lg:inline-flex items-center pl-3 ml-1 border-l border-marketing-border/70">
+            <span className="text-[11px] font-medium text-marketing-secondary/75 whitespace-nowrap">
+              Powered by Circle Technology Limited
+            </span>
           </span>
-        </Link>
+        </div>
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">
