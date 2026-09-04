@@ -67,7 +67,13 @@ export function RegisterStepOne({ defaultValues, onSuccess }: RegisterStepOnePro
                     placeholder="08012345678"
                     inputMode="tel"
                     autoComplete="tel"
-                    {...register("phone")}
+                    {...register("phone", {
+                        onChange: (e) => {
+                            const clean = e.target.value.replace(/[^0-9+]/g, "");
+                            e.target.value = clean;
+                            setValue("phone", clean, { shouldValidate: true });
+                        }
+                    })}
                     aria-invalid={!!errors.phone}
                     className="pr-10"
                 />

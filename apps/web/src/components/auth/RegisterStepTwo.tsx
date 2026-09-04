@@ -119,11 +119,10 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
 
         setIsSendingOtp(true);
         try {
-            // Mocking the backend call
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await apiClient.post("/auth/resend-verification-email", { email });
             setOtpSent(true);
             setCountdown(60);
-            toast.success("Verification code sent! (Mock: any 6 digits)");
+            toast.success("Verification code sent!");
         } catch (err: any) {
             toast.error(err.response?.data?.message || "Failed to send code.");
         } finally {
@@ -136,8 +135,7 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
 
         setIsVerifyingOtp(true);
         try {
-            // Mocking the backend call
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await apiClient.post("/auth/verify-email", { email, code: otpCode });
             setValue("otpVerified", true, { shouldValidate: true });
             toast.success("Email verified!");
         } catch (err: any) {
