@@ -148,8 +148,12 @@ function UserProfileCard() {
                 onClick={() => router.push("/settings")}
                 className="flex items-center gap-3 text-left transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-trueWhite/20 rounded-xl"
             >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-200 text-sm font-extrabold text-orange-900">
-                    {displayName.substring(0, 2).toUpperCase()}
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-200 text-sm font-extrabold text-orange-900">
+                    {user?.avatarUrl ? (
+                        <img src={user.avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                    ) : (
+                        displayName.substring(0, 2).toUpperCase()
+                    )}
                 </div>
                 <div className="flex flex-col hidden xl:flex">
                     <span className="text-sm font-bold text-trueWhite">{displayName}</span>

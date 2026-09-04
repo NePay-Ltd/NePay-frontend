@@ -7,10 +7,10 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IconUser as UserIcon, IconBuilding as Landmark, IconLock as Lock, IconLogOut as LogOut, IconChevronRight as ChevronRight, IconBell as Bell } from "@/components/icons";
-import { ShieldCheck, LifeBuoy, Info, Mail, AlertCircle, Receipt } from "lucide-react";;
+import { ShieldCheck, LifeBuoy, Info, Mail, AlertCircle, Receipt, Camera } from "lucide-react";
 
 import { useAuth } from "@/lib/auth-context";
-import { useProfile, useUpdateProfile } from "@/lib/queries/profile";
+import { useProfile, useUpdateProfile, useUpdateAvatar } from "@/lib/queries/profile";
 import { cn } from "@/lib/cn";
 
 import { Panel, PanelBody } from "@/components/shared/panel";
@@ -63,6 +63,7 @@ export default function ProfilePage() {
     // Queries & Mutations
     const { data: profile, isLoading } = useProfile();
     const { mutate: updateProfile, isPending: isUpdatingProfile } = useUpdateProfile();
+    const { mutate: updateAvatar, isPending: isUpdatingAvatar } = useUpdateAvatar();
 
     // Preference state mirrors the profile response and persists through the profile API.
     const [pushEnabled, setPushEnabled] = React.useState(true);
@@ -71,6 +72,9 @@ export default function ProfilePage() {
     // State
     const [editModalOpen, setEditModalOpen] = React.useState(false);
     const [logoutModalOpen, setLogoutModalOpen] = React.useState(false);
+    
+    // Refs
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     // Form
     const form = useForm<EditProfileFormValues>({
@@ -96,6 +100,17 @@ export default function ProfilePage() {
     const onEmailReceiptsChange = (enabled: boolean) => {
         setEmailEnabled(enabled);
         updateProfile({ emailReceipts: enabled });
+    };
+    
+    const onAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            updateAvatar(file);
+        }
+        // Reset input so the same file can be selected again if needed
+        if (e.target) {
+            e.target.value = '';
+        }
     };
 
     // Handlers
@@ -130,8 +145,36 @@ export default function ProfilePage() {
                     </div>
                 ) : (
                     <>
-                        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-brand-gradient text-3xl font-bold text-white shadow-lg">
-                            {getInitials(`${profile.firstName} ${profile.lastName}`)}
+                        <div 
+                            className="group relative flex h-24 w-24 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-brand-gradient text-3xl font-bold text-white shadow-lg ring-4 ring-white"
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            {profile.avatarUrl ? (
+                                <img src={profile.avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                            ) : (
+                                getInitials(`${profile.firstName} ${profile.lastName}`)
+                            )}
+                            
+                            {/* Hover Overlay */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                                <Camera className="h-6 w-6 text-white" />
+                            </div>
+
+                            {/* Loading Overlay */}
+                            {isUpdatingAvatar && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+                                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                </div>
+                            )}
+
+                            <input 
+                                type="file" 
+                                ref={fileInputRef} 
+                                className="hidden" 
+                                accept="image/png, image/jpeg, image/webp, image/gif" 
+                                onChange={onAvatarChange} 
+                                disabled={isUpdatingAvatar}
+                            />
                         </div>
                         <h1 className="mt-4 text-2xl font-bold text-ink">{profile.firstName} {profile.lastName}</h1>
                         

@@ -57,6 +57,7 @@ export interface UserResponseDto {
     role: string;
     preferredCurrency: Currency;
     referralCode: string;
+    avatarUrl?: string | null;
     /** True once this account has an APPROVED BVN verification. */
     kycVerified: boolean;
     isActive: boolean;

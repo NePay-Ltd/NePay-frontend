@@ -42,6 +42,32 @@ export function useUpdateProfile() {
     });
 }
 
+export function useUpdateAvatar() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (file: File) => {
+            const formData = new FormData();
+            formData.append("avatar", file);
+
+            const res = await apiClient.post<ApiResponse<UserResponseDto>>("/users/me/avatar", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+            return res.data.data;
+        },
+        onSuccess: (newProfile) => {
+            queryClient.setQueryData(profileKeys.detail(), newProfile);
+            toast.success("Profile picture updated");
+        },
+        onError: (err: any) => {
+            const msg = err.response?.data?.message || "Failed to update profile picture. Please try again.";
+            toast.error(msg);
+        }
+    });
+}
+
 
 /**
  * Restricted to NGN/USD, matching the backend's own UpdateCurrencyDto — see

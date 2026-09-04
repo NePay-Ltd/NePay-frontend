@@ -9,8 +9,8 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";
 import { useUiStore } from "@/lib/stores/ui-store";
-
 import { Button } from "@/components/shared/button";
+import { useAuth } from "@/lib/auth-context";
 
 function Logo() {
     return (
@@ -56,6 +56,7 @@ export function TopBar() {
     const toggleMobileSidebar = useUiStore((s) => s.toggleMobileSidebar);
     const setCommandOpen = useUiStore((s) => s.setCommandOpen);
     const router = useRouter();
+    const { user } = useAuth();
 
     const { title, subtitle } = usePageHeaders();
 
@@ -152,6 +153,20 @@ export function TopBar() {
                     aria-label="Help and Support"
                 >
                     <HelpCircle className="h-[18px] w-[18px]" />
+                </button>
+
+                {/* Profile */}
+                <button
+                    type="button"
+                    onClick={() => router.push("/profile")}
+                    className="hidden lg:flex h-9 w-9 items-center justify-center rounded-full border border-border overflow-hidden bg-orange-200 text-orange-900 transition-all shadow-sm hover:shadow-md ml-1"
+                    aria-label="Profile"
+                >
+                    {user?.avatarUrl ? (
+                        <img src={user.avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                    ) : (
+                        <span className="text-xs font-bold">{user?.firstName?.substring(0, 2).toUpperCase() || "U"}</span>
+                    )}
                 </button>
             </div>
         </header>
