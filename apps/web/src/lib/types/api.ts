@@ -1,4 +1,4 @@
-export type Currency = "NGN" | "USD" | "EUR" | "GBP" | "CAD";
+export type Currency = "NGN" | "USD" | "EUR" | "GBP";
 export type LedgerDirection = "CREDIT" | "DEBIT";
 export type LedgerEntryType = "DEPOSIT" | "BANK_DEPOSIT" | "WITHDRAWAL" | "ADMIN_ADJUSTMENT" | "PROMO_CREDIT" | "GOODWILL_CREDIT" | "ERROR_CORRECTION" | "UTILITY_PURCHASE" | "UTILITY_DISCOUNT" | "GIFT_CARD_SALE" | "FLIGHT_BOOKING" | "FEE" | "CASHBACK" | "REFERRAL_REWARD" | "FCY_CONVERSION_CREDIT";
 export type CryptoDepositStatus =
@@ -341,191 +341,118 @@ export interface GiftCardListingDto {
     sortOrder: number;
 }
 
-// ─── FCY (Foreign Currency) Accounts — Fincra-backed ────────────────────────
-// USD/EUR/GBP/CAD virtual accounts, collections, RFI and NGN conversion.
-// Only EUR/CAD are testable against Fincra's sandbox today (USD/GBP have no
-// sandbox account support yet, per the backend's own confirmed spec) — the
-// UI still supports requesting all four, since the code path is real.
+// ─── Foreign Accounts — Bridge.xyz-backed ───────────────────────────────────
+// USD/EUR/GBP virtual accounts that auto-convert to USDC and land in a
+// Bridge-custodied wallet. NePay credits the NGN-equivalent to the user's
+// wallet immediately once a deposit is confirmed, using NePay's own internal
+// rate — never a live per-transaction FX quote (replaces Fincra entirely).
 
-export type FcyCurrency = "USD" | "EUR" | "GBP" | "CAD";
-export type FcyAccountStatus = "REQUESTED" | "APPROVED" | "ISSUED" | "DECLINED" | "CLOSED";
-export type FcyCollectionStatus = "PENDING" | "SUCCESSFUL" | "FAILED" | "AWAITING_INFO";
-export type FcyConversionStatus = "INITIATED" | "SUCCESSFUL" | "FAILED";
-export type FcyRfiStatus = "OPEN" | "RESPONSE_SUBMITTED" | "RESOLVED" | "EXPIRED";
-/** USD/GBP/CAD accept PASSPORT only — confirmed against Fincra's real docs; EUR alone accepts the other three. */
-export type FcyIdentityDocumentType = "PASSPORT" | "NATIONAL_ID" | "DRIVERS_LICENSE" | "ID_CARD";
+export type BridgeCurrency = "USD" | "EUR" | "GBP";
+/** Mirrors Bridge's own Customer.status values verbatim. */
+export type BridgeCustomerStatus =
+    | "not_started"
+    | "incomplete"
+    | "active"
+    | "rejected"
+    | "awaiting_ubo"
+    | "under_review"
+    | "deposits_restricted"
+    | "paused"
+    | "offboarded";
+export type BridgeDepositStatus = "RECEIVED" | "CREDITED";
 
-export interface FcyAccountDto {
+export interface BridgeCustomerDto {
     id: string;
     userId: string;
-    currency: FcyCurrency;
-    status: FcyAccountStatus;
-    reference: string;
-    accountNumber: string | null;
-    accountName: string | null;
-    bankName: string | null;
-    /** CAD only — funds are addressed to this Interac alias, never an account number. */
-    interacEmail: string | null;
-    declineReason: string | null;
-    approvedAt: string | null;
-    issuedAt: string | null;
-    declinedAt: string | null;
+    bridgeCustomerId: string;
+    status: BridgeCustomerStatus;
+    hasAcceptedTermsOfService: boolean;
+    /** Bridge's hosted ToS page — a human click-through, no API shortcut exists. Null once accepted. */
+    tosLink: string | null;
     createdAt: string;
-}
-
-export type FcyEmploymentStatus =
-    | "employed"
-    | "self_employed"
-    | "unemployed"
-    | "student"
-    | "retired"
-    | "homemaker"
-    | "freelancer"
-    | "other";
-
-export type FcySourceOfIncome =
-    | "salary"
-    | "business_income"
-    | "investment"
-    | "gift"
-    | "inheritance"
-    | "real_estate"
-    | "loan"
-    | "pension"
-    | "grant"
-    | "trust"
-    | "crypto"
-    | "other";
-
-export type FcyDocumentPurpose = "IDENTITY_DOCUMENT" | "UTILITY_BILL" | "BANK_STATEMENT";
-
-/** Response of POST /fcy/documents — never a URL, see RequestFcyAccountDto's own note on why. */
-export interface FcyDocumentDto {
-    id: string;
-    purpose: FcyDocumentPurpose;
-    originalFilename: string;
-    createdAt: string;
+    updatedAt: string;
 }
 
 /**
- * Body of POST /fcy/accounts — the full KYCInformation block Fincra's real
- * individual-account API requires (confirmed against Fincra's docs
- * 2026-08-29, after a real sandbox VALIDATION_FAILED traced to a much
- * narrower original DTO). USD/GBP/CAD accept `passport` ONLY — enforced by
- * the backend, surfaced here so the form can hint it upfront; EUR alone
- * accepts the other document types.
- *
- * `identityDocumentFileId`/`utilityBillFileId` reference a document already
- * uploaded via POST /fcy/documents — never a raw URL. Confirmed live
- * 2026-08-29: Fincra's server actually fetches whatever URL it's given
- * ("Unable to retrieve one or more documents from url." on a dead one,
- * even Fincra's own docs example value), so the backend resolves each id to
- * a fresh, short-lived signed URL right before submitting — see
- * FcyDocumentService.getSignedUrl on the backend.
- *
- * `identityDocumentBackFileId` is required for every document type EXCEPT
- * PASSPORT — confirmed live 2026-08-29: Fincra needs a front+back pair
- * (`meansOfId`) for nationalId/driverLicense/idCard, one file only for a
- * passport.
+ * Body of POST /bridge/customer (multipart/form-data — identity document
+ * images go alongside as files, see useCreateBridgeCustomer). Field names
+ * and enum values confirmed live against Bridge's real sandbox API
+ * 2026-09-04 — most notably `expectedMonthlyPaymentsUsd`, not
+ * `expectedMonthlyPayments` (a wrong guess that silently passed validation
+ * while permanently failing the underlying compliance check).
  */
-export interface RequestFcyAccountDto {
-    currency: FcyCurrency;
-
-    identityDocumentType: FcyIdentityDocumentType;
-    identityDocumentNumber: string;
-    /** Front of the document — id from POST /fcy/documents (purpose: IDENTITY_DOCUMENT). */
-    identityDocumentFileId: string;
-    /** Back of the document — required unless identityDocumentType is PASSPORT. */
-    identityDocumentBackFileId?: string;
-    /** ISO 3166-1 alpha-2, e.g. "NG". */
-    identityDocumentIssuedCountryCode: string;
-    identityDocumentIssuedBy: string;
-    /** ISO date (yyyy-MM-dd). */
-    identityDocumentIssuedDate: string;
-    /** Optional only when identityDocumentType is NATIONAL_ID. */
-    identityDocumentExpirationDate?: string;
-
-    /** ISO date (yyyy-MM-dd). */
+export interface CreateBridgeCustomerDto {
     birthDate: string;
-    /** ISO 3166-1 alpha-2, e.g. "NG". */
-    nationality: string;
-    occupation: string;
-    employmentStatus: FcyEmploymentStatus;
-    sourceOfIncome: FcySourceOfIncome;
-    accountDesignation: string;
-    /** ISO 3166-1 alpha-2. taxNumber is only required when this is "US". */
-    taxCountry: string;
-    taxNumber?: string;
-    incomeBandLower: string;
-    incomeBandUpper: string;
-
-    addressCountryOfResidence: string;
-    addressState: string;
-    addressCity: string;
-    addressStreet: string;
-    addressNumber: string;
-    addressZip: string;
-
-    monthlyTransactionCount: string;
-    monthlyTransactionVolume: string;
-
-    /** Confirmed REQUIRED live 2026-08-29 ("utilityBill is required"). id from POST /fcy/documents (purpose: UTILITY_BILL). */
-    utilityBillFileId: string;
-    /** Still unconfirmed whether Fincra requires this — utilityBill alone was sufficient in a real sandbox call. id from POST /fcy/documents (purpose: BANK_STATEMENT). */
-    bankStatementFileId?: string;
+    streetLine1: string;
+    city: string;
+    postalCode: string;
+    /** ISO 3166-1 alpha-3, e.g. "NGA" — confirmed live, not alpha-2. */
+    country: string;
+    employmentStatus: "employed" | "self_employed" | "unemployed" | "student" | "retired" | "homemaker";
+    expectedMonthlyPaymentsUsd: "0_4999" | "5000_9999" | "10000_49999" | "50000_plus";
+    /** O*NET/SOC-style numeric occupation code, e.g. "151254" for Software Developers. */
+    mostRecentOccupation: string;
+    accountPurpose:
+        | "business_transactions"
+        | "charitable_donations"
+        | "ecommerce_retail_payments"
+        | "investment_purposes"
+        | "operating_a_company"
+        | "other"
+        | "payments_to_friends_or_family_abroad"
+        | "personal_or_living_expenses"
+        | "protect_wealth"
+        | "purchase_goods_and_services"
+        | "receive_payment_for_freelancing"
+        | "receive_salary";
+    sourceOfFunds:
+        | "business_income"
+        | "company_funds"
+        | "ecommerce_reseller"
+        | "gambling_proceeds"
+        | "gifts"
+        | "government_benefits"
+        | "inheritance"
+        | "investments_loans"
+        | "pension_retirement"
+        | "salary"
+        | "sale_of_assets_real_estate"
+        | "savings"
+        | "someone_elses_funds";
+    actingAsIntermediary: boolean;
+    identityDocumentType: "passport" | "national_id" | "drivers_license";
+    /** ISO 3166-1 alpha-3, e.g. "NGA". */
+    identityDocumentIssuingCountry: string;
+    identityDocumentNumber: string;
 }
 
-export interface FcyCollectionDto {
+export interface BridgeVirtualAccountDto {
     id: string;
-    fcyAccountId: string;
-    currency: FcyCurrency;
-    amount: string;
-    reference: string;
-    status: FcyCollectionStatus;
-    payerName: string | null;
-    narration: string | null;
-    rfiCaseId: string | null;
-    failureReason: string | null;
-    resolvedAt: string | null;
+    userId: string;
+    currency: BridgeCurrency;
+    bridgeVirtualAccountId: string;
+    status: string;
+    /** Bridge's real per-currency deposit instructions — shape varies (US bank+routing, EU IBAN, UK sort code+account). */
+    sourceDepositInstructions: Record<string, unknown>;
+    destinationCurrency: string;
+    destinationChain: string;
+    destinationAddress: string;
     createdAt: string;
 }
 
-/** Body of POST /fcy/accounts/:id/simulate-collection — sandbox-only, CAD only. Outcome is driven purely by amount (confirmed): <10,000 (and not exactly 999) -> SUCCESSFUL, exactly 999 -> FAILED, >10,000 -> AWAITING_INFO (RFI). */
-export interface SimulateCadCollectionDto {
-    amount: string;
+/** Body of POST /bridge/accounts. */
+export interface RequestBridgeVirtualAccountDto {
+    currency: BridgeCurrency;
 }
 
-export interface FcyConversionDto {
+export interface BridgeDepositDto {
     id: string;
-    fcyAccountId: string;
-    sourceCurrency: FcyCurrency;
+    userId: string;
+    sourceCurrency: string;
     sourceAmount: string;
-    rate: string | null;
-    convertedNgnAmount: string | null;
-    reference: string;
-    status: FcyConversionStatus;
-    failureReason: string | null;
-    completedAt: string | null;
-    createdAt: string;
-}
-
-/** Body of POST /fcy/conversions. */
-export interface InitiateFcyConversionDto {
-    fcyAccountId: string;
-    amount: string;
-}
-
-export interface FcyRfiCaseDto {
-    id: string;
-    fcyCollectionId: string;
-    status: FcyRfiStatus;
-    requestedInfo: string | null;
-    responseNote: string | null;
-    responseSubmittedAt: string | null;
-    /** Same-day/within-hours in practice (confirmed) — render prominently, never as a low-urgency multi-day countdown. */
-    deadlineAt: string;
-    returnFeeAmount: string | null;
-    returnFeeCurrency: Currency | null;
-    resolvedAt: string | null;
+    usdAmount: string | null;
+    rateUsed: string | null;
+    ngnAmountCredited: string | null;
+    status: BridgeDepositStatus;
     createdAt: string;
 }
