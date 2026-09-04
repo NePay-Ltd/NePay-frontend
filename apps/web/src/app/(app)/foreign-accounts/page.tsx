@@ -375,10 +375,19 @@ function DocumentPicker({ label, file, onChange }: { label: string; file: File |
     );
 }
 
-/** Bridge's own customer-facing rejection message — see `rejection_reasons[].reason` on the raw payload. */
-function rejectionMessage(customer?: { rawPayload: Record<string, unknown> | null }): string | null {
-    const reasons = customer?.rawPayload?.rejection_reasons as { reason?: string }[] | undefined;
-    return reasons?.[0]?.reason ?? null;
+/**
+ * Bridge's rejection detail. `reason` is the generic customer-facing text
+ * (almost always "Your information could not be verified" — not actionable
+ * on its own); `developer_reason` is the specific one (e.g. names
+ * `acting_as_intermediary` outright) — surfaced here too since this is
+ * still an actively-tested flow and the generic text alone gives no way to
+ * tell one rejection cause from another.
+ */
+function rejectionMessage(customer?: { rawPayload: Record<string, unknown> | null }): { reason: string; detail: string | null } | null {
+    const reasons = customer?.rawPayload?.rejection_reasons as { reason?: string; developer_reason?: string }[] | undefined;
+    const first = reasons?.[0];
+    if (!first?.reason) return null;
+    return { reason: first.reason, detail: first.developer_reason ?? null };
 }
 
 function OnboardingForm({ rejectedCustomer }: { rejectedCustomer?: { rawPayload: Record<string, unknown> | null } }) {
@@ -436,7 +445,10 @@ function OnboardingForm({ rejectedCustomer }: { rejectedCustomer?: { rawPayload:
                         <AlertCircle className="h-4 w-4 shrink-0 text-red-600 dark:text-red-400 mt-0.5" />
                         <div>
                             <p className="text-sm font-bold text-red-900 dark:text-red-300">Previous submission wasn&apos;t approved</p>
-                            <p className="mt-0.5 text-xs font-medium text-red-800 dark:text-red-400">{rejection}</p>
+                            <p className="mt-0.5 text-xs font-medium text-red-800 dark:text-red-400">{rejection.reason}</p>
+                            {rejection.detail ? (
+                                <p className="mt-0.5 text-xs text-red-700 dark:text-red-500">{rejection.detail}</p>
+                            ) : null}
                             <p className="mt-1 text-xs text-red-700 dark:text-red-500">Correct the details below and submit again.</p>
                         </div>
                     </div>
