@@ -22,6 +22,8 @@ import { Field } from "@/components/shared/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/shared/spinner";
 import { BridgeOnboardingForm } from "@/components/shared/bridge-onboarding-form";
+import { BridgeTosConsent } from "@/components/shared/bridge-tos-consent";
+import { useBridgeCustomer } from "@/lib/queries/bridge";
 import { cn } from "@/lib/cn";
 
 import { getApiErrorMessage } from "@/lib/api-client";
@@ -199,6 +201,37 @@ function KycRejected({ type }: { type: "BVN" }) {
  */
 function BridgeOptionalStep({ onDone }: { onDone: () => void }) {
     const [expanded, setExpanded] = React.useState(false);
+    // Reacts automatically once BridgeOnboardingForm's own submit succeeds —
+    // its mutation invalidates this same query, so `customer` appears here
+    // with no extra plumbing needed between the form and this step.
+    const { data: customer } = useBridgeCustomer();
+
+    // The form was submitted (this render or an earlier one): the Bridge
+    // customer now exists, which means it may still need ToS acceptance
+    // before it's actually usable — show that here rather than jumping
+    // straight to "done" and letting the user believe everything's
+    // finished when Bridge itself isn't done reviewing yet.
+    if (customer) {
+        const needsTos = !customer.hasAcceptedTermsOfService && customer.tosLink;
+        return (
+            <div className="space-y-5">
+                <div className="space-y-1 text-center">
+                    <h2 className="text-xl font-bold text-ink">
+                        {needsTos ? "One last thing" : "Verification submitted"}
+                    </h2>
+                    <p className="text-sm text-body">
+                        {needsTos
+                            ? "Accept Bridge's terms to finish setting up your foreign accounts."
+                            : "Bridge is reviewing your details — this can take a few minutes. You can check progress anytime from Foreign Accounts."}
+                    </p>
+                </div>
+                {needsTos ? <BridgeTosConsent customer={customer} /> : null}
+                <Button variant="primary" size="lg" fullWidth onClick={onDone}>
+                    Continue
+                </Button>
+            </div>
+        );
+    }
 
     if (expanded) {
         return (
@@ -210,7 +243,7 @@ function BridgeOptionalStep({ onDone }: { onDone: () => void }) {
                 >
                     ← Back
                 </button>
-                <BridgeOnboardingForm bare onSubmitted={onDone} />
+                <BridgeOnboardingForm bare />
             </div>
         );
     }
