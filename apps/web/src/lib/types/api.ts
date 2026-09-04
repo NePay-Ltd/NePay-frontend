@@ -407,8 +407,8 @@ export interface CreateBridgeCustomerDto {
         | "purchase_goods_and_services"
         | "receive_payment_for_freelancing"
         | "receive_salary";
+    /** "business_income" deliberately excluded — confirmed live 2026-09-04 that Bridge rejects it despite listing it as valid in their own error messages. */
     sourceOfFunds:
-        | "business_income"
         | "company_funds"
         | "ecommerce_reseller"
         | "gambling_proceeds"

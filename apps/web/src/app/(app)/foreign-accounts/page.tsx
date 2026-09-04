@@ -294,9 +294,10 @@ const ACCOUNT_PURPOSES: { value: CreateBridgeCustomerDto["accountPurpose"]; labe
     { value: "other", label: "Other" },
 ];
 
+/** "business_income" deliberately excluded — confirmed live 2026-09-04 that Bridge rejects it despite listing it as valid in their own error messages. "company_funds" is the closest working substitute for a business owner's income. */
 const SOURCES_OF_FUNDS: { value: CreateBridgeCustomerDto["sourceOfFunds"]; label: string }[] = [
     { value: "salary", label: "Salary" },
-    { value: "business_income", label: "Business income" },
+    { value: "company_funds", label: "Business / company funds" },
     { value: "ecommerce_reseller", label: "E-commerce reselling" },
     { value: "savings", label: "Savings" },
     { value: "investments_loans", label: "Investments / loans" },
@@ -305,7 +306,6 @@ const SOURCES_OF_FUNDS: { value: CreateBridgeCustomerDto["sourceOfFunds"]; label
     { value: "gifts", label: "Gifts" },
     { value: "sale_of_assets_real_estate", label: "Sale of assets / real estate" },
     { value: "government_benefits", label: "Government benefits" },
-    { value: "company_funds", label: "Company funds" },
     { value: "someone_elses_funds", label: "Someone else's funds" },
     { value: "gambling_proceeds", label: "Gambling proceeds" },
 ];
