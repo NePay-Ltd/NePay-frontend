@@ -369,6 +369,8 @@ export interface BridgeCustomerDto {
     hasAcceptedTermsOfService: boolean;
     /** Bridge's hosted ToS page — a human click-through, no API shortcut exists. Null once accepted. */
     tosLink: string | null;
+    /** Bridge's full raw customer payload — `rejection_reasons[].reason` is the customer-facing message when status is "rejected". */
+    rawPayload: Record<string, unknown> | null;
     createdAt: string;
     updatedAt: string;
 }

@@ -71,8 +71,8 @@ export default function ForeignAccountsPage() {
 
                 {customerLoading ? (
                     <Skeleton className="h-64 w-full rounded-2xl" />
-                ) : !customer ? (
-                    <OnboardingForm />
+                ) : !customer || customer.status === "rejected" ? (
+                    <OnboardingForm rejectedCustomer={customer ?? undefined} />
                 ) : customer.status !== "active" ? (
                     <StatusPanel customer={customer} />
                 ) : (
@@ -150,22 +150,9 @@ export default function ForeignAccountsPage() {
 
 // ─── Status panel (pending verification / ToS / rejected) ──────────────────
 
+/** `rejected` never reaches here — page.tsx routes it straight back to OnboardingForm so the user can actually correct and resubmit. */
 function StatusPanel({ customer }: { customer: NonNullable<ReturnType<typeof useBridgeCustomer>["data"]> }) {
     const { mutate: refresh, isPending } = useRefreshBridgeCustomer();
-
-    if (customer.status === "rejected") {
-        return (
-            <div className="rounded-xl border border-red-200 bg-red-50 dark:border-red-900/30 dark:bg-red-900/10 p-5 flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 shrink-0 text-red-600 dark:text-red-400 mt-0.5" />
-                <div>
-                    <h4 className="text-sm font-bold text-red-900 dark:text-red-300">Verification not approved</h4>
-                    <p className="mt-1 text-sm font-medium text-red-800 dark:text-red-400">
-                        Contact support for help getting this resolved.
-                    </p>
-                </div>
-            </div>
-        );
-    }
 
     if (!customer.hasAcceptedTermsOfService && customer.tosLink) {
         return (
@@ -388,7 +375,13 @@ function DocumentPicker({ label, file, onChange }: { label: string; file: File |
     );
 }
 
-function OnboardingForm() {
+/** Bridge's own customer-facing rejection message — see `rejection_reasons[].reason` on the raw payload. */
+function rejectionMessage(customer?: { rawPayload: Record<string, unknown> | null }): string | null {
+    const reasons = customer?.rawPayload?.rejection_reasons as { reason?: string }[] | undefined;
+    return reasons?.[0]?.reason ?? null;
+}
+
+function OnboardingForm({ rejectedCustomer }: { rejectedCustomer?: { rawPayload: Record<string, unknown> | null } }) {
     const [form, setForm] = React.useState<FormState>(emptyForm());
     const [front, setFront] = React.useState<File | null>(null);
     const [back, setBack] = React.useState<File | null>(null);
@@ -433,9 +426,22 @@ function OnboardingForm() {
         );
     };
 
+    const rejection = rejectionMessage(rejectedCustomer);
+
     return (
         <Panel>
             <PanelBody className="space-y-5">
+                {rejection ? (
+                    <div className="rounded-xl border border-red-200 bg-red-50 dark:border-red-900/30 dark:bg-red-900/10 p-4 flex items-start gap-3">
+                        <AlertCircle className="h-4 w-4 shrink-0 text-red-600 dark:text-red-400 mt-0.5" />
+                        <div>
+                            <p className="text-sm font-bold text-red-900 dark:text-red-300">Previous submission wasn&apos;t approved</p>
+                            <p className="mt-0.5 text-xs font-medium text-red-800 dark:text-red-400">{rejection}</p>
+                            <p className="mt-1 text-xs text-red-700 dark:text-red-500">Correct the details below and submit again.</p>
+                        </div>
+                    </div>
+                ) : null}
+
                 <div className="space-y-3">
                     <p className="text-xs font-bold uppercase tracking-widest text-muted">Personal details</p>
                     <Field label="Date of birth">
