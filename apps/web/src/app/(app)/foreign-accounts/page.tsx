@@ -12,6 +12,7 @@ import { Button } from "@/components/shared/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/shared/skeletons";
 import { Field } from "@/components/shared/field";
+import { Modal } from "@/components/shared/modal";
 import { Tag, type TagVariant } from "@/components/shared/tag";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -153,29 +154,62 @@ export default function ForeignAccountsPage() {
 /** `rejected` never reaches here — page.tsx routes it straight back to OnboardingForm so the user can actually correct and resubmit. */
 function StatusPanel({ customer }: { customer: NonNullable<ReturnType<typeof useBridgeCustomer>["data"]> }) {
     const { mutate: refresh, isPending } = useRefreshBridgeCustomer();
+    const [tosOpen, setTosOpen] = React.useState(false);
+
+    // Bridge's hosted ToS page sends no X-Frame-Options/CSP header (confirmed
+    // live), so it can be embedded directly instead of sending the user to a
+    // separate tab. There's no postMessage/redirect callback from Bridge to
+    // hook into, so this polls the same refresh() the manual button used —
+    // just automatically, closing itself the moment Bridge confirms.
+    React.useEffect(() => {
+        if (!tosOpen) return;
+        const interval = setInterval(() => refresh(), 4000);
+        return () => clearInterval(interval);
+    }, [tosOpen, refresh]);
+
+    React.useEffect(() => {
+        if (tosOpen && customer.hasAcceptedTermsOfService) {
+            setTosOpen(false);
+            toast.success("Terms of service accepted");
+        }
+    }, [tosOpen, customer.hasAcceptedTermsOfService]);
 
     if (!customer.hasAcceptedTermsOfService && customer.tosLink) {
         return (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/30 dark:bg-amber-900/10 p-5 space-y-4">
-                <div className="flex items-start gap-3">
-                    <ShieldAlert className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-500 mt-0.5" />
-                    <div>
-                        <h4 className="text-sm font-bold text-amber-900 dark:text-amber-400">One more step</h4>
-                        <p className="mt-1 text-sm font-medium text-amber-800 dark:text-amber-500">
-                            Accept the terms of service to finish setting up your foreign accounts.
-                        </p>
+            <>
+                <div className="rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/30 dark:bg-amber-900/10 p-5 space-y-4">
+                    <div className="flex items-start gap-3">
+                        <ShieldAlert className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-500 mt-0.5" />
+                        <div>
+                            <h4 className="text-sm font-bold text-amber-900 dark:text-amber-400">One more step</h4>
+                            <p className="mt-1 text-sm font-medium text-amber-800 dark:text-amber-500">
+                                Accept the terms of service to finish setting up your foreign accounts.
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button variant="primary" onClick={() => setTosOpen(true)}>
+                            <ExternalLink className="mr-2 h-4 w-4" />
+                            Accept terms of service
+                        </Button>
+                        <Button variant="quiet" loading={isPending} onClick={() => refresh()}>
+                            I&apos;ve completed it
+                        </Button>
                     </div>
                 </div>
-                <div className="flex gap-2">
-                    <Button variant="primary" onClick={() => window.open(customer.tosLink!, "_blank", "noopener,noreferrer")}>
-                        <ExternalLink className="mr-2 h-4 w-4" />
-                        Open terms of service
-                    </Button>
-                    <Button variant="quiet" loading={isPending} onClick={() => refresh()}>
-                        I&apos;ve completed it
-                    </Button>
-                </div>
-            </div>
+
+                <Modal
+                    open={tosOpen}
+                    onOpenChange={setTosOpen}
+                    title="Bridge terms of service"
+                    description="Accept the terms below — this closes automatically once it's done."
+                    size="lg"
+                >
+                    <div className="h-[65vh] max-h-[600px] w-full overflow-hidden rounded-lg border border-border">
+                        <iframe src={customer.tosLink} title="Bridge terms of service" className="h-full w-full" />
+                    </div>
+                </Modal>
+            </>
         );
     }
 
@@ -202,11 +236,29 @@ function CurrencyPanel({ currency, account }: { currency: BridgeCurrency; accoun
 
     if (!account) {
         return (
-            <div className="space-y-4">
-                <p className="text-sm font-medium text-muted">
-                    Get a real {currency} account number you can share with clients or employers abroad.
-                </p>
-                <Button fullWidth variant="primary" loading={isPending} onClick={() => requestAccount({ currency })}>
+            <div className="rounded-xl border border-dashed border-border bg-gray-50/60 dark:bg-white/5 p-6 text-center space-y-4">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-900/30">
+                    <Building2 className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                </div>
+                <div>
+                    <p className="text-sm font-bold text-ink">No {currency} account yet</p>
+                    <p className="mt-1 text-sm text-muted">
+                        Get a real {currency} account number you can share with clients or employers abroad.
+                    </p>
+                </div>
+                <Button
+                    variant="primary"
+                    loading={isPending}
+                    onClick={() =>
+                        requestAccount(
+                            { currency },
+                            {
+                                onSuccess: () => toast.success(`${currency} account issued`),
+                                onError: (err) => toast.error(err.message || `Could not issue a ${currency} account.`),
+                            },
+                        )
+                    }
+                >
                     <Building2 className="mr-2 h-4 w-4" />
                     Get {currency} Account
                 </Button>
