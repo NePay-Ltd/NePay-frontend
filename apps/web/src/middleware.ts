@@ -29,6 +29,18 @@ const PUBLIC_PATHS = new Set([
     "/icons-preview",
 ]);
 
+/** Paths that can be viewed by anyone, logged in or not, without redirecting. */
+const PUBLIC_CONTENT_PATHS = new Set([
+    "/terms",
+    "/privacy",
+    "/eula",
+    "/faq",
+    "/about",
+    "/legal/terms",
+    "/legal/privacy",
+    "/legal/compliance",
+]);
+
 /** Paths that start with these prefixes are always public (static, marketing). */
 const PUBLIC_PREFIXES = ["/_next", "/favicon", "/api/auth/callback"];
 
@@ -64,6 +76,11 @@ export function middleware(request: NextRequest) {
     const hasSession = request.cookies.has("nepay_refresh");
 
     if (!hasSession) {
+        // If it's a public content page, let them view it without logging in
+        if (PUBLIC_CONTENT_PATHS.has(pathname)) {
+            return NextResponse.next();
+        }
+
         // Preserve the attempted URL so we can redirect back after login
         const loginUrl = new URL("/login", request.url);
         const returnTo = pathname !== "/" ? pathname : undefined;

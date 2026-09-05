@@ -145,7 +145,7 @@ function UserProfileCard() {
     return (
         <div className="mt-2 flex items-center justify-between p-4">
             <button
-                onClick={() => router.push("/settings")}
+                onClick={() => router.push("/profile")}
                 className="flex items-center gap-3 text-left transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-trueWhite/20 rounded-xl"
             >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-200 text-sm font-extrabold text-orange-900">

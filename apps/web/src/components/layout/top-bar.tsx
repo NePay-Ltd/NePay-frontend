@@ -43,6 +43,9 @@ function usePageHeaders() {
     if (pathname.startsWith("/gift-cards")) {
         return { title: "Gift Cards", subtitle: "Trade gift cards at the best rates" };
     }
+    if (["/about", "/faq", "/eula", "/terms", "/privacy"].some(p => pathname.startsWith(p))) {
+        return { title: "About", subtitle: "Manage your account" };
+    }
     
     // Default fallback
     const title = pathname.split('/')[1] || "NePay";
