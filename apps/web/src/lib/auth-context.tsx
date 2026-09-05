@@ -39,8 +39,10 @@ export interface AuthContextValue {
     login: (values: LoginValues) => Promise<void>;
     /** Completes a login that was paused by a 2FA challenge — see login()'s `mfaRequired` branch. */
     verifyMfa: (mfaToken: string, code: string) => Promise<void>;
-    register: (values: Omit<RegisterValues, "confirmPassword" | "acceptTerms">) => Promise<void>;
+    register: (values: Omit<RegisterValues, "confirmPassword" | "acceptTerms">, autoLogin?: boolean) => Promise<AuthTokensDto | void>;
     logout: () => Promise<void>;
+    /** Exposed to finalize session after external verifications (e.g. email OTP) */
+    finalizeLogin: (data: AuthTokensDto) => void;
     /** Locally flip kycVerified to true after a successful BVN submission. */
     markKycVerified: () => void;
 }
@@ -112,7 +114,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     return;
                 }
 
-                completeLogin(data);
+                if ('user' in data && data.user.emailVerified === false) {
+                    toast.info("Please verify your email address to continue.");
+                    try {
+                        // Automatically resend a fresh code when they hit this block
+                        await apiClient.post("/auth/resend-verification-email", { email: data.user.email });
+                    } catch (e) {
+                        // Ignore resend errors (could be rate limited, that's fine)
+                    }
+                    sessionStorage.setItem("pending_verification_tokens", JSON.stringify(data));
+                    router.push(`/verify-email?email=${encodeURIComponent(data.user.email)}`);
+                    return;
+                }
+
+                completeLogin(data as AuthTokensDto);
             } catch (err: any) {
                 // ACCOUNT_SUSPENDED and INVALID_CREDENTIALS are shown inline by the
                 // login page itself (a persistent banner / field error respectively)
@@ -158,32 +173,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         async (values: Omit<RegisterValues, "confirmPassword" | "acceptTerms">) => {
             setIsMutating(true);
             try {
-                const res = await apiClient.post<ApiResponse<AuthTokensDto>>("/auth/register", {
+                const res = await apiClient.post<ApiResponse<UserResponseDto>>("/auth/register", {
                     firstName: values.firstName,
                     lastName: values.lastName,
                     email: values.email,
                     username: values.username,
                     phoneNumber: values.phone,
                     password: values.password,
-                    // Best-effort fraud signal — see FraudDetectionService's
-                    // own note on why this is deliberately weaker than a
-                    // native app's hardware device id. undefined (omitted
-                    // from the body) when storage is unavailable, never sent
-                    // as a fabricated value.
+                    // Best-effort fraud signal
                     deviceId: getOrCreateDeviceId() ?? undefined,
-                    // Both optional attribution codes — see the register
-                    // page's own note on where each one comes from.
                     referralCode: values.referralCode || undefined,
                     referredByMarketerCode: values.referredByMarketerCode || undefined,
                 });
                 
-                const data = res.data.data;
-                setTokens(data);
-                setUser(data.user);
-                
-                document.cookie = "nepay_refresh=true; path=/; max-age=86400";
-                toast.success("Account created! Welcome to NePay.");
-                window.location.href = "/overview";
+                const user = res.data.data;
+                return user;
             } catch (err: any) {
                 const msg = err.response?.data?.message || "Registration failed. Please try again.";
                 toast.error(msg);
@@ -225,6 +229,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         verifyMfa,
         register,
         logout,
+        finalizeLogin: completeLogin,
         markKycVerified,
     };
 

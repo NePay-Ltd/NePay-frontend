@@ -25,6 +25,7 @@ const PUBLIC_PATHS = new Set([
     "/forgot-password",
     "/reset-password",
     "/verify-mfa",
+    "/verify-email",
     "/icons-preview",
 ]);
 

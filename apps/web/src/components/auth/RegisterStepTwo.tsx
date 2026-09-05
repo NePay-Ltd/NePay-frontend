@@ -34,12 +34,6 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
     const [showPassword, setShowPassword] = React.useState(false);
     const [showConfirm, setShowConfirm] = React.useState(false);
 
-    const [isSendingOtp, setIsSendingOtp] = React.useState(false);
-    const [isVerifyingOtp, setIsVerifyingOtp] = React.useState(false);
-    const [otpSent, setOtpSent] = React.useState(false);
-    const [countdown, setCountdown] = React.useState(0);
-    const [otpCode, setOtpCode] = React.useState("");
-
     const {
         register,
         handleSubmit,
@@ -56,7 +50,6 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
             password: "",
             confirmPassword: "",
             acceptTerms: true,
-            otpVerified: false,
         },
     });
 
@@ -100,50 +93,7 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
         };
     }, [usernameValue, clearErrors, setError]);
 
-    const email = watch("email");
-    const otpVerified = watch("otpVerified");
-
-    React.useEffect(() => {
-        let timer: NodeJS.Timeout;
-        if (countdown > 0) {
-            timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
-        }
-        return () => clearTimeout(timer);
-    }, [countdown]);
-
-    const handleSendOtp = async () => {
-        if (!email || errors.email) {
-            toast.error("Please enter a valid email address first.");
-            return;
-        }
-
-        setIsSendingOtp(true);
-        try {
-            await apiClient.post("/auth/resend-verification-email", { email });
-            setOtpSent(true);
-            setCountdown(60);
-            toast.success("Verification code sent!");
-        } catch (err: any) {
-            toast.error(err.response?.data?.message || "Failed to send code.");
-        } finally {
-            setIsSendingOtp(false);
-        }
-    };
-
-    const handleVerifyOtp = async () => {
-        if (otpCode.length !== 6) return;
-
-        setIsVerifyingOtp(true);
-        try {
-            await apiClient.post("/auth/verify-email", { email, code: otpCode });
-            setValue("otpVerified", true, { shouldValidate: true });
-            toast.success("Email verified!");
-        } catch (err: any) {
-            toast.error(err.response?.data?.message || "Invalid or expired code.");
-        } finally {
-            setIsVerifyingOtp(false);
-        }
-    };
+    const emailValue = watch("email");
 
     return (
         <form id="step-two-form" onSubmit={handleSubmit(onSubmitFinal)} className="space-y-6">
@@ -174,67 +124,10 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
                     inputMode="email"
                     autoComplete="email"
                     {...register("email")}
-                    disabled={otpVerified || isSendingOtp}
                     aria-invalid={!!errors.email}
                     className="pr-10"
                 />
             </Field>
-
-            {!otpVerified && (
-                <div className="flex items-center gap-3 -mt-2">
-                    <Button
-                        type="button"
-                        variant="quiet"
-                        size="sm"
-                        onClick={handleSendOtp}
-                        disabled={!email || !!errors.email || countdown > 0 || isSendingOtp}
-                        loading={isSendingOtp}
-                    >
-                        {countdown > 0 ? `Resend code in ${countdown}s` : "Send Code"}
-                    </Button>
-                </div>
-            )}
-
-            {otpSent && !otpVerified && (
-                <div className="rounded-lg border border-border p-4 bg-gray-50 -mt-2 space-y-3 animate-in fade-in slide-in-from-top-2">
-                    <label htmlFor="reg-otp" className="block text-sm font-medium text-ink">
-                        Enter the 6-digit code sent to your email
-                    </label>
-                    <div className="flex gap-2 items-center">
-                        <Input
-                            id="reg-otp"
-                            type="text"
-                            inputMode="numeric"
-                            maxLength={6}
-                            placeholder="123456"
-                            value={otpCode}
-                            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                            className="w-32 tracking-widest text-center bg-white"
-                        />
-                        <Button
-                            type="button"
-                            variant="primary"
-                            onClick={handleVerifyOtp}
-                            disabled={otpCode.length !== 6 || isVerifyingOtp}
-                            loading={isVerifyingOtp}
-                        >
-                            Verify
-                        </Button>
-                    </div>
-                </div>
-            )}
-
-            {otpVerified && (
-                <div className="rounded-lg border border-green-500/20 bg-green-500/10 px-3 py-2 -mt-2 text-green-700 text-sm font-medium flex items-center gap-2 animate-in fade-in">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-white text-xs">✓</span>
-                    Email verified
-                </div>
-            )}
-            
-            <input type="hidden" {...register("otpVerified")} />
-            {errors.otpVerified && (
-                <p className="text-red-500 text-sm font-medium -mt-2">{errors.otpVerified.message}</p>
-            )}
 
             <Field
                 label="Password"
