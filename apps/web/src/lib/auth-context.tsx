@@ -39,7 +39,7 @@ export interface AuthContextValue {
     login: (values: LoginValues) => Promise<void>;
     /** Completes a login that was paused by a 2FA challenge — see login()'s `mfaRequired` branch. */
     verifyMfa: (mfaToken: string, code: string) => Promise<void>;
-    register: (values: Omit<RegisterValues, "confirmPassword" | "acceptTerms">, autoLogin?: boolean) => Promise<AuthTokensDto | void>;
+    register: (values: Omit<RegisterValues, "confirmPassword" | "acceptTerms">, autoLogin?: boolean) => Promise<UserResponseDto>;
     logout: () => Promise<void>;
     /** Exposed to finalize session after external verifications (e.g. email OTP) */
     finalizeLogin: (data: AuthTokensDto) => void;

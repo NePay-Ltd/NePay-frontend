@@ -26,6 +26,7 @@ export function RegisterStepOne({ defaultValues, onSuccess }: RegisterStepOnePro
         formState: { errors },
     } = useForm<RegisterStepOneValues>({
         resolver: zodResolver(registerStepOneSchema),
+        mode: "onChange",
         defaultValues: defaultValues || {
             firstName: "",
             lastName: "",

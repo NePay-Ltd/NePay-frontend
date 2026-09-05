@@ -44,6 +44,7 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
         formState: { errors },
     } = useForm<RegisterStepTwoValues>({
         resolver: zodResolver(registerStepTwoSchema),
+        mode: "onChange",
         defaultValues: {
             username: "",
             email: "",
