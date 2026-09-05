@@ -206,7 +206,7 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
                 ) : (
                     <Button
                         type="button"
-                        variant="secondary"
+                        variant="ghost"
                         className="w-full justify-center h-12"
                         onClick={() => setIsTermsModalOpen(true)}
                     >

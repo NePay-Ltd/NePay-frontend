@@ -73,7 +73,7 @@ export function ScrollToAcceptModal({ isOpen, onClose, onAccept, title, children
                     </p>
                     <Button
                         type="button"
-                        variant={hasScrolledToBottom ? "primary" : "secondary"}
+                        variant={hasScrolledToBottom ? "primary" : "ghost"}
                         size="lg"
                         disabled={!hasScrolledToBottom}
                         onClick={() => {
