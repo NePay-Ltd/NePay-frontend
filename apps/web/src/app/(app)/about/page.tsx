@@ -24,6 +24,15 @@ export default function AboutPage() {
                 <p className="text-sm text-muted mt-1">Information, legal documents, and support.</p>
             </div>
 
+            <div className="flex flex-col items-center justify-center pt-8 pb-10">
+                <img src="/icon.png" alt="NePay Logo" className="w-20 h-20 rounded-2xl mb-4 shadow-sm" />
+                <h2 className="text-2xl font-extrabold text-ink mb-1">NePay</h2>
+                <p className="text-sm text-muted mb-6">Version 1.0.0 (Build 1)</p>
+                <p className="text-[15px] leading-relaxed text-body text-center max-w-lg px-4">
+                    NePay is a comprehensive financial platform designed to bridge the gap between traditional fiat currencies and digital assets in Nigeria and beyond. Our mission is to make payments, utility settlements, and crypto transactions seamless, secure, and accessible to everyone.
+                </p>
+            </div>
+
             <Panel>
                 <PanelBody className="p-0">
                     <div className="divide-y divide-border">
