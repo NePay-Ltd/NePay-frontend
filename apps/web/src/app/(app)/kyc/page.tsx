@@ -4,7 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { IconCard as CreditCard, IconLock as Lock } from "@/components/icons";
+import { IconBuilding as Building2, IconCard as CreditCard, IconLock as Lock } from "@/components/icons";
 import { ShieldCheck, AlertCircle, ArrowRight, BadgeCheck, XCircle } from "lucide-react";;
 import { toast } from "sonner";
 
@@ -21,6 +21,9 @@ import { Button } from "@/components/shared/button";
 import { Field } from "@/components/shared/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/shared/spinner";
+import { BridgeOnboardingForm } from "@/components/shared/bridge-onboarding-form";
+import { BridgeTosConsent } from "@/components/shared/bridge-tos-consent";
+import { useBridgeCustomer } from "@/lib/queries/bridge";
 import { cn } from "@/lib/cn";
 
 import { getApiErrorMessage } from "@/lib/api-client";
@@ -184,6 +187,92 @@ function KycRejected({ type }: { type: "BVN" }) {
     );
 }
 
+// ─── Optional Bridge (foreign account) step ────────────────────────────────────
+
+/**
+ * Offered once, right after a fresh BVN approval — never shown to a
+ * returning already-verified user (RequireKyc's own gating means a Bridge
+ * customer can't exist without BVN already being approved, so this step
+ * genuinely only applies at first-time verification). Skipping is a real,
+ * equally-valid choice: the same form is always reachable later from the
+ * Foreign Accounts page — see the user's own explicit call on keeping BVN
+ * alone sufficient for the Naira wallet, with this bundled in as a
+ * convenience rather than a second mandatory gate.
+ */
+function BridgeOptionalStep({ onDone }: { onDone: () => void }) {
+    const [expanded, setExpanded] = React.useState(false);
+    // Reacts automatically once BridgeOnboardingForm's own submit succeeds —
+    // its mutation invalidates this same query, so `customer` appears here
+    // with no extra plumbing needed between the form and this step.
+    const { data: customer } = useBridgeCustomer();
+
+    // The form was submitted (this render or an earlier one): the Bridge
+    // customer now exists, which means it may still need ToS acceptance
+    // before it's actually usable — show that here rather than jumping
+    // straight to "done" and letting the user believe everything's
+    // finished when Bridge itself isn't done reviewing yet.
+    if (customer) {
+        const needsTos = !customer.hasAcceptedTermsOfService && customer.tosLink;
+        return (
+            <div className="space-y-5">
+                <div className="space-y-1 text-center">
+                    <h2 className="text-xl font-bold text-ink">
+                        {needsTos ? "One last thing" : "Verification submitted"}
+                    </h2>
+                    <p className="text-sm text-body">
+                        {needsTos
+                            ? "Accept Bridge's terms to finish setting up your foreign accounts."
+                            : "Bridge is reviewing your details — this can take a few minutes. You can check progress anytime from Foreign Accounts."}
+                    </p>
+                </div>
+                {needsTos ? <BridgeTosConsent customer={customer} /> : null}
+                <Button variant="primary" size="lg" fullWidth onClick={onDone}>
+                    Continue
+                </Button>
+            </div>
+        );
+    }
+
+    if (expanded) {
+        return (
+            <div className="space-y-4">
+                <button
+                    type="button"
+                    onClick={() => setExpanded(false)}
+                    className="text-sm font-semibold text-violet-600 hover:text-violet-700"
+                >
+                    ← Back
+                </button>
+                <BridgeOnboardingForm bare />
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6 text-center">
+            <div className="flex justify-center">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-violet-500/10">
+                    <Building2 className="h-10 w-10 text-violet-500" />
+                </div>
+            </div>
+            <div className="space-y-2">
+                <h2 className="text-xl font-bold text-ink">Want to receive USD, EUR or GBP too?</h2>
+                <p className="text-sm text-body">
+                    Add a few more details now to get real foreign account numbers you can share with clients or employers abroad — it lands in your Naira wallet automatically. You can always do this later from Foreign Accounts instead.
+                </p>
+            </div>
+            <div className="space-y-2">
+                <Button variant="primary" size="lg" fullWidth onClick={() => setExpanded(true)}>
+                    Add foreign account details
+                </Button>
+                <Button variant="ghost" size="lg" fullWidth onClick={onDone}>
+                    Skip for now
+                </Button>
+            </div>
+        </div>
+    );
+}
+
 // ─── Success screen ───────────────────────────────────────────────────────────
 
 function KycSuccess({ userName }: { userName: string }) {
@@ -232,7 +321,7 @@ function KycSuccess({ userName }: { userName: string }) {
 
 // ─── KYC Page ─────────────────────────────────────────────────────────────────
 
-type KycStep = "bvn-number" | "bvn-rejected" | "done";
+type KycStep = "bvn-number" | "bvn-rejected" | "bridge-optional" | "done";
 
 export default function KycPage() {
     const { user, markKycVerified } = useAuth();
@@ -259,12 +348,14 @@ export default function KycPage() {
         );
     }
 
+    const wide = step === "bridge-optional";
+
     return (
         <div className="flex min-h-screen items-start justify-center bg-bg px-4 py-12">
-            <div className="w-full max-w-lg">
+            <div className={cn("w-full", wide ? "max-w-2xl" : "max-w-lg")}>
                 {/* Card */}
                 <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
-                    {!isDone && step !== "bvn-rejected" && (
+                    {!isDone && step !== "bvn-rejected" && step !== "bridge-optional" && (
                         <>
                             {/* Header */}
                             <div className="mb-8 space-y-1">
@@ -292,19 +383,20 @@ export default function KycPage() {
                                 // account server-side (BvnVerifiedListener,
                                 // via publishAndWait) — nothing left to call.
                                 markKycVerified();
-                                toast.success("BVN verified! You're fully verified.");
-                                setStep("done");
+                                toast.success("BVN verified!");
+                                setStep("bridge-optional");
                             }}
                             onRejected={() => setStep("bvn-rejected")}
                         />
                     )}
                     {step === "bvn-rejected" && <KycRejected type="BVN" />}
+                    {step === "bridge-optional" && <BridgeOptionalStep onDone={() => setStep("done")} />}
 
                     {isDone && <KycSuccess userName={user?.firstName ?? "there"} />}
                 </div>
 
                 {/* Security disclaimer */}
-                {!isDone && step !== "bvn-rejected" && (
+                {!isDone && step !== "bvn-rejected" && step !== "bridge-optional" && (
                     <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-xs text-muted">
                         <Lock className="h-3 w-3" />
                         Your data is encrypted and processed securely in line with CBN guidelines.
