@@ -163,14 +163,17 @@ export function SupportWidget() {
         <button type="button" onClick={() => setOpen(true)} aria-label="Open support chat" className="fixed bottom-20 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-violet-700 text-white shadow-xl shadow-violet-900/30 transition hover:scale-105 hover:bg-violet-800 active:scale-95 lg:bottom-8 lg:right-8"><MessageCircle className="h-6 w-6" /></button>
         {open && <div className="fixed inset-0 z-50 bg-black/20 lg:pointer-events-none lg:bg-transparent">
             <section className="pointer-events-auto absolute bottom-0 right-0 flex h-[min(720px,100vh)] w-full flex-col overflow-hidden bg-white shadow-2xl lg:bottom-8 lg:right-8 lg:h-[620px] lg:w-[390px] lg:rounded-3xl lg:border lg:border-border">
-                <header className="flex items-center justify-between bg-gradient-to-r from-violet-950 to-violet-900 px-5 py-4 text-white">
-                    <div className="flex items-center gap-2.5">
-                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10"><MessageCircle className="h-4 w-4" /></span>
-                        <div><p className="text-sm font-bold leading-tight">NePay support</p><p className="text-xs text-white/60">Chats are saved for quality review and training</p></div>
+                <header className="flex items-center gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3.5 text-white">
+                    <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15"><MessageCircle className="h-4 w-4" /></span>
+                        <div className="min-w-0">
+                            <p className="truncate text-sm font-bold leading-tight">NePay support</p>
+                            <p className="truncate text-[11px] text-white/70">Saved for quality &amp; training</p>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        {started && conversation && conversation.status !== "closed" && <button type="button" onClick={() => void closeConversation()} className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-violet-800 shadow-sm transition hover:bg-violet-50 active:scale-95">End chat</button>}
-                        <button type="button" onClick={() => setOpen(false)} aria-label="Close support chat" className="rounded-full p-1.5 transition hover:bg-white/10"><X className="h-4 w-4" /></button>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                        {started && conversation && conversation.status !== "closed" && <button type="button" onClick={() => void closeConversation()} className="shrink-0 whitespace-nowrap rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-violet-800 shadow-sm transition hover:bg-violet-50 active:scale-95">End chat</button>}
+                        <button type="button" onClick={() => setOpen(false)} aria-label="Close support chat" className="shrink-0 rounded-full p-1.5 transition hover:bg-white/15"><X className="h-4 w-4" /></button>
                     </div>
                 </header>
 
@@ -202,7 +205,7 @@ export function SupportWidget() {
                         {conversation.messages
                             .filter((item) => !(item.senderType === "system" && item.body.startsWith(QUEUE_GREETING_PREFIX) && conversation.messages.some((other) => other.senderType !== "system")))
                             .map((item) => <div key={item.id} className={`flex flex-col ${item.senderType === "customer" ? "items-end" : item.senderType === "system" ? "items-center" : "items-start"}`}>
-                                <div className={item.senderType === "customer" ? "w-fit max-w-[80%] rounded-2xl rounded-br-sm bg-violet-700 px-3.5 py-2 text-sm leading-relaxed text-white shadow-sm" : item.senderType === "system" ? "w-fit max-w-[90%] rounded-xl bg-violet-50 px-3 py-2 text-center text-xs text-violet-900" : "w-fit max-w-[80%] rounded-2xl rounded-bl-sm border border-border bg-white px-3.5 py-2 text-sm leading-relaxed text-ink shadow-sm"}>{item.body}</div>
+                                <div className={item.senderType === "customer" ? "w-fit max-w-[80%] break-words rounded-2xl rounded-br-sm bg-violet-700 px-3.5 py-2 text-sm leading-relaxed text-white shadow-sm" : item.senderType === "system" ? "w-fit max-w-[90%] break-words rounded-xl bg-violet-50 px-3 py-2 text-center text-xs text-violet-900" : "w-fit max-w-[80%] break-words rounded-2xl rounded-bl-sm border border-border bg-white px-3.5 py-2 text-sm leading-relaxed text-ink shadow-sm"}>{item.body}</div>
                                 {item.senderType !== "system" && <div className="mt-1 text-[10px] text-muted/70">{timeAgoLabel(item.createdAt)}</div>}
                             </div>)}
                         {agentTyping && <TypingBubble />}
