@@ -4,7 +4,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IconEye as Eye, IconEyeOff as EyeOff } from "@/components/icons";
-import { AtSign, UserPlus } from "lucide-react";
+import { AtSign, UserPlus, FileText, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -14,6 +14,10 @@ import { registerStepTwoSchema, type RegisterStepTwoValues } from "@/lib/schemas
 import { Button } from "@/components/shared/button";
 import { Field } from "@/components/shared/field";
 import { Input } from "@/components/ui/input";
+import { ScrollToAcceptModal } from "@/components/shared/ScrollToAcceptModal";
+import { TermsContent } from "@/components/legal/TermsContent";
+import { PrivacyContent } from "@/components/legal/PrivacyContent";
+import { EulaContent } from "@/components/legal/EulaContent";
 
 function calculateStrength(password: string): number {
     let strength = 0;
@@ -33,6 +37,7 @@ interface RegisterStepTwoProps {
 export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: RegisterStepTwoProps) {
     const [showPassword, setShowPassword] = React.useState(false);
     const [showConfirm, setShowConfirm] = React.useState(false);
+    const [isTermsModalOpen, setIsTermsModalOpen] = React.useState(false);
 
     const {
         register,
@@ -50,7 +55,7 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
             email: "",
             password: "",
             confirmPassword: "",
-            acceptTerms: true,
+            acceptTerms: false,
         },
     });
 
@@ -95,6 +100,7 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
     }, [usernameValue, clearErrors, setError]);
 
     const emailValue = watch("email");
+    const acceptedTerms = watch("acceptTerms");
 
     return (
         <form id="step-two-form" onSubmit={handleSubmit(onSubmitFinal)} className="space-y-6">
@@ -192,27 +198,25 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
 
             {/* Terms */}
             <div className="space-y-1">
-                <label className="flex cursor-pointer items-start gap-3">
-                    <input
-                        id="reg-terms"
-                        type="checkbox"
-                        {...register("acceptTerms")}
-                        className="mt-0.5 h-4 w-4 cursor-pointer rounded border-border text-violet-600 accent-violet-600 focus:ring-violet-600"
-                    />
-                    <span className="text-sm text-body">
-                        I agree to the{" "}
-                        <Link href="/terms" target="_blank" className="font-semibold text-violet-600 hover:underline">
-                            Terms of Service
-                        </Link>{" "}
-                        and{" "}
-                        <Link href="/privacy" target="_blank" className="font-semibold text-violet-600 hover:underline">
-                            Privacy Policy
-                        </Link>
-                        .
-                    </span>
-                </label>
+                {acceptedTerms ? (
+                    <div className="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-xl border border-green-200">
+                        <CheckCircle2 className="w-5 h-5" />
+                        <span className="text-sm font-semibold">Terms of Service Accepted</span>
+                    </div>
+                ) : (
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        className="w-full justify-center h-12"
+                        onClick={() => setIsTermsModalOpen(true)}
+                    >
+                        <FileText className="w-4 h-4 mr-2 text-violet-600" />
+                        Review Legal Agreements to Continue
+                    </Button>
+                )}
+                
                 {errors.acceptTerms && (
-                    <p role="alert" className="pl-7 text-xs font-medium text-red-500">
+                    <p role="alert" className="text-xs font-medium text-red-500 mt-1">
                         {errors.acceptTerms.message}
                     </p>
                 )}
@@ -234,12 +238,29 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
                     variant="primary"
                     size="lg"
                     loading={isSubmitting}
+                    disabled={!acceptedTerms || isSubmitting}
                     className="flex-[2]"
                 >
                     <UserPlus className="h-4 w-4" />
                     Create Account
                 </Button>
             </div>
+
+            <ScrollToAcceptModal
+                isOpen={isTermsModalOpen}
+                onClose={() => setIsTermsModalOpen(false)}
+                title="Legal Agreements"
+                onAccept={() => {
+                    setValue("acceptTerms", true, { shouldValidate: true });
+                    setIsTermsModalOpen(false);
+                }}
+            >
+                <EulaContent />
+                <div className="h-8" />
+                <TermsContent />
+                <div className="h-8" />
+                <PrivacyContent />
+            </ScrollToAcceptModal>
         </form>
     );
 }

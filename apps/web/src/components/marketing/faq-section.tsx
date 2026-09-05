@@ -12,29 +12,32 @@ import {
 
 const faqs = [
   {
-    question: "Is my money safe with NePay?",
-    answer: "Yes. All funds are held by our regulated banking partners, and every byte of data is secured using bank-grade encryption in transit and at rest. We also require BVN verification before unlocking full transaction limits to protect the network from fraud.",
-  },
-
-  {
-    question: "Which banks can I link?",
-    answer: "NePay connects securely with all major Nigerian banks, including Wema, Guaranty Trust Bank (GTB), Zenith, and Access Bank. You can fund your wallet directly via bank transfer or by linking a valid debit card.",
+    question: "What can I do with NePay?",
+    answer: "With NePay, you can receive and convert supported cryptocurrencies to Naira, pay everyday bills, sell gift cards and access other payment services from one app.",
   },
   {
-    question: "Is there a fee to join?",
-    answer: "No, signing up and keeping an active NePay account is completely free. We clearly display any transaction fees or exchange rates side-by-side before you confirm a payment or conversion.",
+    question: "How do I fund and withdraw from my NePay account?",
+    answer: "You can fund your account using your personal virtual account or by depositing supported cryptocurrencies. You can withdraw your available Naira balance to a Nigerian bank account.",
   },
   {
-    question: "How fast are withdrawals?",
-    answer: "Withdrawals to your linked Nigerian bank account are processed instantly. In most cases, the funds will reflect in your bank account within seconds.",
+    question: "How do crypto deposits work?",
+    answer: "Select the cryptocurrency you want to deposit and follow the instructions shown in the app. Once your deposit is successfully confirmed, the Naira equivalent will be credited to your balance at the applicable rate shown for your transaction.",
   },
   {
-    question: "Can I use NePay for crypto?",
-    answer: "Yes, you can convert supported crypto assets directly into your NePay balance. All crypto transactions require strict identity verification (BVN/NIN), and we always display the reference market rate alongside our quoted rate before you confirm.",
+    question: "What bills can I pay on NePay?",
+    answer: "You can pay for airtime, mobile data, electricity, TV subscriptions and other supported services available in the app.",
   },
   {
-    question: "Is NePay available outside Nigeria?",
-    answer: "Currently, NePay is optimized for the Nigerian market, requiring a Nigerian phone number and BVN for verification. We are focused on providing the best possible infrastructure and experience locally before expanding.",
+    question: "What happens if my transaction fails?",
+    answer: "If your account is debited for a transaction that later fails, the amount will be reversed once the failed transaction has been confirmed and processed.",
+  },
+  {
+    question: "How do I sell a gift card?",
+    answer: "Select the gift card you want to sell, enter the required details and submit it for verification. Once your gift card is successfully verified, the applicable Naira amount will be credited to your account.",
+  },
+  {
+    question: "How do I get help if I have a problem?",
+    answer: "If you have an issue with your account or a transaction, contact our support team at support@nepay.com.ng.",
   },
 ];
 
