@@ -7,6 +7,7 @@ import { Sidebar, MobileSidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/top-bar";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { CommandPalette } from "@/components/layout/command-palette";
+import { SupportWidget } from "@/components/support/support-widget";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/shared/button";
 import { apiClient } from "@/lib/api-client";
@@ -148,6 +149,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
             <BottomNav />
             <CommandPalette />
+            <SupportWidget />
         </React.Fragment>
     );
 }

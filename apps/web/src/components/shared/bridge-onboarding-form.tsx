@@ -18,6 +18,7 @@ import { Field } from "@/components/shared/field";
 import { Panel, PanelBody } from "@/components/shared/panel";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { OccupationPicker } from "@/components/shared/occupation-picker";
 
 import { useCreateBridgeCustomer } from "@/lib/queries/bridge";
 import type { CreateBridgeCustomerDto } from "@/lib/types/api";
@@ -230,8 +231,8 @@ export function BridgeOnboardingForm({
                 <Field label="Date of birth">
                     <Input type="date" value={form.birthDate} onChange={(e) => update("birthDate", e.target.value)} />
                 </Field>
-                <Field label="Occupation code" hint="O*NET/SOC numeric code, e.g. 151254 for Software Developers">
-                    <Input value={form.mostRecentOccupation} onChange={(e) => update("mostRecentOccupation", e.target.value)} placeholder="151254" />
+                <Field label="Occupation">
+                    <OccupationPicker value={form.mostRecentOccupation} onChange={(code) => update("mostRecentOccupation", code)} />
                 </Field>
                 <Field label="Employment status">
                     <Select value={form.employmentStatus} onValueChange={(v) => update("employmentStatus", v as FormState["employmentStatus"])}>
