@@ -319,6 +319,7 @@ export default function ProfilePage() {
                             icon={Info}
                             title="About NePay"
                             trailing={<ChevronRight className="h-5 w-5 text-muted" />}
+                            onClick={() => router.push("/about")}
                             className="cursor-pointer px-5 hover:bg-gray-50"
                         />
                     </div>
