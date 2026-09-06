@@ -293,8 +293,8 @@ export default function TransactionDetailPage() {
                             </div>
 
                             {transaction.utilityToken && transaction.category === "electricity" && (
-                                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 sm:col-span-2">
-                                    <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">Electricity Token</p>
+                                <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-500/10 p-4 sm:col-span-2">
+                                    <p className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-500">Electricity Token</p>
                                     <p className="mt-2 break-all font-mono text-xl font-bold tracking-widest text-ink">{transaction.utilityToken}</p>
                                 </div>
                             )}

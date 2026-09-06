@@ -256,10 +256,7 @@ export default function DataPage() {
                     )
                 }
                 onHome={() => router.push("/overview")}
-                onReceipt={() => {
-                    setSuccessOpen(false);
-                    setReceiptOpen(true);
-                }}
+                onReceipt={() => router.push(txResult?.id ? `/transactions/${txResult.id}` : "/transactions")}
             />
 
             <TransactionDetailModal

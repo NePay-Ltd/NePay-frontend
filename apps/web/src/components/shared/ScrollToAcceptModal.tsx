@@ -49,8 +49,8 @@ export function ScrollToAcceptModal({ isOpen, onClose, onAccept, title, children
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden sm:rounded-2xl">
-                <DialogHeader className="px-6 py-4 border-b border-border bg-white z-10 shrink-0 shadow-sm">
+            <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden sm:rounded-2xl dark:border-zinc-800">
+                <DialogHeader className="px-6 py-4 border-b border-border bg-white dark:bg-zinc-950 z-10 shrink-0 shadow-sm">
                     <DialogTitle className="text-xl font-bold">{title}</DialogTitle>
                     <DialogDescription className="text-sm text-muted">
                         Please scroll to the bottom of the document to accept.
@@ -60,14 +60,14 @@ export function ScrollToAcceptModal({ isOpen, onClose, onAccept, title, children
                 <div 
                     ref={scrollRef}
                     onScroll={handleScroll}
-                    className="flex-1 overflow-y-auto px-6 py-6 custom-scrollbar bg-slate-50"
+                    className="flex-1 overflow-y-auto px-6 py-6 custom-scrollbar bg-slate-50 dark:bg-zinc-900"
                 >
-                    <div className="prose prose-sm prose-slate max-w-none">
+                    <div className="max-w-none">
                         {children}
                     </div>
                 </div>
 
-                <DialogFooter className="px-6 py-4 border-t border-border bg-white shrink-0 sm:justify-between items-center shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+                <DialogFooter className="px-6 py-4 border-t border-border bg-white dark:bg-zinc-950 shrink-0 sm:justify-between items-center shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
                     <p className="text-xs text-muted max-sm:hidden">
                         By accepting, you agree to these {title.toLowerCase()}.
                     </p>
@@ -83,7 +83,7 @@ export function ScrollToAcceptModal({ isOpen, onClose, onAccept, title, children
                         }}
                         className={cn(
                             "w-full sm:w-auto transition-all",
-                            !hasScrolledToBottom && "opacity-50 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200"
+                            !hasScrolledToBottom && "opacity-50 cursor-not-allowed bg-slate-100 dark:bg-zinc-800 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-zinc-700"
                         )}
                     >
                         <ShieldCheck className={cn("w-4 h-4 mr-2", hasScrolledToBottom ? "text-white" : "text-slate-400")} />

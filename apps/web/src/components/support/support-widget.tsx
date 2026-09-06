@@ -63,6 +63,13 @@ export function SupportWidget() {
         if (typeof window !== "undefined" && window.sessionStorage.getItem(STARTED_KEY) === "1") setStarted(true);
     }, []);
 
+    // Global event listener so we can open the chat programmatically from other components.
+    React.useEffect(() => {
+        const handleOpen = () => setOpen(true);
+        window.addEventListener("open-support-chat", handleOpen);
+        return () => window.removeEventListener("open-support-chat", handleOpen);
+    }, []);
+
     const loadConversation = React.useCallback(async () => {
         setLoading(true);
         try {
@@ -160,7 +167,7 @@ export function SupportWidget() {
     }
 
     return <>
-        <button type="button" onClick={() => setOpen(true)} aria-label="Open support chat" className="fixed bottom-20 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-violet-700 text-white shadow-xl shadow-violet-900/30 transition hover:scale-105 hover:bg-violet-800 active:scale-95 lg:bottom-8 lg:right-8"><MessageCircle className="h-6 w-6" /></button>
+        <button type="button" onClick={() => setOpen(true)} aria-label="Open support chat" className="hidden lg:flex fixed bottom-20 right-5 z-40 h-14 w-14 items-center justify-center rounded-full bg-violet-700 text-white shadow-xl shadow-violet-900/30 transition hover:scale-105 hover:bg-violet-800 active:scale-95 lg:bottom-8 lg:right-8"><MessageCircle className="h-6 w-6" /></button>
         {open && <div className="fixed inset-0 z-50 bg-black/20 lg:pointer-events-none lg:bg-transparent">
             <section className="pointer-events-auto absolute bottom-0 right-0 flex h-[min(720px,100vh)] w-full flex-col overflow-hidden bg-white shadow-2xl lg:bottom-8 lg:right-8 lg:h-[620px] lg:w-[390px] lg:rounded-3xl lg:border lg:border-border">
                 <header className="flex items-center gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3.5 text-white">

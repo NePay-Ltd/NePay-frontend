@@ -94,6 +94,7 @@ export default function LoginPage() {
             {/* Form */}
             <form
                 id="login-form"
+                method="POST"
                 onSubmit={handleSubmit(onSubmit)}
                 className="space-y-6"
                 noValidate

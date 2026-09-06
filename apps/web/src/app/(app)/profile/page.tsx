@@ -232,14 +232,14 @@ export default function ProfilePage() {
                             title="Personal Information"
                             trailing={<ChevronRight className="h-5 w-5 text-muted" />}
                             onClick={() => setEditModalOpen(true)}
-                            className="cursor-pointer px-5 hover:bg-gray-50"
+                            className="cursor-pointer px-5 hover:bg-gray-50 dark:hover:bg-white/5"
                         />
                         <RowItem
                             icon={Receipt}
                             title="Activity & Transactions"
                             trailing={<ChevronRight className="h-5 w-5 text-muted" />}
                             onClick={() => router.push("/transactions")}
-                            className="cursor-pointer px-5 hover:bg-gray-50"
+                            className="cursor-pointer px-5 hover:bg-gray-50 dark:hover:bg-white/5"
                         />
                         <RowItem
                             icon={ShieldCheck}
@@ -254,14 +254,14 @@ export default function ProfilePage() {
                                 </div>
                             }
                             onClick={() => router.push("/kyc")}
-                            className="cursor-pointer px-5 hover:bg-gray-50"
+                            className="cursor-pointer px-5 hover:bg-gray-50 dark:hover:bg-white/5"
                         />
                         <RowItem
                             icon={Lock}
                             title="Security"
                             trailing={<ChevronRight className="h-5 w-5 text-muted" />}
                             onClick={() => router.push("/security")}
-                            className="cursor-pointer px-5 hover:bg-gray-50"
+                            className="cursor-pointer px-5 hover:bg-gray-50 dark:hover:bg-white/5"
                         />
                     </div>
                 </PanelBody>
@@ -313,14 +313,15 @@ export default function ProfilePage() {
                             icon={LifeBuoy}
                             title="Help & Support"
                             trailing={<ChevronRight className="h-5 w-5 text-muted" />}
-                            className="cursor-pointer px-5 hover:bg-gray-50"
+                            onClick={() => router.push("/support")}
+                            className="cursor-pointer px-5 hover:bg-gray-50 dark:hover:bg-white/5"
                         />
                         <RowItem
                             icon={Info}
                             title="About NePay"
                             trailing={<ChevronRight className="h-5 w-5 text-muted" />}
                             onClick={() => router.push("/about")}
-                            className="cursor-pointer px-5 hover:bg-gray-50"
+                            className="cursor-pointer px-5 hover:bg-gray-50 dark:hover:bg-white/5"
                         />
                     </div>
                 </PanelBody>

@@ -46,30 +46,30 @@ export default function FAQPage() {
     return (
         <div className="max-w-3xl mx-auto py-12 px-6">
             <div className="mb-8">
-                <Link href="/about" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors mb-4 -ml-1 px-1 py-1">
+                <Link href="/about" className="inline-flex items-center text-sm font-medium text-muted hover:text-ink transition-colors mb-4 -ml-1 px-1 py-1">
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back to About
                 </Link>
-                <h1 className="text-3xl font-bold text-slate-900">Frequently Asked Questions</h1>
+                <h1 className="text-3xl font-bold text-ink">Frequently Asked Questions</h1>
             </div>
             
-            <div className="bg-white p-8 sm:p-12 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="bg-white dark:bg-zinc-950 p-8 sm:p-12 rounded-2xl border border-border shadow-sm">
                 <Accordion type="single" collapsible className="w-full">
                     {faqs.map((faq, index) => (
                         <AccordionItem key={index} value={`item-${index}`}>
-                        <AccordionTrigger className="text-left text-lg font-semibold text-slate-900">
+                        <AccordionTrigger className="text-left text-lg font-semibold text-ink">
                             {faq.question}
                         </AccordionTrigger>
-                        <AccordionContent className="text-base leading-relaxed text-slate-600">
+                        <AccordionContent className="text-base leading-relaxed text-muted">
                             {faq.answer}
                         </AccordionContent>
                         </AccordionItem>
                     ))}
                 </Accordion>
                 
-                <div className="mt-12 p-6 bg-slate-50 border border-slate-100 rounded-xl text-center">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">Still need help?</h3>
-                    <p className="text-slate-600 mb-4">Our support team is available 24/7 to assist you.</p>
+                <div className="mt-12 p-6 bg-slate-50 dark:bg-zinc-900 border border-border rounded-xl text-center">
+                    <h3 className="text-lg font-semibold text-ink mb-2">Still need help?</h3>
+                    <p className="text-muted mb-4">Our support team is available 24/7 to assist you.</p>
                     <Button variant="primary" asChild>
                         <a href="mailto:support@nepay.com.ng">Contact Support</a>
                     </Button>

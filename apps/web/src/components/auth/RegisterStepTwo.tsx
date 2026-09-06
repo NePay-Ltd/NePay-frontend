@@ -103,7 +103,7 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
     const acceptedTerms = watch("acceptTerms");
 
     return (
-        <form id="step-two-form" onSubmit={handleSubmit(onSubmitFinal)} className="space-y-6">
+        <form id="step-two-form" method="POST" onSubmit={handleSubmit(onSubmitFinal)} className="space-y-6">
             <div>
                 <Field label="Username" htmlFor="reg-username" error={errors.username?.message} trailing={<UserPlus className="h-4 w-4" aria-hidden />}>
                     <Input

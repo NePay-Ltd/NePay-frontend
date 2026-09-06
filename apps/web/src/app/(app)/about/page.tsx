@@ -28,7 +28,7 @@ export default function AboutPage() {
                 <img src="/icon.png" alt="NePay Logo" className="w-20 h-20 rounded-2xl mb-4 shadow-sm" />
                 <h2 className="text-2xl font-extrabold text-ink mb-1">NePay</h2>
                 <p className="text-sm text-muted mb-6">Version 1.0.0 (Build 1)</p>
-                <p className="text-[15px] leading-relaxed text-body text-center max-w-lg px-4">
+                <p className="text-[15px] leading-relaxed text-muted text-center max-w-lg px-4">
                     NePay is a comprehensive financial platform designed to bridge the gap between traditional fiat currencies and digital assets in Nigeria and beyond. Our mission is to make payments, utility settlements, and crypto transactions seamless, secure, and accessible to everyone.
                 </p>
             </div>
@@ -41,28 +41,28 @@ export default function AboutPage() {
                             title="Frequently Asked Questions"
                             trailing={<ChevronRight className="h-5 w-5 text-muted" />}
                             onClick={() => router.push("/faq")}
-                            className="cursor-pointer px-5 hover:bg-gray-50"
+                            className="cursor-pointer px-5 hover:bg-gray-50 dark:hover:bg-white/5"
                         />
                         <RowItem
                             icon={FileText}
                             title="End User Licence Agreement"
                             trailing={<ChevronRight className="h-5 w-5 text-muted" />}
                             onClick={() => router.push("/eula")}
-                            className="cursor-pointer px-5 hover:bg-gray-50"
+                            className="cursor-pointer px-5 hover:bg-gray-50 dark:hover:bg-white/5"
                         />
                         <RowItem
                             icon={FileText}
                             title="Terms of Service"
                             trailing={<ChevronRight className="h-5 w-5 text-muted" />}
                             onClick={() => router.push("/terms")}
-                            className="cursor-pointer px-5 hover:bg-gray-50"
+                            className="cursor-pointer px-5 hover:bg-gray-50 dark:hover:bg-white/5"
                         />
                         <RowItem
                             icon={Shield}
                             title="Privacy Policy"
                             trailing={<ChevronRight className="h-5 w-5 text-muted" />}
                             onClick={() => router.push("/privacy")}
-                            className="cursor-pointer px-5 hover:bg-gray-50"
+                            className="cursor-pointer px-5 hover:bg-gray-50 dark:hover:bg-white/5"
                         />
                     </div>
                 </PanelBody>

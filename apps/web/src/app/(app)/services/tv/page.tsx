@@ -265,7 +265,7 @@ export default function TvPage() {
                 title="Subscription Active!"
                 description={<p>You successfully renewed <span className="font-bold">{selectedPlan?.name}</span> for <span className="font-bold">{resolvedName}</span>.</p>}
                 onHome={() => router.push("/overview")}
-                onReceipt={() => router.push("/transactions")}
+                onReceipt={() => router.push(txId ? `/transactions/${txId}` : "/transactions")}
             />
         </>
     );

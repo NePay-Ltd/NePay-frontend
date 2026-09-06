@@ -39,7 +39,7 @@ export function RegisterStepOne({ defaultValues, onSuccess }: RegisterStepOnePro
     };
 
     return (
-        <form id="register-step-one" onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        <form id="register-step-one" method="POST" onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <div className="grid grid-cols-2 gap-4">
                 <Field label="First Name" htmlFor="reg-first-name" error={errors.firstName?.message}>
                     <Input
