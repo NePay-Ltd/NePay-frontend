@@ -7,7 +7,9 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IconUser as UserIcon, IconBuilding as Landmark, IconLock as Lock, IconLogOut as LogOut, IconChevronRight as ChevronRight, IconBell as Bell } from "@/components/icons";
-import { ShieldCheck, LifeBuoy, Info, Mail, AlertCircle, Receipt, Camera } from "lucide-react";
+import { ShieldCheck, LifeBuoy, Info, Mail, AlertCircle, AlertTriangle, Receipt, Camera } from "lucide-react";
+import { toast } from "sonner";
+import { apiClient, getApiErrorMessage } from "@/lib/api-client";
 
 import { useAuth } from "@/lib/auth-context";
 import { useProfile, useUpdateProfile, useUpdateAvatar } from "@/lib/queries/profile";
@@ -72,6 +74,9 @@ export default function ProfilePage() {
     // State
     const [editModalOpen, setEditModalOpen] = React.useState(false);
     const [logoutModalOpen, setLogoutModalOpen] = React.useState(false);
+    const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
+    const [deletePassword, setDeletePassword] = React.useState("");
+    const [isDeleting, setIsDeleting] = React.useState(false);
     
     // Refs
     const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -123,6 +128,20 @@ export default function ProfilePage() {
     const onLogout = async () => {
         await logout();
         router.push("/login");
+    };
+
+    const onDeleteAccount = async () => {
+        setIsDeleting(true);
+        try {
+            await apiClient.delete("/auth/account", { data: { password: deletePassword } });
+            setDeleteModalOpen(false);
+            await logout();
+            router.push("/login");
+        } catch (err: any) {
+            toast.error(getApiErrorMessage(err) || "Failed to delete account");
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     const getInitials = (name: string) => {
@@ -327,6 +346,26 @@ export default function ProfilePage() {
                 </PanelBody>
             </Panel>
 
+            {/* ── Danger Zone ── */}
+            <h2 className="px-1 mt-8 text-sm font-semibold uppercase tracking-wider text-red-500">
+                Danger Zone
+            </h2>
+            <Panel>
+                <PanelBody className="p-0">
+                    <div className="divide-y divide-border border border-red-200 dark:border-red-900/50 rounded-2xl overflow-hidden">
+                        <RowItem
+                            icon={AlertTriangle}
+                            iconTint="red"
+                            title={<span className="text-red-600 dark:text-red-500 font-bold">Delete Account</span>}
+                            subtitle="Permanently delete your account and all data"
+                            trailing={<ChevronRight className="h-5 w-5 text-red-300" />}
+                            onClick={() => setDeleteModalOpen(true)}
+                            className="cursor-pointer px-5 hover:bg-red-50 dark:hover:bg-red-950/30"
+                        />
+                    </div>
+                </PanelBody>
+            </Panel>
+
             {/* ── Logout Action ── */}
             <div className="pt-8 pb-4 flex justify-center">
                 <button
@@ -402,6 +441,45 @@ export default function ProfilePage() {
                     <AlertDialogFooter className="flex flex-row justify-center gap-4 mt-2 sm:space-x-0 sm:justify-center">
                         <AlertDialogCancel className="mt-0 flex-1 h-12 rounded-full border-0 bg-violet-100 text-base font-bold text-violet-700 hover:bg-violet-200 hover:text-violet-800">No</AlertDialogCancel>
                         <AlertDialogAction onClick={onLogout} className="flex-1 h-12 rounded-full border-0 bg-violet-600 text-base font-bold text-white hover:bg-violet-700 hover:text-white">Yes</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* ── Delete Account Confirmation Dialog ── */}
+            <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-red-600 dark:text-red-500">Delete Account</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action is permanent and cannot be undone. All your data, wallet balance, and transaction history will be permanently deleted.
+                            <br /><br />
+                            Please enter your password to confirm account deletion.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    
+                    <div className="py-2">
+                        <Label htmlFor="delete-password">Password</Label>
+                        <Input
+                            id="delete-password"
+                            type="password"
+                            placeholder="Enter your password"
+                            value={deletePassword}
+                            onChange={(e) => setDeletePassword(e.target.value)}
+                            className="mt-2"
+                        />
+                    </div>
+
+                    <AlertDialogFooter className="flex-col gap-3 sm:flex-row sm:justify-end sm:gap-2 sm:space-x-0">
+                        <AlertDialogCancel className="mt-0" disabled={isDeleting} onClick={() => setDeletePassword("")}>Cancel</AlertDialogCancel>
+                        <Button 
+                            variant="primary" 
+                            className="bg-red-600 hover:bg-red-700 text-white border-0" 
+                            disabled={!deletePassword || isDeleting}
+                            loading={isDeleting}
+                            onClick={onDeleteAccount}
+                        >
+                            Delete My Account
+                        </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
