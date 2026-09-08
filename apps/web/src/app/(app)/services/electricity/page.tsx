@@ -67,9 +67,11 @@ export default function ElectricityPage() {
     const [pinModalOpen, setPinModalOpen] = React.useState(false);
     const [txState, setTxState] = React.useState<TransactionState>("pin");
     const [txId, setTxId] = React.useState<string | null>(null);
-    // The provider token is returned by the purchase endpoint and refreshed
-    // from the persisted purchase while an asynchronous payment resolves.
+    // The provider token/units are returned by the purchase endpoint and
+    // refreshed from the persisted purchase while an asynchronous payment
+    // resolves.
     const [purchaseToken, setPurchaseToken] = React.useState<string | null>(null);
+    const [purchaseUnits, setPurchaseUnits] = React.useState<string | null>(null);
     const [successOpen, setSuccessOpen] = React.useState(false);
 
     const { data: txStatus } = useServiceTransactionStatus(txId);
@@ -77,6 +79,7 @@ export default function ElectricityPage() {
     React.useEffect(() => {
         if (!txStatus) return;
         if (txStatus.token) setPurchaseToken(txStatus.token);
+        if (txStatus.units) setPurchaseUnits(txStatus.units);
         if (txStatus.status === "COMPLETED") {
             if (saveBeneficiary) {
                 saveBeneficiaryMutation.mutate({
@@ -124,6 +127,7 @@ export default function ElectricityPage() {
         }
         setTxId(null);
         setPurchaseToken(null);
+        setPurchaseUnits(null);
         setTxState("pin");
         setPinModalOpen(true);
     };
@@ -141,6 +145,7 @@ export default function ElectricityPage() {
             {
                 onSuccess: (res) => {
                     setPurchaseToken(res.token);
+                    setPurchaseUnits(res.units);
                     if (res.status === "COMPLETED") {
                         if (saveBeneficiary) {
                             saveBeneficiaryMutation.mutate({
@@ -291,6 +296,14 @@ export default function ElectricityPage() {
                 description={
                     <div className="space-y-2">
                         <p>You successfully purchased electricity for <span className="font-bold">{resolvedName}</span>.</p>
+                        {purchaseUnits && (
+                            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mt-4">
+                                <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">Units Purchased</p>
+                                <p className="text-xl font-bold text-ink">
+                                    {purchaseUnits}
+                                </p>
+                            </div>
+                        )}
                         {purchaseToken && (
                             <div className="bg-gray-50 border border-border rounded-xl p-4 mt-4">
                                 <p className="text-xs font-bold text-muted uppercase tracking-wider mb-1">Your Token</p>

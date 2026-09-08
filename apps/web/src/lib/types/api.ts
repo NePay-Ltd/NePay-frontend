@@ -260,6 +260,16 @@ export interface UtilityPurchaseResponseDto {
     failureReason: string | null;
     /** The provider-issued redemption code (electricity token, exam PIN, ...) when this purchase's category/response carried one — null otherwise. Always render this in the receipt when present. */
     token: string | null;
+    /** Electricity-only — the meter's registered customer name, when VTpass returned one. */
+    customerName: string | null;
+    /** Electricity-only — the meter's registered address, when VTpass returned one. */
+    customerAddress: string | null;
+    /** Electricity-only — the actual kWh purchased, e.g. "79.9 kWh". */
+    units: string | null;
+    /** VTpass's own display name for whatever was purchased, e.g. "Ikeja Electric Payment - IKEDC" — render as "Disco" for electricity. */
+    productName: string | null;
+    /** VTpass's own internal transaction id, for cross-referencing VTpass's own records. `providerReference` is this app's own reference. */
+    providerTransactionId: string | null;
     createdAt: string;
 }
 

@@ -6,6 +6,7 @@ import { formatDate, formatTime } from "@/lib/date";
 import { IconArrowLeft as ArrowLeft, IconCopy as Copy, IconCheck as Check, IconChevronDown as ChevronDown } from "@/components/icons";
 import { Download, Share2, Image } from "lucide-react";;
 import { useTransaction } from "@/lib/queries/transactions";
+import { useProfile } from "@/lib/queries/profile";
 import { Button } from "@/components/shared/button";
 import { Panel, PanelBody } from "@/components/shared/panel";
 import { TxIcon } from "@/components/shared/tx-icon";
@@ -50,6 +51,12 @@ export default function TransactionDetailPage() {
     // out of whatever page of the list happens to be cached, so this works
     // for any transaction the caller owns, not just the most recent ones.
     const { data: transaction, isLoading } = useTransaction(transactionId);
+    // Electricity receipts show "Phone no"/"Email" alongside VTpass's own
+    // fields — VTpass's response carries the *merchant account's* contact
+    // info there (constant across every purchase, live-confirmed), never
+    // the customer's, so those two lines come from the logged-in user's own
+    // profile instead.
+    const { data: profile } = useProfile();
     const [copied, setCopied] = React.useState(false);
     const [isDownloading, setIsDownloading] = React.useState(false);
     const [isSharing, setIsSharing] = React.useState(false);
@@ -75,6 +82,15 @@ export default function TransactionDetailPage() {
             currency: "NGN",
             meta: transaction.meta,
             utilityToken: transaction.utilityToken,
+            utilityCustomerName: transaction.utilityCustomerName,
+            utilityCustomerAddress: transaction.utilityCustomerAddress,
+            utilityUnits: transaction.utilityUnits,
+            utilityDisco: transaction.utilityDisco,
+            utilityMeterNumber: transaction.utilityMeterNumber,
+            utilityMeterType: transaction.utilityMeterType,
+            utilityProviderTransactionId: transaction.utilityProviderTransactionId,
+            utilityPhoneNumber: profile?.phoneNumber,
+            utilityEmail: profile?.email,
         };
     };
 
@@ -292,14 +308,81 @@ export default function TransactionDetailPage() {
                                 <p className="text-sm font-semibold text-ink">NGN (Nigerian Naira)</p>
                             </div>
 
-                            {transaction.utilityToken && transaction.category === "electricity" && (
-                                <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-500/10 p-4 sm:col-span-2">
+                        </div>
+                    </div>
+
+                    {/* Electricity Receipt — the full VTpass breakdown, not just the token */}
+                    {transaction.category === "electricity" && (
+                        <div className="space-y-5 border-t border-border pt-6">
+                            <p className="text-xs font-semibold text-muted uppercase">Electricity Receipt</p>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+                                {transaction.utilityCustomerName && (
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted uppercase mb-2">Name</p>
+                                        <p className="text-sm font-semibold text-ink">{transaction.utilityCustomerName}</p>
+                                    </div>
+                                )}
+                                {transaction.utilityCustomerAddress && (
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted uppercase mb-2">Address</p>
+                                        <p className="text-sm font-semibold text-ink">{transaction.utilityCustomerAddress}</p>
+                                    </div>
+                                )}
+                                {profile?.phoneNumber && (
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted uppercase mb-2">Phone No</p>
+                                        <p className="text-sm font-semibold text-ink">{profile.phoneNumber}</p>
+                                    </div>
+                                )}
+                                {profile?.email && (
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted uppercase mb-2">Email</p>
+                                        <p className="text-sm font-semibold text-ink break-all">{profile.email}</p>
+                                    </div>
+                                )}
+                                {transaction.utilityMeterNumber && (
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted uppercase mb-2">Meter No</p>
+                                        <p className="text-sm font-semibold text-ink font-mono">{transaction.utilityMeterNumber}</p>
+                                    </div>
+                                )}
+                                {transaction.utilityMeterType && (
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted uppercase mb-2">Type</p>
+                                        <p className="text-sm font-semibold text-ink capitalize">{transaction.utilityMeterType}</p>
+                                    </div>
+                                )}
+                                {transaction.utilityDisco && (
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted uppercase mb-2">Disco</p>
+                                        <p className="text-sm font-semibold text-ink">{transaction.utilityDisco}</p>
+                                    </div>
+                                )}
+                                {transaction.utilityProviderTransactionId && (
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted uppercase mb-2">Transaction ID</p>
+                                        <p className="text-sm font-semibold text-ink font-mono break-all">{transaction.utilityProviderTransactionId}</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Units — what the customer actually bought, always shown when present */}
+                            {transaction.utilityUnits && (
+                                <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-500/10 p-4">
+                                    <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-500">Units Purchased</p>
+                                    <p className="mt-2 text-xl font-bold text-ink">{transaction.utilityUnits}</p>
+                                </div>
+                            )}
+
+                            {transaction.utilityToken && (
+                                <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-500/10 p-4">
                                     <p className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-500">Electricity Token</p>
                                     <p className="mt-2 break-all font-mono text-xl font-bold tracking-widest text-ink">{transaction.utilityToken}</p>
                                 </div>
                             )}
                         </div>
-                    </div>
+                    )}
 
                     {/* Action Buttons */}
                     <div className="pt-4 border-t border-border">
