@@ -7,7 +7,7 @@ import { Lightbulb, Check } from "lucide-react";
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { useVerifyMeter, usePayElectricity, useSaveBeneficiary, useSavedBillers, useServiceTransactionStatus } from "@/lib/queries/services";
+import { useVerifyMeter, usePayElectricity, useSaveBeneficiary, useSavedBillers, useServiceTransactionStatus, useUtilityCategories, useUtilityServices } from "@/lib/queries/services";
 
 // New Shared UI Components
 import { ProviderRowButton } from "@/components/services/ProviderRowButton";
@@ -20,12 +20,13 @@ import { Switch } from "@/components/ui/switch";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const PROVIDERS = [
-    { id: "ikeja-electric", label: "Ikeja", color: "bg-amber-500", logoUrl: "/images/providers/ikeja.svg" },
-    { id: "eko-electric", label: "Eko", color: "bg-yellow-500", logoUrl: "/images/providers/eko.svg" },
-    { id: "ibadan-electric", label: "Ibadan", color: "bg-orange-500", logoUrl: "/images/providers/ibadan.svg" },
-    { id: "abuja-electric", label: "Abuja", color: "bg-red-500", logoUrl: "/images/providers/abuja.svg" },
-];
+// A rotating fallback palette — VTpass doesn't send brand colors, only a
+// logo (`n.image`), so this only ever shows if a disco's image fails to
+// load. The previous hardcoded 4-disco list (with local /images/providers/*
+// paths that were never real assets) has been replaced by the real catalog
+// fetched from GET /utilities/services?category=electricity-bill — this is
+// the same dynamic-catalog pattern airtime/data/education already use.
+const FALLBACK_COLORS = ["bg-amber-500", "bg-yellow-500", "bg-orange-500", "bg-red-500", "bg-blue-500", "bg-emerald-500"];
 
 const PRESET_AMOUNTS = [2000, 5000, 10000, 20000];
 
@@ -48,6 +49,30 @@ export default function ElectricityPage() {
     const [minPurchaseAmount, setMinPurchaseAmount] = React.useState<string | undefined>();
     const [verificationToken, setVerificationToken] = React.useState<string | undefined>();
     const [verifyStatus, setVerifyStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+
+    // ─── Dynamic catalog — every real electricity disco VTpass actually
+    // offers, with VTpass's own hosted logo, not a hardcoded shortlist.
+    const { data: categories = [] } = useUtilityCategories();
+    const electricityCategory = categories.find((c) => c.name.toLowerCase().includes("electricity"));
+    const { data: services = [], isLoading: providersLoading } = useUtilityServices(electricityCategory?.identifier);
+    const providers = services.map((s, i) => ({
+        id: s.serviceID,
+        label: s.name,
+        color: FALLBACK_COLORS[i % FALLBACK_COLORS.length] ?? FALLBACK_COLORS[0]!,
+        logoUrl: s.image,
+    }));
+    const activeProvider = providers.find((p) => p.id === providerId);
+
+    // If the pre-filled/default provider id isn't actually in the fetched
+    // catalog (e.g. it was disabled on VTpass's side, or the query-param
+    // default is stale), fall back to the first real disco once loaded
+    // rather than silently pointing at a serviceID that doesn't exist.
+    React.useEffect(() => {
+        const firstProvider = providers[0];
+        if (!providersLoading && firstProvider && !activeProvider) {
+            setProviderId(firstProvider.id);
+        }
+    }, [providersLoading, providers, activeProvider]);
 
     // Queries & Mutations
     const verifyMeter = useVerifyMeter();
@@ -90,7 +115,7 @@ export default function ElectricityPage() {
                     category: "ELECTRICITY",
                     provider: providerId,
                     identifier: meter,
-                    label: `${activeProvider.label} ${meter}`,
+                    label: `${activeProvider?.label ?? "Electricity"} ${meter}`,
                     amount: amount.toString(),
                 });
             }
@@ -160,7 +185,7 @@ export default function ElectricityPage() {
                                 category: "ELECTRICITY",
                                 provider: providerId,
                                 identifier: meter,
-                                label: `${activeProvider.label} ${meter}`,
+                                label: `${activeProvider?.label ?? "Electricity"} ${meter}`,
                                 amount: amount.toString(),
                             });
                         }
@@ -179,7 +204,6 @@ export default function ElectricityPage() {
     };
 
     const isValid = verifyStatus === "success" && !!verificationToken && amount >= 500;
-    const activeProvider = PROVIDERS.find(p => p.id === providerId)!;
 
     return (
         <>
@@ -199,11 +223,15 @@ export default function ElectricityPage() {
 
                 <div className="px-2 sm:px-0 space-y-4">
                     {/* Provider Selection */}
-                    <ProviderRowButton 
-                        providers={PROVIDERS}
-                        selectedId={providerId}
-                        onChange={setProviderId}
-                    />
+                    {providersLoading ? (
+                        <div className="h-[68px] rounded-2xl border-2 border-border bg-white dark:bg-white/5 animate-pulse" />
+                    ) : (
+                        <ProviderRowButton
+                            providers={providers}
+                            selectedId={providerId}
+                            onChange={setProviderId}
+                        />
+                    )}
 
                     {/* Meter Type Toggle */}
                     <div className="flex rounded-2xl border-2 border-border p-1 bg-white dark:bg-white/5">
@@ -283,7 +311,7 @@ export default function ElectricityPage() {
             <StickyPayBar 
                 visible={!successOpen} 
                 amount={amount}
-                summaryText={resolvedName ? `${activeProvider.label} · ${resolvedName}` : "Enter meter details"}
+                summaryText={resolvedName && activeProvider ? `${activeProvider.label} · ${resolvedName}` : "Enter meter details"}
                 onPay={handlePayClick}
                 disabled={!isValid}
             />

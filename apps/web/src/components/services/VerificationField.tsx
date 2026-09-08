@@ -82,7 +82,7 @@ export function VerificationField({
                         <div className="flex items-center gap-2">
                             <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
                             <span className="text-sm font-bold text-green-900 truncate">
-                                {resolvedName || "Meter verified"}
+                                {resolvedName || "Verified"}
                             </span>
                         </div>
                         {resolvedAddress && (
@@ -95,7 +95,7 @@ export function VerificationField({
                         )}
                         {!resolvedName && (
                             <p className="pl-7 text-xs text-green-700">
-                                This meter is valid, but the provider didn&apos;t return a registered name for it.
+                                This is valid, but the provider didn&apos;t return a registered name for it.
                             </p>
                         )}
                     </motion.div>

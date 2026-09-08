@@ -140,8 +140,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <NoticeModal />
 
             <div className="flex min-h-screen flex-col lg:pl-64">
-                <NoticeTicker />
-                <TopBar />
+                <div className="sticky top-0 z-20">
+                    <NoticeTicker />
+                    <TopBar />
+                </div>
                 {/* 
                   Mobile: px-4 horizontal padding, generous bottom padding to clear the floating nav + safe area, pt-5 top breathing room.
                   Desktop: px-8 generous padding, pb-8 normal.

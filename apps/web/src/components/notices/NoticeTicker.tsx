@@ -17,7 +17,7 @@ function TickerItem({ notice }: { notice: NoticeDto }) {
     return (
         <span className="inline-flex items-center gap-2 px-6">
             <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", SEVERITY_DOT[notice.severity])} aria-hidden />
-            <span className="text-sm font-medium text-ink">{notice.title}</span>
+            <span className="text-sm font-medium text-ink">{notice.body}</span>
         </span>
     );
 }
