@@ -12,6 +12,16 @@ export interface ReceiptData {
     currency: string;
     meta: string;
     utilityToken?: string;
+    /** Electricity-only receipt fields — see BaseTransaction's own note on where these come from. */
+    utilityCustomerName?: string;
+    utilityCustomerAddress?: string;
+    utilityUnits?: string;
+    utilityDisco?: string;
+    utilityMeterNumber?: string;
+    utilityMeterType?: string;
+    utilityProviderTransactionId?: string;
+    utilityPhoneNumber?: string;
+    utilityEmail?: string;
 }
 
 /**
@@ -32,7 +42,7 @@ Description: ${receipt.label}
 Amount: ${amountStr}
 Direction: ${receipt.direction === "CREDIT" ? "Received" : "Sent"}
 Status: ${receipt.status.toUpperCase()}
-${receipt.utilityToken ? `Electricity Token: ${receipt.utilityToken}` : ""}
+${receipt.utilityCustomerName ? `Name: ${receipt.utilityCustomerName}\n` : ""}${receipt.utilityCustomerAddress ? `Address: ${receipt.utilityCustomerAddress}\n` : ""}${receipt.utilityPhoneNumber ? `Phone No: ${receipt.utilityPhoneNumber}\n` : ""}${receipt.utilityEmail ? `Email: ${receipt.utilityEmail}\n` : ""}${receipt.utilityMeterNumber ? `Meter No: ${receipt.utilityMeterNumber}\n` : ""}${receipt.utilityMeterType ? `Type: ${receipt.utilityMeterType}\n` : ""}${receipt.utilityDisco ? `Disco: ${receipt.utilityDisco}\n` : ""}${receipt.utilityUnits ? `Units: ${receipt.utilityUnits}\n` : ""}${receipt.utilityProviderTransactionId ? `Provider Transaction ID: ${receipt.utilityProviderTransactionId}\n` : ""}${receipt.utilityToken ? `Electricity Token: ${receipt.utilityToken}` : ""}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Powered by NePay
@@ -60,6 +70,26 @@ async function getLogoBase64(): Promise<string> {
 }
 
 /**
+ * Escapes text before it's interpolated into `generateReceiptHTML`'s output.
+ * That HTML is `innerHTML`'d into a live, authenticated DOM node in
+ * `downloadReceiptImage`/`shareReceiptImage` (to screenshot it via
+ * html2canvas) before being torn down — an unescaped externally-sourced
+ * string (VTpass's `customerName`/`customerAddress`, or anything else on
+ * `ReceiptData`) could carry an `onerror`/`onload`-style payload that
+ * executes in that real session, not just in a downloaded offline file.
+ * `innerHTML` blocks `<script>` execution on its own but does not block
+ * inline event handlers, so escaping is still required here.
+ */
+function escapeHtml(value: string): string {
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+/**
  * Generate receipt HTML for PDF download
  */
 async function generateReceiptHTML(receipt: ReceiptData): Promise<string> {
@@ -76,7 +106,7 @@ async function generateReceiptHTML(receipt: ReceiptData): Promise<string> {
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>NePay Receipt - ${receipt.id}</title>
+    <title>NePay Receipt - ${escapeHtml(receipt.id)}</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -182,15 +212,15 @@ async function generateReceiptHTML(receipt: ReceiptData): Promise<string> {
         <div class="details">
             <div class="detail-row">
                 <span class="detail-label">Transaction ID</span>
-                <span class="detail-value">${receipt.id}</span>
+                <span class="detail-value">${escapeHtml(receipt.id)}</span>
             </div>
             <div class="detail-row">
                 <span class="detail-label">Description</span>
-                <span class="detail-value">${receipt.label}</span>
+                <span class="detail-value">${escapeHtml(receipt.label)}</span>
             </div>
             <div class="detail-row">
                 <span class="detail-label">Type</span>
-                <span class="detail-value">${receipt.type}</span>
+                <span class="detail-value">${escapeHtml(receipt.type)}</span>
             </div>
             <div class="detail-row">
                 <span class="detail-label">Direction</span>
@@ -204,7 +234,16 @@ async function generateReceiptHTML(receipt: ReceiptData): Promise<string> {
                 <span class="detail-label">Currency</span>
                 <span class="detail-value">${receipt.currency}</span>
             </div>
-            ${receipt.utilityToken ? `<div class="detail-row"><span class="detail-label">Electricity Token</span><span class="detail-value" style="font-family: monospace; letter-spacing: 1px;">${receipt.utilityToken}</span></div>` : ''}
+            ${receipt.utilityCustomerName ? `<div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">${escapeHtml(receipt.utilityCustomerName)}</span></div>` : ''}
+            ${receipt.utilityCustomerAddress ? `<div class="detail-row"><span class="detail-label">Address</span><span class="detail-value">${escapeHtml(receipt.utilityCustomerAddress)}</span></div>` : ''}
+            ${receipt.utilityPhoneNumber ? `<div class="detail-row"><span class="detail-label">Phone No</span><span class="detail-value">${escapeHtml(receipt.utilityPhoneNumber)}</span></div>` : ''}
+            ${receipt.utilityEmail ? `<div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${escapeHtml(receipt.utilityEmail)}</span></div>` : ''}
+            ${receipt.utilityMeterNumber ? `<div class="detail-row"><span class="detail-label">Meter No</span><span class="detail-value">${escapeHtml(receipt.utilityMeterNumber)}</span></div>` : ''}
+            ${receipt.utilityMeterType ? `<div class="detail-row"><span class="detail-label">Type</span><span class="detail-value" style="text-transform: capitalize;">${escapeHtml(receipt.utilityMeterType)}</span></div>` : ''}
+            ${receipt.utilityDisco ? `<div class="detail-row"><span class="detail-label">Disco</span><span class="detail-value">${escapeHtml(receipt.utilityDisco)}</span></div>` : ''}
+            ${receipt.utilityUnits ? `<div class="detail-row"><span class="detail-label">Units</span><span class="detail-value">${escapeHtml(receipt.utilityUnits)}</span></div>` : ''}
+            ${receipt.utilityProviderTransactionId ? `<div class="detail-row"><span class="detail-label">Provider Transaction ID</span><span class="detail-value">${escapeHtml(receipt.utilityProviderTransactionId)}</span></div>` : ''}
+            ${receipt.utilityToken ? `<div class="detail-row"><span class="detail-label">Electricity Token</span><span class="detail-value" style="font-family: monospace; letter-spacing: 1px;">${escapeHtml(receipt.utilityToken)}</span></div>` : ''}
         </div>
 
         <div class="footer">

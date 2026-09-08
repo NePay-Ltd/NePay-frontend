@@ -7,6 +7,9 @@ import { Sidebar, MobileSidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/top-bar";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { CommandPalette } from "@/components/layout/command-palette";
+import { NoticeModal } from "@/components/notices/NoticeModal";
+import { NoticeSocketListener } from "@/components/notices/NoticeSocketListener";
+import { NoticeTicker } from "@/components/notices/NoticeTicker";
 import { SupportWidget } from "@/components/support/support-widget";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/shared/button";
@@ -18,7 +21,8 @@ export interface AppShellProps {
     children: React.ReactNode;
 }
 
-function isProtectedPinRoute(pathname: string) {
+/** Also reused by NoticeModal — the same "mid-sensitive-input" routes that shouldn't be interrupted by a PIN dialog shouldn't be interrupted by a notice popup either. */
+export function isProtectedPinRoute(pathname: string) {
     const moneyRoutes = [
         "/withdraw",
         "/services/airtime",
@@ -132,8 +136,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Sidebar />
             <MobileSidebar />
             <TransactionPinSetupGate />
+            <NoticeSocketListener />
+            <NoticeModal />
 
             <div className="flex min-h-screen flex-col lg:pl-64">
+                <NoticeTicker />
                 <TopBar />
                 {/* 
                   Mobile: px-4 horizontal padding, generous bottom padding to clear the floating nav + safe area, pt-5 top breathing room.
