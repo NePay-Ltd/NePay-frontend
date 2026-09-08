@@ -6,7 +6,6 @@ import { IconBuilding as Building2, IconClock as Clock, IconCopy as Copy } from 
 import { Receipt } from "lucide-react";
 import { toast } from "sonner";
 
-import { RequireKyc } from "@/components/shared/require-kyc";
 import { Panel, PanelBody, PanelHeader } from "@/components/shared/panel";
 import { Button } from "@/components/shared/button";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -58,91 +57,89 @@ export default function ForeignAccountsPage() {
     }, [accounts]);
 
     return (
-        <RequireKyc>
-            <div className="mx-auto max-w-5xl pb-12 md:pb-20 space-y-6 px-6 pt-6">
-                <div className="mb-2">
-                    <h1 className="text-3xl font-black text-ink tracking-tight">Foreign Accounts</h1>
-                    <p className="mt-2 text-base font-medium text-muted">
-                        Get paid in USD, EUR or GBP — it lands in your Naira wallet automatically.
-                    </p>
-                </div>
-
-                {customerLoading ? (
-                    <Skeleton className="h-64 w-full rounded-2xl" />
-                ) : !customer || customer.status === "rejected" ? (
-                    <BridgeOnboardingForm rejectedCustomer={customer ?? undefined} />
-                ) : customer.status !== "active" ? (
-                    <StatusPanel customer={customer} />
-                ) : (
-                    <>
-                        <Panel>
-                            <PanelBody>
-                                <Tabs value={activeCurrency} onValueChange={(v) => setActiveCurrency(v as BridgeCurrency)}>
-                                    <TabsList className="w-full grid grid-cols-3">
-                                        {CURRENCIES.map((c) => (
-                                            <TabsTrigger key={c.code} value={c.code}>
-                                                {c.label}
-                                            </TabsTrigger>
-                                        ))}
-                                    </TabsList>
-
-                                    {CURRENCIES.map((c) => (
-                                        <TabsContent key={c.code} value={c.code} className="pt-5">
-                                            {accountsLoading ? (
-                                                <Skeleton className="h-40 w-full rounded-xl" />
-                                            ) : (
-                                                <CurrencyPanel currency={c.code} account={accountsByCurrency.get(c.code) ?? null} />
-                                            )}
-                                        </TabsContent>
-                                    ))}
-                                </Tabs>
-                            </PanelBody>
-                        </Panel>
-
-                        <Panel flush>
-                            <PanelHeader
-                                className="px-4 pt-4 sm:px-6 sm:pt-6"
-                                title="Recent deposits"
-                                description="Money received into your foreign accounts — credited to your Naira wallet automatically"
-                            />
-                            <PanelBody className="px-4 pb-3 pt-1 sm:px-6 sm:pb-4">
-                                {(deposits ?? []).length === 0 ? (
-                                    <EmptyState icon={Receipt} heading="No deposits yet" description="Once money arrives, it'll show up here." className="py-8" />
-                                ) : (
-                                    <div className="divide-y divide-border">
-                                        {deposits!.map((deposit) => {
-                                            const tag = DEPOSIT_STATUS_TAG[deposit.status] ?? { variant: "neutral" as TagVariant, label: deposit.status };
-                                            return (
-                                                <div key={deposit.id} className="flex items-center justify-between gap-3 py-3">
-                                                    <div className="min-w-0">
-                                                        <p className="text-sm font-bold text-ink">
-                                                            {formatByCurrency(deposit.sourceAmount, deposit.sourceCurrency)}
-                                                            {deposit.ngnAmountCredited ? (
-                                                                <span className="text-muted font-medium"> → ₦{Number(deposit.ngnAmountCredited).toLocaleString()}</span>
-                                                            ) : null}
-                                                        </p>
-                                                        <p className="text-xs text-muted mt-0.5">{formatDate(deposit.createdAt)}</p>
-                                                    </div>
-                                                    <Tag variant={tag.variant}>{tag.label}</Tag>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </PanelBody>
-                        </Panel>
-
-                        <Button
-                            variant="ghost"
-                            className="w-full font-bold h-12 rounded-xl text-sm border-2 border-border text-ink hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-                            onClick={() => router.push("/transactions")}
-                        >
-                            View Full Transaction History
-                        </Button>
-                    </>
-                )}
+        <div className="mx-auto max-w-5xl pb-12 md:pb-20 space-y-6 px-6 pt-6">
+            <div className="mb-2">
+                <h1 className="text-3xl font-black text-ink tracking-tight">Foreign Accounts</h1>
+                <p className="mt-2 text-base font-medium text-muted">
+                    Get paid in USD, EUR or GBP — it lands in your Naira wallet automatically.
+                </p>
             </div>
-        </RequireKyc>
+
+            {customerLoading ? (
+                <Skeleton className="h-64 w-full rounded-2xl" />
+            ) : !customer || customer.status === "rejected" ? (
+                <BridgeOnboardingForm rejectedCustomer={customer ?? undefined} />
+            ) : customer.status !== "active" ? (
+                <StatusPanel customer={customer} />
+            ) : (
+                <>
+                    <Panel>
+                        <PanelBody>
+                            <Tabs value={activeCurrency} onValueChange={(v) => setActiveCurrency(v as BridgeCurrency)}>
+                                <TabsList className="w-full grid grid-cols-3">
+                                    {CURRENCIES.map((c) => (
+                                        <TabsTrigger key={c.code} value={c.code}>
+                                            {c.label}
+                                        </TabsTrigger>
+                                    ))}
+                                </TabsList>
+
+                                {CURRENCIES.map((c) => (
+                                    <TabsContent key={c.code} value={c.code} className="pt-5">
+                                        {accountsLoading ? (
+                                            <Skeleton className="h-40 w-full rounded-xl" />
+                                        ) : (
+                                            <CurrencyPanel currency={c.code} account={accountsByCurrency.get(c.code) ?? null} />
+                                        )}
+                                    </TabsContent>
+                                ))}
+                            </Tabs>
+                        </PanelBody>
+                    </Panel>
+
+                    <Panel flush>
+                        <PanelHeader
+                            className="px-4 pt-4 sm:px-6 sm:pt-6"
+                            title="Recent deposits"
+                            description="Money received into your foreign accounts — credited to your Naira wallet automatically"
+                        />
+                        <PanelBody className="px-4 pb-3 pt-1 sm:px-6 sm:pb-4">
+                            {(deposits ?? []).length === 0 ? (
+                                <EmptyState icon={Receipt} heading="No deposits yet" description="Once money arrives, it'll show up here." className="py-8" />
+                            ) : (
+                                <div className="divide-y divide-border">
+                                    {deposits!.map((deposit) => {
+                                        const tag = DEPOSIT_STATUS_TAG[deposit.status] ?? { variant: "neutral" as TagVariant, label: deposit.status };
+                                        return (
+                                            <div key={deposit.id} className="flex items-center justify-between gap-3 py-3">
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-bold text-ink">
+                                                        {formatByCurrency(deposit.sourceAmount, deposit.sourceCurrency)}
+                                                        {deposit.ngnAmountCredited ? (
+                                                            <span className="text-muted font-medium"> → ₦{Number(deposit.ngnAmountCredited).toLocaleString()}</span>
+                                                        ) : null}
+                                                    </p>
+                                                    <p className="text-xs text-muted mt-0.5">{formatDate(deposit.createdAt)}</p>
+                                                </div>
+                                                <Tag variant={tag.variant}>{tag.label}</Tag>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </PanelBody>
+                    </Panel>
+
+                    <Button
+                        variant="ghost"
+                        className="w-full font-bold h-12 rounded-xl text-sm border-2 border-border text-ink hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                        onClick={() => router.push("/transactions")}
+                    >
+                        View Full Transaction History
+                    </Button>
+                </>
+            )}
+        </div>
     );
 }
 

@@ -190,14 +190,12 @@ function KycRejected({ type }: { type: "BVN" }) {
 // ─── Optional Bridge (foreign account) step ────────────────────────────────────
 
 /**
- * Offered once, right after a fresh BVN approval — never shown to a
- * returning already-verified user (RequireKyc's own gating means a Bridge
- * customer can't exist without BVN already being approved, so this step
- * genuinely only applies at first-time verification). Skipping is a real,
- * equally-valid choice: the same form is always reachable later from the
- * Foreign Accounts page — see the user's own explicit call on keeping BVN
- * alone sufficient for the Naira wallet, with this bundled in as a
- * convenience rather than a second mandatory gate.
+ * Offered once, right after a fresh BVN approval. Skipping is a real,
+ * equally-valid choice: Bridge KYC is reachable independently, any time,
+ * from the Foreign Accounts page (no longer gated behind BVN) — see the
+ * user's own explicit call on keeping BVN alone sufficient for the Naira
+ * wallet, with this bundled in as a convenience rather than a second
+ * mandatory gate.
  */
 function BridgeOptionalStep({ onDone }: { onDone: () => void }) {
     const [expanded, setExpanded] = React.useState(false);
