@@ -89,6 +89,7 @@ export default function TransactionDetailPage() {
             utilityMeterNumber: transaction.utilityMeterNumber,
             utilityMeterType: transaction.utilityMeterType,
             utilityProviderTransactionId: transaction.utilityProviderTransactionId,
+            utilityTariff: transaction.utilityTariff,
             utilityPhoneNumber: profile?.phoneNumber,
             utilityEmail: profile?.email,
         };
@@ -363,6 +364,12 @@ export default function TransactionDetailPage() {
                                     <div>
                                         <p className="text-xs font-semibold text-muted uppercase mb-2">Transaction ID</p>
                                         <p className="text-sm font-semibold text-ink font-mono break-all">{transaction.utilityProviderTransactionId}</p>
+                                    </div>
+                                )}
+                                {transaction.utilityTariff && (
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted uppercase mb-2">Tariff</p>
+                                        <p className="text-sm font-semibold text-ink">{transaction.utilityTariff}</p>
                                     </div>
                                 )}
                             </div>

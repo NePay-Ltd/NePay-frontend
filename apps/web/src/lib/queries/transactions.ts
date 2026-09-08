@@ -105,6 +105,7 @@ export function useTransaction(id: string | null) {
                     transaction.utilityMeterNumber = data.identifier;
                     transaction.utilityMeterType = data.variationCode ?? undefined;
                     transaction.utilityProviderTransactionId = data.providerTransactionId ?? undefined;
+                    transaction.utilityTariff = data.tariff ?? undefined;
                 } catch {
                     // Older transactions may predate the utility-purchase link.
                 }

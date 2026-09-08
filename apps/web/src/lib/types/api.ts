@@ -270,13 +270,19 @@ export interface UtilityPurchaseResponseDto {
     productName: string | null;
     /** VTpass's own internal transaction id, for cross-referencing VTpass's own records. `providerReference` is this app's own reference. */
     providerTransactionId: string | null;
+    /** Electricity-only, e.g. "R2 SINGLE PHASE RESIDENTIAL" — only ever known post-purchase, never available before payment. */
+    tariff: string | null;
     createdAt: string;
 }
 
 export interface UtilityVerificationResponseDto {
     verificationToken: string;
     customerName: string | null;
+    /** The meter/smartcard's registered service address, when VTpass returned one. */
+    address: string | null;
     renewalAmount: string | null;
+    /** Electricity-only — the smallest amount VTpass will vend for this meter, when it returned one. Null for cable. */
+    minPurchaseAmount: string | null;
     expiresAt: string;
 }
 

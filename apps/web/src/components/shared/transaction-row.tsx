@@ -26,6 +26,8 @@ export interface BaseTransaction {
     utilityMeterNumber?: string;
     utilityMeterType?: string;
     utilityProviderTransactionId?: string;
+    /** Electricity-only — only ever known post-purchase, VTpass's pre-purchase verify-meter response never carries a tariff field. */
+    utilityTariff?: string;
 }
 
 export interface TransactionRowProps {

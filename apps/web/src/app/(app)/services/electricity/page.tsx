@@ -44,6 +44,8 @@ export default function ElectricityPage() {
     const [saveBeneficiary, setSaveBeneficiary] = React.useState(true);
 
     const [resolvedName, setResolvedName] = React.useState<string | undefined>();
+    const [resolvedAddress, setResolvedAddress] = React.useState<string | undefined>();
+    const [minPurchaseAmount, setMinPurchaseAmount] = React.useState<string | undefined>();
     const [verificationToken, setVerificationToken] = React.useState<string | undefined>();
     const [verifyStatus, setVerifyStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
 
@@ -59,6 +61,8 @@ export default function ElectricityPage() {
     // Reset resolution if user types something new or changes provider
     React.useEffect(() => {
         setResolvedName(undefined);
+        setResolvedAddress(undefined);
+        setMinPurchaseAmount(undefined);
         setVerificationToken(undefined);
         setVerifyStatus("idle");
     }, [meter, providerId, meterType]);
@@ -108,11 +112,15 @@ export default function ElectricityPage() {
             {
                 onSuccess: (data) => {
                     setResolvedName(data.customerName ?? undefined);
+                    setResolvedAddress(data.address ?? undefined);
+                    setMinPurchaseAmount(data.minPurchaseAmount ?? undefined);
                     setVerificationToken(data.verificationToken);
                     setVerifyStatus("success");
                 },
                 onError: () => {
                     setResolvedName(undefined);
+                    setResolvedAddress(undefined);
+                    setMinPurchaseAmount(undefined);
                     setVerificationToken(undefined);
                     setVerifyStatus("error");
                 }
@@ -239,6 +247,8 @@ export default function ElectricityPage() {
                             onVerify={handleVerify}
                             status={verifyStatus}
                             resolvedName={resolvedName}
+                            resolvedAddress={resolvedAddress}
+                            minPurchaseAmount={minPurchaseAmount}
                             errorMessage="Failed to verify meter number"
                         />
                         
