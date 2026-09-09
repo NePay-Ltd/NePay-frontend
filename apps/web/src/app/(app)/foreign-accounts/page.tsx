@@ -32,14 +32,36 @@ const CURRENCIES: { code: BridgeCurrency; label: string }[] = [
     { code: "GBP", label: "GBP" },
 ];
 
+/** How fast money actually arrives depends on which rail the sender's bank uses, not on anything NePay or the user controls — so this is always a range, never a promise. Minimums are Bridge's own hard floor: a smaller send is neither credited nor returned. */
+const CURRENCY_INFO: Record<BridgeCurrency, { speed: string; minimum: string }> = {
+    USD: {
+        speed: "Wire transfers usually arrive within 2 hours, FedNow in seconds. Regular bank transfers (ACH) can take 1–2 business days.",
+        minimum: "$1",
+    },
+    EUR: {
+        speed: "Most European transfers (SEPA Instant) arrive within 5 minutes, any time of day. Transfers over €1,000,000 use a slower rail and can take up to 3 business days.",
+        minimum: "€1",
+    },
+    GBP: {
+        speed: "UK Faster Payments usually arrive within 30 minutes. Transfers over £1,000,000 use a slower rail and can take up to 3 business days.",
+        minimum: "£2",
+    },
+};
+
 function copy(value: string, label: string) {
     navigator.clipboard.writeText(value);
     toast.success(`${label} copied to clipboard`);
 }
 
 const DEPOSIT_STATUS_TAG: Record<string, { variant: TagVariant; label: string }> = {
+    SCHEDULED: { variant: "neutral", label: "Arriving soon" },
     RECEIVED: { variant: "warn", label: "Incoming" },
+    IN_REVIEW: { variant: "warn", label: "Under review" },
+    PROCESSING: { variant: "neutral", label: "Processing" },
     CREDITED: { variant: "ok", label: "Credited" },
+    RETURNING: { variant: "warn", label: "Returning to sender" },
+    RETURNED: { variant: "error", label: "Returned to sender" },
+    RETURN_FAILED: { variant: "error", label: "Return failed — contact support" },
 };
 
 export default function ForeignAccountsPage() {
@@ -73,6 +95,10 @@ export default function ForeignAccountsPage() {
                 <StatusPanel customer={customer} />
             ) : (
                 <>
+                    <p className="text-xs font-medium text-muted -mt-2">
+                        A 1% fee applies to each converted deposit, plus a flat $2/month maintenance fee while you hold a foreign account.
+                    </p>
+
                     <Panel>
                         <PanelBody>
                             <Tabs value={activeCurrency} onValueChange={(v) => setActiveCurrency(v as BridgeCurrency)}>
@@ -119,7 +145,19 @@ export default function ForeignAccountsPage() {
                                                             <span className="text-muted font-medium"> → ₦{Number(deposit.ngnAmountCredited).toLocaleString()}</span>
                                                         ) : null}
                                                     </p>
-                                                    <p className="text-xs text-muted mt-0.5">{formatDate(deposit.createdAt)}</p>
+                                                    <p className="text-xs text-muted mt-0.5">
+                                                        {formatDate(deposit.createdAt)}
+                                                        {deposit.feeAmount && Number(deposit.feeAmount) > 0 ? (
+                                                            <> · Fee ₦{Number(deposit.feeAmount).toLocaleString()}</>
+                                                        ) : null}
+                                                        {deposit.status === "SCHEDULED" && deposit.estimatedArrivalDate ? (
+                                                            <> · Est. arrival {formatDate(deposit.estimatedArrivalDate)}</>
+                                                        ) : null}
+                                                        {deposit.status === "IN_REVIEW" ? <> · Routine check, usually resolves within 2 hours</> : null}
+                                                        {(deposit.status === "RETURNED" || deposit.status === "RETURN_FAILED") && deposit.refundReason ? (
+                                                            <> · {deposit.refundReason.replace(/_/g, " ")}</>
+                                                        ) : null}
+                                                    </p>
                                                 </div>
                                                 <Tag variant={tag.variant}>{tag.label}</Tag>
                                             </div>
@@ -173,6 +211,7 @@ function StatusPanel({ customer }: { customer: NonNullable<ReturnType<typeof use
 
 function CurrencyPanel({ currency, account }: { currency: BridgeCurrency; account: BridgeVirtualAccountDto | null }) {
     const { mutate: requestAccount, isPending } = useRequestBridgeAccount();
+    const info = CURRENCY_INFO[currency];
 
     if (!account) {
         return (
@@ -202,6 +241,9 @@ function CurrencyPanel({ currency, account }: { currency: BridgeCurrency; accoun
                     <Building2 className="mr-2 h-4 w-4" />
                     Get {currency} Account
                 </Button>
+                <p className="text-xs text-muted leading-relaxed">
+                    {info.speed} Minimum {info.minimum} per transfer — smaller amounts can&apos;t be credited or returned.
+                </p>
             </div>
         );
     }
@@ -248,6 +290,9 @@ function CurrencyPanel({ currency, account }: { currency: BridgeCurrency; accoun
 
             <p className="text-xs text-muted">
                 Money sent here converts automatically and lands in your Naira wallet — no extra step needed.
+            </p>
+            <p className="text-xs text-muted leading-relaxed">
+                {info.speed} Minimum {info.minimum} per transfer — smaller amounts can&apos;t be credited or returned.
             </p>
         </div>
     );

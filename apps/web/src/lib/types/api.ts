@@ -376,7 +376,15 @@ export type BridgeCustomerStatus =
     | "deposits_restricted"
     | "paused"
     | "offboarded";
-export type BridgeDepositStatus = "RECEIVED" | "CREDITED";
+export type BridgeDepositStatus =
+    | "SCHEDULED"
+    | "RECEIVED"
+    | "IN_REVIEW"
+    | "PROCESSING"
+    | "CREDITED"
+    | "RETURNING"
+    | "RETURNED"
+    | "RETURN_FAILED";
 
 export interface BridgeCustomerDto {
     id: string;
@@ -471,7 +479,14 @@ export interface BridgeDepositDto {
     sourceAmount: string;
     usdAmount: string | null;
     rateUsed: string | null;
+    /** Net of feeAmount — what actually landed in the wallet. */
     ngnAmountCredited: string | null;
+    /** The cross-border conversion fee taken (NGN). */
+    feeAmount: string | null;
     status: BridgeDepositStatus;
+    /** ACH only — Bridge's own estimated arrival date while status is SCHEDULED. */
+    estimatedArrivalDate: string | null;
+    /** Set once status is RETURNED/RETURN_FAILED — Bridge's own reason code. */
+    refundReason: string | null;
     createdAt: string;
 }
