@@ -256,6 +256,14 @@ function CurrencyPanel({ currency, account }: { currency: BridgeCurrency; accoun
         bank_routing_number: "Routing number",
         bank_beneficiary_name: "Beneficiary name",
         bank_beneficiary_address: "Beneficiary address",
+        // GBP's schema misspells both fields this way ("benficiary", missing
+        // the "e") — confirmed against Bridge's own live API reference, not
+        // a guess. USD/EUR use the correctly-spelled keys above; mapping
+        // both to the same label means neither currency silently drops
+        // beneficiary details depending on which spelling Bridge sends.
+        bank_benficiary_name: "Beneficiary name",
+        bank_benficiary_address: "Beneficiary address",
+        account_holder_name: "Account holder name",
         iban: "IBAN",
         bic: "BIC / SWIFT",
         account_number: "Account number",
