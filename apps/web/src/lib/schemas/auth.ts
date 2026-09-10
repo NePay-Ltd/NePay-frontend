@@ -61,9 +61,7 @@ export const registerStepTwoSchema = z
         email: emailSchema,
         password: passwordSchema,
         confirmPassword: z.string().min(1, "Confirm your password"),
-        acceptTerms: z
-            .boolean()
-            .refine((v) => v === true, "You must accept the terms of service"),
+        acceptTerms: z.boolean().optional(),
         /** Another customer's shareable code, typed in by hand or prefilled from a `?ref=` link. */
         referralCode: attributionCodeSchema,
         /** A marketer's own attribution code — only ever arrives via a `?mkt=` partner link, never typed by hand; see the register page's own note. */
