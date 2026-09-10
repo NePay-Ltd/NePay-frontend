@@ -14,6 +14,10 @@ interface VerificationFieldProps {
     onVerify: () => Promise<void>;
     status: "idle" | "loading" | "success" | "error";
     resolvedName?: string;
+    /** Service address, when the provider returned one — electricity/cable only. */
+    resolvedAddress?: string;
+    /** Electricity-only — the smallest amount the provider will vend for this meter, when it returned one. */
+    minPurchaseAmount?: string;
     errorMessage?: string;
     maxLength?: number;
 }
@@ -26,6 +30,8 @@ export function VerificationField({
     onVerify,
     status,
     resolvedName,
+    resolvedAddress,
+    minPurchaseAmount,
     errorMessage,
     maxLength
 }: VerificationFieldProps) {
@@ -66,17 +72,32 @@ export function VerificationField({
             </div>
 
             <AnimatePresence mode="wait">
-                {status === "success" && resolvedName && (
+                {status === "success" && (
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="flex items-center gap-2 px-4 py-3 bg-green-50 rounded-xl border border-green-200"
+                        className="space-y-2 px-4 py-3 bg-green-50 rounded-xl border border-green-200"
                     >
-                        <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
-                        <span className="text-sm font-bold text-green-900 truncate">
-                            {resolvedName}
-                        </span>
+                        <div className="flex items-center gap-2">
+                            <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                            <span className="text-sm font-bold text-green-900 truncate">
+                                {resolvedName || "Verified"}
+                            </span>
+                        </div>
+                        {resolvedAddress && (
+                            <p className="pl-7 text-xs font-medium text-green-800">{resolvedAddress}</p>
+                        )}
+                        {minPurchaseAmount && Number(minPurchaseAmount) > 0 && (
+                            <p className="pl-7 text-xs font-medium text-green-800">
+                                Minimum purchase: ₦{Number(minPurchaseAmount).toLocaleString()}
+                            </p>
+                        )}
+                        {!resolvedName && (
+                            <p className="pl-7 text-xs text-green-700">
+                                This is valid, but the provider didn&apos;t return a registered name for it.
+                            </p>
+                        )}
                     </motion.div>
                 )}
 

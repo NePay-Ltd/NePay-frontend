@@ -96,7 +96,16 @@ export function useTransaction(id: string | null) {
             if (transaction.category === "electricity") {
                 try {
                     const utility = await apiClient.get<ApiResponse<UtilityPurchaseResponseDto>>(`/utilities/purchases/by-ledger/${id}`);
-                    transaction.utilityToken = utility.data.data.token ?? undefined;
+                    const data = utility.data.data;
+                    transaction.utilityToken = data.token ?? undefined;
+                    transaction.utilityCustomerName = data.customerName ?? undefined;
+                    transaction.utilityCustomerAddress = data.customerAddress ?? undefined;
+                    transaction.utilityUnits = data.units ?? undefined;
+                    transaction.utilityDisco = data.productName ?? undefined;
+                    transaction.utilityMeterNumber = data.identifier;
+                    transaction.utilityMeterType = data.variationCode ?? undefined;
+                    transaction.utilityProviderTransactionId = data.providerTransactionId ?? undefined;
+                    transaction.utilityTariff = data.tariff ?? undefined;
                 } catch {
                     // Older transactions may predate the utility-purchase link.
                 }

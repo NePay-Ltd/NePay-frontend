@@ -6,7 +6,6 @@ import { IconBuilding as Building2, IconClock as Clock, IconCopy as Copy } from 
 import { Receipt } from "lucide-react";
 import { toast } from "sonner";
 
-import { RequireKyc } from "@/components/shared/require-kyc";
 import { Panel, PanelBody, PanelHeader } from "@/components/shared/panel";
 import { Button } from "@/components/shared/button";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -33,14 +32,36 @@ const CURRENCIES: { code: BridgeCurrency; label: string }[] = [
     { code: "GBP", label: "GBP" },
 ];
 
+/** How fast money actually arrives depends on which rail the sender's bank uses, not on anything NePay or the user controls — so this is always a range, never a promise. Minimums are Bridge's own hard floor: a smaller send is neither credited nor returned. */
+const CURRENCY_INFO: Record<BridgeCurrency, { speed: string; minimum: string }> = {
+    USD: {
+        speed: "Wire transfers usually arrive within 2 hours, FedNow in seconds. Regular bank transfers (ACH) can take 1–2 business days.",
+        minimum: "$1",
+    },
+    EUR: {
+        speed: "Most European transfers (SEPA Instant) arrive within 5 minutes, any time of day. Transfers over €1,000,000 use a slower rail and can take up to 3 business days.",
+        minimum: "€1",
+    },
+    GBP: {
+        speed: "UK Faster Payments usually arrive within 30 minutes. Transfers over £1,000,000 use a slower rail and can take up to 3 business days.",
+        minimum: "£2",
+    },
+};
+
 function copy(value: string, label: string) {
     navigator.clipboard.writeText(value);
     toast.success(`${label} copied to clipboard`);
 }
 
 const DEPOSIT_STATUS_TAG: Record<string, { variant: TagVariant; label: string }> = {
+    SCHEDULED: { variant: "neutral", label: "Arriving soon" },
     RECEIVED: { variant: "warn", label: "Incoming" },
+    IN_REVIEW: { variant: "warn", label: "Under review" },
+    PROCESSING: { variant: "neutral", label: "Processing" },
     CREDITED: { variant: "ok", label: "Credited" },
+    RETURNING: { variant: "warn", label: "Returning to sender" },
+    RETURNED: { variant: "error", label: "Returned to sender" },
+    RETURN_FAILED: { variant: "error", label: "Return failed — contact support" },
 };
 
 export default function ForeignAccountsPage() {
@@ -58,91 +79,105 @@ export default function ForeignAccountsPage() {
     }, [accounts]);
 
     return (
-        <RequireKyc>
-            <div className="mx-auto max-w-5xl pb-12 md:pb-20 space-y-6 px-6 pt-6">
-                <div className="mb-2">
-                    <h1 className="text-3xl font-black text-ink tracking-tight">Foreign Accounts</h1>
-                    <p className="mt-2 text-base font-medium text-muted">
-                        Get paid in USD, EUR or GBP — it lands in your Naira wallet automatically.
-                    </p>
-                </div>
-
-                {customerLoading ? (
-                    <Skeleton className="h-64 w-full rounded-2xl" />
-                ) : !customer || customer.status === "rejected" ? (
-                    <BridgeOnboardingForm rejectedCustomer={customer ?? undefined} />
-                ) : customer.status !== "active" ? (
-                    <StatusPanel customer={customer} />
-                ) : (
-                    <>
-                        <Panel>
-                            <PanelBody>
-                                <Tabs value={activeCurrency} onValueChange={(v) => setActiveCurrency(v as BridgeCurrency)}>
-                                    <TabsList className="w-full grid grid-cols-3">
-                                        {CURRENCIES.map((c) => (
-                                            <TabsTrigger key={c.code} value={c.code}>
-                                                {c.label}
-                                            </TabsTrigger>
-                                        ))}
-                                    </TabsList>
-
-                                    {CURRENCIES.map((c) => (
-                                        <TabsContent key={c.code} value={c.code} className="pt-5">
-                                            {accountsLoading ? (
-                                                <Skeleton className="h-40 w-full rounded-xl" />
-                                            ) : (
-                                                <CurrencyPanel currency={c.code} account={accountsByCurrency.get(c.code) ?? null} />
-                                            )}
-                                        </TabsContent>
-                                    ))}
-                                </Tabs>
-                            </PanelBody>
-                        </Panel>
-
-                        <Panel flush>
-                            <PanelHeader
-                                className="px-4 pt-4 sm:px-6 sm:pt-6"
-                                title="Recent deposits"
-                                description="Money received into your foreign accounts — credited to your Naira wallet automatically"
-                            />
-                            <PanelBody className="px-4 pb-3 pt-1 sm:px-6 sm:pb-4">
-                                {(deposits ?? []).length === 0 ? (
-                                    <EmptyState icon={Receipt} heading="No deposits yet" description="Once money arrives, it'll show up here." className="py-8" />
-                                ) : (
-                                    <div className="divide-y divide-border">
-                                        {deposits!.map((deposit) => {
-                                            const tag = DEPOSIT_STATUS_TAG[deposit.status] ?? { variant: "neutral" as TagVariant, label: deposit.status };
-                                            return (
-                                                <div key={deposit.id} className="flex items-center justify-between gap-3 py-3">
-                                                    <div className="min-w-0">
-                                                        <p className="text-sm font-bold text-ink">
-                                                            {formatByCurrency(deposit.sourceAmount, deposit.sourceCurrency)}
-                                                            {deposit.ngnAmountCredited ? (
-                                                                <span className="text-muted font-medium"> → ₦{Number(deposit.ngnAmountCredited).toLocaleString()}</span>
-                                                            ) : null}
-                                                        </p>
-                                                        <p className="text-xs text-muted mt-0.5">{formatDate(deposit.createdAt)}</p>
-                                                    </div>
-                                                    <Tag variant={tag.variant}>{tag.label}</Tag>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </PanelBody>
-                        </Panel>
-
-                        <Button
-                            variant="ghost"
-                            className="w-full font-bold h-12 rounded-xl text-sm border-2 border-border text-ink hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-                            onClick={() => router.push("/transactions")}
-                        >
-                            View Full Transaction History
-                        </Button>
-                    </>
-                )}
+        <div className="mx-auto max-w-5xl pb-12 md:pb-20 space-y-6 px-6 pt-6">
+            <div className="mb-2">
+                <h1 className="text-3xl font-black text-ink tracking-tight">Foreign Accounts</h1>
+                <p className="mt-2 text-base font-medium text-muted">
+                    Get paid in USD, EUR or GBP — it lands in your Naira wallet automatically.
+                </p>
             </div>
-        </RequireKyc>
+
+            {customerLoading ? (
+                <Skeleton className="h-64 w-full rounded-2xl" />
+            ) : !customer || customer.status === "rejected" ? (
+                <BridgeOnboardingForm rejectedCustomer={customer ?? undefined} />
+            ) : customer.status !== "active" ? (
+                <StatusPanel customer={customer} />
+            ) : (
+                <>
+                    <p className="text-xs font-medium text-muted -mt-2">
+                        A 1% fee applies to each converted deposit, plus a flat $2/month maintenance fee while you hold a foreign account.
+                    </p>
+
+                    <Panel>
+                        <PanelBody>
+                            <Tabs value={activeCurrency} onValueChange={(v) => setActiveCurrency(v as BridgeCurrency)}>
+                                <TabsList className="w-full grid grid-cols-3">
+                                    {CURRENCIES.map((c) => (
+                                        <TabsTrigger key={c.code} value={c.code}>
+                                            {c.label}
+                                        </TabsTrigger>
+                                    ))}
+                                </TabsList>
+
+                                {CURRENCIES.map((c) => (
+                                    <TabsContent key={c.code} value={c.code} className="pt-5">
+                                        {accountsLoading ? (
+                                            <Skeleton className="h-40 w-full rounded-xl" />
+                                        ) : (
+                                            <CurrencyPanel currency={c.code} account={accountsByCurrency.get(c.code) ?? null} />
+                                        )}
+                                    </TabsContent>
+                                ))}
+                            </Tabs>
+                        </PanelBody>
+                    </Panel>
+
+                    <Panel flush>
+                        <PanelHeader
+                            className="px-4 pt-4 sm:px-6 sm:pt-6"
+                            title="Recent deposits"
+                            description="Money received into your foreign accounts — credited to your Naira wallet automatically"
+                        />
+                        <PanelBody className="px-4 pb-3 pt-1 sm:px-6 sm:pb-4">
+                            {(deposits ?? []).length === 0 ? (
+                                <EmptyState icon={Receipt} heading="No deposits yet" description="Once money arrives, it'll show up here." className="py-8" />
+                            ) : (
+                                <div className="divide-y divide-border">
+                                    {deposits!.map((deposit) => {
+                                        const tag = DEPOSIT_STATUS_TAG[deposit.status] ?? { variant: "neutral" as TagVariant, label: deposit.status };
+                                        return (
+                                            <div key={deposit.id} className="flex items-center justify-between gap-3 py-3">
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-bold text-ink">
+                                                        {formatByCurrency(deposit.sourceAmount, deposit.sourceCurrency)}
+                                                        {deposit.ngnAmountCredited ? (
+                                                            <span className="text-muted font-medium"> → ₦{Number(deposit.ngnAmountCredited).toLocaleString()}</span>
+                                                        ) : null}
+                                                    </p>
+                                                    <p className="text-xs text-muted mt-0.5">
+                                                        {formatDate(deposit.createdAt)}
+                                                        {deposit.feeAmount && Number(deposit.feeAmount) > 0 ? (
+                                                            <> · Fee ₦{Number(deposit.feeAmount).toLocaleString()}</>
+                                                        ) : null}
+                                                        {deposit.status === "SCHEDULED" && deposit.estimatedArrivalDate ? (
+                                                            <> · Est. arrival {formatDate(deposit.estimatedArrivalDate)}</>
+                                                        ) : null}
+                                                        {deposit.status === "IN_REVIEW" ? <> · Routine check, usually resolves within 2 hours</> : null}
+                                                        {(deposit.status === "RETURNED" || deposit.status === "RETURN_FAILED") && deposit.refundReason ? (
+                                                            <> · {deposit.refundReason.replace(/_/g, " ")}</>
+                                                        ) : null}
+                                                    </p>
+                                                </div>
+                                                <Tag variant={tag.variant}>{tag.label}</Tag>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </PanelBody>
+                    </Panel>
+
+                    <Button
+                        variant="ghost"
+                        className="w-full font-bold h-12 rounded-xl text-sm border-2 border-border text-ink hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                        onClick={() => router.push("/transactions")}
+                    >
+                        View Full Transaction History
+                    </Button>
+                </>
+            )}
+        </div>
     );
 }
 
@@ -176,6 +211,7 @@ function StatusPanel({ customer }: { customer: NonNullable<ReturnType<typeof use
 
 function CurrencyPanel({ currency, account }: { currency: BridgeCurrency; account: BridgeVirtualAccountDto | null }) {
     const { mutate: requestAccount, isPending } = useRequestBridgeAccount();
+    const info = CURRENCY_INFO[currency];
 
     if (!account) {
         return (
@@ -205,6 +241,9 @@ function CurrencyPanel({ currency, account }: { currency: BridgeCurrency; accoun
                     <Building2 className="mr-2 h-4 w-4" />
                     Get {currency} Account
                 </Button>
+                <p className="text-xs text-muted leading-relaxed">
+                    {info.speed} Minimum {info.minimum} per transfer — smaller amounts can&apos;t be credited or returned.
+                </p>
             </div>
         );
     }
@@ -217,6 +256,14 @@ function CurrencyPanel({ currency, account }: { currency: BridgeCurrency; accoun
         bank_routing_number: "Routing number",
         bank_beneficiary_name: "Beneficiary name",
         bank_beneficiary_address: "Beneficiary address",
+        // GBP's schema misspells both fields this way ("benficiary", missing
+        // the "e") — confirmed against Bridge's own live API reference, not
+        // a guess. USD/EUR use the correctly-spelled keys above; mapping
+        // both to the same label means neither currency silently drops
+        // beneficiary details depending on which spelling Bridge sends.
+        bank_benficiary_name: "Beneficiary name",
+        bank_benficiary_address: "Beneficiary address",
+        account_holder_name: "Account holder name",
         iban: "IBAN",
         bic: "BIC / SWIFT",
         account_number: "Account number",
@@ -251,6 +298,9 @@ function CurrencyPanel({ currency, account }: { currency: BridgeCurrency; accoun
 
             <p className="text-xs text-muted">
                 Money sent here converts automatically and lands in your Naira wallet — no extra step needed.
+            </p>
+            <p className="text-xs text-muted leading-relaxed">
+                {info.speed} Minimum {info.minimum} per transfer — smaller amounts can&apos;t be credited or returned.
             </p>
         </div>
     );

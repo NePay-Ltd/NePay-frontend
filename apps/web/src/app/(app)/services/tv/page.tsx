@@ -7,7 +7,7 @@ import { MonitorPlay } from "lucide-react";;
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { useVerifySmartcard, usePayCableTv, useSaveBeneficiary, useSavedBillers, useServiceTransactionStatus } from "@/lib/queries/services";
+import { useVerifySmartcard, usePayCableTv, useSaveBeneficiary, useSavedBillers, useServiceTransactionStatus, useUtilityCategories, useUtilityServices, useUtilityVariations } from "@/lib/queries/services";
 
 // New Shared UI Components
 import { ProviderRowButton } from "@/components/services/ProviderRowButton";
@@ -20,52 +20,55 @@ import { Switch } from "@/components/ui/switch";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const PROVIDERS = [
-    { id: "dstv", label: "DSTV", color: "bg-blue-600", logoUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200"><rect width="400" height="200" fill="%230099e5" rx="20"/><text x="200" y="130" font-family="Arial, Helvetica, sans-serif" font-size="100" font-weight="900" font-style="italic" fill="%23ffffff" text-anchor="middle" letter-spacing="-2">DStv</text></svg>' },
-    { id: "gotv", label: "GOtv", color: "bg-green-600", logoUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200"><rect width="400" height="200" fill="%23ffffff" rx="20"/><text x="140" y="130" font-family="Arial, Helvetica, sans-serif" font-size="110" font-weight="900" font-style="italic" fill="%23e3000f" text-anchor="middle" letter-spacing="-5">GO</text><text x="270" y="130" font-family="Arial, Helvetica, sans-serif" font-size="110" font-weight="900" font-style="italic" fill="%23008c3a" text-anchor="middle" letter-spacing="-2">tv</text></svg>' },
-    { id: "startimes", label: "Startimes", color: "bg-orange-600", logoUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200"><rect width="400" height="200" fill="%23ffffff" rx="20"/><circle cx="100" cy="100" r="40" fill="%23f26522"/><text x="240" y="125" font-family="Arial, Helvetica, sans-serif" font-size="60" font-weight="bold" fill="%23000000" text-anchor="middle">StarTimes</text></svg>' },
-];
-
-const MOCK_TV_PLANS: Record<string, { id: string; name: string; price: number }[]> = {
-    dstv: [
-        { id: "padi", name: "DStv Padi", price: 2950 },
-        { id: "yanga", name: "DStv Yanga", price: 4200 },
-        { id: "confam", name: "DStv Confam", price: 7400 },
-        { id: "compact", name: "DStv Compact", price: 12500 },
-        { id: "compact_plus", name: "DStv Compact Plus", price: 19800 },
-        { id: "premium", name: "DStv Premium", price: 29500 },
-    ],
-    gotv: [
-        { id: "smallie", name: "GOtv Smallie", price: 1300 },
-        { id: "jinja", name: "GOtv Jinja", price: 2700 },
-        { id: "jolli", name: "GOtv Jolli", price: 3950 },
-        { id: "max", name: "GOtv Max", price: 5700 },
-        { id: "supa", name: "GOtv Supa", price: 7600 },
-    ],
-    startimes: [
-        { id: "nova", name: "Nova", price: 1500 },
-        { id: "basic", name: "Basic", price: 2600 },
-        { id: "smart", name: "Smart", price: 3500 },
-        { id: "classic", name: "Classic", price: 3800 },
-        { id: "super", name: "Super", price: 6500 },
-    ]
-};
+// A rotating fallback palette — VTpass doesn't send brand colors, only a
+// logo (`n.image`), so this only ever shows if a provider's image fails to
+// load. The previous hardcoded 3-provider list (with fabricated data: URI
+// SVG logos, and — separately — a MOCK_TV_PLANS table of fake bouquet
+// names/prices/codes that didn't match VTpass's real variation codes at
+// all) has been replaced by the real catalog fetched from
+// GET /utilities/services?category=tv-subscription and
+// GET /utilities/variations?serviceId=<provider>.
+const FALLBACK_COLORS = ["bg-blue-600", "bg-green-600", "bg-orange-600", "bg-violet-600"];
 
 export default function TvPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    
+
     // Support pre-filling
-    const initialProviderId = searchParams.get("provider") || "dstv";
+    const initialProviderId = searchParams.get("provider") || undefined;
     const initialSmartcard = searchParams.get("meter") || "";
 
-    const [providerId, setProviderId] = React.useState(initialProviderId);
+    const [providerId, setProviderId] = React.useState<string | undefined>(initialProviderId);
     const [smartcard, setSmartcard] = React.useState(initialSmartcard);
-    const [planId, setPlanId] = React.useState("");
+    const [variationCode, setVariationCode] = React.useState("");
     const [saveBeneficiary, setSaveBeneficiary] = React.useState(true);
-    
+
     const [resolvedName, setResolvedName] = React.useState<string | undefined>();
+    const [verificationToken, setVerificationToken] = React.useState<string | undefined>();
     const [verifyStatus, setVerifyStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+
+    // ─── Dynamic catalog — every real TV provider VTpass actually offers,
+    // and each provider's own real bouquets/prices, not fabricated ones.
+    const { data: categories = [] } = useUtilityCategories();
+    const tvCategory = categories.find((c) => c.name.toLowerCase().includes("tv"));
+    const { data: services = [], isLoading: providersLoading } = useUtilityServices(tvCategory?.identifier);
+    const providers = services.map((s, i) => ({
+        id: s.serviceID,
+        label: s.name,
+        color: FALLBACK_COLORS[i % FALLBACK_COLORS.length] ?? FALLBACK_COLORS[0]!,
+        logoUrl: s.image,
+    }));
+
+    React.useEffect(() => {
+        const firstProvider = providers[0];
+        if (!providerId && firstProvider) {
+            setProviderId(firstProvider.id);
+        }
+    }, [providerId, providers]);
+
+    const activeProvider = providers.find((p) => p.id === providerId);
+    const { data: plans = [], isLoading: plansLoading } = useUtilityVariations(activeProvider?.id);
+    const selectedPlan = plans.find((p) => p.variation_code === variationCode);
 
     // Queries & Mutations
     const verifySmartcard = useVerifySmartcard();
@@ -76,14 +79,12 @@ export default function TvPage() {
         .filter((b) => b.serviceType === "cable-tv")
         .map((b) => ({ name: b.billerName, id: b.identifier }));
 
-    const providerPlans = MOCK_TV_PLANS[providerId] || [];
-    const selectedPlan = providerPlans.find(p => p.id === planId);
-
     // Reset resolution and plan if user types something new or changes provider
     React.useEffect(() => {
         setResolvedName(undefined);
+        setVerificationToken(undefined);
         setVerifyStatus("idle");
-        setPlanId("");
+        setVariationCode("");
     }, [smartcard, providerId]);
 
     // ─── Transaction State ────────────────────────────────────────────────
@@ -100,10 +101,10 @@ export default function TvPage() {
             if (saveBeneficiary) {
                 saveBeneficiaryMutation.mutate({
                     category: "CABLE",
-                    provider: providerId,
+                    provider: providerId ?? "",
                     identifier: smartcard,
-                    label: `${PROVIDERS.find((provider) => provider.id === providerId)?.label || providerId} ${smartcard}`,
-                    amount: selectedPlan?.price.toString(),
+                    label: `${activeProvider?.label ?? "TV"} ${smartcard}`,
+                    amount: selectedPlan?.variation_amount,
                 });
             }
             setPinModalOpen(false);
@@ -116,18 +117,20 @@ export default function TvPage() {
 
     // ─── Handlers ───────────────────────────────────────────────────────────────
     const handleVerify = async () => {
-        if (smartcard.length < 5) return;
+        if (smartcard.length < 5 || !providerId) return;
         setVerifyStatus("loading");
 
         verifySmartcard.mutate(
             { provider: providerId, smartcardNumber: smartcard },
             {
                 onSuccess: (data) => {
-                    setResolvedName(data.customerName);
+                    setResolvedName(data.customerName ?? undefined);
+                    setVerificationToken(data.verificationToken);
                     setVerifyStatus("success");
                 },
                 onError: () => {
                     setResolvedName(undefined);
+                    setVerificationToken(undefined);
                     setVerifyStatus("error");
                 }
             }
@@ -145,13 +148,39 @@ export default function TvPage() {
     };
 
     const handlePinSubmit = (pin: string) => {
-        if (!selectedPlan) return;
+        if (!selectedPlan || !providerId) return;
+        if (!verificationToken) {
+            toast.error("We couldn't find that smartcard number. Double-check your digits?");
+            setTxState("error");
+            return;
+        }
         setTxState("processing");
-        
+
         payCableTv.mutate(
-            { provider: providerId, smartcardNumber: smartcard, amountNgn: selectedPlan.price, pin },
+            {
+                provider: providerId,
+                smartcardNumber: smartcard,
+                variationCode: selectedPlan.variation_code,
+                verificationToken,
+                amountNgn: Number(selectedPlan.variation_amount),
+                pin,
+            },
             {
                 onSuccess: (res) => {
+                    if (res.status === "COMPLETED") {
+                        if (saveBeneficiary) {
+                            saveBeneficiaryMutation.mutate({
+                                category: "CABLE",
+                                provider: providerId,
+                                identifier: smartcard,
+                                label: `${activeProvider?.label ?? "TV"} ${smartcard}`,
+                                amount: selectedPlan.variation_amount,
+                            });
+                        }
+                        setPinModalOpen(false);
+                        setSuccessOpen(true);
+                        return;
+                    }
                     setTxId(res.id);
                 },
                 onError: (err: any) => {
@@ -162,18 +191,8 @@ export default function TvPage() {
         );
     };
 
-    const isValid = verifyStatus === "success" && !!selectedPlan;
-
-    // Helper to format plan for PlanGrid
-    const formatPlansForGrid = (rawPlans: typeof providerPlans) => {
-        return rawPlans.map((p, idx) => ({
-            id: p.id,
-            name: p.name,
-            validity: "30 Days", // Standard for most cable tv
-            price: p.price,
-            recommended: idx === 3 // Mock a recommendation
-        }));
-    };
+    const isValid = verifyStatus === "success" && !!verificationToken && !!selectedPlan;
+    const selectedAmount = selectedPlan ? Number(selectedPlan.variation_amount) : 0;
 
     return (
         <>
@@ -193,15 +212,19 @@ export default function TvPage() {
 
                 <div className="px-2 sm:px-0 space-y-4">
                     {/* Provider Selection */}
-                    <ProviderRowButton 
-                        providers={PROVIDERS}
-                        selectedId={providerId}
-                        onChange={setProviderId}
-                    />
+                    {providersLoading ? (
+                        <div className="h-[68px] rounded-2xl border-2 border-border bg-white dark:bg-white/5 animate-pulse" />
+                    ) : (
+                        <ProviderRowButton
+                            providers={providers}
+                            selectedId={providerId ?? ""}
+                            onChange={setProviderId}
+                        />
+                    )}
 
                     {/* Smartcard Number & Verification */}
                     <div className="space-y-4 pt-4">
-                        <VerificationField 
+                        <VerificationField
                             label="Smartcard / IUC Number"
                             placeholder="Enter smartcard number"
                             value={smartcard}
@@ -211,7 +234,7 @@ export default function TvPage() {
                             resolvedName={resolvedName}
                             errorMessage="Failed to verify smartcard"
                         />
-                        
+
                         {/* Only show recent if we haven't typed yet or verified */}
                         {verifyStatus !== "success" && (
                             <RecentNumbersRow
@@ -231,18 +254,19 @@ export default function TvPage() {
 
                     {/* Subscription Plans */}
                     <div className={`transition-all duration-300 ${verifyStatus === "success" ? "opacity-100" : "opacity-40 pointer-events-none"}`}>
-                        <PlanGrid 
-                            plans={formatPlansForGrid(providerPlans)}
-                            selectedId={planId}
-                            onChange={setPlanId}
+                        <PlanGrid
+                            plans={plans.map((p) => ({ id: p.variation_code, name: p.name, price: Number(p.variation_amount) }))}
+                            selectedId={variationCode}
+                            onChange={setVariationCode}
+                            isLoading={plansLoading}
                         />
                     </div>
                 </div>
             </div>
 
-            <StickyPayBar 
-                visible={!successOpen} 
-                amount={selectedPlan?.price || 0}
+            <StickyPayBar
+                visible={!successOpen}
+                amount={selectedAmount}
                 summaryText={selectedPlan ? `${selectedPlan.name} · ${resolvedName || smartcard}` : "Select a plan"}
                 onPay={handlePayClick}
                 disabled={!isValid}
@@ -259,11 +283,11 @@ export default function TvPage() {
                 onErrorAction={() => setPinModalOpen(false)}
             />
 
-            <PaymentSuccessScreen 
+            <PaymentSuccessScreen
                 open={successOpen}
-                amount={selectedPlan?.price || 0}
+                amount={selectedAmount}
                 title="Subscription Active!"
-                description={<p>You successfully renewed <span className="font-bold">{selectedPlan?.name}</span> for <span className="font-bold">{resolvedName}</span>.</p>}
+                description={<p>You successfully renewed <span className="font-bold">{selectedPlan?.name}</span> for <span className="font-bold">{resolvedName || smartcard}</span>.</p>}
                 onHome={() => router.push("/overview")}
                 onReceipt={() => router.push(txId ? `/transactions/${txId}` : "/transactions")}
             />

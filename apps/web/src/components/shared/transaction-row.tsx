@@ -18,6 +18,16 @@ export interface BaseTransaction {
     cryptoAsset?: string;
     exchangeRate?: string;
     utilityToken?: string;
+    /** Electricity-only receipt fields from VTpass's own response — see UtilityPurchaseResponseDto on the backend. Undefined for every non-electricity category. */
+    utilityCustomerName?: string;
+    utilityCustomerAddress?: string;
+    utilityUnits?: string;
+    utilityDisco?: string;
+    utilityMeterNumber?: string;
+    utilityMeterType?: string;
+    utilityProviderTransactionId?: string;
+    /** Electricity-only — only ever known post-purchase, VTpass's pre-purchase verify-meter response never carries a tariff field. */
+    utilityTariff?: string;
 }
 
 export interface TransactionRowProps {
