@@ -33,6 +33,19 @@ const CURRENCIES: { code: BridgeCurrency; label: string }[] = [
 ];
 
 /** How fast money actually arrives depends on which rail the sender's bank uses, not on anything NePay or the user controls — so this is always a range, never a promise. Minimums are Bridge's own hard floor: a smaller send is neither credited nor returned. */
+/**
+ * Bridge confirmed in writing (2026-09-10) that GBP third-party deposits
+ * from individuals are unavailable by policy, not a bug — and asked us to
+ * pause live GBP P2P testing. New account requests are also blocked
+ * server-side (BridgeVirtualAccountService.requestAccount); this is the
+ * UI-side half so nobody hits that error unexplained. Only blocks NEW
+ * requests — an account issued before this was known still displays
+ * normally below.
+ */
+const DISABLED_CURRENCIES: Partial<Record<BridgeCurrency, string>> = {
+    GBP: "GBP accounts are temporarily unavailable — Bridge's UK banking partner doesn't currently support individual-to-individual transfers into these accounts. We'll turn this back on once that's resolved.",
+};
+
 const CURRENCY_INFO: Record<BridgeCurrency, { speed: string; minimum: string }> = {
     USD: {
         speed: "Wire transfers usually arrive within 2 hours, FedNow in seconds. Regular bank transfers (ACH) can take 1–2 business days.",
@@ -212,6 +225,21 @@ function StatusPanel({ customer }: { customer: NonNullable<ReturnType<typeof use
 function CurrencyPanel({ currency, account }: { currency: BridgeCurrency; account: BridgeVirtualAccountDto | null }) {
     const { mutate: requestAccount, isPending } = useRequestBridgeAccount();
     const info = CURRENCY_INFO[currency];
+    const disabledReason = DISABLED_CURRENCIES[currency];
+
+    if (!account && disabledReason) {
+        return (
+            <div className="rounded-xl border border-dashed border-border bg-gray-50/60 dark:bg-white/5 p-6 text-center space-y-4">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
+                    <Clock className="h-5 w-5 text-amber-600 dark:text-amber-500" />
+                </div>
+                <div>
+                    <p className="text-sm font-bold text-ink">{currency} accounts unavailable right now</p>
+                    <p className="mt-1 text-sm text-muted">{disabledReason}</p>
+                </div>
+            </div>
+        );
+    }
 
     if (!account) {
         return (
