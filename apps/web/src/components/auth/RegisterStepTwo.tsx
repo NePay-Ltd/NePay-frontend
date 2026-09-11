@@ -14,10 +14,6 @@ import { registerStepTwoSchema, type RegisterStepTwoValues } from "@/lib/schemas
 import { Button } from "@/components/shared/button";
 import { Field } from "@/components/shared/field";
 import { Input } from "@/components/ui/input";
-import { ScrollToAcceptModal } from "@/components/shared/ScrollToAcceptModal";
-import { TermsContent } from "@/components/legal/TermsContent";
-import { PrivacyContent } from "@/components/legal/PrivacyContent";
-import { EulaContent } from "@/components/legal/EulaContent";
 
 function calculateStrength(password: string): number {
     let strength = 0;
@@ -197,29 +193,15 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
             </Field>
 
             {/* Terms */}
-            <div className="space-y-1">
-                {acceptedTerms ? (
-                    <div className="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-xl border border-green-200">
-                        <CheckCircle2 className="w-5 h-5" />
-                        <span className="text-sm font-semibold">Terms of Service Accepted</span>
-                    </div>
-                ) : (
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        className="w-full justify-center h-12"
-                        onClick={() => setIsTermsModalOpen(true)}
-                    >
-                        <FileText className="w-4 h-4 mr-2 text-violet-600" />
-                        Review Legal Agreements to Continue
-                    </Button>
-                )}
-                
-                {errors.acceptTerms && (
-                    <p role="alert" className="text-xs font-medium text-red-500 mt-1">
-                        {errors.acceptTerms.message}
-                    </p>
-                )}
+            <div className="text-center text-sm text-muted mt-2 mb-6">
+                By signing up, you agree to our{" "}
+                <Link href="/legal/terms" target="_blank" className="font-bold text-violet-600 hover:underline">
+                    Terms of Service
+                </Link>
+                {" "}and{" "}
+                <Link href="/legal/privacy" target="_blank" className="font-bold text-violet-600 hover:underline">
+                    Privacy Policy
+                </Link>.
             </div>
 
             <div className="flex items-center gap-3 mt-6">
@@ -238,29 +220,13 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
                     variant="primary"
                     size="lg"
                     loading={isSubmitting}
-                    disabled={!acceptedTerms || isSubmitting}
+                    disabled={isSubmitting}
                     className="flex-[2]"
                 >
                     <UserPlus className="h-4 w-4" />
                     Create Account
                 </Button>
             </div>
-
-            <ScrollToAcceptModal
-                isOpen={isTermsModalOpen}
-                onClose={() => setIsTermsModalOpen(false)}
-                title="Legal Agreements"
-                onAccept={() => {
-                    setValue("acceptTerms", true, { shouldValidate: true });
-                    setIsTermsModalOpen(false);
-                }}
-            >
-                <EulaContent />
-                <div className="h-8" />
-                <TermsContent />
-                <div className="h-8" />
-                <PrivacyContent />
-            </ScrollToAcceptModal>
         </form>
     );
 }

@@ -20,6 +20,7 @@ export interface ReceiptData {
     utilityMeterNumber?: string;
     utilityMeterType?: string;
     utilityProviderTransactionId?: string;
+    utilityTariff?: string;
     utilityPhoneNumber?: string;
     utilityEmail?: string;
 }
@@ -42,7 +43,7 @@ Description: ${receipt.label}
 Amount: ${amountStr}
 Direction: ${receipt.direction === "CREDIT" ? "Received" : "Sent"}
 Status: ${receipt.status.toUpperCase()}
-${receipt.utilityCustomerName ? `Name: ${receipt.utilityCustomerName}\n` : ""}${receipt.utilityCustomerAddress ? `Address: ${receipt.utilityCustomerAddress}\n` : ""}${receipt.utilityPhoneNumber ? `Phone No: ${receipt.utilityPhoneNumber}\n` : ""}${receipt.utilityEmail ? `Email: ${receipt.utilityEmail}\n` : ""}${receipt.utilityMeterNumber ? `Meter No: ${receipt.utilityMeterNumber}\n` : ""}${receipt.utilityMeterType ? `Type: ${receipt.utilityMeterType}\n` : ""}${receipt.utilityDisco ? `Disco: ${receipt.utilityDisco}\n` : ""}${receipt.utilityUnits ? `Units: ${receipt.utilityUnits}\n` : ""}${receipt.utilityProviderTransactionId ? `Provider Transaction ID: ${receipt.utilityProviderTransactionId}\n` : ""}${receipt.utilityToken ? `Electricity Token: ${receipt.utilityToken}` : ""}
+${receipt.utilityCustomerName ? `Name: ${receipt.utilityCustomerName}\n` : ""}${receipt.utilityCustomerAddress ? `Address: ${receipt.utilityCustomerAddress}\n` : ""}${receipt.utilityPhoneNumber ? `Phone No: ${receipt.utilityPhoneNumber}\n` : ""}${receipt.utilityEmail ? `Email: ${receipt.utilityEmail}\n` : ""}${receipt.utilityMeterNumber ? `Meter No: ${receipt.utilityMeterNumber}\n` : ""}${receipt.utilityMeterType ? `Type: ${receipt.utilityMeterType}\n` : ""}${receipt.utilityDisco ? `Disco: ${receipt.utilityDisco}\n` : ""}${receipt.utilityUnits ? `Units: ${receipt.utilityUnits}\n` : ""}${receipt.utilityProviderTransactionId ? `Provider Transaction ID: ${receipt.utilityProviderTransactionId}\n` : ""}${receipt.utilityTariff ? `Tariff: ${receipt.utilityTariff}\n` : ""}${receipt.utilityToken ? `Electricity Token: ${receipt.utilityToken}` : ""}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Powered by NePay
@@ -243,6 +244,7 @@ async function generateReceiptHTML(receipt: ReceiptData): Promise<string> {
             ${receipt.utilityDisco ? `<div class="detail-row"><span class="detail-label">Disco</span><span class="detail-value">${escapeHtml(receipt.utilityDisco)}</span></div>` : ''}
             ${receipt.utilityUnits ? `<div class="detail-row"><span class="detail-label">Units</span><span class="detail-value">${escapeHtml(receipt.utilityUnits)}</span></div>` : ''}
             ${receipt.utilityProviderTransactionId ? `<div class="detail-row"><span class="detail-label">Provider Transaction ID</span><span class="detail-value">${escapeHtml(receipt.utilityProviderTransactionId)}</span></div>` : ''}
+            ${receipt.utilityTariff ? `<div class="detail-row"><span class="detail-label">Tariff</span><span class="detail-value">${escapeHtml(receipt.utilityTariff)}</span></div>` : ''}
             ${receipt.utilityToken ? `<div class="detail-row"><span class="detail-label">Electricity Token</span><span class="detail-value" style="font-family: monospace; letter-spacing: 1px;">${escapeHtml(receipt.utilityToken)}</span></div>` : ''}
         </div>
 

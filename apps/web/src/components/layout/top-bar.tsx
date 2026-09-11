@@ -64,7 +64,7 @@ export function TopBar() {
     const { title, subtitle } = usePageHeaders();
 
     return (
-        <header className="sticky top-0 z-20 flex h-[72px] items-center gap-3 border-b border-border bg-white/95 px-4 backdrop-blur-md lg:pl-10 lg:pr-8">
+        <header className="flex h-[72px] items-center gap-3 border-b border-border bg-white/95 px-4 backdrop-blur-md lg:pl-10 lg:pr-8">
 
             {/* ── Mobile layout ──────────────────────────────────────────── */}
             {/* Hamburger — mobile only */}

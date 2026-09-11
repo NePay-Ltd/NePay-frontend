@@ -270,13 +270,19 @@ export interface UtilityPurchaseResponseDto {
     productName: string | null;
     /** VTpass's own internal transaction id, for cross-referencing VTpass's own records. `providerReference` is this app's own reference. */
     providerTransactionId: string | null;
+    /** Electricity-only, e.g. "R2 SINGLE PHASE RESIDENTIAL" — only ever known post-purchase, never available before payment. */
+    tariff: string | null;
     createdAt: string;
 }
 
 export interface UtilityVerificationResponseDto {
     verificationToken: string;
     customerName: string | null;
+    /** The meter/smartcard's registered service address, when VTpass returned one. */
+    address: string | null;
     renewalAmount: string | null;
+    /** Electricity-only — the smallest amount VTpass will vend for this meter, when it returned one. Null for cable. */
+    minPurchaseAmount: string | null;
     expiresAt: string;
 }
 
@@ -370,7 +376,15 @@ export type BridgeCustomerStatus =
     | "deposits_restricted"
     | "paused"
     | "offboarded";
-export type BridgeDepositStatus = "RECEIVED" | "CREDITED";
+export type BridgeDepositStatus =
+    | "SCHEDULED"
+    | "RECEIVED"
+    | "IN_REVIEW"
+    | "PROCESSING"
+    | "CREDITED"
+    | "RETURNING"
+    | "RETURNED"
+    | "RETURN_FAILED";
 
 export interface BridgeCustomerDto {
     id: string;
@@ -465,7 +479,14 @@ export interface BridgeDepositDto {
     sourceAmount: string;
     usdAmount: string | null;
     rateUsed: string | null;
+    /** Net of feeAmount — what actually landed in the wallet. */
     ngnAmountCredited: string | null;
+    /** The cross-border conversion fee taken (NGN). */
+    feeAmount: string | null;
     status: BridgeDepositStatus;
+    /** ACH only — Bridge's own estimated arrival date while status is SCHEDULED. */
+    estimatedArrivalDate: string | null;
+    /** Set once status is RETURNED/RETURN_FAILED — Bridge's own reason code. */
+    refundReason: string | null;
     createdAt: string;
 }

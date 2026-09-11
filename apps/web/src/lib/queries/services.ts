@@ -155,10 +155,14 @@ export function useVerifyMeter() {
 }
 
 export function useVerifySmartcard() {
-    return useMutation<{ customerName: string; package: string }, Error, { provider: string; smartcardNumber: string }>({
+    return useMutation<UtilityVerificationResponseDto, Error, { provider: string; smartcardNumber: string }>({
         mutationFn: async ({ provider, smartcardNumber }) => {
-            const res = await apiClient.get<ApiResponse<{ customerName: string; package: string }>>("/utilities/verify-smartcard", {
-                params: { provider, smartcardNumber },
+            // Field names match VerifySmartcardQueryDto on the backend exactly
+            // (cableProvider/smartCardNumber) — a prior version sent
+            // provider/smartcardNumber, which the backend's whitelisted
+            // ValidationPipe would reject outright as unknown properties.
+            const res = await apiClient.get<ApiResponse<UtilityVerificationResponseDto>>("/utilities/verify-smartcard", {
+                params: { cableProvider: provider, smartCardNumber: smartcardNumber },
             });
             return res.data.data;
         }
@@ -226,12 +230,21 @@ export function usePayElectricity() {
 }
 
 export function usePayCableTv() {
-    return useMutation<UtilityPurchaseResponseDto, Error, { smartcardNumber: string; provider: string; amountNgn: number; pin: string }>({
-        mutationFn: async ({ smartcardNumber, provider, amountNgn, pin }) => {
+    return useMutation<UtilityPurchaseResponseDto, Error, { smartcardNumber: string; provider: string; variationCode: string; verificationToken: string; amountNgn: number; pin: string }>({
+        mutationFn: async ({ smartcardNumber, provider, variationCode, verificationToken, amountNgn, pin }) => {
+            // Field names match PurchaseCableDto on the backend exactly. A
+            // prior version sent provider/smartcardNumber (wrong names, and
+            // uppercased the serviceID — VTpass's real serviceIDs are
+            // lowercase, e.g. "dstv" not "DSTV") and omitted variationCode
+            // and verificationToken entirely, both required — every real
+            // cable purchase would have failed the backend's whitelisted
+            // ValidationPipe with a 400 before ever reaching VTpass.
             const res = await apiClient.post<ApiResponse<UtilityPurchaseResponseDto>>("/utilities/cable", {
-                provider: provider.toUpperCase(),
+                cableProvider: provider,
+                smartCardNumber: smartcardNumber,
+                variationCode,
+                verificationToken,
                 amount: amountNgn.toString(),
-                smartcardNumber,
                 pin,
             });
             return res.data.data;

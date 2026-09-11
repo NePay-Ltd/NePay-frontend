@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { IconCheck as Check, IconPlus as Plus, IconBuilding as Landmark, IconBuilding as Building2 } from "@/components/icons";
-import { ChevronsUpDown, Loader2 } from "lucide-react";;
+import { ChevronsUpDown, Loader2, Search } from "lucide-react";;
 import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";
@@ -21,7 +21,8 @@ import {
     useWithdrawalStatus
 } from "@/lib/queries/withdraw";
 
-import { RequireKyc } from "@/components/shared/require-kyc";
+// TEMPORARY: unused while the KYC gate is lifted below — re-add when reverting.
+// import { RequireKyc } from "@/components/shared/require-kyc";
 import { Button } from "@/components/shared/button";
 import { Chip } from "@/components/shared/chip";
 import { Panel, PanelHeader, PanelBody } from "@/components/shared/panel";
@@ -101,6 +102,22 @@ export default function WithdrawPage() {
     const [newAccountNumber, setNewAccountNumber] = React.useState("");
     const [resolvedName, setResolvedName] = React.useState("");
 
+    // Bank search — the bank list can now run into the hundreds (see the
+    // backend's KorapayTransferAdapter, which layers in a full Nigerian
+    // bank list), so a plain <select> isn't usable. Search-as-you-type by
+    // name instead; there's no way to derive a bank from an account number
+    // alone (NUBAN account numbers aren't globally unique or bank-encoded —
+    // the same 10 digits can exist at different banks), so the bank still
+    // has to be picked before the account number resolves.
+    const [bankPickerOpen, setBankPickerOpen] = React.useState(false);
+    const [bankSearchQuery, setBankSearchQuery] = React.useState("");
+    const selectedNewBank = bankList.find(b => b.bankCode === newBankCode);
+    const filteredBankList = React.useMemo(() => {
+        const q = bankSearchQuery.trim().toLowerCase();
+        if (!q) return bankList;
+        return bankList.filter(b => b.bankName.toLowerCase().includes(q));
+    }, [bankList, bankSearchQuery]);
+
     // Auto-resolve when 10 digits are typed and a bank is selected
     React.useEffect(() => {
         if (newBankCode && newAccountNumber.length === 10) {
@@ -175,8 +192,13 @@ export default function WithdrawPage() {
         );
     };
 
+    // TEMPORARY: KYC gate lifted for sandbox testing (2026-09-11, user's explicit
+    // request) — was <RequireKyc>...</RequireKyc>. Revert by restoring that wrapper
+    // once testing against the deployed backend is done. Backend's own
+    // WithdrawalService.initiateWithdrawal kycVerified check is disabled to match
+    // — see that method's own TEMPORARY marker.
     return (
-        <RequireKyc>
+        <>
             <div className="mx-auto max-w-5xl space-y-8">
                 {/* ── Top Header ── */}
                 <div className="text-center md:text-left">
@@ -231,7 +253,13 @@ export default function WithdrawPage() {
                                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                             </Button>
                                         </PopoverTrigger>
-                                        <PopoverContent className="w-[340px] p-0 md:w-[400px]" align="start">
+                                        <PopoverContent
+                                            className="w-[340px] p-0 md:w-[400px] max-h-[min(70vh,var(--radix-popover-content-available-height))] overflow-y-auto"
+                                            align="start"
+                                            side="bottom"
+                                            sideOffset={8}
+                                            avoidCollisions={false}
+                                        >
                                             {!isAddingNew ? (
                                                 <Command>
                                                     <CommandInput placeholder="Search saved banks..." />
@@ -274,6 +302,8 @@ export default function WithdrawPage() {
                                                                 setNewBankCode("");
                                                                 setNewAccountNumber("");
                                                                 setResolvedName("");
+                                                                setBankPickerOpen(false);
+                                                                setBankSearchQuery("");
                                                             }}
                                                         >
                                                             <Plus className="mr-2 h-4 w-4" />
@@ -288,16 +318,54 @@ export default function WithdrawPage() {
                                                     
                                                     <div className="space-y-2">
                                                         <Label className="text-xs text-muted">Bank</Label>
-                                                        <select 
-                                                            className="flex h-10 w-full rounded-md border border-border bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600"
-                                                            value={newBankCode}
-                                                            onChange={(e) => setNewBankCode(e.target.value)}
-                                                        >
-                                                            <option value="" disabled>Select a bank</option>
-                                                            {bankList.map(b => (
-                                                                <option key={b.bankCode} value={b.bankCode}>{b.bankName}</option>
-                                                            ))}
-                                                        </select>
+                                                        {bankPickerOpen ? (
+                                                            <div className="rounded-md border border-violet-600 bg-white">
+                                                                <div className="flex items-center gap-2 border-b border-border px-2">
+                                                                    <Search className="h-4 w-4 shrink-0 text-muted" />
+                                                                    <input
+                                                                        autoFocus
+                                                                        className="h-9 w-full bg-transparent text-sm outline-none placeholder:text-muted"
+                                                                        placeholder="Search banks..."
+                                                                        value={bankSearchQuery}
+                                                                        onChange={(e) => setBankSearchQuery(e.target.value)}
+                                                                    />
+                                                                </div>
+                                                                <div className="max-h-[180px] overflow-y-auto p-1">
+                                                                    {filteredBankList.length === 0 ? (
+                                                                        <p className="px-2 py-3 text-center text-xs text-muted">No banks found.</p>
+                                                                    ) : (
+                                                                        filteredBankList.map(b => (
+                                                                            <button
+                                                                                key={b.bankCode}
+                                                                                type="button"
+                                                                                className={cn(
+                                                                                    "flex w-full items-center rounded-sm px-2 py-2 text-left text-sm hover:bg-gray-100",
+                                                                                    newBankCode === b.bankCode && "bg-violet-050 font-medium text-violet-700"
+                                                                                )}
+                                                                                onClick={() => {
+                                                                                    setNewBankCode(b.bankCode);
+                                                                                    setBankPickerOpen(false);
+                                                                                    setBankSearchQuery("");
+                                                                                }}
+                                                                            >
+                                                                                {b.bankName}
+                                                                            </button>
+                                                                        ))
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <button
+                                                                type="button"
+                                                                className="flex h-10 w-full items-center justify-between rounded-md border border-border bg-white px-3 text-sm hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600"
+                                                                onClick={() => setBankPickerOpen(true)}
+                                                            >
+                                                                <span className={selectedNewBank ? "text-ink" : "text-muted"}>
+                                                                    {selectedNewBank ? selectedNewBank.bankName : "Select a bank"}
+                                                                </span>
+                                                                <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                                                            </button>
+                                                        )}
                                                     </div>
 
                                                     <div className="space-y-2">
@@ -503,6 +571,6 @@ export default function WithdrawPage() {
                 // PIN
                 onPinSubmit={handlePinSubmit}
             />
-        </RequireKyc>
+        </>
     );
 }
