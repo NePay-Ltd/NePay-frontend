@@ -21,7 +21,8 @@ import {
     useWithdrawalStatus
 } from "@/lib/queries/withdraw";
 
-import { RequireKyc } from "@/components/shared/require-kyc";
+// TEMPORARY: unused while the KYC gate is lifted below — re-add when reverting.
+// import { RequireKyc } from "@/components/shared/require-kyc";
 import { Button } from "@/components/shared/button";
 import { Chip } from "@/components/shared/chip";
 import { Panel, PanelHeader, PanelBody } from "@/components/shared/panel";
@@ -175,8 +176,13 @@ export default function WithdrawPage() {
         );
     };
 
+    // TEMPORARY: KYC gate lifted for sandbox testing (2026-09-11, user's explicit
+    // request) — was <RequireKyc>...</RequireKyc>. Revert by restoring that wrapper
+    // once testing against the deployed backend is done. Backend's own
+    // WithdrawalService.initiateWithdrawal kycVerified check is disabled to match
+    // — see that method's own TEMPORARY marker.
     return (
-        <RequireKyc>
+        <>
             <div className="mx-auto max-w-5xl space-y-8">
                 {/* ── Top Header ── */}
                 <div className="text-center md:text-left">
@@ -503,6 +509,6 @@ export default function WithdrawPage() {
                 // PIN
                 onPinSubmit={handlePinSubmit}
             />
-        </RequireKyc>
+        </>
     );
 }
