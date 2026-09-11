@@ -6,7 +6,7 @@ import { formatDate } from "@/lib/date";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { IconUser as UserIcon, IconBuilding as Landmark, IconLock as Lock, IconLogOut as LogOut, IconChevronRight as ChevronRight, IconBell as Bell } from "@/components/icons";
+import { IconUser as UserIcon, IconBuilding as Landmark, IconLock as Lock, IconLogOut as LogOut, IconChevronRight as ChevronRight, IconBell as Bell, IconCard as CreditCard } from "@/components/icons";
 import { ShieldCheck, LifeBuoy, Info, Mail, AlertCircle, AlertTriangle, Receipt, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { apiClient, getApiErrorMessage } from "@/lib/api-client";
@@ -280,6 +280,13 @@ export default function ProfilePage() {
                             title="Security"
                             trailing={<ChevronRight className="h-5 w-5 text-muted" />}
                             onClick={() => router.push("/security")}
+                            className="cursor-pointer px-5 hover:bg-gray-50 dark:hover:bg-white/5"
+                        />
+                        <RowItem
+                            icon={CreditCard}
+                            title="Virtual Card"
+                            trailing={<ChevronRight className="h-5 w-5 text-muted" />}
+                            onClick={() => router.push("/card")}
                             className="cursor-pointer px-5 hover:bg-gray-50 dark:hover:bg-white/5"
                         />
                     </div>

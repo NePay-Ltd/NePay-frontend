@@ -3,7 +3,8 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { formatDateTime } from "@/lib/date";
-import { IconAirtime as Smartphone, IconData as Globe } from "@/components/icons";
+import { IconAirtime as Smartphone } from "@/components/icons";
+import { Globe } from "lucide-react";
 import { ChevronLeft, Monitor, ShieldOff } from "lucide-react";;
 import { toast } from "sonner";
 

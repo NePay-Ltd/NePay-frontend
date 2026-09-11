@@ -1,5 +1,5 @@
-import { IconWallet as Wallet, IconGrid as LayoutGrid, IconGift as Gift, IconPlane as Plane, IconCard as CreditCard, IconBuilding as Building2, IconBell as Bell, IconUser as User, IconHome as Home, IconUsers as Users, IconTrophy as Trophy, IconData as Globe } from "@/components/icons";
-import { LayoutDashboard, Receipt, Download, ShieldCheck, PlusCircle, UserPlus, type LucideIcon } from "lucide-react";;
+import { IconWallet as Wallet, IconGrid as LayoutGrid, IconGift as Gift, IconPlane as Plane, IconCard as CreditCard, IconBuilding as Building2, IconBell as Bell, IconUser as User, IconHome as Home, IconUsers as Users, IconTrophy as Trophy } from "@/components/icons";
+import { LayoutDashboard, ReceiptText, Download, ShieldCheck, PlusCircle, UserPlus, Globe, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
     key: string;
@@ -20,7 +20,7 @@ export const SIDEBAR_GROUPS: NavGroup[] = [
         title: "MONEY",
         items: [
             { key: "overview", label: "Overview", icon: LayoutDashboard, href: "/overview" },
-            { key: "transactions", label: "Transactions", icon: Receipt, href: "/transactions" },
+            { key: "transactions", label: "Transactions", icon: ReceiptText, href: "/transactions" },
             { key: "leaderboard", label: "Leaderboard", icon: Trophy, href: "/leaderboard" },
             { key: "refer", label: "Refer & Earn", icon: UserPlus, href: "/refer" },
         ],
@@ -46,8 +46,7 @@ export const SIDEBAR_GROUPS: NavGroup[] = [
 
 export const BOTTOM_NAV: NavItem[] = [
     { key: "overview", label: "Home", icon: Home, href: "/overview" },
-    { key: "add-money", label: "Add Money", icon: PlusCircle, href: "/add-money" },
     { key: "services", label: "Services", icon: LayoutGrid, href: "/services" },
-    { key: "card", label: "Cards", icon: CreditCard, href: "/card" },
+    { key: "transactions", label: "Transactions", icon: ReceiptText, href: "/transactions" },
     { key: "profile", label: "Profile", icon: User, href: "/profile" },
 ];
