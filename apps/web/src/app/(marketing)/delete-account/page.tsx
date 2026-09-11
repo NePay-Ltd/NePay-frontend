@@ -43,7 +43,7 @@ export default function DeleteAccountPage() {
 
         <div className="text-sm opacity-70">
           <p>
-            If you have the NePay app installed, you can also delete your account directly by navigating to <strong>Profile &gt; Security &gt; Delete Account</strong>.
+            If you have the NePay app installed, you can also delete your account directly from <strong>Profile &gt; Danger Zone &gt; Delete Account</strong>.
           </p>
           <div className="mt-4">
             <Link href="/" className="text-violet-500 hover:underline font-medium">
