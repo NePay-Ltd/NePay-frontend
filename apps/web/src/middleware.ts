@@ -39,6 +39,7 @@ const PUBLIC_CONTENT_PATHS = new Set([
     "/legal/terms",
     "/legal/privacy",
     "/legal/compliance",
+    "/delete-account",
 ]);
 
 /** Paths that start with these prefixes are always public (static, marketing). */

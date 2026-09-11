@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { IconArrowLeft as ArrowLeft, IconCoin as Bitcoin, IconBuilding as Landmark, IconCard as CreditCard, IconCopy as Copy, IconData as Globe } from "@/components/icons";
+import { IconArrowLeft as ArrowLeft, IconCoin as Bitcoin, IconBuilding as Landmark, IconCard as CreditCard, IconCopy as Copy } from "@/components/icons";
+import { Globe } from "lucide-react";
 import { AlertCircle, Loader2, FlaskConical } from "lucide-react";;
 import { toast } from "sonner";
 
