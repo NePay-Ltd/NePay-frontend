@@ -21,8 +21,7 @@ import {
     useWithdrawalStatus
 } from "@/lib/queries/withdraw";
 
-// TEMPORARY: unused while the KYC gate is lifted below — re-add when reverting.
-// import { RequireKyc } from "@/components/shared/require-kyc";
+import { RequireKyc } from "@/components/shared/require-kyc";
 import { Button } from "@/components/shared/button";
 import { Chip } from "@/components/shared/chip";
 import { Panel, PanelHeader, PanelBody } from "@/components/shared/panel";
@@ -192,13 +191,8 @@ export default function WithdrawPage() {
         );
     };
 
-    // TEMPORARY: KYC gate lifted for sandbox testing (2026-09-11, user's explicit
-    // request) — was <RequireKyc>...</RequireKyc>. Revert by restoring that wrapper
-    // once testing against the deployed backend is done. Backend's own
-    // WithdrawalService.initiateWithdrawal kycVerified check is disabled to match
-    // — see that method's own TEMPORARY marker.
     return (
-        <>
+        <RequireKyc>
             <div className="mx-auto max-w-5xl space-y-8">
                 {/* ── Top Header ── */}
                 <div className="text-center md:text-left">
@@ -467,7 +461,7 @@ export default function WithdrawPage() {
                                         <p className="text-xs text-red-500">Insufficient funds for this amount.</p>
                                     )}
                                     <p className="text-xs text-muted">
-                                        A processing fee applies, deducted separately once the transfer completes — the exact amount depends on the destination bank.
+                                        A processing fee applies, deducted separately once the transfer completes. The exact amount depends on the destination bank.
                                     </p>
                                 </div>
                             </PanelBody>
@@ -490,7 +484,7 @@ export default function WithdrawPage() {
                                     <div className="my-2 border-t border-dashed border-border" />
 
                                     <p className="text-xs text-body">
-                                        A processing fee is charged separately once the transfer completes — the exact amount is set by the destination bank, not a fixed rate.
+                                        A processing fee is charged separately once the transfer completes. The exact amount is set by the destination bank, not a fixed rate.
                                     </p>
                                 </div>
                             </PanelBody>
@@ -571,6 +565,6 @@ export default function WithdrawPage() {
                 // PIN
                 onPinSubmit={handlePinSubmit}
             />
-        </>
+        </RequireKyc>
     );
 }

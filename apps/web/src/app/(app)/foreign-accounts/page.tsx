@@ -43,12 +43,12 @@ const CURRENCIES: { code: BridgeCurrency; label: string }[] = [
  * normally below.
  */
 const DISABLED_CURRENCIES: Partial<Record<BridgeCurrency, string>> = {
-    GBP: "GBP accounts are temporarily unavailable — Bridge's UK banking partner doesn't currently support individual-to-individual transfers into these accounts. We'll turn this back on once that's resolved.",
+    GBP: "GBP accounts are temporarily unavailable. Bridge's UK banking partner doesn't currently support individual-to-individual transfers into these accounts. We'll turn this back on once that's resolved.",
 };
 
 const CURRENCY_INFO: Record<BridgeCurrency, { speed: string; minimum: string }> = {
     USD: {
-        speed: "Wire transfers usually arrive within 2 hours, FedNow in seconds. Regular bank transfers (ACH) can take 1–2 business days.",
+        speed: "Wire transfers usually arrive within 2 hours, FedNow in seconds. Regular bank transfers (ACH) can take 1-2 business days.",
         minimum: "$1",
     },
     EUR: {
@@ -74,7 +74,7 @@ const DEPOSIT_STATUS_TAG: Record<string, { variant: TagVariant; label: string }>
     CREDITED: { variant: "ok", label: "Credited" },
     RETURNING: { variant: "warn", label: "Returning to sender" },
     RETURNED: { variant: "error", label: "Returned to sender" },
-    RETURN_FAILED: { variant: "error", label: "Return failed — contact support" },
+    RETURN_FAILED: { variant: "error", label: "Return failed, contact support" },
 };
 
 export default function ForeignAccountsPage() {
@@ -96,7 +96,7 @@ export default function ForeignAccountsPage() {
             <div className="mb-2">
                 <h1 className="text-3xl font-black text-ink tracking-tight">Foreign Accounts</h1>
                 <p className="mt-2 text-base font-medium text-muted">
-                    Get paid in USD, EUR or GBP — it lands in your Naira wallet automatically.
+                    Get paid in USD, EUR or GBP, and it lands in your Naira wallet automatically.
                 </p>
             </div>
 
@@ -140,7 +140,7 @@ export default function ForeignAccountsPage() {
                         <PanelHeader
                             className="px-4 pt-4 sm:px-6 sm:pt-6"
                             title="Recent deposits"
-                            description="Money received into your foreign accounts — credited to your Naira wallet automatically"
+                            description="Money received into your foreign accounts, credited to your Naira wallet automatically"
                         />
                         <PanelBody className="px-4 pb-3 pt-1 sm:px-6 sm:pb-4">
                             {(deposits ?? []).length === 0 ? (
@@ -270,7 +270,7 @@ function CurrencyPanel({ currency, account }: { currency: BridgeCurrency; accoun
                     Get {currency} Account
                 </Button>
                 <p className="text-xs text-muted leading-relaxed">
-                    {info.speed} Minimum {info.minimum} per transfer — smaller amounts can&apos;t be credited or returned.
+                    {info.speed} Minimum {info.minimum} per transfer. Smaller amounts can&apos;t be credited or returned.
                 </p>
             </div>
         );
@@ -325,10 +325,10 @@ function CurrencyPanel({ currency, account }: { currency: BridgeCurrency; accoun
             ))}
 
             <p className="text-xs text-muted">
-                Money sent here converts automatically and lands in your Naira wallet — no extra step needed.
+                Money sent here converts automatically and lands in your Naira wallet. No extra step needed.
             </p>
             <p className="text-xs text-muted leading-relaxed">
-                {info.speed} Minimum {info.minimum} per transfer — smaller amounts can&apos;t be credited or returned.
+                {info.speed} Minimum {info.minimum} per transfer. Smaller amounts can&apos;t be credited or returned.
             </p>
         </div>
     );

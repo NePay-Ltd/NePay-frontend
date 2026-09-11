@@ -348,7 +348,7 @@ function StatusBanner({
         case "finished":
             return (
                 <Banner tone="success" icon={<CheckCircle2 className="h-4 w-4 text-green-600" />}>
-                    Deposit confirmed — {statusData?.creditedAmount?.toLocaleString()} {statusData?.creditedCurrency} credited.
+                    Deposit confirmed. {statusData?.creditedAmount?.toLocaleString()} {statusData?.creditedCurrency} credited.
                 </Banner>
             );
         case "partially_paid":

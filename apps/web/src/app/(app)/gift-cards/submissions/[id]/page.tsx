@@ -102,7 +102,7 @@ export default function SubmissionTrackerPage({ params }: { params: { id: string
                                         </h3>
                                         <p className="text-xs text-muted mt-1">
                                             {isPending
-                                                ? "A member of our team is checking this card — usually under 30 minutes. You'll be notified once it clears."
+                                                ? "A member of our team is checking this card, usually under 30 minutes. You'll be notified once it clears."
                                                 : "This card's review is complete."}
                                         </p>
                                     </div>
@@ -137,7 +137,7 @@ export default function SubmissionTrackerPage({ params }: { params: { id: string
                                             </p>
                                         )}
                                         {isPending && (
-                                            <p className="text-xs text-muted mt-1">No payout yet — nothing is added to your wallet until review clears.</p>
+                                            <p className="text-xs text-muted mt-1">No payout yet. Nothing is added to your wallet until review clears.</p>
                                         )}
                                     </div>
                                 </div>

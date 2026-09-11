@@ -69,7 +69,7 @@ export function AmountCalculator({ amount, onChange, presets }: AmountCalculator
                     inputMode="numeric"
                     value={localVal}
                     onChange={handleChange}
-                    placeholder="50 - 500,000"
+                    placeholder="50-500,000"
                     className="flex-1 h-full bg-transparent text-lg font-bold tabular-nums tracking-wide outline-none placeholder:font-medium placeholder:text-muted"
                 />
             </div>

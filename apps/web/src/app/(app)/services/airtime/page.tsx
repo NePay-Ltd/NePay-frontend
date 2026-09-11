@@ -208,7 +208,7 @@ export default function AirtimePage() {
             <StickyPayBar
                 visible={!successOpen} // Hide bar if success screen is up
                 amount={amount}
-                summaryText={`${selectedNetwork?.name ?? "Select network"} Airtime — ${phone || "..."}`}
+                summaryText={`${selectedNetwork?.name ?? "Select network"} Airtime - ${phone || "..."}`}
                 onPay={handlePayClick}
                 disabled={!isValid}
             />

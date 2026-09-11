@@ -129,7 +129,7 @@ export default function GiftCardsPage() {
                             <div>
                                 <h2 className="text-[18px] font-extrabold text-ink">Today&apos;s rates</h2>
                                 <p className="text-sm font-medium text-body mt-1">
-                                    Rates refresh every hour — the rate you see is the rate you get
+                                    Rates refresh every hour. The rate you see is the rate you get
                                 </p>
                             </div>
                             {visibleListings.length > 0 && (
@@ -150,7 +150,7 @@ export default function GiftCardsPage() {
                             <EmptyState
                                 icon={Gift}
                                 heading="No gift cards available right now"
-                                description="Check back soon — we're always adding more brands to sell."
+                                description="Check back soon. We're always adding more brands to sell."
                             />
                         ) : (
                             <div id="gift-card-options" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

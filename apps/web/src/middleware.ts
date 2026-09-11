@@ -39,6 +39,10 @@ const PUBLIC_CONTENT_PATHS = new Set([
     "/legal/terms",
     "/legal/privacy",
     "/legal/compliance",
+    // Google Play's required external account-deletion resource — must be
+    // reachable without a session, since the whole point is letting someone
+    // close their account without opening or reinstalling the app.
+    "/delete-account",
 ]);
 
 /** Paths that start with these prefixes are always public (static, marketing). */
