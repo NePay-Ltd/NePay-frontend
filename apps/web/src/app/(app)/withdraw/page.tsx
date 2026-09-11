@@ -253,7 +253,13 @@ export default function WithdrawPage() {
                                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                             </Button>
                                         </PopoverTrigger>
-                                        <PopoverContent className="w-[340px] p-0 md:w-[400px]" align="start">
+                                        <PopoverContent
+                                            className="w-[340px] p-0 md:w-[400px] max-h-[min(70vh,var(--radix-popover-content-available-height))] overflow-y-auto"
+                                            align="start"
+                                            side="bottom"
+                                            sideOffset={8}
+                                            avoidCollisions={false}
+                                        >
                                             {!isAddingNew ? (
                                                 <Command>
                                                     <CommandInput placeholder="Search saved banks..." />
