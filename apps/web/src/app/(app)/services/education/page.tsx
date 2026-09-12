@@ -158,14 +158,19 @@ export default function EducationPage() {
 
                     {/* Recipient Phone Number */}
                     <div className="space-y-4">
-                        <input
-                            type="tel"
-                            placeholder="Phone Number"
-                            value={phone}
-                            maxLength={11}
-                            onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                            className="w-full h-16 rounded-2xl border-2 border-border bg-white px-5 text-xl font-bold tracking-wide outline-none focus:border-indigo-600 transition-colors"
-                        />
+                        <div className="space-y-1">
+                            <input
+                                type="tel"
+                                placeholder="Phone Number (to receive PIN)"
+                                value={phone}
+                                maxLength={11}
+                                onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                                className="w-full h-16 rounded-2xl border-2 border-border bg-white px-5 text-xl font-bold tracking-wide outline-none focus:border-indigo-600 transition-colors"
+                            />
+                            <p className="px-1 text-[13px] font-medium text-muted">
+                                Your purchased PIN will be linked and sent to this number.
+                            </p>
+                        </div>
                         <RecentNumbersRow
                             contacts={recentContacts}
                             onSelect={(id) => setPhone(id)}
