@@ -9,6 +9,56 @@ import { BaseTransaction } from "@/components/shared/transaction-row";
 import { TxCategory } from "@/components/shared/tx-icon";
 import { UtilityPurchaseResponseDto } from "@/lib/types/api";
 
+/**
+ * UtilityCategory (AIRTIME/DATA/ELECTRICITY/CABLE/EDUCATION/BETTING) -> the
+ * specific, customer-facing purchase name. Every UTILITY_PURCHASE ledger
+ * entry uses this one shared type regardless of which utility it actually
+ * was, so "Utility Purchase" alone would never say whether it was airtime,
+ * data, electricity or an exam PIN — mirrors the backend's
+ * getTransactionTypeLabel in email-templates.ts exactly, same source data.
+ */
+const UTILITY_CATEGORY_LABELS: Record<string, string> = {
+    AIRTIME: "Airtime Purchase",
+    DATA: "Data Purchase",
+    ELECTRICITY: "Electricity Purchase",
+    CABLE: "Cable TV Subscription",
+    EDUCATION: "Exam PIN Purchase",
+    BETTING: "Betting Wallet Funding",
+};
+
+/** Recovers the specific utility category from `description`, the only place UtilitiesService records it — "<CATEGORY> purchase: ..." or, for a reversal, "Refund: <CATEGORY> purchase ...". */
+function utilityPurchaseLabel(description: string | null | undefined): string {
+    const isRefund = /^Refund:/i.test(description ?? "");
+    const category = description?.match(/([A-Z]+)\s+purchase/)?.[1];
+    const base = (category && UTILITY_CATEGORY_LABELS[category]) || "Utility Purchase";
+    return isRefund ? `${base} Refund` : base;
+}
+
+/** The specific, customer-facing name for a ledger entry's type — never the literal LedgerEntryType enum value. Shown as the "Type" field on every transaction row, detail view and downloadable receipt. */
+function getTransactionTypeLabel(entry: LedgerEntryDto): string {
+    switch (entry.type) {
+        case "DEPOSIT": return "Crypto Deposit";
+        case "BANK_DEPOSIT": return "Bank Deposit";
+        case "FCY_CONVERSION_CREDIT": return "Foreign Currency Deposit";
+        case "WITHDRAWAL": return "Withdrawal";
+        case "UTILITY_PURCHASE": return utilityPurchaseLabel(entry.description);
+        case "UTILITY_DISCOUNT": return "Utility Cashback";
+        case "GIFT_CARD_SALE": return "Gift Card Sale";
+        case "FLIGHT_BOOKING": return "Flight Booking";
+        case "CASHBACK": return "Cashback";
+        case "REFERRAL_REWARD": return "Referral Reward";
+        case "PROMO_CREDIT": return "Promo Credit";
+        case "GOODWILL_CREDIT": return "Goodwill Credit";
+        case "ERROR_CORRECTION": return "Error Correction";
+        // ADMIN_ADJUSTMENT is the true catch-all (AdminService's OTHER
+        // category) — every named category above already has an honest
+        // type of its own, so this is the only case left where showing the
+        // literal type would read as "Admin Adjustment" to a customer.
+        case "ADMIN_ADJUSTMENT": return entry.direction === "DEBIT" ? "Account Debit" : "Account Credit";
+        default: return entry.type.replace(/_/g, " ").replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+    }
+}
+
 export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
     let category: TxCategory = "payment";
     switch (entry.type) {
@@ -45,21 +95,13 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
         ? entry.description.match(/\s([A-Za-z0-9_-]+)\s@\s/)?.[1]
         : undefined;
 
-    // ADMIN_ADJUSTMENT is the one type that's still a generic, internal
-    // name by design (AdminService's true OTHER catch-all) — every named
-    // category above already has an honest type of its own, so this is the
-    // only case left where showing the literal type would read as "Admin
-    // Adjustment" to a customer. "Account Credit"/"Account Debit" reads
-    // like a normal part of the wallet instead.
-    const meta = entry.type === "ADMIN_ADJUSTMENT"
-        ? entry.direction === "DEBIT" ? "Account Debit" : "Account Credit"
-        : entry.type.replace(/_/g, " ");
+    const meta = getTransactionTypeLabel(entry);
 
     return {
         id: entry.id,
         label: entry.assetQuantity && cryptoAsset
             ? `Crypto deposit${entry.description?.includes("partial payment") ? " (partial payment)" : ""}`
-            : entry.description || entry.type.replace(/_/g, " "),
+            : entry.description || meta,
         meta: entry.assetQuantity && cryptoAsset
             ? `${entry.assetQuantity} ${cryptoAsset} · Crypto deposit`
             : meta,

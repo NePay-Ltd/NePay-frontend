@@ -214,7 +214,7 @@ export function TransactionDetailModal({
 
                         <ReceiptRow label="Type">
                             <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-200">
-                                {transaction.type.replace(/_/g, " ")}
+                                {transaction.type}
                             </span>
                         </ReceiptRow>
 
