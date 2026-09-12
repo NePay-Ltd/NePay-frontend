@@ -310,7 +310,7 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
                                         onChange={(e) => setCardCode(e.target.value)}
                                     />
                                     <p className="text-xs text-body">
-                                        No photo needed — just the code above. Every e-code is checked
+                                        No photo needed, just the code above. Every e-code is checked
                                         for reuse and reviewed by our team before payout.
                                     </p>
                                 </TabsContent>
@@ -348,7 +348,7 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
                 reviewTitle="Under Review"
                 reviewDescription={
                     <p>
-                        Your card is being reviewed — you&apos;ll be notified once it clears, usually under 30 minutes.
+                        Your card is being reviewed. You&apos;ll be notified once it clears, usually under 30 minutes.
                         No payout has been sent yet.
                     </p>
                 }

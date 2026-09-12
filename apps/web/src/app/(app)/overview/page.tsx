@@ -85,7 +85,7 @@ export default function OverviewPage() {
                             Unlock ₦5M transfer limits
                         </p>
                         <p className="mt-0.5 hidden text-sm font-medium text-violet-800 sm:block">
-                            Verify your BVN to unlock full account limits — it takes under 2 minutes.
+                            Verify your BVN to unlock full account limits. It takes under 2 minutes.
                         </p>
                     </div>
                     <button

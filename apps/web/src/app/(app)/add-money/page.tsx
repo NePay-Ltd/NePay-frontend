@@ -39,14 +39,14 @@ function pollForCredit(
         const current = data ? Number(data.availableBalance) : balanceBefore;
 
         if (current > balanceBefore) {
-            toast.success(`Wallet credited — new balance ${formatNairaString(current)}.`);
+            toast.success(`Wallet credited. New balance ${formatNairaString(current)}.`);
             clearInterval(interval);
             return;
         }
 
         if (attempts >= 10) {
             clearInterval(interval);
-            toast.info("Still processing — check your balance shortly.");
+            toast.info("Still processing. Check your balance shortly.");
         }
     }, 2000);
 }
@@ -77,7 +77,7 @@ export default function AddMoneyPage() {
             { amount: simulateAmount.toFixed(2) },
             {
                 onSuccess: () => {
-                    toast.info("Deposit triggered — crediting via Korapay's webhook, this takes a few seconds.");
+                    toast.info("Deposit triggered. Crediting via Korapay's webhook, this takes a few seconds.");
                     pollForCredit(balanceBefore, refetchBalance);
                 },
                 onError: (err: any) => {
@@ -128,7 +128,7 @@ export default function AddMoneyPage() {
                                 icon={Bitcoin}
                                 iconTint="amber"
                                 title="Crypto Deposit"
-                                subtitle="USDT / USDC — instant conversion"
+                                subtitle="USDT / USDC, instant conversion"
                                 showChevron
                                 onClick={() => router.push("/receive-crypto")}
                                 className="px-3 hover:bg-violet-050 dark:hover:bg-violet-900/10"
@@ -214,7 +214,7 @@ export default function AddMoneyPage() {
                                                     <div className="space-y-3 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2.5">
                                                         <p className="text-sm text-violet-800">
                                                             Your account is created automatically once your
-                                                            BVN verification is approved — no separate
+                                                            BVN verification is approved. No separate
                                                             setup needed.
                                                         </p>
                                                         <Button
@@ -238,7 +238,7 @@ export default function AddMoneyPage() {
                                 icon={Globe}
                                 iconTint="green"
                                 title="Foreign Currency Account"
-                                subtitle="USD / EUR / GBP / CAD — convert to Naira anytime"
+                                subtitle="USD / EUR / GBP / CAD, convert to Naira anytime"
                                 showChevron
                                 onClick={() => router.push("/foreign-accounts")}
                                 className="px-3 hover:bg-violet-050 dark:hover:bg-violet-900/10"
@@ -259,7 +259,7 @@ export default function AddMoneyPage() {
                                     icon={FlaskConical}
                                     iconTint="amber"
                                     title="Simulate Deposit"
-                                    subtitle="Test mode — credits your wallet via a real Korapay sandbox transfer"
+                                    subtitle="Test mode, credits your wallet via a real Korapay sandbox transfer"
                                     showChevron={!simulateExpanded}
                                     onClick={() => setSimulateExpanded(!simulateExpanded)}
                                     className={`px-3 transition-colors hover:bg-violet-050 dark:hover:bg-violet-900/10 ${simulateExpanded ? "bg-violet-050 dark:bg-violet-900/10" : ""}`}

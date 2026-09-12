@@ -123,6 +123,10 @@ export default function DataPage() {
                             identifier: phone,
                             label: `${selectedNetwork.name} ${phone}`,
                             amount: selectedPlan.variation_amount,
+                        }, {
+                            onError: () => {
+                                toast.error("Payment went through, but we couldn't save this as a beneficiary for next time.");
+                            },
                         });
                     }
                     if (res.status === "FAILED") {

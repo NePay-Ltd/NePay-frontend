@@ -25,7 +25,7 @@ export function CryptoFeature() {
             See the real rate. Every time.
           </h2>
           <p className="text-lg text-marketing-secondary mb-8 leading-relaxed">
-            Every crypto conversion shows the exact reference market rate alongside our quoted rate before you confirm. We believe in earning your trust through total transparency—what you see is exactly what you get, with zero hidden spreads.
+            Every crypto conversion shows the exact reference market rate alongside our quoted rate before you confirm. We believe in earning your trust through total transparency: what you see is exactly what you get, with zero hidden spreads.
           </p>
         </motion.div>
 

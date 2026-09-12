@@ -220,7 +220,7 @@ function BridgeOptionalStep({ onDone }: { onDone: () => void }) {
                     <p className="text-sm text-body">
                         {needsTos
                             ? "Accept Bridge's terms to finish setting up your foreign accounts."
-                            : "Bridge is reviewing your details — this can take a few minutes. You can check progress anytime from Foreign Accounts."}
+                            : "Bridge is reviewing your details. This can take a few minutes. You can check progress anytime from Foreign Accounts."}
                     </p>
                 </div>
                 {needsTos ? <BridgeTosConsent customer={customer} /> : null}
@@ -256,7 +256,7 @@ function BridgeOptionalStep({ onDone }: { onDone: () => void }) {
             <div className="space-y-2">
                 <h2 className="text-xl font-bold text-ink">Want to receive USD, EUR or GBP too?</h2>
                 <p className="text-sm text-body">
-                    Add a few more details now to get real foreign account numbers you can share with clients or employers abroad — it lands in your Naira wallet automatically. You can always do this later from Foreign Accounts instead.
+                    Add a few more details now to get real foreign account numbers you can share with clients or employers abroad. It lands in your Naira wallet automatically. You can always do this later from Foreign Accounts instead.
                 </p>
             </div>
             <div className="space-y-2">
@@ -293,8 +293,8 @@ function KycSuccess({ userName }: { userName: string }) {
                     You&apos;re fully verified, {userName.split(" ")[0]}!
                 </h2>
                 <p className="text-sm text-body">
-                    Your BVN has been verified and your virtual account is ready —
-                    you can now send and receive higher transaction amounts.
+                    Your BVN has been verified and your virtual account is ready.
+                    You can now send and receive higher transaction amounts.
                 </p>
             </div>
 

@@ -105,6 +105,10 @@ export default function TvPage() {
                     identifier: smartcard,
                     label: `${activeProvider?.label ?? "TV"} ${smartcard}`,
                     amount: selectedPlan?.variation_amount,
+                }, {
+                    onError: () => {
+                        toast.error("Payment went through, but we couldn't save this as a beneficiary for next time.");
+                    },
                 });
             }
             setPinModalOpen(false);
@@ -175,6 +179,10 @@ export default function TvPage() {
                                 identifier: smartcard,
                                 label: `${activeProvider?.label ?? "TV"} ${smartcard}`,
                                 amount: selectedPlan.variation_amount,
+                            }, {
+                                onError: () => {
+                                    toast.error("Payment went through, but we couldn't save this as a beneficiary for next time.");
+                                },
                             });
                         }
                         setPinModalOpen(false);

@@ -25,7 +25,7 @@ export function AmountCalculator({ amount, onChange, presets }: AmountCalculator
         const val = e.target.value;
         // Only allow numbers
         if (!/^\d*$/.test(val)) return;
-        
+
         setLocalVal(val);
         const parsed = parseInt(val, 10);
         onChange(isNaN(parsed) ? 0 : parsed);
@@ -48,11 +48,10 @@ export function AmountCalculator({ amount, onChange, presets }: AmountCalculator
                             type="button"
                             whileTap={{ scale: 0.96 }}
                             onClick={() => handlePreset(preset)}
-                            className={`flex flex-col items-center justify-center rounded-2xl border-2 p-3 min-h-[72px] transition-all ${
-                                isSelected
+                            className={`flex flex-col items-center justify-center rounded-2xl border-2 p-3 min-h-[72px] transition-all ${isSelected
                                     ? "border-violet-600 bg-violet-50/50 dark:bg-violet-900/20 shadow-sm"
                                     : "border-border bg-white dark:bg-white/5 hover:border-violet-200 dark:hover:border-white/20 hover:bg-gray-50 dark:hover:bg-white/10"
-                            }`}
+                                }`}
                         >
                             <span className={`text-[15px] sm:text-[17px] font-black tabular-nums tracking-tight ${isSelected ? 'text-violet-700 dark:text-violet-300' : 'text-ink'}`}>
                                 {formatNaira(preset)}

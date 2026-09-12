@@ -12,7 +12,7 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-    title: "NePay — Your Money, Simplified",
+    title: "NePay - Your Money, Simplified",
     description:
         "NePay is a Nigerian fintech platform for crypto off-ramp, gift cards, bill payments, flight booking, and group data-buying Pods.",
 };
