@@ -3,6 +3,7 @@
 import * as React from "react";
 import { IconUser as User, IconShield as Shield, IconSliders as Sliders, IconAirtime as Smartphone, IconLogOut as LogOut, IconLock as Lock } from "@/components/icons";
 import { ShieldCheck, Mail } from "lucide-react";;
+import { toast } from "sonner";
 import { Button } from "@/components/shared/button";
 import { Panel, PanelBody, PanelHeader } from "@/components/shared/panel";
 import { useProfile, useUpdatePreferredCurrency } from "@/lib/queries/profile";
@@ -286,7 +287,10 @@ function PreferencesTab() {
                                 variant="primary"
                                 className="rounded-xl px-6 font-bold bg-violet-700 hover:bg-violet-600"
                                 disabled={!isDirty || updateCurrency.isPending}
-                                onClick={() => updateCurrency.mutate(selected)}
+                                onClick={() => updateCurrency.mutate(selected, {
+                                    onSuccess: () => toast.success("Display currency updated"),
+                                    onError: (err: any) => toast.error(err.response?.data?.message || "Couldn't save your display currency. Please try again."),
+                                })}
                             >
                                 {updateCurrency.isPending ? "Saving…" : "Save Changes"}
                             </Button>

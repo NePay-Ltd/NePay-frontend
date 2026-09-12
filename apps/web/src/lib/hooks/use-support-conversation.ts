@@ -1,7 +1,8 @@
 import * as React from "react";
 import { io, type Socket } from "socket.io-client";
+import { toast } from "sonner";
 
-import { apiClient, getTokens } from "@/lib/api-client";
+import { apiClient, getApiErrorMessage, getTokens } from "@/lib/api-client";
 import type { ApiResponse } from "@/lib/types/api";
 import { playSupportReplySound } from "@/lib/support-notification-sound";
 
@@ -134,6 +135,8 @@ export function useSupportConversation() {
         try {
             const result = await apiClient.get<ApiResponse<SupportConversation>>("/support/conversation");
             applyConversation(result.data.data, { markSeenIfOpen: true });
+        } catch (err) {
+            toast.error(getApiErrorMessage(err, "We couldn't reach support right now. Please try again."));
         } finally {
             setLoading(false);
         }
@@ -185,8 +188,13 @@ export function useSupportConversation() {
     }
 
     async function sendViaRest(conversationId: string, body: string) {
-        const result = await apiClient.post<ApiResponse<SupportMessage>>(`/support/conversation/${conversationId}/messages`, { body });
-        setConversation((current) => current && !current.messages.some((item) => item.id === result.data.data.id) ? { ...current, messages: [...current.messages, result.data.data] } : current);
+        try {
+            const result = await apiClient.post<ApiResponse<SupportMessage>>(`/support/conversation/${conversationId}/messages`, { body });
+            setConversation((current) => current && !current.messages.some((item) => item.id === result.data.data.id) ? { ...current, messages: [...current.messages, result.data.data] } : current);
+        } catch (err) {
+            setMessage(body);
+            toast.error(getApiErrorMessage(err, "We couldn't send that message. Please try again."));
+        }
     }
 
     async function sendMessage() {
@@ -215,6 +223,8 @@ export function useSupportConversation() {
                 headers: { "Content-Type": "multipart/form-data" },
             });
             setConversation((current) => current && !current.messages.some((item) => item.id === result.data.data.id) ? { ...current, messages: [...current.messages, result.data.data] } : current);
+        } catch (err) {
+            toast.error(getApiErrorMessage(err, "We couldn't send that attachment. Please try again."));
         } finally {
             setUploadingAttachment(false);
         }
@@ -228,21 +238,29 @@ export function useSupportConversation() {
     }
 
     async function dismissIntake() {
-        if (conversation) {
-            await apiClient.patch<ApiResponse<SupportConversation>>("/support/conversation/intake", {
-                name: form.name || undefined,
-                email: form.email || undefined,
-                category: form.category || undefined,
-                priority: form.urgent ? "urgent" : undefined,
-            });
+        try {
+            if (conversation) {
+                await apiClient.patch<ApiResponse<SupportConversation>>("/support/conversation/intake", {
+                    name: form.name || undefined,
+                    email: form.email || undefined,
+                    category: form.category || undefined,
+                    priority: form.urgent ? "urgent" : undefined,
+                });
+            }
+            setStage("done");
+        } catch (err) {
+            toast.error(getApiErrorMessage(err, "We couldn't save those details. Please try again."));
         }
-        setStage("done");
     }
 
     async function closeConversation() {
         if (!conversation) return;
-        await apiClient.post(`/support/conversation/${conversation.id}/close`);
-        setConversation({ ...conversation, status: "closed" });
+        try {
+            await apiClient.post(`/support/conversation/${conversation.id}/close`);
+            setConversation({ ...conversation, status: "closed" });
+        } catch (err) {
+            toast.error(getApiErrorMessage(err, "We couldn't end this conversation. Please try again."));
+        }
     }
 
     async function startNewConversation() {

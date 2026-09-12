@@ -120,6 +120,10 @@ export default function AirtimePage() {
                             identifier: phone,
                             label: `${selectedNetwork.name} ${phone}`,
                             amount: amount.toString(),
+                        }, {
+                            onError: () => {
+                                toast.error("Payment went through, but we couldn't save this as a beneficiary for next time.");
+                            },
                         });
                     }
                     if (res.status === "FAILED") {

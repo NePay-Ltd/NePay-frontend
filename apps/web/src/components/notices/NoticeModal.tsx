@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { toast } from "sonner";
 
 import { Button } from "@/components/shared/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -60,7 +61,9 @@ export function NoticeModal() {
                 // derived from query data above, so Radix is simply told
                 // "still open" again on the next render.
                 if (!nextOpen && !requiresAck && !busy) {
-                    dismiss.mutate(notice.id);
+                    dismiss.mutate(notice.id, {
+                        onError: () => toast.error("Couldn't dismiss this notice. Please try again."),
+                    });
                 }
             }}
         >
@@ -87,12 +90,24 @@ export function NoticeModal() {
 
                 <DialogFooter>
                     {requiresAck ? (
-                        <Button variant="primary" disabled={busy} onClick={() => acknowledge.mutate(notice.id)}>
+                        <Button
+                            variant="primary"
+                            disabled={busy}
+                            onClick={() => acknowledge.mutate(notice.id, {
+                                onError: () => toast.error("Couldn't record your acknowledgement. Please try again."),
+                            })}
+                        >
                             I understand
                         </Button>
                     ) : (
                         <>
-                            <Button variant="quiet" disabled={busy} onClick={() => dismiss.mutate(notice.id)}>
+                            <Button
+                                variant="quiet"
+                                disabled={busy}
+                                onClick={() => dismiss.mutate(notice.id, {
+                                    onError: () => toast.error("Couldn't dismiss this notice. Please try again."),
+                                })}
+                            >
                                 Dismiss
                             </Button>
                             {notice.ctaLabel && notice.ctaUrl && (

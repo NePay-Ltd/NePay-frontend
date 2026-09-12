@@ -117,6 +117,10 @@ export default function ElectricityPage() {
                     identifier: meter,
                     label: `${activeProvider?.label ?? "Electricity"} ${meter}`,
                     amount: amount.toString(),
+                }, {
+                    onError: () => {
+                        toast.error("Payment went through, but we couldn't save this as a beneficiary for next time.");
+                    },
                 });
             }
             setPinModalOpen(false);
@@ -187,6 +191,10 @@ export default function ElectricityPage() {
                                 identifier: meter,
                                 label: `${activeProvider?.label ?? "Electricity"} ${meter}`,
                                 amount: amount.toString(),
+                            }, {
+                                onError: () => {
+                                    toast.error("Payment went through, but we couldn't save this as a beneficiary for next time.");
+                                },
                             });
                         }
                         setPinModalOpen(false);

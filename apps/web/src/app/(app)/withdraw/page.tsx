@@ -145,6 +145,9 @@ export default function WithdrawPage() {
                     setIsAddingNew(false);
                     setPopoverOpen(false);
                     toast.success("Bank account saved");
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || "Couldn't save this bank account. Please try again.");
                 }
             }
         );
