@@ -37,7 +37,7 @@ export function FlightsFeature() {
           
           <p className="text-lg text-marketing-secondary leading-relaxed mb-8">
             Book local and international flights directly within NePay. We instantly
-            convert your Naira balance to settle the booking—no forex limits, no
+            convert your Naira balance to settle the booking, no forex limits, no
             dollar cards needed, just instant ticketing.
           </p>
 

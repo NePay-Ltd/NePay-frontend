@@ -4,6 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { MessageCircle, Mail, Book, ChevronRight, Linkedin, Instagram, Send, MessageSquare, Share2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SupportChatPanel } from "@/components/support/support-chat-panel";
+import { useSupportConversation } from "@/lib/hooks/use-support-conversation";
 
 const XIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -13,12 +15,11 @@ const XIcon = ({ className }: { className?: string }) => (
 
 export default function SupportPage() {
     const [socialModalOpen, setSocialModalOpen] = React.useState(false);
-
-    const handleLiveChat = () => {
-        if (typeof window !== "undefined") {
-            window.dispatchEvent(new CustomEvent("open-support-chat"));
-        }
-    };
+    const [chatOpen, setChatOpen] = React.useState(false);
+    // Owned here, once, rather than inside the chat panel — so navigating back
+    // to this list (without leaving the page) keeps the same socket connection
+    // and unread count alive instead of tearing it down every time the panel closes.
+    const support = useSupportConversation();
 
     return (
         <>
@@ -28,22 +29,37 @@ export default function SupportPage() {
                 <p className="mt-2 text-sm text-muted">Get assistance, find answers, and connect with our team.</p>
             </header>
 
+            {chatOpen ? (
+                <SupportChatPanel support={support} onBack={() => setChatOpen(false)} />
+            ) : (
             <div className="space-y-8">
                 {/* Chat Section */}
                 <section>
                     <h2 className="mb-3 text-sm font-semibold text-ink">Chat</h2>
+                    {support.replyToast && <button
+                        type="button"
+                        onClick={() => setChatOpen(true)}
+                        className="mb-3 flex w-full items-center gap-2.5 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-left transition hover:bg-violet-100"
+                    >
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white"><MessageCircle className="h-4 w-4" /></span>
+                        <span className="min-w-0">
+                            <span className="block text-xs font-semibold text-violet-900">New reply from support</span>
+                            <span className="block truncate text-[11px] text-violet-700">Tap to view the conversation</span>
+                        </span>
+                    </button>}
                     <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
                         <button
                             type="button"
-                            onClick={handleLiveChat}
+                            onClick={() => setChatOpen(true)}
                             className="flex w-full items-center gap-4 p-4 text-left transition hover:bg-slate-50 focus:bg-slate-50"
                         >
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-500">
+                            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-500">
                                 <MessageCircle className="h-5 w-5" />
+                                {support.unreadCount > 0 && <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white ring-2 ring-white">{support.unreadCount > 9 ? "9+" : support.unreadCount}</span>}
                             </div>
                             <div className="min-w-0 flex-1">
                                 <p className="font-semibold text-ink">Live Chat</p>
-                                <p className="text-xs text-muted">Initiate a live chat conversation now.</p>
+                                <p className="text-xs text-muted">{support.unreadCount > 0 ? `${support.unreadCount} new ${support.unreadCount === 1 ? "message" : "messages"} from support` : "Initiate a live chat conversation now."}</p>
                             </div>
                             <ChevronRight className="h-5 w-5 shrink-0 text-slate-300" />
                         </button>
@@ -128,6 +144,7 @@ export default function SupportPage() {
                     </div>
                 </section>
             </div>
+            )}
         </div>
 
         <Dialog open={socialModalOpen} onOpenChange={setSocialModalOpen}>

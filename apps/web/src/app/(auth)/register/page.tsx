@@ -134,7 +134,7 @@ export default function RegisterPage() {
             {/* Dev hint */}
             {process.env.NEXT_PUBLIC_PROTOTYPE_MODE === "true" && (
                 <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-center text-xs text-amber-700">
-                    Mock mode — after registration you&apos;ll be redirected to{" "}
+                    Mock mode: after registration you&apos;ll be redirected to{" "}
                     <code className="font-mono">/kyc</code>.
                     <br />
                     Use <code className="font-mono">taken@example.com</code> to test the duplicate-email error.

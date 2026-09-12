@@ -33,9 +33,9 @@ const EMPLOYMENT_STATUSES: { value: CreateBridgeCustomerDto["employmentStatus"];
 ];
 
 const EXPECTED_MONTHLY_PAYMENTS: { value: CreateBridgeCustomerDto["expectedMonthlyPaymentsUsd"]; label: string }[] = [
-    { value: "0_4999", label: "$0 – $4,999" },
-    { value: "5000_9999", label: "$5,000 – $9,999" },
-    { value: "10000_49999", label: "$10,000 – $49,999" },
+    { value: "0_4999", label: "$0-$4,999" },
+    { value: "5000_9999", label: "$5,000-$9,999" },
+    { value: "10000_49999", label: "$10,000-$49,999" },
     { value: "50000_plus", label: "$50,000+" },
 ];
 
@@ -101,7 +101,7 @@ function DocumentPicker({ label, file, onChange }: { label: string; file: File |
     const inputRef = React.useRef<HTMLInputElement>(null);
 
     return (
-        <Field label={label} hint="JPEG or PNG — max 10MB">
+        <Field label={label} hint="JPEG or PNG, max 10MB">
             <input
                 ref={inputRef}
                 type="file"
@@ -143,11 +143,10 @@ function DocumentPicker({ label, file, onChange }: { label: string; file: File |
  * still an actively-tested flow and the generic text alone gives no way to
  * tell one rejection cause from another.
  */
-export function rejectionMessage(customer?: { rawPayload: Record<string, unknown> | null }): { reason: string; detail: string | null } | null {
-    const reasons = customer?.rawPayload?.rejection_reasons as { reason?: string; developer_reason?: string }[] | undefined;
-    const first = reasons?.[0];
+export function rejectionMessage(customer?: { rejectionReasons: { reason: string; developerReason: string | null }[] | null }): { reason: string; detail: string | null } | null {
+    const first = customer?.rejectionReasons?.[0];
     if (!first?.reason) return null;
-    return { reason: first.reason, detail: first.developer_reason ?? null };
+    return { reason: first.reason, detail: first.developerReason ?? null };
 }
 
 export function BridgeOnboardingForm({
@@ -155,7 +154,7 @@ export function BridgeOnboardingForm({
     onSubmitted,
     bare = false,
 }: {
-    rejectedCustomer?: { rawPayload: Record<string, unknown> | null };
+    rejectedCustomer?: { rejectionReasons: { reason: string; developerReason: string | null }[] | null };
     /** Called once the submission succeeds — e.g. to advance to the next step of a wizard. Doesn't wait for Bridge's actual review outcome, just that the request went through. */
     onSubmitted?: () => void;
     /** Skip the wrapping Panel — used when a parent (like the KYC step card) already provides one. */
@@ -200,7 +199,7 @@ export function BridgeOnboardingForm({
             },
             {
                 onSuccess: () => {
-                    toast.success("Verification submitted — this updates automatically.");
+                    toast.success("Verification submitted. This updates automatically.");
                     onSubmitted?.();
                 },
                 onError: (err) => toast.error(err.message || "Could not submit verification."),

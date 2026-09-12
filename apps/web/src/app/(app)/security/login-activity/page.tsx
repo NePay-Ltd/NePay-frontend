@@ -53,7 +53,7 @@ export default function LoginActivityPage() {
             toast.success(
                 revoked
                     ? "Session revoked. That device has been signed out."
-                    : "That session had already ended — nothing to revoke.",
+                    : "That session had already ended. Nothing to revoke.",
             );
             setRevokeTarget(null);
         } catch (err: any) {

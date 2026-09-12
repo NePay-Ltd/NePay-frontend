@@ -103,7 +103,7 @@ export default function MarketerDashboardPage() {
             <Panel>
                 <PanelHeader
                     title="Your referral link"
-                    description="Share this link — signups and deposits made through it are credited to you."
+                    description="Share this link. Signups and deposits made through it are credited to you."
                 />
                 <PanelBody>
                     <div className="flex w-full items-center gap-2 rounded-xl border border-border bg-gray-50 px-3 py-3 sm:px-4">

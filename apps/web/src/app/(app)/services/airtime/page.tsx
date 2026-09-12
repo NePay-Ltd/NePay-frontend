@@ -120,6 +120,10 @@ export default function AirtimePage() {
                             identifier: phone,
                             label: `${selectedNetwork.name} ${phone}`,
                             amount: amount.toString(),
+                        }, {
+                            onError: () => {
+                                toast.error("Payment went through, but we couldn't save this as a beneficiary for next time.");
+                            },
                         });
                     }
                     if (res.status === "FAILED") {
@@ -208,7 +212,7 @@ export default function AirtimePage() {
             <StickyPayBar
                 visible={!successOpen} // Hide bar if success screen is up
                 amount={amount}
-                summaryText={`${selectedNetwork?.name ?? "Select network"} Airtime — ${phone || "..."}`}
+                summaryText={`${selectedNetwork?.name ?? "Select network"} Airtime - ${phone || "..."}`}
                 onPay={handlePayClick}
                 disabled={!isValid}
             />

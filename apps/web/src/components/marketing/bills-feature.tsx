@@ -106,7 +106,7 @@ export function BillsFeature() {
             Every bill, one balance.
           </h2>
           <p className="text-lg text-marketing-secondary mb-8 leading-relaxed">
-            Settle your electricity tokens, renew your cable TV, top up airtime and data, or purchase global gift cards instantly. It all runs directly from your unified NePay balance—fast, secure, and with no external card required.
+            Settle your electricity tokens, renew your cable TV, top up airtime and data, or purchase global gift cards instantly. It all runs directly from your unified NePay balance: fast, secure, and with no external card required.
           </p>
         </motion.div>
 

@@ -10,7 +10,6 @@ import { CommandPalette } from "@/components/layout/command-palette";
 import { NoticeModal } from "@/components/notices/NoticeModal";
 import { NoticeSocketListener } from "@/components/notices/NoticeSocketListener";
 import { NoticeTicker } from "@/components/notices/NoticeTicker";
-import { SupportWidget } from "@/components/support/support-widget";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/shared/button";
 import { apiClient } from "@/lib/api-client";
@@ -91,9 +90,9 @@ function TransactionPinSetupGate() {
 
     return (
         <Dialog open={open} onOpenChange={(nextOpen) => setOpen(nextOpen)}>
-            <DialogContent className="sm:max-w-md bg-[#10151f] border border-white/10 text-white shadow-2xl">
+            <DialogContent className="sm:max-w-md bg-[#10151f] border border-trueWhite/10 text-trueWhite shadow-2xl">
                 <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold text-white">Set your transaction PIN</DialogTitle>
+                    <DialogTitle className="text-2xl font-bold text-trueWhite">Set your transaction PIN</DialogTitle>
                     <DialogDescription className="text-sm text-slate-300">
                         You need to create a 4-digit payment PIN before you can withdraw or make wallet payments.
                     </DialogDescription>
@@ -119,7 +118,7 @@ function TransactionPinSetupGate() {
                             variant="ghost"
                             fullWidth
                             onClick={() => setOpen(false)}
-                            className="border border-white/10 bg-transparent text-white hover:bg-white/5"
+                            className="border border-trueWhite/10 bg-transparent text-trueWhite hover:bg-trueWhite/5"
                         >
                             Later
                         </Button>
@@ -158,7 +157,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
             <BottomNav />
             <CommandPalette />
-            <SupportWidget />
         </React.Fragment>
     );
 }

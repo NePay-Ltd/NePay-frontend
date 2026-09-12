@@ -386,16 +386,25 @@ export type BridgeDepositStatus =
     | "RETURNED"
     | "RETURN_FAILED";
 
+export interface BridgeRejectionReasonDto {
+    reason: string;
+    developerReason: string | null;
+}
+
+/**
+ * The backend allowlists this from Bridge's full raw customer payload —
+ * identity document number/DOB/address never leave it (see the backend's
+ * BridgeCustomerResponseDto). `rejectionReasons[0].reason` is the
+ * customer-facing message when status is "rejected".
+ */
 export interface BridgeCustomerDto {
     id: string;
-    userId: string;
     bridgeCustomerId: string;
     status: BridgeCustomerStatus;
     hasAcceptedTermsOfService: boolean;
     /** Bridge's hosted ToS page — a human click-through, no API shortcut exists. Null once accepted. */
     tosLink: string | null;
-    /** Bridge's full raw customer payload — `rejection_reasons[].reason` is the customer-facing message when status is "rejected". */
-    rawPayload: Record<string, unknown> | null;
+    rejectionReasons: BridgeRejectionReasonDto[] | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -455,7 +464,6 @@ export interface CreateBridgeCustomerDto {
 
 export interface BridgeVirtualAccountDto {
     id: string;
-    userId: string;
     currency: BridgeCurrency;
     bridgeVirtualAccountId: string;
     status: string;
@@ -474,7 +482,6 @@ export interface RequestBridgeVirtualAccountDto {
 
 export interface BridgeDepositDto {
     id: string;
-    userId: string;
     sourceCurrency: string;
     sourceAmount: string;
     usdAmount: string | null;

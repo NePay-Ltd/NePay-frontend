@@ -105,6 +105,10 @@ export default function EducationPage() {
                             identifier: phone,
                             label: `${selectedExamBody.name} ${phone}`,
                             amount: selectedPinType?.variation_amount,
+                        }, {
+                            onError: () => {
+                                toast.error("Payment went through, but we couldn't save this as a beneficiary for next time.");
+                            },
                         });
                     }
                     if (res.status === "FAILED") {

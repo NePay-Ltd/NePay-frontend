@@ -112,7 +112,7 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
                     />
                 </Field>
                 <p className="mt-2 text-xs text-muted">
-                    Must be 3–20 letters, numbers, or underscores. It is set once at signup and cannot be changed later.
+                    Must be 3-20 letters, numbers, or underscores. It is set once at signup and cannot be changed later.
                 </p>
                 {usernameValue.trim().length >= 3 && !errors.username && (
                     <p className="mt-1 text-xs text-emerald-600">Availability is checked live before submit.</p>

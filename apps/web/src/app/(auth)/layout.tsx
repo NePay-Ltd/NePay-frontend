@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-    title: "NePay — Sign In",
+    title: "NePay - Sign In",
 };
 
 /**
