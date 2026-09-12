@@ -110,7 +110,7 @@ export default function SupportPage() {
                     <h2 className="mb-3 text-sm font-semibold text-ink">Email</h2>
                     <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
                         <a
-                            href="mailto:support@nepay.app"
+                            href="mailto:support@nepay.com.ng"
                             className="flex w-full items-center gap-4 p-4 text-left transition hover:bg-slate-50 focus:bg-slate-50"
                         >
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white">

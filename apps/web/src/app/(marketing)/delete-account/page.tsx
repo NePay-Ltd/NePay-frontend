@@ -32,7 +32,7 @@ export default function DeleteAccountPage() {
             To securely request account deletion, please send an email to our support team from the email address associated with your NePay account. Include the phrase <strong>"Account Deletion Request"</strong> in the subject line.
           </p>
           <a
-            href="mailto:support@nepay.app?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20NePay%20account%20associated%20with%20this%20email."
+            href="mailto:support@nepay.com.ng?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20NePay%20account%20associated%20with%20this%20email."
             className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-violet-600 hover:bg-violet-700 transition-colors text-white font-bold"
           >
             Email Support to Delete Account
