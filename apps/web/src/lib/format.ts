@@ -6,12 +6,9 @@
  * consistent grouping, decimal places, and locale handling across the UI.
  */
 
-const nairaFormatter = new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-});
+// We use strict regex grouping for Naira to guarantee standard ASCII commas.
+// Intl.NumberFormat can sometimes introduce narrow no-break spaces or weird
+// locale-specific grouping separators depending on the browser's ICU version.
 
 /**
  * Format a value as Naira, always showing 2 decimal places and the ₦ symbol.
@@ -39,9 +36,11 @@ export function formatNaira(amount: string | number): React.ReactNode {
         );
     }
 
-    const formatted = nairaFormatter.format(numeric);
-    const isNegative = formatted.startsWith("-");
-    const valueStr = formatted.replace(/[₦-]/g, "");
+    const isNegative = numeric < 0;
+    const absValue = Math.abs(numeric);
+    
+    // Strict ASCII comma formatting
+    const valueStr = absValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
     return React.createElement(
         "span",
@@ -55,16 +54,19 @@ export function formatNaira(amount: string | number): React.ReactNode {
 export function formatNairaString(amount: string | number): string {
     const numeric = typeof amount === "string" ? Number.parseFloat(amount) : amount;
     if (Number.isNaN(numeric)) return "₦0.00";
-    return nairaFormatter.format(numeric);
+    
+    const isNegative = numeric < 0;
+    const absValue = Math.abs(numeric);
+    const valueStr = absValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    
+    return isNegative ? `-₦${valueStr}` : `₦${valueStr}`;
 }
 
 /**
  * Compact formatter for tight spaces (KPI cards, charts).
  * @example formatNairaCompact(1_250_000) // "₦1.25M"
  */
-const compactFormatter = new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
+const compactFormatter = new Intl.NumberFormat("en-US", {
     notation: "compact",
     maximumFractionDigits: 2,
 });
@@ -80,7 +82,7 @@ export function formatNairaCompact(amount: string | number): React.ReactNode {
     
     const formatted = compactFormatter.format(numeric);
     const isNegative = formatted.startsWith("-");
-    const valueStr = formatted.replace(/[₦-]/g, "");
+    const valueStr = formatted.replace(/[-]/g, "");
 
     return React.createElement(
         "span",

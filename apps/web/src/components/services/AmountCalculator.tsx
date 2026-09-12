@@ -60,18 +60,18 @@ export function AmountCalculator({ amount, onChange, presets }: AmountCalculator
                         </motion.button>
                     );
                 })}
-            </div>
 
-            <div className="relative flex items-center h-[56px] w-full rounded-2xl border-2 border-border bg-white dark:bg-white/5 focus-within:border-violet-600 transition-colors overflow-hidden px-5 mt-6">
-                <span className="text-lg font-black text-ink mr-1">₦</span>
-                <input
-                    type="text"
-                    inputMode="numeric"
-                    value={localVal}
-                    onChange={handleChange}
-                    placeholder="50 - 500,000"
-                    className="flex-1 h-full bg-transparent text-lg font-bold tabular-nums tracking-wide outline-none placeholder:font-medium placeholder:text-muted"
-                />
+                <div className="col-span-3 relative flex items-center h-[56px] w-full rounded-2xl border-2 border-border bg-white dark:bg-white/5 focus-within:border-violet-600 transition-colors overflow-hidden px-5">
+                    <span className="text-lg font-black text-ink mr-1">₦</span>
+                    <input
+                        type="text"
+                        inputMode="numeric"
+                        value={localVal}
+                        onChange={handleChange}
+                        placeholder="50 - 500,000"
+                        className="flex-1 h-full bg-transparent text-lg font-bold tabular-nums tracking-wide outline-none placeholder:font-medium placeholder:text-muted"
+                    />
+                </div>
             </div>
         </div>
     );
