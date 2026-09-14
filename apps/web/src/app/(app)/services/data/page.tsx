@@ -269,12 +269,12 @@ export default function DataPage() {
                 transaction={txResult ? {
                     id: txResult.providerReference || `tx-${Date.now()}`,
                     label: `DATA purchase: ${selectedNetwork?.serviceID}-${selectedPlan?.variation_code} ${phone}`,
-                    meta: "UTILITY PURCHASE",
+                    meta: "Data Purchase",
                     amount: -selectedAmount,
                     category: "payment",
                     status: txResult.status === "PROCESSING" ? "pending" : "success",
                     date: new Date().toISOString(),
-                    type: "UTILITY_PURCHASE",
+                    type: "Data Purchase",
                     direction: "DEBIT",
                     currency: "NGN"
                 } : null}

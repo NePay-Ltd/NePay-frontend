@@ -110,14 +110,14 @@ export default function SupportPage() {
                     <h2 className="mb-3 text-sm font-semibold text-ink">Email</h2>
                     <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
                         <a
-                            href="mailto:support@nepay.app"
+                            href="mailto:support@nepay.com.ng"
                             className="flex w-full items-center gap-4 p-4 text-left transition hover:bg-slate-50 focus:bg-slate-50"
                         >
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white">
                                 <Mail className="h-5 w-5" />
                             </div>
                             <div className="min-w-0 flex-1">
-                                <p className="font-semibold text-ink">support@nepay.app</p>
+                                <p className="font-semibold text-ink">support@nepay.com.ng</p>
                                 <p className="text-xs text-muted">Send us an email</p>
                             </div>
                             <ChevronRight className="h-5 w-5 shrink-0 text-slate-300" />

@@ -4,8 +4,8 @@ import React, { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform, type Variants } from "framer-motion";
-import { IconGrid as LayoutGrid, IconAirtime as Smartphone, IconElectricity as Zap, IconPlane as Plane, IconGift as Gift, IconArrowUpRight as ArrowUpRight } from "@/components/icons";
-import { ArrowRight, ArrowDownRight, Activity } from "lucide-react";;
+import { IconGrid as LayoutGrid, IconAirtime as Smartphone, IconElectricity as Zap, IconGift as Gift, IconArrowUpRight as ArrowUpRight } from "@/components/icons";
+import { ArrowRight, ArrowDownRight, Activity, Globe } from "lucide-react";
 import { Section } from "./section";
 
 const staggerContainer: Variants = {
@@ -91,7 +91,7 @@ export function Hero() {
                 </li>
                 <li className="flex items-center gap-3">
                   <span className="h-2 w-2 rounded-full bg-violet-500 shrink-0" />
-                  <span><strong className="text-marketing-text font-bold">Book flights</strong> globally.</span>
+                  <span><strong className="text-marketing-text font-bold">Receive foreign currency</strong> directly.</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <span className="h-2 w-2 rounded-full bg-violet-500 shrink-0" />
@@ -158,7 +158,7 @@ export function Hero() {
                       {[
                         { icon: Smartphone, label: "Airtime" },
                         { icon: Zap, label: "Data" },
-                        { icon: Plane, label: "Flights" },
+                        { icon: Globe, label: "Foreign FX" },
                         { icon: LayoutGrid, label: "More" },
                       ].map((action, i) => (
                         <div key={i} className="flex flex-col items-center gap-2 p-3 rounded-2xl hover:bg-marketing-surface">
@@ -180,8 +180,8 @@ export function Hero() {
                   </div>
                   
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="font-sans tabular-nums text-[28px] font-extrabold tracking-tighter text-marketing-text leading-none">
-                      ₦1,562.50
+                    <span className="font-sans text-[28px] font-extrabold tracking-[0.1em] text-marketing-text leading-none translate-y-1">
+                      ₦••••••
                     </span>
                     <div className="inline-flex items-center gap-0.5 rounded-md bg-green-50 dark:bg-green-900/30 px-1.5 py-0.5 text-[11px] font-bold text-green-700 dark:text-green-400">
                       <ArrowUpRight className="h-3 w-3" />
