@@ -10,7 +10,7 @@ import { noticeKeys } from "@/lib/queries/notices";
 
 function socketOrigin() {
     const configured = process.env.NEXT_PUBLIC_API_URL;
-    return configured ? new URL(configured).origin : window.location.origin;
+    return configured ? new URL(configured).origin : "https://nepay-backend.onrender.com";
 }
 
 /**
