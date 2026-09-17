@@ -15,7 +15,7 @@ const TOTAL_INTAKE_STAGES = INTAKE_STAGES.length + 1; // + the category stage
 
 const CATEGORY_OPTIONS: { value: SupportCategory; label: string }[] = [
     { value: "deposit_issue", label: "Deposit issue" },
-    { value: "transfer_issue", label: "Transfer issue" },
+    { value: "withdrawal_issue", label: "Withdrawal issue" },
     { value: "kyc_verification", label: "KYC / Verification" },
     { value: "gift_card", label: "Gift card" },
     { value: "other", label: "Something else" },

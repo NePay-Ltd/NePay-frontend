@@ -7,7 +7,7 @@ import type { ApiResponse } from "@/lib/types/api";
 import { playSupportReplySound } from "@/lib/support-notification-sound";
 
 export type SupportStatus = "waiting" | "active" | "pending_agent" | "pending_customer" | "resolved" | "closed";
-export type SupportCategory = "deposit_issue" | "transfer_issue" | "kyc_verification" | "gift_card" | "other";
+export type SupportCategory = "deposit_issue" | "withdrawal_issue" | "kyc_verification" | "gift_card" | "other";
 
 export interface SupportMessage { id: string; body: string; attachmentUrl: string | null; senderType: "customer" | "agent" | "system"; createdAt: string; }
 export interface AssignedAgent { id: string; name: string; avatarUrl: string | null; }
