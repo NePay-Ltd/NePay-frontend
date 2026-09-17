@@ -28,17 +28,14 @@ import { Panel, PanelHeader, PanelBody } from "@/components/shared/panel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
+import { Switch } from "@/components/ui/switch";
 
 const PRESET_AMOUNTS = [10000, 50000, 100000];
 
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
 
 const formSchema = z.object({
-    bankAccountId: z.string().min(1, "Please select a bank account"),
-    accountName: z.string().optional(),
-    accountNumber: z.string().optional(),
     amount: z.number().min(100, "Minimum withdrawal is ₦100").positive(),
 });
 
@@ -62,18 +59,11 @@ export default function WithdrawPage() {
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            bankAccountId: "",
             amount: 0,
         },
     });
 
     const watchAmount = form.watch("amount");
-    const watchBankAccountId = form.watch("bankAccountId");
-    const selectedAccount = savedAccounts.find((a) => a.id === watchBankAccountId);
-
-    // No client-side fee estimate — the real fee is Korapay's own, only
-    // known once the transfer completes (charged as a separate ledger
-    // debit after the fact, see the backend's WithdrawalService.handleWebhook).
     const isValidAmount = watchAmount > 0 && watchAmount <= withdrawable;
 
     // ── Modal & Transaction State ──
@@ -92,25 +82,16 @@ export default function WithdrawPage() {
         if (txStatus.status === "FAILED") setTxState("error");
     }, [txStatus]);
 
-    // ── Popover State (Bank Selector vs Add New) ──
-    const [popoverOpen, setPopoverOpen] = React.useState(false);
-    const [isAddingNew, setIsAddingNew] = React.useState(false);
-    
-    // Add New Bank internal state
-    const [newBankCode, setNewBankCode] = React.useState("");
-    const [newAccountNumber, setNewAccountNumber] = React.useState("");
+    // ── Bank Account State ──
+    const [bankCode, setBankCode] = React.useState("");
+    const [accountNumber, setAccountNumber] = React.useState("");
     const [resolvedName, setResolvedName] = React.useState("");
+    const [saveAccount, setSaveAccount] = React.useState(true);
 
-    // Bank search — the bank list can now run into the hundreds (see the
-    // backend's KorapayTransferAdapter, which layers in a full Nigerian
-    // bank list), so a plain <select> isn't usable. Search-as-you-type by
-    // name instead; there's no way to derive a bank from an account number
-    // alone (NUBAN account numbers aren't globally unique or bank-encoded —
-    // the same 10 digits can exist at different banks), so the bank still
-    // has to be picked before the account number resolves.
     const [bankPickerOpen, setBankPickerOpen] = React.useState(false);
     const [bankSearchQuery, setBankSearchQuery] = React.useState("");
-    const selectedNewBank = bankList.find(b => b.bankCode === newBankCode);
+    
+    const selectedBank = bankList.find(b => b.bankCode === bankCode);
     const filteredBankList = React.useMemo(() => {
         const q = bankSearchQuery.trim().toLowerCase();
         if (!q) return bankList;
@@ -119,9 +100,9 @@ export default function WithdrawPage() {
 
     // Auto-resolve when 10 digits are typed and a bank is selected
     React.useEffect(() => {
-        if (newBankCode && newAccountNumber.length === 10) {
+        if (bankCode && accountNumber.length === 10) {
             resolveMutation.mutate(
-                { accountNumber: newAccountNumber, bankCode: newBankCode },
+                { accountNumber, bankCode },
                 {
                     onSuccess: (data) => setResolvedName(data.accountName),
                     onError: () => {
@@ -133,33 +114,21 @@ export default function WithdrawPage() {
         } else {
             setResolvedName("");
         }
-    }, [newBankCode, newAccountNumber]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [bankCode, accountNumber]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const handleSaveNewBank = () => {
-        if (!newBankCode || !newAccountNumber || !resolvedName) return;
-        saveBankMutation.mutate(
-            { accountNumber: newAccountNumber, bankCode: newBankCode, accountName: resolvedName },
-            {
-                onSuccess: (newAccount) => {
-                    form.setValue("bankAccountId", newAccount.id, { shouldValidate: true });
-                    setIsAddingNew(false);
-                    setPopoverOpen(false);
-                    toast.success("Bank account saved");
-                },
-                onError: (err: any) => {
-                    toast.error(err.response?.data?.message || "Couldn't save this bank account. Please try again.");
-                }
-            }
-        );
+    const handleSelectSavedAccount = (acc: any) => {
+        setBankCode(acc.bankCode);
+        setAccountNumber(acc.accountNumber);
+        setResolvedName(acc.accountName);
     };
 
     const handleConfirm = async () => {
-        if (!isValidAmount || !selectedAccount) return;
+        if (!isValidAmount || !bankCode || !accountNumber || !resolvedName) return;
         setTxState("processing"); // Show loading briefly while resolving
         try {
             const data = await resolveMutation.mutateAsync({
-                accountNumber: selectedAccount.accountNumber,
-                bankCode: selectedAccount.bankCode
+                accountNumber,
+                bankCode
             });
             setResolutionToken(data.resolutionToken);
             setTxState("pin");
@@ -170,20 +139,30 @@ export default function WithdrawPage() {
     };
 
     const handlePinSubmit = (pin: string) => {
-        if (!resolutionToken || !selectedAccount) return;
+        if (!resolutionToken || !selectedBank) return;
         setTxState("processing");
         initiateMutation.mutate(
             {
                 amount: watchAmount.toString(),
                 resolutionToken,
                 pin,
-                bankCode: selectedAccount.bankCode,
-                accountNumber: selectedAccount.accountNumber,
-                accountName: selectedAccount.accountName,
+                bankCode,
+                accountNumber,
+                accountName: resolvedName,
             },
             {
                 onSuccess: (res) => {
                     setTxId(res.id); // Triggers success since we mock the polling
+                    
+                    if (saveAccount) {
+                        const isAlreadySaved = savedAccounts.some(a => a.accountNumber === accountNumber && a.bankCode === bankCode);
+                        if (!isAlreadySaved) {
+                            saveBankMutation.mutate({
+                                bankCode, accountNumber, accountName: resolvedName
+                            });
+                        }
+                    }
+
                     setTxState("success");
                 },
                 onError: (err: any) => {
@@ -193,6 +172,8 @@ export default function WithdrawPage() {
             }
         );
     };
+
+    const isFormValid = isValidAmount && !!bankCode && accountNumber.length === 10 && !!resolvedName;
 
     return (
         <RequireKyc>
@@ -208,213 +189,136 @@ export default function WithdrawPage() {
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-10">
                     {/* ── Left Column (Form) ── */}
                     <div className="space-y-6 md:col-span-7">
-                        <Panel>
-                            <PanelBody className="space-y-6 p-6">
+                        <Panel flush className="border-none bg-transparent shadow-none sm:border-solid sm:bg-white sm:shadow-sm -mx-4 sm:mx-0 px-4 sm:px-6 py-2 sm:py-6">
+                            <PanelBody className="space-y-6 sm:space-y-8">
                                 {/* Available Balance Display */}
-                                <div className="rounded-xl bg-violet-050 p-4">
-                                    <p className="text-xs font-medium uppercase tracking-wider text-violet-700/70">
+                                <div className="rounded-xl bg-violet-500/10 p-5 sm:p-6 border border-violet-500/20">
+                                    <p className="text-xs font-semibold uppercase tracking-wider text-violet-400">
                                         Available Balance
                                     </p>
-                                    <p className="mt-1 font-mono text-2xl sm:text-3xl font-bold tracking-tight text-violet-700 break-all">
+                                    <p className="mt-2 font-mono text-3xl sm:text-4xl font-bold tracking-tight text-ink break-all drop-shadow-sm">
                                         {formatNaira(withdrawable)}
                                     </p>
                                 </div>
 
-                                {/* Bank Selector */}
-                                <div className="space-y-2">
-                                    <Label>Select Bank Account</Label>
-                                    <Popover open={popoverOpen} onOpenChange={(o) => {
-                                        setPopoverOpen(o);
-                                        if (!o) setIsAddingNew(false); // Reset view on close
-                                    }}>
-                                        <PopoverTrigger asChild>
-                                            <Button
-                                                variant="quiet"
-                                                role="combobox"
-                                                aria-expanded={popoverOpen}
-                                                className="w-full justify-between h-14 bg-white hover:bg-gray-50 border-border"
-                                            >
-                                                {selectedAccount ? (
-                                                    <div className="flex items-center gap-3 truncate">
-                                                        <img src={selectedAccount.iconUrl} alt="" className="h-6 w-6 rounded-full object-cover bg-gray-100" />
-                                                        <div className="flex flex-col items-start truncate">
-                                                            <span className="text-sm font-semibold text-ink truncate">{selectedAccount.bankName}</span>
-                                                            <span className="text-xs text-muted truncate">
-                                                                {selectedAccount.accountNumber} • {selectedAccount.accountName}
-                                                            </span>
-                                                        </div>
+                                {/* Bank Selector UI */}
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label>Select Bank</Label>
+                                        <Popover open={bankPickerOpen} onOpenChange={setBankPickerOpen}>
+                                            <PopoverTrigger asChild>
+                                                <button
+                                                    type="button"
+                                                    className="flex h-12 w-full items-center justify-between rounded-md border border-border bg-white px-3 text-sm hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600"
+                                                >
+                                                    <span className={selectedBank ? "text-ink" : "text-muted"}>
+                                                        {selectedBank ? selectedBank.bankName : "Select a bank"}
+                                                    </span>
+                                                    <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                                                </button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-[340px] p-0 md:w-[400px]">
+                                                <div className="rounded-md border-0 bg-white shadow-none">
+                                                    <div className="flex items-center gap-2 border-b border-border px-3 py-2">
+                                                        <Search className="h-4 w-4 shrink-0 text-muted" />
+                                                        <input
+                                                            autoFocus
+                                                            className="h-9 w-full bg-transparent text-sm outline-none placeholder:text-muted"
+                                                            placeholder="Search banks..."
+                                                            value={bankSearchQuery}
+                                                            onChange={(e) => setBankSearchQuery(e.target.value)}
+                                                        />
                                                     </div>
-                                                ) : (
-                                                    <span className="text-muted">Select a saved bank...</span>
-                                                )}
-                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent
-                                            className="w-[340px] p-0 md:w-[400px] max-h-[min(70vh,var(--radix-popover-content-available-height))] overflow-y-auto"
-                                            align="start"
-                                            side="bottom"
-                                            sideOffset={8}
-                                            avoidCollisions={false}
-                                        >
-                                            {!isAddingNew ? (
-                                                <Command>
-                                                    <CommandInput placeholder="Search saved banks..." />
-                                                    <CommandList>
-                                                        <CommandEmpty>No saved accounts found.</CommandEmpty>
-                                                        <CommandGroup>
-                                                            {savedAccounts.map((acc) => (
-                                                                <CommandItem
-                                                                    key={acc.id}
-                                                                    value={`${acc.bankName} ${acc.accountNumber}`}
-                                                                    onSelect={() => {
-                                                                        form.setValue("bankAccountId", acc.id, { shouldValidate: true });
-                                                                        setPopoverOpen(false);
-                                                                    }}
-                                                                    className="flex items-center gap-3 py-3"
-                                                                >
-                                                                    <img src={acc.iconUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
-                                                                    <div className="flex flex-col">
-                                                                        <span className="text-sm font-medium">{acc.bankName}</span>
-                                                                        <span className="text-xs text-muted">{acc.accountNumber}</span>
-                                                                    </div>
-                                                                    <Check
-                                                                        className={cn(
-                                                                            "ml-auto h-4 w-4 text-violet-600",
-                                                                            watchBankAccountId === acc.id ? "opacity-100" : "opacity-0"
-                                                                        )}
-                                                                    />
-                                                                </CommandItem>
-                                                            ))}
-                                                        </CommandGroup>
-                                                    </CommandList>
-                                                    <div className="border-t border-border p-2">
-                                                        <Button 
-                                                            variant="ghost" 
-                                                            fullWidth 
-                                                            className="justify-start text-violet-600"
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                setIsAddingNew(true);
-                                                                setNewBankCode("");
-                                                                setNewAccountNumber("");
-                                                                setResolvedName("");
-                                                                setBankPickerOpen(false);
-                                                                setBankSearchQuery("");
-                                                            }}
-                                                        >
-                                                            <Plus className="mr-2 h-4 w-4" />
-                                                            Add new bank account
-                                                        </Button>
-                                                    </div>
-                                                </Command>
-                                            ) : (
-                                                // Inline Add Bank Form
-                                                <div className="p-4 space-y-4">
-                                                    <h3 className="text-sm font-semibold text-ink">Add New Bank</h3>
-                                                    
-                                                    <div className="space-y-2">
-                                                        <Label className="text-xs text-muted">Bank</Label>
-                                                        {bankPickerOpen ? (
-                                                            <div className="rounded-md border border-violet-600 bg-white">
-                                                                <div className="flex items-center gap-2 border-b border-border px-2">
-                                                                    <Search className="h-4 w-4 shrink-0 text-muted" />
-                                                                    <input
-                                                                        autoFocus
-                                                                        className="h-9 w-full bg-transparent text-sm outline-none placeholder:text-muted"
-                                                                        placeholder="Search banks..."
-                                                                        value={bankSearchQuery}
-                                                                        onChange={(e) => setBankSearchQuery(e.target.value)}
-                                                                    />
-                                                                </div>
-                                                                <div className="max-h-[180px] overflow-y-auto p-1">
-                                                                    {filteredBankList.length === 0 ? (
-                                                                        <p className="px-2 py-3 text-center text-xs text-muted">No banks found.</p>
-                                                                    ) : (
-                                                                        filteredBankList.map(b => (
-                                                                            <button
-                                                                                key={b.bankCode}
-                                                                                type="button"
-                                                                                className={cn(
-                                                                                    "flex w-full items-center rounded-sm px-2 py-2 text-left text-sm hover:bg-gray-100",
-                                                                                    newBankCode === b.bankCode && "bg-violet-050 font-medium text-violet-700"
-                                                                                )}
-                                                                                onClick={() => {
-                                                                                    setNewBankCode(b.bankCode);
-                                                                                    setBankPickerOpen(false);
-                                                                                    setBankSearchQuery("");
-                                                                                }}
-                                                                            >
-                                                                                {b.bankName}
-                                                                            </button>
-                                                                        ))
-                                                                    )}
-                                                                </div>
-                                                            </div>
+                                                    <div className="max-h-[250px] overflow-y-auto p-1">
+                                                        {filteredBankList.length === 0 ? (
+                                                            <p className="px-2 py-3 text-center text-xs text-muted">No banks found.</p>
                                                         ) : (
-                                                            <button
-                                                                type="button"
-                                                                className="flex h-10 w-full items-center justify-between rounded-md border border-border bg-white px-3 text-sm hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600"
-                                                                onClick={() => setBankPickerOpen(true)}
-                                                            >
-                                                                <span className={selectedNewBank ? "text-ink" : "text-muted"}>
-                                                                    {selectedNewBank ? selectedNewBank.bankName : "Select a bank"}
-                                                                </span>
-                                                                <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-                                                            </button>
+                                                            filteredBankList.map(b => (
+                                                                <button
+                                                                    key={b.bankCode}
+                                                                    type="button"
+                                                                    className={cn(
+                                                                        "flex w-full items-center rounded-sm px-2 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800",
+                                                                        bankCode === b.bankCode && "bg-violet-50 dark:bg-violet-500/20 font-medium text-violet-700 dark:text-violet-300"
+                                                                    )}
+                                                                    onClick={() => {
+                                                                        setBankCode(b.bankCode);
+                                                                        setBankPickerOpen(false);
+                                                                        setBankSearchQuery("");
+                                                                    }}
+                                                                >
+                                                                    {b.bankName}
+                                                                </button>
+                                                            ))
                                                         )}
                                                     </div>
-
-                                                    <div className="space-y-2">
-                                                        <Label className="text-xs text-muted">Account Number</Label>
-                                                        <div className="relative">
-                                                            <Input 
-                                                                placeholder="e.g. 0123456789" 
-                                                                maxLength={10}
-                                                                value={newAccountNumber}
-                                                                onChange={(e) => setNewAccountNumber(e.target.value.replace(/\D/g, ''))}
-                                                            />
-                                                            {resolveMutation.isPending && (
-                                                                <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted" />
-                                                            )}
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="space-y-2">
-                                                        <Label className="text-xs text-muted">Account Name</Label>
-                                                        <div className="flex h-10 w-full items-center rounded-md border border-border bg-gray-50 px-3 text-sm text-body">
-                                                            {resolvedName ? (
-                                                                <span className="font-medium text-ink">{resolvedName}</span>
-                                                            ) : (
-                                                                <span className="text-muted/50">—</span>
-                                                            )}
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="pt-2 flex gap-2">
-                                                        <Button 
-                                                            variant="primary" 
-                                                            className="flex-1"
-                                                            disabled={!resolvedName || saveBankMutation.isPending}
-                                                            onClick={handleSaveNewBank}
-                                                        >
-                                                            {saveBankMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Bank"}
-                                                        </Button>
-                                                        <Button 
-                                                            variant="ghost" 
-                                                            className="flex-1"
-                                                            onClick={() => setIsAddingNew(false)}
-                                                        >
-                                                            Cancel
-                                                        </Button>
-                                                    </div>
                                                 </div>
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label>Account Number</Label>
+                                        <div className="relative">
+                                            <Input 
+                                                className="h-12"
+                                                placeholder="e.g. 0123456789" 
+                                                maxLength={10}
+                                                value={accountNumber}
+                                                onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ''))}
+                                            />
+                                            {resolveMutation.isPending && (
+                                                <Loader2 className="absolute right-3 top-3.5 h-5 w-5 animate-spin text-muted" />
                                             )}
-                                        </PopoverContent>
-                                    </Popover>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label>Account Name</Label>
+                                        <div className="flex h-12 w-full items-center rounded-md border border-border bg-gray-50 px-3 text-sm text-body">
+                                            {resolvedName ? (
+                                                <span className="font-medium text-ink">{resolvedName}</span>
+                                            ) : (
+                                                <span className="text-muted/50">—</span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between rounded-xl bg-white p-4 border border-border">
+                                        <div>
+                                            <p className="text-sm font-bold text-ink">Save account</p>
+                                            <p className="text-xs text-muted">Save this account for future withdrawals</p>
+                                        </div>
+                                        <Switch checked={saveAccount} onCheckedChange={setSaveAccount} />
+                                    </div>
                                     
-                                    {form.formState.errors.bankAccountId && (
-                                        <p className="text-xs text-red-500 mt-1">{form.formState.errors.bankAccountId.message}</p>
+                                    {savedAccounts.length > 0 && (
+                                        <div className="pt-4 border-t border-border">
+                                            <p className="text-xs font-semibold text-muted mb-3 uppercase tracking-wider">Saved Accounts</p>
+                                            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                                                {savedAccounts.map(acc => (
+                                                    <button
+                                                        key={acc.id}
+                                                        onClick={() => handleSelectSavedAccount(acc)}
+                                                        className={cn(
+                                                            "flex-shrink-0 flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors",
+                                                            bankCode === acc.bankCode && accountNumber === acc.accountNumber 
+                                                                ? "border-violet-600 bg-violet-50 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300" 
+                                                                : "border-border bg-white text-ink hover:bg-gray-50 dark:bg-transparent dark:hover:bg-gray-900"
+                                                        )}
+                                                    >
+                                                        {acc.iconUrl ? (
+                                                            <img src={acc.iconUrl} alt="" className="h-5 w-5 rounded-full object-cover bg-gray-100" />
+                                                        ) : (
+                                                            <div className="h-5 w-5 rounded-full bg-gray-200 flex items-center justify-center">
+                                                                <Landmark className="h-3 w-3 text-gray-500" />
+                                                            </div>
+                                                        )}
+                                                        <span className="font-medium">{acc.accountName.split(' ')[0]}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
 
@@ -451,7 +355,7 @@ export default function WithdrawPage() {
                                                     form.setValue("amount", withdrawable, { shouldValidate: true });
                                                 }
                                             }}
-                                            className="font-semibold text-violet-700"
+                                            className="font-semibold text-violet-600 dark:text-violet-400"
                                         >
                                             Max
                                         </Chip>
@@ -472,14 +376,14 @@ export default function WithdrawPage() {
                     </div>
 
                     {/* ── Right Column (Summary & Submit) ── */}
-                    <div className="space-y-6 md:col-span-5">
-                        <Panel>
-                            <PanelHeader title="Transaction Summary" />
-                            <PanelBody className="p-5">
+                    <div className="space-y-6 md:col-span-5 px-4 sm:px-0">
+                        <Panel flush className="border-none bg-transparent shadow-none sm:border-solid sm:bg-white sm:shadow-sm sm:p-5">
+                            <PanelHeader title="Transaction Summary" className="px-2 sm:px-0" />
+                            <PanelBody className="px-2 sm:px-0">
                                 <div className="space-y-4">
                                     <div className="flex justify-between text-base font-bold">
                                         <span className="text-ink">You withdraw</span>
-                                        <span className="font-mono text-violet-700">
+                                        <span className="font-mono text-violet-600 dark:text-violet-400">
                                             {formatNaira(watchAmount || 0)}
                                         </span>
                                     </div>
@@ -497,7 +401,7 @@ export default function WithdrawPage() {
                             variant="primary" 
                             size="lg" 
                             fullWidth
-                            disabled={!isValidAmount || !watchBankAccountId}
+                            disabled={!isFormValid}
                             onClick={() => {
                                 // Reset state before opening modal
                                 setTxId(null);
@@ -527,14 +431,14 @@ export default function WithdrawPage() {
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted">To</span>
                                 <span className="font-medium text-ink text-right">
-                                    {selectedAccount?.bankName}<br/>
-                                    <span className="text-xs text-body font-mono">•••{selectedAccount?.accountNumber.slice(-4)}</span>
+                                    {selectedBank?.bankName}<br/>
+                                    <span className="text-xs text-body font-mono">•••{accountNumber.slice(-4)}</span>
                                 </span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted">Account Name</span>
                                 <span className="font-medium text-ink truncate max-w-[150px]">
-                                    {selectedAccount?.accountName}
+                                    {resolvedName}
                                 </span>
                             </div>
                         </div>
