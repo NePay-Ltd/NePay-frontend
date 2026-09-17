@@ -138,7 +138,7 @@ export function useLoginActivity() {
             const res = await apiClient.get<ApiResponse<{ items: LoginActivity[] }>>("/security/login-activity");
             return res.data.data.items;
         },
-        refetchInterval: 20_000,
+        refetchInterval: process.env.NODE_ENV === 'development' ? false : 20_000,
         refetchOnWindowFocus: true,
     });
 }

@@ -130,7 +130,7 @@ function ledgerToNotification(entry: LedgerEntryDto, readSet: Set<string>): Noti
 
         case "ADMIN_ADJUSTMENT":
         case "ERROR_CORRECTION":
-            type = entry.direction === "CREDIT" ? "credit" : "withdrawal";
+            type = entry.direction === "CREDIT" ? "credit" : "transfer";
             title = entry.direction === "CREDIT" ? "Account credit" : "Account debit";
             body = desc || `${amount} ${entry.direction === "CREDIT" ? "added to" : "deducted from"} your wallet.`;
             break;
@@ -197,7 +197,7 @@ export function useUnreadNotificationCount() {
             // Any entry not in the local read set is "unread"
             return items.filter((entry) => !readSet.has(entry.id)).length;
         },
-        refetchInterval: 60_000, // Poll every minute for new transactions
+        refetchInterval: process.env.NODE_ENV === 'development' ? false : 60_000, // Poll every minute for new transactions
     });
 }
 

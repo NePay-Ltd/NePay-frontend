@@ -114,7 +114,7 @@ export function useFlightBookingStatus(bookingId: string | null) {
             return res.data.data;
         },
         enabled: !!bookingId,
-        refetchInterval: (query) => {
+        refetchInterval: process.env.NODE_ENV === 'development' ? false : (query) => {
             const status = query.state.data?.status;
             if (status === "CONFIRMED" || status === "FAILED") {
                 return false; // Stop polling

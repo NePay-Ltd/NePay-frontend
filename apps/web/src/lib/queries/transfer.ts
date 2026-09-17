@@ -113,6 +113,6 @@ export function useTransferStatus(withdrawalId: string | null) {
             return res.data.data;
         },
         enabled: !!withdrawalId,
-        refetchInterval: 3000,
+        refetchInterval: process.env.NODE_ENV === 'development' ? false : 3000,
     });
 }
