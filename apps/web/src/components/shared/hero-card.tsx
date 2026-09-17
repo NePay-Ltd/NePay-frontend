@@ -114,7 +114,7 @@ export function HeroCard({
                     <div className="mt-7 grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:gap-4">
                         <Button
                             size="md"
-                            onClick={() => router.push("/withdraw")}
+                            onClick={() => router.push("/transfer")}
                             className="bg-white text-violet-700 hover:bg-violet-50 font-bold shadow-sm rounded-xl h-12 px-2 text-[13px] sm:text-sm sm:px-6 sm:w-auto active:scale-95 transition-transform min-w-0"
                         >
                             <ArrowLeftRight className="mr-1.5 h-4 w-4 shrink-0" />

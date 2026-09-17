@@ -18,7 +18,7 @@ import { toast } from "sonner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type NotificationType = "deposit" | "withdrawal" | "referral" | "kyc" | "utility" | "gift_card" | "flight" | "security" | "credit";
+export type NotificationType = "deposit" | "transfer" | "referral" | "kyc" | "utility" | "gift_card" | "flight" | "security" | "credit";
 
 export interface Notification {
     id: string;
@@ -74,8 +74,8 @@ function ledgerToNotification(entry: LedgerEntryDto, readSet: Set<string>): Noti
             break;
 
         case "WITHDRAWAL":
-            type = "withdrawal";
-            title = "Withdrawal successful";
+            type = "transfer";
+            title = "Transfer successful";
             body = `${amount} sent to your bank account.${desc ? ` ${desc}` : ""}`;
             break;
 
@@ -130,7 +130,7 @@ function ledgerToNotification(entry: LedgerEntryDto, readSet: Set<string>): Noti
 
         case "ADMIN_ADJUSTMENT":
         case "ERROR_CORRECTION":
-            type = entry.direction === "CREDIT" ? "credit" : "withdrawal";
+            type = entry.direction === "CREDIT" ? "credit" : "transfer";
             title = entry.direction === "CREDIT" ? "Account credit" : "Account debit";
             body = desc || `${amount} ${entry.direction === "CREDIT" ? "added to" : "deducted from"} your wallet.`;
             break;
@@ -197,7 +197,7 @@ export function useUnreadNotificationCount() {
             // Any entry not in the local read set is "unread"
             return items.filter((entry) => !readSet.has(entry.id)).length;
         },
-        refetchInterval: 60_000, // Poll every minute for new transactions
+        refetchInterval: process.env.NODE_ENV === 'development' ? false : 60_000, // Poll every minute for new transactions
     });
 }
 

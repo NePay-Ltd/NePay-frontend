@@ -26,7 +26,7 @@ export function useCurrentLeaderboard() {
             const response = await apiClient.get<ApiResponse<LeaderboardSnapshot>>("/leaderboard/current");
             return response.data.data;
         },
-        refetchInterval: 3000,
+        refetchInterval: process.env.NODE_ENV === 'development' ? false : 3000,
         refetchOnWindowFocus: true,
     });
 }

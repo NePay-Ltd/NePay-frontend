@@ -2,7 +2,8 @@
 
 import React from "react";
 import { motion, type Variants } from "framer-motion";
-import { IconAirtime as Smartphone, IconData as Wifi, IconElectricity as Zap, IconTv as Tv, IconGift as Gift, IconPlane as Plane } from "@/components/icons";;
+import { IconAirtime as Smartphone, IconData as Wifi, IconElectricity as Zap, IconTv as Tv, IconGift as Gift } from "@/components/icons";
+import { Globe } from "lucide-react";
 import { Section } from "./section";
 
 export function BillsFeature() {
@@ -12,7 +13,7 @@ export function BillsFeature() {
     { name: "Electricity", icon: Zap, color: "text-amber-500" },
     { name: "Cable TV", icon: Tv, color: "text-blue-500" },
     { name: "Gift Cards", icon: Gift, color: "text-pink-500" },
-    { name: "Flights", icon: Plane, color: "text-teal-500" },
+    { name: "Foreign FX", icon: Globe, color: "text-teal-500" },
   ];
 
   const containerVariants: Variants = {

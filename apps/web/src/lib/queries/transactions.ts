@@ -67,7 +67,7 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
         // The NGN credit from a completed FCY conversion — same category as
         // any other deposit into the wallet, just a different source.
         case "FCY_CONVERSION_CREDIT": category = "deposit"; break;
-        case "WITHDRAWAL": category = "withdrawal"; break;
+        case "WITHDRAWAL": category = "transfer"; break;
         case "UTILITY_PURCHASE": 
             category = "payment"; 
             if (entry.description?.toLowerCase().includes("airtime") || entry.description?.toLowerCase().includes("vtu")) category = "airtime";

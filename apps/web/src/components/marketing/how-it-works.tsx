@@ -10,8 +10,8 @@ const steps = [
     description: "Sign up in 2 minutes.",
   },
   {
-    title: "Fund your wallet: bank, card, or crypto",
-    description: "Move money into NePay instantly via bank transfer, your debit card, or by converting your crypto.",
+    title: "Fund your wallet: crypto or cross-border payment",
+    description: "Move money into NePay instantly by converting your crypto or using a foreign currency account.",
   },
   {
     title: "Convert crypto to Naira instantly",

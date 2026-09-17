@@ -30,7 +30,7 @@ export function useBridgeCustomer() {
             const res = await apiClient.get<ApiResponse<BridgeCustomerDto | null>>("/bridge/customer");
             return res.data.data;
         },
-        refetchInterval: (query) => {
+        refetchInterval: process.env.NODE_ENV === 'development' ? false : (query) => {
             const customer = query.state.data;
             if (!customer) return false;
             const settling = customer.status === "incomplete" || customer.status === "under_review" || customer.status === "not_started";
@@ -117,7 +117,7 @@ export function useBridgeDeposits() {
             const res = await apiClient.get<ApiResponse<BridgeDepositDto[]>>("/bridge/accounts/deposits");
             return res.data.data;
         },
-        refetchInterval: (query) => {
+        refetchInterval: process.env.NODE_ENV === 'development' ? false : (query) => {
             const items = query.state.data ?? [];
             const stillSettling = items.some((d) => d.status === "RECEIVED");
             return stillSettling ? 5000 : false;

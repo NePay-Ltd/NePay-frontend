@@ -39,7 +39,7 @@ export interface TransactionRowProps {
 function getCategoryLabel(cat: TxCategory) {
     switch (cat) {
         case "deposit": return "Deposit";
-        case "withdrawal": return "Withdrawal";
+        case "transfer": return "Transfer";
         case "payment": return "Payment";
         case "gift-card": return "Gift Card";
         case "flight": return "Flight";
