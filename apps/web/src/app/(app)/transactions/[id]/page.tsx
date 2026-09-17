@@ -18,7 +18,7 @@ import { downloadReceipt, downloadReceiptPDF, downloadReceiptImage, shareReceipt
 function getCategoryColor(category: string) {
     switch (category) {
         case "deposit": return "bg-green-100 text-green-700";
-        case "withdrawal": return "bg-red-100 text-red-700";
+        case "transfer": return "bg-red-100 text-red-700";
         case "payment": return "bg-blue-100 text-blue-700";
         case "gift-card": return "bg-purple-100 text-purple-700";
         case "flight": return "bg-amber-100 text-amber-700";

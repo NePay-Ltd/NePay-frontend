@@ -278,7 +278,7 @@ function PreferencesTab() {
                                 {selected === "USD"
                                     ? "Your balance shows in dollars, with the naira equivalent underneath."
                                     : "Your balance shows in naira, with the dollar equivalent underneath."}{" "}
-                                Everything else (deposits, withdrawals, spending) still happens in naira, no matter what you pick here.
+                                Everything else (deposits, transfers, spending) still happens in naira, no matter what you pick here.
                             </p>
                         </div>
 

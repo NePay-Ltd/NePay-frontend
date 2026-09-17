@@ -53,7 +53,7 @@ export interface TransactionModalProps {
 }
 
 /**
- * Generic state-machine modal for transactional flows (Withdrawals, Transfers, Bill Payments).
+ * Generic state-machine modal for transactional flows (Transfers, Transfers, Bill Payments).
  * Handles the standard Confirm -> Processing -> Success/Error UX cleanly.
  */
 export function TransactionModal({

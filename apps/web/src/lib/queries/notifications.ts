@@ -18,7 +18,7 @@ import { toast } from "sonner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type NotificationType = "deposit" | "withdrawal" | "referral" | "kyc" | "utility" | "gift_card" | "flight" | "security" | "credit";
+export type NotificationType = "deposit" | "transfer" | "referral" | "kyc" | "utility" | "gift_card" | "flight" | "security" | "credit";
 
 export interface Notification {
     id: string;
@@ -74,8 +74,8 @@ function ledgerToNotification(entry: LedgerEntryDto, readSet: Set<string>): Noti
             break;
 
         case "WITHDRAWAL":
-            type = "withdrawal";
-            title = "Withdrawal successful";
+            type = "transfer";
+            title = "Transfer successful";
             body = `${amount} sent to your bank account.${desc ? ` ${desc}` : ""}`;
             break;
 

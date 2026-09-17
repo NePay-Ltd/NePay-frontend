@@ -92,8 +92,8 @@ export default function ServicesPage() {
                             />
                             <Tile 
                                 icon={Landmark} 
-                                label="Withdraw" 
-                                onClick={() => router.push("/withdraw")} 
+                                label="Transfer" 
+                                onClick={() => router.push("/transfer")} 
                             />
                         </div>
                     </section>

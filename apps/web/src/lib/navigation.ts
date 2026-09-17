@@ -30,7 +30,7 @@ export const SIDEBAR_GROUPS: NavGroup[] = [
         items: [
             { key: "receive", label: "Receive crypto", icon: LayoutGrid, href: "/receive-crypto" },
             { key: "foreign-accounts", label: "Foreign accounts", icon: Globe, href: "/foreign-accounts" },
-            { key: "withdraw", label: "Withdraw to bank", icon: Building2, href: "/withdraw" },
+            { key: "transfer", label: "Transfer to bank", icon: Building2, href: "/transfer" },
         ],
     },
     {

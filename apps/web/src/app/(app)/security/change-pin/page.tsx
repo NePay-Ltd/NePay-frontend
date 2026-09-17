@@ -112,7 +112,7 @@ export default function ChangePinPage() {
                     </h1>
                     <p className="mt-0.5 text-sm text-body">
                         {isSetupMode
-                            ? "Create your 4-digit payment PIN for withdrawals and purchases."
+                            ? "Create your 4-digit payment PIN for transfers and purchases."
                             : "Update your 4-digit security PIN for transactions."}
                     </p>
                 </div>

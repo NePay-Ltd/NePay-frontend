@@ -17,9 +17,9 @@ import {
     useBankList,
     useResolveBankAccount,
     useSaveBankAccount,
-    useInitiateWithdrawal,
-    useWithdrawalStatus
-} from "@/lib/queries/withdraw";
+    useInitiateTransfer,
+    useTransferStatus
+} from "@/lib/queries/transfer";
 
 import { RequireKyc } from "@/components/shared/require-kyc";
 import { Button } from "@/components/shared/button";
@@ -36,24 +36,24 @@ const PRESET_AMOUNTS = [10000, 50000, 100000];
 // ─── Zod Schema ───────────────────────────────────────────────────────────────
 
 const formSchema = z.object({
-    amount: z.number().min(100, "Minimum withdrawal is ₦100").positive(),
+    amount: z.number().min(100, "Minimum transfer is ₦100").positive(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function WithdrawPage() {
+export default function TransferPage() {
     const router = useRouter();
 
     // ── Queries ──
     const { data: summary } = useOverviewSummary();
-    const withdrawable = summary?.balance ?? 0;
+    const transferable = summary?.balance ?? 0;
 
     const { data: savedAccounts = [], isLoading: accountsLoading } = useSavedBankAccounts();
     const { data: bankList = [] } = useBankList();
     
     const resolveMutation = useResolveBankAccount();
     const saveBankMutation = useSaveBankAccount();
-    const initiateMutation = useInitiateWithdrawal();
+    const initiateMutation = useInitiateTransfer();
 
     // ── Form State ──
     const form = useForm<FormValues>({
@@ -64,7 +64,7 @@ export default function WithdrawPage() {
     });
 
     const watchAmount = form.watch("amount");
-    const isValidAmount = watchAmount > 0 && watchAmount <= withdrawable;
+    const isValidAmount = watchAmount > 0 && watchAmount <= transferable;
 
     // ── Modal & Transaction State ──
     const [modalOpen, setModalOpen] = React.useState(false);
@@ -73,7 +73,7 @@ export default function WithdrawPage() {
     const [resolutionToken, setResolutionToken] = React.useState<string | null>(null);
 
     // Poll the status if txId exists
-    const { data: txStatus } = useWithdrawalStatus(txId);
+    const { data: txStatus } = useTransferStatus(txId);
 
     // Watch polling status and update modal state
     React.useEffect(() => {
@@ -133,7 +133,7 @@ export default function WithdrawPage() {
             setResolutionToken(data.resolutionToken);
             setTxState("pin");
         } catch (err) {
-            toast.error("Failed to verify bank account for withdrawal");
+            toast.error("Failed to verify bank account for transfer");
             setTxState("error");
         }
     };
@@ -166,7 +166,7 @@ export default function WithdrawPage() {
                     setTxState("success");
                 },
                 onError: (err: any) => {
-                    toast.error(err.response?.data?.message || "Withdrawal failed");
+                    toast.error(err.response?.data?.message || "Transfer failed");
                     setTxState("error");
                 }
             }
@@ -180,7 +180,7 @@ export default function WithdrawPage() {
             <div className="mx-auto max-w-5xl space-y-8">
                 {/* ── Top Header ── */}
                 <div className="text-center md:text-left">
-                    <h1 className="text-3xl font-bold text-ink">Withdraw Funds</h1>
+                    <h1 className="text-3xl font-bold text-ink">Transfer Funds</h1>
                     <p className="mt-2 text-sm text-body">
                         Transfer money securely to your local bank account.
                     </p>
@@ -197,7 +197,7 @@ export default function WithdrawPage() {
                                         Available Balance
                                     </p>
                                     <p className="mt-2 font-mono text-3xl sm:text-4xl font-bold tracking-tight text-ink break-all drop-shadow-sm">
-                                        {formatNaira(withdrawable)}
+                                        {formatNaira(transferable)}
                                     </p>
                                 </div>
 
@@ -287,7 +287,7 @@ export default function WithdrawPage() {
                                     <div className="flex items-center justify-between rounded-xl bg-white p-4 border border-border">
                                         <div>
                                             <p className="text-sm font-bold text-ink">Save account</p>
-                                            <p className="text-xs text-muted">Save this account for future withdrawals</p>
+                                            <p className="text-xs text-muted">Save this account for future transfers</p>
                                         </div>
                                         <Switch checked={saveAccount} onCheckedChange={setSaveAccount} />
                                     </div>
@@ -349,10 +349,10 @@ export default function WithdrawPage() {
                                             </Chip>
                                         ))}
                                         <Chip
-                                            active={watchAmount === withdrawable && withdrawable > 0}
+                                            active={watchAmount === transferable && transferable > 0}
                                             onClick={() => {
-                                                if (withdrawable > 0) {
-                                                    form.setValue("amount", withdrawable, { shouldValidate: true });
+                                                if (transferable > 0) {
+                                                    form.setValue("amount", transferable, { shouldValidate: true });
                                                 }
                                             }}
                                             className="font-semibold text-violet-600 dark:text-violet-400"
@@ -382,7 +382,7 @@ export default function WithdrawPage() {
                             <PanelBody className="px-2 sm:px-0">
                                 <div className="space-y-4">
                                     <div className="flex justify-between text-base font-bold">
-                                        <span className="text-ink">You withdraw</span>
+                                        <span className="text-ink">You transfer</span>
                                         <span className="font-mono text-violet-600 dark:text-violet-400">
                                             {formatNaira(watchAmount || 0)}
                                         </span>
@@ -409,7 +409,7 @@ export default function WithdrawPage() {
                                 setModalOpen(true);
                             }}
                         >
-                            Withdraw Now
+                            Transfer Now
                         </Button>
                     </div>
                 </div>
@@ -421,7 +421,7 @@ export default function WithdrawPage() {
                 onOpenChange={setModalOpen}
                 state={txState}
                 // Confirm UI
-                confirmTitle="Review Withdrawal"
+                confirmTitle="Review Transfer"
                 confirmButtonLabel="Confirm & Send"
                 onConfirm={handleConfirm}
                 onCancel={() => setModalOpen(false)}
@@ -449,9 +449,9 @@ export default function WithdrawPage() {
                     </div>
                 }
                 // Processing UI
-                processingText="Processing your withdrawal..."
+                processingText="Processing your transfer..."
                 // Success UI
-                successTitle="Withdrawal Successful"
+                successTitle="Transfer Successful"
                 successDescription={
                     <p>
                         We have successfully sent <span className="font-bold">{formatNaira(watchAmount)}</span> to your bank account. It should arrive shortly.
@@ -463,7 +463,7 @@ export default function WithdrawPage() {
                     router.push("/transactions");
                 }}
                 // Error UI
-                errorTitle="Withdrawal Failed"
+                errorTitle="Transfer Failed"
                 errorDescription={
                     <p>{txStatus?.failureReason || initiateMutation.error?.message || "We encountered an unexpected error."}</p>
                 }

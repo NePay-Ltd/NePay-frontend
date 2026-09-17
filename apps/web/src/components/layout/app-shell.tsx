@@ -23,7 +23,7 @@ export interface AppShellProps {
 /** Also reused by NoticeModal — the same "mid-sensitive-input" routes that shouldn't be interrupted by a PIN dialog shouldn't be interrupted by a notice popup either. */
 export function isProtectedPinRoute(pathname: string) {
     const moneyRoutes = [
-        "/withdraw",
+        "/transfer",
         "/services/airtime",
         "/services/data",
         "/services/electricity",
@@ -94,7 +94,7 @@ function TransactionPinSetupGate() {
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold text-trueWhite">Set your transaction PIN</DialogTitle>
                     <DialogDescription className="text-sm text-slate-300">
-                        You need to create a 4-digit payment PIN before you can withdraw or make wallet payments.
+                        You need to create a 4-digit payment PIN before you can transfer or make wallet payments.
                     </DialogDescription>
                 </DialogHeader>
 
