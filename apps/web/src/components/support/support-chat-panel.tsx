@@ -114,15 +114,18 @@ export function SupportChatPanel({ onBack, support }: SupportChatPanelProps) {
 
         {support.checkedForExisting && !support.loading && !conversation && <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-gradient-to-b from-[#fbfaff] to-white px-8 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-violet-100 text-violet-700"><MessageCircle className="h-7 w-7" /></div>
-            <div>
+            {support.isOnline ? <div>
                 <p className="text-base font-semibold text-ink">Need a hand?</p>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted">Our support team is ready to help. Start a conversation and we&apos;ll take it from there.</p>
-            </div>
+            </div> : <div>
+                <p className="text-base font-semibold text-ink">We&apos;re offline right now</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted">Leave your name, email, and message below and we&apos;ll get back to you by email as soon as we&apos;re back online.</p>
+            </div>}
             {/* The only place that ever creates a conversation — deliberately never automatic
                 on mount, or merely visiting Help & Support would leave a phantom waiting
                 conversation (with its system greeting) behind for anyone who never intended to chat. */}
             <button type="button" onClick={() => void support.loadOrStartConversation()} className="mt-2 rounded-full bg-violet-700 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-700/25 transition hover:bg-violet-800 active:scale-[0.98]">
-                Start a chat
+                {support.isOnline ? "Start a chat" : "Leave a message"}
             </button>
         </div>}
 
@@ -145,7 +148,11 @@ export function SupportChatPanel({ onBack, support }: SupportChatPanelProps) {
                         {item.senderType !== "system" && <div className="mt-1 text-[10px] text-muted/70">{timeAgoLabel(item.createdAt)}</div>}
                     </div>)}
                 {support.agentTyping && <TypingBubble />}
-                {conversation.status === "waiting" && <div className="rounded-xl border border-dashed border-violet-200 bg-white p-3 text-center text-xs text-muted">{conversation.queuePosition === 1 ? "You're next. A real person will join this chat shortly." : conversation.queuePosition ? `You're #${conversation.queuePosition} in line. A real person will join this chat shortly.` : "You're in the queue. A real person will join this chat shortly."} Thanks for your patience!</div>}
+                {conversation.status === "waiting" && <div className="rounded-xl border border-dashed border-violet-200 bg-white p-3 text-center text-xs text-muted">
+                    {support.isOnline
+                        ? <>{conversation.queuePosition === 1 ? "You're next. A real person will join this chat shortly." : conversation.queuePosition ? `You're #${conversation.queuePosition} in line. A real person will join this chat shortly.` : "You're in the queue. A real person will join this chat shortly."} Thanks for your patience!</>
+                        : "We're currently offline, but your message has been saved. We'll get back to you by email as soon as we're back."}
+                </div>}
                 {conversation.status === "pending_agent" && <div className="rounded-xl border border-dashed border-violet-200 bg-white p-3 text-center text-xs text-muted">We&apos;re still looking into this and will follow up right here.</div>}
                 <div ref={messagesEndRef} />
             </div>

@@ -56,6 +56,10 @@ export interface IntakeForm { name: string; email: string; category: SupportCate
 export function useSupportConversation() {
     const [conversation, setConversation] = React.useState<SupportConversation | null>(null);
     const [checkedForExisting, setCheckedForExisting] = React.useState(false);
+    // Whether support is currently staffed — a manual admin-side toggle, not
+    // presence detection. Known even before any conversation (and its socket)
+    // exists, so the landing screen can say so upfront.
+    const [isOnline, setIsOnline] = React.useState(true);
     const [loading, setLoading] = React.useState(false);
     const [unreadCount, setUnreadCount] = React.useState(0);
     const [replyToast, setReplyToast] = React.useState(false);
@@ -113,6 +117,16 @@ export function useSupportConversation() {
         return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
     }, [markConversationSeen]);
 
+    // Fetched once on mount, independent of whether a conversation exists — the landing
+    // screen needs to know this before the customer has even started a chat.
+    React.useEffect(() => {
+        let cancelled = false;
+        apiClient.get<ApiResponse<{ isOnline: boolean }>>("/support/status")
+            .then((result) => { if (!cancelled) setIsOnline(result.data.data.isOnline); })
+            .catch(() => { /* best-effort — assume online rather than block on this */ });
+        return () => { cancelled = true; };
+    }, []);
+
     // Safe, non-creating check on mount: is there already an open conversation to resume?
     React.useEffect(() => {
         let cancelled = false;
@@ -169,6 +183,7 @@ export function useSupportConversation() {
         socket.on("queue_position", (payload: { position: number }) => setConversation((current) => current ? { ...current, queuePosition: payload.position } : current));
         socket.on("conversation_closed", () => { setAgentTyping(false); setConversation((current) => current ? { ...current, status: "closed" } : current); });
         socket.on("conversation_status_changed", (payload: { status: SupportStatus }) => setConversation((current) => current ? { ...current, status: payload.status } : current));
+        socket.on("support_status_changed", (payload: { isOnline: boolean }) => setIsOnline(payload.isOnline));
         return () => { socket.disconnect(); socketRef.current = null; };
         // eslint-disable-next-line react-hooks/exhaustive-deps -- conversationEnded is the intentionally-narrowed dependency; see its own comment.
     }, [conversation?.id, conversationEnded]);
@@ -189,8 +204,19 @@ export function useSupportConversation() {
 
     async function sendViaRest(conversationId: string, body: string) {
         try {
-            const result = await apiClient.post<ApiResponse<SupportMessage>>(`/support/conversation/${conversationId}/messages`, { body });
-            setConversation((current) => current && !current.messages.some((item) => item.id === result.data.data.id) ? { ...current, messages: [...current.messages, result.data.data] } : current);
+            // systemMessage carries the "we're offline" autoresponder, if this was the
+            // conversation's first customer message and support is off — the socket path
+            // gets it via the room broadcast instead, but a REST send (used when the socket
+            // isn't connected) has no broadcast to fall back on, so it rides along here.
+            const result = await apiClient.post<ApiResponse<SupportMessage> & { systemMessage?: SupportMessage }>(`/support/conversation/${conversationId}/messages`, { body });
+            const { data: sent, systemMessage } = result.data;
+            setConversation((current) => {
+                if (!current) return current;
+                const next = [...current.messages];
+                if (!next.some((item) => item.id === sent.id)) next.push(sent);
+                if (systemMessage && !next.some((item) => item.id === systemMessage.id)) next.push(systemMessage);
+                return { ...current, messages: next };
+            });
         } catch (err) {
             setMessage(body);
             toast.error(getApiErrorMessage(err, "We couldn't send that message. Please try again."));
@@ -205,7 +231,10 @@ export function useSupportConversation() {
         if (typingTimeoutRef.current) window.clearTimeout(typingTimeoutRef.current);
         socketRef.current?.emit("typing", { conversationId, isTyping: false });
         if (socketRef.current?.connected) {
-            socketRef.current.timeout(4000).emit("send_message", { conversationId, text: body }, (err: unknown, response?: { ok: boolean }) => {
+            // 10s, not the socket.io default 20s — but well above the ~3-4s round trip
+            // this backend's remote (Supabase-pooler) DB actually takes per message, so a
+            // slow-but-successful ack doesn't get raced by the REST fallback and double-create.
+            socketRef.current.timeout(10000).emit("send_message", { conversationId, text: body }, (err: unknown, response?: { ok: boolean }) => {
                 if (err || !response?.ok) void sendViaRest(conversationId, body);
             });
             return;
@@ -219,10 +248,17 @@ export function useSupportConversation() {
         try {
             const formData = new FormData();
             formData.append("file", file);
-            const result = await apiClient.post<ApiResponse<SupportMessage>>(`/support/conversation/${conversation.id}/attachments`, formData, {
+            const result = await apiClient.post<ApiResponse<SupportMessage> & { systemMessage?: SupportMessage }>(`/support/conversation/${conversation.id}/attachments`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
-            setConversation((current) => current && !current.messages.some((item) => item.id === result.data.data.id) ? { ...current, messages: [...current.messages, result.data.data] } : current);
+            const { data: sent, systemMessage } = result.data;
+            setConversation((current) => {
+                if (!current) return current;
+                const next = [...current.messages];
+                if (!next.some((item) => item.id === sent.id)) next.push(sent);
+                if (systemMessage && !next.some((item) => item.id === systemMessage.id)) next.push(systemMessage);
+                return { ...current, messages: next };
+            });
         } catch (err) {
             toast.error(getApiErrorMessage(err, "We couldn't send that attachment. Please try again."));
         } finally {
@@ -270,7 +306,7 @@ export function useSupportConversation() {
     }
 
     return {
-        conversation, loading, checkedForExisting, unreadCount, replyToast, agentTyping,
+        conversation, loading, checkedForExisting, isOnline, unreadCount, replyToast, agentTyping,
         message, uploadingAttachment, form, setForm, stage,
         loadOrStartConversation, markPanelOpen, handleMessageChange, sendMessage,
         handleAttachmentSelected, advanceStage, dismissIntake, closeConversation, startNewConversation,

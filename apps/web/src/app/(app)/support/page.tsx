@@ -2,10 +2,13 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { MessageCircle, Mail, Book, ChevronRight, Linkedin, Instagram, Send, MessageSquare, Share2 } from "lucide-react";
+import { MessageCircle, Mail, Book, ChevronRight, Linkedin, Instagram, Send, MessageSquare, Share2, Ticket } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SupportChatPanel } from "@/components/support/support-chat-panel";
+import { SupportTicketHistory } from "@/components/support/support-ticket-history";
 import { useSupportConversation } from "@/lib/hooks/use-support-conversation";
+
+type PageView = "list" | "chat" | "tickets";
 
 const XIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -15,7 +18,7 @@ const XIcon = ({ className }: { className?: string }) => (
 
 export default function SupportPage() {
     const [socialModalOpen, setSocialModalOpen] = React.useState(false);
-    const [chatOpen, setChatOpen] = React.useState(false);
+    const [view, setView] = React.useState<PageView>("list");
     // Owned here, once, rather than inside the chat panel — so navigating back
     // to this list (without leaving the page) keeps the same socket connection
     // and unread count alive instead of tearing it down every time the panel closes.
@@ -29,16 +32,19 @@ export default function SupportPage() {
                 <p className="mt-2 text-sm text-muted">Get assistance, find answers, and connect with our team.</p>
             </header>
 
-            {chatOpen ? (
-                <SupportChatPanel support={support} onBack={() => setChatOpen(false)} />
-            ) : (
+            {view === "chat" && <SupportChatPanel support={support} onBack={() => setView("list")} />}
+            {view === "tickets" && <SupportTicketHistory support={support} onBack={() => setView("list")} onOpenLive={() => setView("chat")} />}
+            {view === "list" && (
             <div className="space-y-8">
                 {/* Chat Section */}
                 <section>
                     <h2 className="mb-3 text-sm font-semibold text-ink">Chat</h2>
+                    {!support.isOnline && <div className="mb-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+                        Support is currently offline. You can still leave a message. We&apos;ll reply by email as soon as we&apos;re back.
+                    </div>}
                     {support.replyToast && <button
                         type="button"
-                        onClick={() => setChatOpen(true)}
+                        onClick={() => setView("chat")}
                         className="mb-3 flex w-full items-center gap-2.5 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-left transition hover:bg-violet-100"
                     >
                         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white"><MessageCircle className="h-4 w-4" /></span>
@@ -50,7 +56,7 @@ export default function SupportPage() {
                     <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
                         <button
                             type="button"
-                            onClick={() => setChatOpen(true)}
+                            onClick={() => setView("chat")}
                             className="flex w-full items-center gap-4 p-4 text-left transition hover:bg-slate-50 focus:bg-slate-50"
                         >
                             <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-500">
@@ -59,7 +65,24 @@ export default function SupportPage() {
                             </div>
                             <div className="min-w-0 flex-1">
                                 <p className="font-semibold text-ink">Live Chat</p>
-                                <p className="text-xs text-muted">{support.unreadCount > 0 ? `${support.unreadCount} new ${support.unreadCount === 1 ? "message" : "messages"} from support` : "Initiate a live chat conversation now."}</p>
+                                <p className="text-xs text-muted">{support.unreadCount > 0 ? `${support.unreadCount} new ${support.unreadCount === 1 ? "message" : "messages"} from support` : support.isOnline ? "Initiate a live chat conversation now." : "We're offline, but you can still leave a message."}</p>
+                            </div>
+                            <ChevronRight className="h-5 w-5 shrink-0 text-slate-300" />
+                        </button>
+
+                        <div className="h-px w-full bg-border" />
+
+                        <button
+                            type="button"
+                            onClick={() => setView("tickets")}
+                            className="flex w-full items-center gap-4 p-4 text-left transition hover:bg-slate-50 focus:bg-slate-50"
+                        >
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+                                <Ticket className="h-5 w-5" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="font-semibold text-ink">My tickets</p>
+                                <p className="text-xs text-muted">Track past and current conversations by reference number.</p>
                             </div>
                             <ChevronRight className="h-5 w-5 shrink-0 text-slate-300" />
                         </button>
