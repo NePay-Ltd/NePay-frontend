@@ -146,6 +146,14 @@ export interface LedgerEntryDto {
     rate: string | null;
     assetQuantity: string | null;
     createdAt: string;
+    /**
+     * What the row should show. A ledger entry only proves money moved — a
+     * utility purchase is debited before the provider is asked, so its entry
+     * alone can't say whether it was delivered, is still pending, or failed
+     * and was refunded. Optional only so an older backend that doesn't send
+     * it still reads as "success", as every row used to.
+     */
+    status?: "success" | "pending" | "failed";
 }
 
 export interface VirtualAccountResponseDto {

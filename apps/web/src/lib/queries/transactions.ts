@@ -107,7 +107,7 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
             : meta,
         amount: entry.direction === "DEBIT" ? -parseFloat(entry.amount) : parseFloat(entry.amount),
         category,
-        status: "success",
+        status: entry.status ?? "success",
         date: entry.createdAt,
         cryptoAmount: entry.assetQuantity ?? undefined,
         cryptoAsset,
