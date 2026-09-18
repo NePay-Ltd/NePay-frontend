@@ -1,8 +1,8 @@
 /**
  * TanStack Query hooks for aggregation pods, customer side.
  *
- * Two reads only — today's pool progress and cashback already paid. There is
- * deliberately no "expected cashback" anywhere: the backend never exposes a
+ * Two reads only: today's pool progress and cashback already paid. There is
+ * deliberately no "expected cashback" anywhere. The backend never exposes a
  * pending figure (see PodsService.getCustomerTodaySnapshots), so nothing here
  * could show one even by accident.
  */
@@ -21,7 +21,7 @@ export interface PodSnapshot {
     currency: string;
     /** "YYYY-MM-DD", Africa/Lagos. */
     cycleDate: string;
-    /** ISO timestamp — when this day's pod closes (next Lagos midnight). */
+    /** ISO timestamp for when this day's pod closes (next Lagos midnight). */
     cycleEndsAt: string;
     phase: PodPhase;
     currentCount: number;
@@ -58,7 +58,7 @@ export function useTodayPods() {
             const response = await apiClient.get<ApiResponse<PodSnapshot[]>>("/pods/today");
             return response.data.data;
         },
-        // Pool progress moves as other customers transact — worth a gentle poll.
+        // Pool progress moves as other customers transact, so a gentle poll is worth it.
         refetchInterval: 30_000,
         refetchOnWindowFocus: true,
     });

@@ -40,7 +40,7 @@ const TYPE_META: Record<
 
 const PHASE_META: Record<PodPhase, { label: string; variant: TagVariant }> = {
     FILLING: { label: "Filling", variant: "ok" },
-    FULL: { label: "Full · being sold", variant: "warn" },
+    FULL: { label: "Full, being sold", variant: "warn" },
     COMPLETED: { label: "Sold", variant: "neutral" },
 };
 
@@ -56,7 +56,7 @@ function plural(count: number, noun: string): string {
     return `${count} ${noun}${count === 1 ? "" : "s"}`;
 }
 
-/** What the customer should understand about where this pod stands — including that a full pod turns later same-day sales away. */
+/** What the customer should understand about where this pod stands, including that a full pod turns later same-day sales away. */
 function phaseMessage(snapshot: PodSnapshot): string {
     switch (snapshot.phase) {
         case "FILLING":
@@ -84,7 +84,7 @@ export default function PodsPage() {
             <div className="animate-in fade-in slide-in-from-bottom-2 py-4 duration-500">
                 <h1 className="text-2xl font-bold text-ink">Pods</h1>
                 <p className="mt-1 text-sm text-body">
-                    Sales pool together each day — and when the batch sells for more, you share the extra.
+                    Sales pool together each day, and when the batch sells for more, you share the extra.
                 </p>
             </div>
 
@@ -156,7 +156,7 @@ function HowItWorks() {
         },
         {
             title: "Better rate? You share it",
-            body: "If the batch sells for more than your rate, the difference is paid to you as cashback. If it doesn't, nothing changes — cashback is a bonus, never guaranteed.",
+            body: "If the batch sells for more than your rate, the difference is paid to you as cashback. If it doesn't, nothing changes. Cashback is a bonus, never guaranteed.",
         },
     ];
 
