@@ -114,7 +114,7 @@ export function useGiftCardOrder(id: string | null) {
             return res.data.data;
         },
         enabled: !!id,
-        refetchInterval: (query) => (query.state.data?.status === "PENDING_REVIEW" ? 5000 : false),
+        refetchInterval: process.env.NODE_ENV === 'development' ? false : (query) => (query.state.data?.status === "PENDING_REVIEW" ? 5000 : false),
     });
 }
 

@@ -78,7 +78,7 @@ export function useCryptoDepositStatus(paymentId: string | null) {
             return res.data.data;
         },
         enabled: !!paymentId,
-        refetchInterval: (query) => {
+        refetchInterval: process.env.NODE_ENV === 'development' ? false : (query) => {
             const status = query.state.data?.status;
             if (!status || TERMINAL_STATUSES.includes(status)) return false;
             return 7000;

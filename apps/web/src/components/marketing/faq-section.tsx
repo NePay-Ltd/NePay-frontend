@@ -16,8 +16,8 @@ const faqs = [
     answer: "With NePay, you can receive and convert supported cryptocurrencies to Naira, pay everyday bills, sell gift cards and access other payment services from one app.",
   },
   {
-    question: "How do I fund and withdraw from my NePay account?",
-    answer: "You can fund your account using your personal virtual account or by depositing supported cryptocurrencies. You can withdraw your available Naira balance to a Nigerian bank account.",
+    question: "How do I fund and transfer from my NePay account?",
+    answer: "You can fund your account using your personal virtual account or by depositing supported cryptocurrencies. You can transfer your available Naira balance to a Nigerian bank account.",
   },
   {
     question: "How do crypto deposits work?",

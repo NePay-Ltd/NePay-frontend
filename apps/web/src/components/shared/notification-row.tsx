@@ -13,7 +13,7 @@ function getIconConfig(type: NotificationType) {
     switch (type) {
         case "deposit":
             return { icon: Wallet, bg: "bg-green-100 dark:bg-green-900/30", fg: "text-green-600 dark:text-green-400" };
-        case "withdrawal":
+        case "transfer":
             return { icon: ArrowUpRight, bg: "bg-red-100 dark:bg-red-900/30", fg: "text-red-500 dark:text-red-400" };
         case "referral":
             return { icon: Gift, bg: "bg-violet-100 dark:bg-violet-900/30", fg: "text-violet-600 dark:text-violet-400" };

@@ -15,7 +15,7 @@ import {
     useBankList, 
     useResolveBankAccount, 
     useSaveBankAccount 
-} from "@/lib/queries/withdraw";
+} from "@/lib/queries/transfer";
 
 import { Button } from "@/components/shared/button";
 import { Panel, PanelBody } from "@/components/shared/panel";
@@ -154,7 +154,7 @@ export default function BankAccountsPage() {
                 <div>
                     <h1 className="text-2xl font-bold text-ink">Saved Bank Accounts</h1>
                     <p className="mt-0.5 text-sm text-body">
-                        Manage accounts for your withdrawals.
+                        Manage accounts for your transfers.
                     </p>
                 </div>
             </div>
@@ -179,7 +179,7 @@ export default function BankAccountsPage() {
                             <EmptyState
                                 icon={Building2}
                                 heading="No saved accounts"
-                                description="Add a bank account to enable withdrawals from your wallet."
+                                description="Add a bank account to enable transfers from your wallet."
                             />
                         </div>
                     ) : (
@@ -254,7 +254,7 @@ export default function BankAccountsPage() {
                     <DialogHeader>
                         <DialogTitle>Add Bank Account</DialogTitle>
                         <DialogDescription>
-                            Enter your account details to add a new withdrawal destination.
+                            Enter your account details to add a new Transfer destination.
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={form.handleSubmit(onAddSubmit)} className="space-y-4 pt-4">

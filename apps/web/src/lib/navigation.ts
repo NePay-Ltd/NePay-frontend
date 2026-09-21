@@ -1,5 +1,5 @@
 import { IconWallet as Wallet, IconGrid as LayoutGrid, IconGift as Gift, IconPlane as Plane, IconCard as CreditCard, IconBuilding as Building2, IconBell as Bell, IconUser as User, IconHome as Home, IconUsers as Users, IconTrophy as Trophy } from "@/components/icons";
-import { LayoutDashboard, ReceiptText, Download, ShieldCheck, PlusCircle, UserPlus, Globe, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, ReceiptText, Download, ShieldCheck, PlusCircle, UserPlus, Globe, Layers, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
     key: string;
@@ -22,6 +22,7 @@ export const SIDEBAR_GROUPS: NavGroup[] = [
             { key: "overview", label: "Overview", icon: LayoutDashboard, href: "/overview" },
             { key: "transactions", label: "Transactions", icon: ReceiptText, href: "/transactions" },
             { key: "leaderboard", label: "Leaderboard", icon: Trophy, href: "/leaderboard" },
+            { key: "pods", label: "Pods", icon: Layers, href: "/pods" },
             { key: "refer", label: "Refer & Earn", icon: UserPlus, href: "/refer" },
         ],
     },
@@ -30,7 +31,7 @@ export const SIDEBAR_GROUPS: NavGroup[] = [
         items: [
             { key: "receive", label: "Receive crypto", icon: LayoutGrid, href: "/receive-crypto" },
             { key: "foreign-accounts", label: "Foreign accounts", icon: Globe, href: "/foreign-accounts" },
-            { key: "withdraw", label: "Withdraw to bank", icon: Building2, href: "/withdraw" },
+            { key: "transfer", label: "Transfer to bank", icon: Building2, href: "/transfer" },
         ],
     },
     {

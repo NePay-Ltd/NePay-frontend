@@ -128,11 +128,11 @@ export function TopBar() {
                     <Button
                         variant="primary"
                         size="sm"
-                        onClick={() => router.push("/withdraw")}
+                        onClick={() => router.push("/transfer")}
                         className="font-bold h-9 px-4 rounded-lg shadow-sm hover:shadow-md"
                     >
                         <ArrowUpRight className="mr-1.5 h-4 w-4" />
-                        Withdraw
+                        Transfer
                     </Button>
                 </div>
 

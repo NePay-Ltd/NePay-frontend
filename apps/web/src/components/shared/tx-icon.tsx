@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 
 export type TxCategory =
     | "deposit"
-    | "withdrawal"
+    | "transfer"
     | "payment"
     | "gift-card"
     | "flight"
@@ -36,7 +36,7 @@ interface CategoryConfig {
 
 const CATEGORY_MAP: Record<TxCategory, CategoryConfig> = {
     deposit: { icon: ArrowDownLeft, bg: "bg-green-500/10", fg: "text-green-500" },
-    withdrawal: { icon: ArrowUpRight, bg: "bg-red-500/10", fg: "text-red-500" },
+    transfer: { icon: ArrowUpRight, bg: "bg-red-500/10", fg: "text-red-500" },
     payment: { icon: CreditCard, bg: "bg-amber-500/10", fg: "text-amber-500" },
     "gift-card": { icon: Gift, bg: "bg-green-100", fg: "text-green-700" },
     flight: { icon: Plane, bg: "bg-teal-100", fg: "text-teal-700" },

@@ -142,7 +142,7 @@ export function Hero() {
                         Add Money
                       </div>
                       <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/15 text-sm font-medium backdrop-blur-sm">
-                        Withdraw
+                        Transfer
                       </div>
                     </div>
                   </div>

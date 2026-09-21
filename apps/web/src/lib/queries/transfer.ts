@@ -1,10 +1,11 @@
 /**
- * TanStack Query hooks for the Withdraw section.
+ * TanStack Query hooks for the Transfer section.
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { ResolveAccountResponseDto, WithdrawalResponseDto, ApiResponse } from "@/lib/types/api";
+
 export interface Bank {
     bankCode: string;
     bankName: string;
@@ -20,16 +21,16 @@ export interface SavedBankAccount {
     lastUsedAt?: string;
 }
 
-export const withdrawKeys = {
-    all: ["withdraw"] as const,
-    bankList: () => [...withdrawKeys.all, "bankList"] as const,
-    savedAccounts: () => [...withdrawKeys.all, "savedAccounts"] as const,
-    status: (id: string) => [...withdrawKeys.all, "status", id] as const,
+export const transferKeys = {
+    all: ["transfer"] as const,
+    bankList: () => [...transferKeys.all, "bankList"] as const,
+    savedAccounts: () => [...transferKeys.all, "savedAccounts"] as const,
+    status: (id: string) => [...transferKeys.all, "status", id] as const,
 };
 
 export function useBankList() {
     return useQuery<Bank[]>({
-        queryKey: withdrawKeys.bankList(),
+        queryKey: transferKeys.bankList(),
         queryFn: async () => {
             const res = await apiClient.get<ApiResponse<Bank[]>>("/withdrawals/banks");
             return res.data.data;
@@ -40,7 +41,7 @@ export function useBankList() {
 
 export function useSavedBankAccounts() {
     return useQuery<SavedBankAccount[]>({
-        queryKey: withdrawKeys.savedAccounts(),
+        queryKey: transferKeys.savedAccounts(),
         queryFn: async () => {
             const res = await apiClient.get<ApiResponse<SavedBankAccount[]>>("/withdrawals/accounts");
             return res.data.data;
@@ -67,7 +68,7 @@ export function useSaveBankAccount() {
             return res.data.data;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: withdrawKeys.savedAccounts() });
+            queryClient.invalidateQueries({ queryKey: transferKeys.savedAccounts() });
         },
     });
 }
@@ -79,12 +80,12 @@ export function useDeleteBankAccount() {
             await apiClient.delete(`/withdrawals/accounts/${accountId}`);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: withdrawKeys.savedAccounts() });
+            queryClient.invalidateQueries({ queryKey: transferKeys.savedAccounts() });
         },
     });
 }
 
-export function useInitiateWithdrawal() {
+export function useInitiateTransfer() {
     return useMutation<
         WithdrawalResponseDto,
         Error,
@@ -104,14 +105,14 @@ export function useInitiateWithdrawal() {
     });
 }
 
-export function useWithdrawalStatus(withdrawalId: string | null) {
+export function useTransferStatus(withdrawalId: string | null) {
     return useQuery<WithdrawalResponseDto>({
-        queryKey: withdrawKeys.status(withdrawalId!),
+        queryKey: transferKeys.status(withdrawalId!),
         queryFn: async () => {
             const res = await apiClient.get<ApiResponse<WithdrawalResponseDto>>(`/withdrawals/${withdrawalId}`);
             return res.data.data;
         },
         enabled: !!withdrawalId,
-        refetchInterval: 3000,
+        refetchInterval: process.env.NODE_ENV === 'development' ? false : 3000,
     });
 }

@@ -149,9 +149,9 @@ export function CommandPalette() {
                                 <Plus className="mr-2 h-4 w-4 text-violet-600" />
                                 Add Money
                             </CommandItem>
-                            <CommandItem onSelect={() => navigate("/withdraw")}>
+                            <CommandItem onSelect={() => navigate("/transfer")}>
                                 <ArrowUpRight className="mr-2 h-4 w-4 text-violet-600" />
-                                Withdraw
+                                Transfer
                             </CommandItem>
                             <CommandItem onSelect={() => navigate("/gift-cards")}>
                                 <Gift className="mr-2 h-4 w-4 text-violet-600" />

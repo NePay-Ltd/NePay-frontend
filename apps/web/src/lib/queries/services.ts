@@ -260,6 +260,6 @@ export function useServiceTransactionStatus(transactionId: string | null) {
             return res.data.data;
         },
         enabled: !!transactionId,
-        refetchInterval: (query) => query.state.data?.status === "PROCESSING" ? 3000 : false,
+        refetchInterval: process.env.NODE_ENV === 'development' ? false : (query) => query.state.data?.status === "PROCESSING" ? 3000 : false,
     });
 }
