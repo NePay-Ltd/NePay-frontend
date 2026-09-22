@@ -29,11 +29,22 @@ interface UiState {
     /** Global balance mask (eye toggle). */
     masked: boolean;
     toggleMasked: () => void;
+
+    /**
+     * Feature-level "seen it" flags — one per interactive first-run guide.
+     * Distinct from the flags a store like this might otherwise carry
+     * one-off: a guide is opt-in reference material a person can deliberately
+     * reopen (see PodsIntroGuide's own help button), so this stays a map
+     * rather than growing a dedicated boolean field per feature.
+     */
+    seenGuides: Record<string, boolean>;
+    hasSeenGuide: (key: string) => boolean;
+    markGuideSeen: (key: string) => void;
 }
 
 export const useUiStore = create<UiState>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             activeNav: "overview",
             setActiveNav: (key) => set({ activeNav: key }),
 
@@ -48,10 +59,15 @@ export const useUiStore = create<UiState>()(
 
             masked: true,
             toggleMasked: () => set((state) => ({ masked: !state.masked })),
+
+            seenGuides: {},
+            hasSeenGuide: (key) => !!get().seenGuides[key],
+            markGuideSeen: (key) =>
+                set((state) => ({ seenGuides: { ...state.seenGuides, [key]: true } })),
         }),
         {
             name: "nepay-ui-storage",
-            partialize: (state) => ({ masked: state.masked }),
+            partialize: (state) => ({ masked: state.masked, seenGuides: state.seenGuides }),
         }
     )
 );
