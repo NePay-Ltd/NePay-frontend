@@ -23,6 +23,12 @@ export const passwordSchema = z
     .min(6, "Password must be at least 6 characters")
     .refine((val) => /\d/.test(val), "Password must contain at least one number");
 
+export const hearAboutUsEnum = z.enum([
+    "INSTAGRAM", "TIKTOK", "TWITTER_X", "FACEBOOK", "YOUTUBE", 
+    "GOOGLE_SEARCH", "FRIEND_OR_FAMILY", "RADIO_OR_TV", "BILLBOARD_OR_FLYER", 
+    "APP_STORE", "OTHER"
+]);
+
 // ─── Login ────────────────────────────────────────────────────────────
 export const loginSchema = z.object({
     identifier: z
@@ -66,10 +72,21 @@ export const registerStepTwoSchema = z
         referralCode: attributionCodeSchema,
         /** A marketer's own attribution code — only ever arrives via a `?mkt=` partner link, never typed by hand; see the register page's own note. */
         referredByMarketerCode: attributionCodeSchema,
+        hearAboutUs: hearAboutUsEnum.optional(),
+        hearAboutUsOther: z.string().trim().max(120, "Must be under 120 characters").optional(),
     })
     .refine((data) => data.password === data.confirmPassword, {
         message: "Passwords do not match",
         path: ["confirmPassword"],
+    })
+    .refine((data) => {
+        if (data.hearAboutUs === "OTHER") {
+            return !!data.hearAboutUsOther && data.hearAboutUsOther.length > 0;
+        }
+        return true;
+    }, {
+        message: "Please specify how you heard about us",
+        path: ["hearAboutUsOther"],
     });
 export type RegisterStepTwoValues = z.infer<typeof registerStepTwoSchema>;
 

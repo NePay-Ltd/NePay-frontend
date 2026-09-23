@@ -3,8 +3,9 @@
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Clock3, Coins, Gift, Layers, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock3, Coins, Gift, HelpCircle, Layers, Users } from "lucide-react";
 
+import { PodsIntroGuide } from "@/components/pods/pods-intro-guide";
 import { Panel, PanelBody, PanelHeader } from "@/components/shared/panel";
 import { Skeleton } from "@/components/shared/skeletons";
 import { Tag, type TagVariant } from "@/components/shared/tag";
@@ -19,6 +20,10 @@ import {
     type PodSnapshot,
     type PodTransactionType,
 } from "@/lib/queries/pods";
+import { useUiStore } from "@/lib/stores/ui-store";
+
+/** This guide's key in the ui-store's `seenGuides` map — see PodsIntroGuide. */
+const PODS_GUIDE_KEY = "pods-intro";
 
 const TYPE_META: Record<
     PodTransactionType,
@@ -74,6 +79,29 @@ export default function PodsPage() {
     const cashback = usePodCashback(page);
     const [now, setNow] = React.useState(() => Date.now());
 
+    // Interactive first-run guide (see PodsIntroGuide) — opens itself once,
+    // ever, per the ui-store's persisted seenGuides flag, and is always
+    // reachable afterwards through the help icon below. `hasSeenGuide`
+    // reads localStorage-backed state that isn't available during SSR, so
+    // this only ever opens client-side, post-hydration, via the effect
+    // below — never as an SSR-mismatched initial render.
+    const hasSeenIntro = useUiStore((state) => state.hasSeenGuide(PODS_GUIDE_KEY));
+    const markIntroSeen = useUiStore((state) => state.markGuideSeen);
+    const [introOpen, setIntroOpen] = React.useState(false);
+
+    React.useEffect(() => {
+        if (!hasSeenIntro) setIntroOpen(true);
+        // Only ever auto-opens once, on the visit where the flag is still
+        // unset — deliberately not reacting to `hasSeenIntro` flipping true,
+        // which happens as a *result* of this same open/close cycle.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const closeIntro = () => {
+        setIntroOpen(false);
+        if (!hasSeenIntro) markIntroSeen(PODS_GUIDE_KEY);
+    };
+
     React.useEffect(() => {
         const timer = window.setInterval(() => setNow(Date.now()), 30000);
         return () => window.clearInterval(timer);
@@ -81,12 +109,25 @@ export default function PodsPage() {
 
     return (
         <div className="mx-auto max-w-3xl space-y-6 pb-12">
-            <div className="animate-in fade-in slide-in-from-bottom-2 py-4 duration-500">
-                <h1 className="text-2xl font-bold text-ink">Pods</h1>
-                <p className="mt-1 text-sm text-body">
-                    Sales pool together each day, and when the batch sells for more, you share the extra.
-                </p>
+            <div className="flex animate-in items-start justify-between gap-3 fade-in slide-in-from-bottom-2 py-4 duration-500">
+                <div>
+                    <h1 className="text-2xl font-bold text-ink">Pods</h1>
+                    <p className="mt-1 text-sm text-body">
+                        Sales pool together each day, and when the batch sells for more, you share the extra.
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    onClick={() => setIntroOpen(true)}
+                    aria-label="How Pods work"
+                    title="How Pods work"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-black/5 hover:text-ink dark:hover:bg-white/5"
+                >
+                    <HelpCircle className="h-5 w-5" aria-hidden="true" />
+                </button>
             </div>
+
+            <PodsIntroGuide open={introOpen} onClose={closeIntro} />
 
             <HowItWorks />
 

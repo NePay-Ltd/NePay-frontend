@@ -8,14 +8,21 @@ import type { NextRequest } from "next/server";
  *   /login, /register, /forgot-password, /reset-password
  *
  * All other routes require the user to be authenticated, indicated by the
- * presence of a `nepay_refresh` httpOnly cookie (set by the backend on login).
+ * presence of a `nepay_refresh` cookie. This is NOT an httpOnly,
+ * backend-issued session cookie — the backend never sets any cookie at
+ * all (every auth response is JSON-body-only); this is a plain flag
+ * cookie (`document.cookie = "nepay_refresh=true"`, see auth-context.tsx)
+ * set by client-side JS purely so this middleware has something to read
+ * before the page renders. It is NOT the security boundary: no
+ * server-side code in this app reads cookies at all (no Server Component
+ * or route handler calls `cookies()`), so this only ever controls a
+ * redirect-to-/login UX decision. Real authorization happens entirely via
+ * the Bearer token validated by the backend's JWT guard on actual API
+ * calls — forging this cookie without ever logging in gets you a page
+ * shell, not any real data.
  *
  * In prototype/design mode this is intentionally loose — any visit to the
  * app routes will redirect to /login so you can explore the auth flows.
- *
- * During backend integration: replace the cookie check with a proper JWT
- * validation or keep it as a lightweight gate and let the API layer handle
- * full auth enforcement via 401 + silent refresh.
  */
 
 const PUBLIC_PATHS = new Set([
@@ -56,33 +63,112 @@ const PUBLIC_PREFIXES = ["/_next", "/favicon", "/api/auth/callback"];
  */
 const MARKETER_PREFIX = "/marketer";
 
+/**
+ * The backend's own origin, both http(s) and ws(s) forms — needed in
+ * connect-src below for plain API calls and the socket.io connections
+ * (support chat, live notices; see use-support-conversation.ts and
+ * NoticeSocketListener.tsx, both of which derive their socket origin from
+ * this exact same env var with the exact same fallback).
+ */
+function backendOrigins(): { http: string; ws: string } {
+    const configured = process.env.NEXT_PUBLIC_API_URL;
+    let http = "https://nepay-backend.onrender.com";
+    try {
+        if (configured) http = new URL(configured).origin;
+    } catch {
+        // keep the fallback
+    }
+    return { http, ws: http.replace(/^http/, "ws") };
+}
+
+/**
+ * A real Content-Security-Policy, nonce-based per Next.js's own documented
+ * App Router pattern (https://nextjs.org/docs/app/building-your-application/configuring/content-security-policy) —
+ * replaces the previous header in next.config.js, which only forced
+ * http->https upgrades and placed no restriction on script execution at
+ * all. This app has a deliberately minimal external footprint that makes a
+ * real policy achievable: next/font self-hosts its one Google font (no
+ * external font host to allow), there are no analytics/tracking scripts or
+ * third-party embeds anywhere in the codebase, and the only external image
+ * host is Cloudinary (avatarUrl, plain <img> tags — not next/image, so no
+ * remotePatterns concern either).
+ *
+ * 'strict-dynamic' alongside the nonce is required, not optional: without
+ * it, Next.js's own dynamically-injected code-split chunk scripts (which
+ * carry no nonce of their own) would be blocked by a plain nonce-only
+ * policy, breaking the app rather than securing it. style-src keeps
+ * 'unsafe-inline' rather than reusing the script nonce — next-themes
+ * injects a small pre-hydration inline script to avoid a flash of the
+ * wrong theme, and style-based injection is a materially smaller risk than
+ * script-based, so this is a deliberate, pragmatic line, not an oversight.
+ */
+function contentSecurityPolicy(nonce: string): string {
+    const { http, ws } = backendOrigins();
+    return `
+        default-src 'self';
+        script-src 'self' 'nonce-${nonce}' 'strict-dynamic';
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' data: https://res.cloudinary.com;
+        font-src 'self';
+        connect-src 'self' ${http} ${ws};
+        frame-ancestors 'self';
+        base-uri 'self';
+        object-src 'none';
+        form-action 'self';
+        upgrade-insecure-requests;
+    `.replace(/\s{2,}/g, " ").trim();
+}
+
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
+    const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+    const csp = contentSecurityPolicy(nonce);
+
+    // Per Next.js's own documented CSP pattern: the nonce is threaded through
+    // as a request header too (not just the response header) so Next's own
+    // App Router rendering pipeline can read it and apply it to the inline
+    // bootstrap scripts it generates itself.
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-nonce", nonce);
+    requestHeaders.set("Content-Security-Policy", csp);
+
+    // Every response — pass-through or redirect — carries the same CSP,
+    // and every pass-through also carries the request-header form of the
+    // nonce (see the comment above) so Next's renderer can see it.
+    const passThrough = (): NextResponse => {
+        const res = NextResponse.next({ request: { headers: requestHeaders } });
+        res.headers.set("Content-Security-Policy", csp);
+        return res;
+    };
+    const withCsp = (res: NextResponse): NextResponse => {
+        res.headers.set("Content-Security-Policy", csp);
+        return res;
+    };
 
     // Always pass through Next.js internals and static files
     if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
-        return NextResponse.next();
+        return passThrough();
     }
 
     // Marketer routes handle their own auth; never gate them on the main app cookie.
     if (pathname === MARKETER_PREFIX || pathname.startsWith(`${MARKETER_PREFIX}/`)) {
-        return NextResponse.next();
+        return passThrough();
     }
 
     // Pass through exact public auth pages
     if (PUBLIC_PATHS.has(pathname)) {
-        return NextResponse.next();
+        return passThrough();
     }
 
-    // Check for the refresh-token cookie as the auth signal.
-    // The access token is short-lived and lives in memory; the refresh token
-    // is httpOnly and is the only persistent auth indicator we can read here.
+    // The nepay_refresh flag cookie is the only persistent, readable signal
+    // available here — see this file's class-level note on why it's a
+    // routing UX gate, not the real auth boundary.
     const hasSession = request.cookies.has("nepay_refresh");
 
     if (!hasSession) {
         // If it's a public content page, let them view it without logging in
         if (PUBLIC_CONTENT_PATHS.has(pathname)) {
-            return NextResponse.next();
+            return passThrough();
         }
 
         // Preserve the attempted URL so we can redirect back after login
@@ -91,15 +177,15 @@ export function middleware(request: NextRequest) {
         if (returnTo) {
             loginUrl.searchParams.set("returnTo", returnTo);
         }
-        return NextResponse.redirect(loginUrl);
+        return withCsp(NextResponse.redirect(loginUrl));
     }
 
     // If the user is logged in and visiting an auth page, bounce to overview
     if (PUBLIC_PATHS.has(pathname)) {
-        return NextResponse.redirect(new URL("/overview", request.url));
+        return withCsp(NextResponse.redirect(new URL("/overview", request.url)));
     }
 
-    return NextResponse.next();
+    return passThrough();
 }
 
 export const config = {

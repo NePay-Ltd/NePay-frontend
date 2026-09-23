@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,7 +12,8 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/format";
-import { useOverviewSummary } from "@/lib/queries/overview";
+import { overviewKeys, useOverviewSummary } from "@/lib/queries/overview";
+import { walletKeys } from "@/lib/queries/wallet";
 import {
     useSavedBankAccounts,
     useBankList,
@@ -45,6 +47,7 @@ export default function TransferPage() {
     const router = useRouter();
 
     // ── Queries ──
+    const queryClient = useQueryClient();
     const { data: summary } = useOverviewSummary();
     const transferable = summary?.balance ?? 0;
 
@@ -152,8 +155,23 @@ export default function TransferPage() {
             },
             {
                 onSuccess: (res) => {
-                    setTxId(res.id); // Triggers success since we mock the polling
-                    
+                    // Starts the real status polling (useTransferStatus,
+                    // 3s interval) — the useEffect above watching
+                    // txStatus.status is what actually flips txState to
+                    // "success"/"error" once the provider confirms, not
+                    // this handler. The withdrawal is only PROCESSING at
+                    // this point, not settled.
+                    setTxId(res.id);
+
+                    // The ledger debit already happened server-side by the
+                    // time this response comes back (see
+                    // WithdrawalService.initiateWithdrawal) — invalidate
+                    // now so the balance shown elsewhere in the app isn't
+                    // stale while the polling above resolves the actual
+                    // outcome.
+                    queryClient.invalidateQueries({ queryKey: walletKeys.balance() });
+                    queryClient.invalidateQueries({ queryKey: overviewKeys.all });
+
                     if (saveAccount) {
                         const isAlreadySaved = savedAccounts.some(a => a.accountNumber === accountNumber && a.bankCode === bankCode);
                         if (!isAlreadySaved) {
@@ -162,8 +180,6 @@ export default function TransferPage() {
                             });
                         }
                     }
-
-                    setTxState("success");
                 },
                 onError: (err: any) => {
                     toast.error(err.response?.data?.message || "Transfer failed");
