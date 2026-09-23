@@ -184,6 +184,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     deviceId: getOrCreateDeviceId() ?? undefined,
                     referralCode: values.referralCode || undefined,
                     referredByMarketerCode: values.referredByMarketerCode || undefined,
+                    hearAboutUs: values.hearAboutUs || undefined,
+                    hearAboutUsOther: values.hearAboutUsOther || undefined,
                 });
                 
                 const user = res.data.data;

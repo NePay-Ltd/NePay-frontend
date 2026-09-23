@@ -14,6 +14,7 @@ import { registerStepTwoSchema, type RegisterStepTwoValues } from "@/lib/schemas
 import { Button } from "@/components/shared/button";
 import { Field } from "@/components/shared/field";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 function calculateStrength(password: string): number {
     let strength = 0;
@@ -97,6 +98,7 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
 
     const emailValue = watch("email");
     const acceptedTerms = watch("acceptTerms");
+    const hearAboutUsValue = watch("hearAboutUs");
 
     return (
         <form id="step-two-form" method="POST" onSubmit={handleSubmit(onSubmitFinal)} className="space-y-6">
@@ -191,6 +193,48 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
                     className="pr-10"
                 />
             </Field>
+
+            <div className="space-y-4">
+                <Field label="How did you hear about us?" htmlFor="reg-hear" error={errors.hearAboutUs?.message}>
+                    <Select
+                        value={hearAboutUsValue || ""}
+                        onValueChange={(val: any) => {
+                            setValue("hearAboutUs", val, { shouldValidate: true });
+                            if (val !== "OTHER") {
+                                setValue("hearAboutUsOther", "", { shouldValidate: true });
+                            }
+                        }}
+                    >
+                        <SelectTrigger id="reg-hear" aria-invalid={!!errors.hearAboutUs} className={cn(!!errors.hearAboutUs && "border-red-500")}>
+                            <SelectValue placeholder="Select an option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="INSTAGRAM">Instagram</SelectItem>
+                            <SelectItem value="TIKTOK">TikTok</SelectItem>
+                            <SelectItem value="TWITTER_X">Twitter (X)</SelectItem>
+                            <SelectItem value="FACEBOOK">Facebook</SelectItem>
+                            <SelectItem value="YOUTUBE">YouTube</SelectItem>
+                            <SelectItem value="GOOGLE_SEARCH">Google Search</SelectItem>
+                            <SelectItem value="FRIEND_OR_FAMILY">Friend or Family</SelectItem>
+                            <SelectItem value="RADIO_OR_TV">Radio / TV</SelectItem>
+                            <SelectItem value="BILLBOARD_OR_FLYER">Billboard / Flyer</SelectItem>
+                            <SelectItem value="APP_STORE">App Store</SelectItem>
+                            <SelectItem value="OTHER">Other (Please specify)</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </Field>
+
+                {hearAboutUsValue === "OTHER" && (
+                    <Field label="Please specify" htmlFor="reg-hear-other" error={errors.hearAboutUsOther?.message}>
+                        <Input
+                            id="reg-hear-other"
+                            placeholder="Where did you hear about us?"
+                            {...register("hearAboutUsOther")}
+                            aria-invalid={!!errors.hearAboutUsOther}
+                        />
+                    </Field>
+                )}
+            </div>
 
             {/* Terms */}
             <div className="text-center text-sm text-muted mt-2 mb-6">
