@@ -53,7 +53,7 @@ const PUBLIC_CONTENT_PATHS = new Set([
 ]);
 
 /** Paths that start with these prefixes are always public (static, marketing). */
-const PUBLIC_PREFIXES = ["/_next", "/favicon", "/api/auth/callback"];
+const PUBLIC_PREFIXES = ["/_next", "/favicon", "/api/auth/callback", "/sitemap.xml", "/robots.txt"];
 
 /**
  * Marketer routes run their own auth system (a bearer token in localStorage,
