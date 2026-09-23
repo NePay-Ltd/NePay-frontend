@@ -6,6 +6,7 @@ const TOKEN_KEY = 'nepay-marketer-token';
 
 export interface MarketerDashboard {
     marketerCode: string;
+    name: string;
     status: 'ACTIVE' | 'INACTIVE';
     signups: number;
     verifiedConversions: number;

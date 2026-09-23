@@ -2,13 +2,14 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IconEye as Eye, IconEyeOff as EyeOff, IconLock as Lock, IconCheck as Check } from "@/components/icons";
 import { UserPlus, Phone, AtSign } from "lucide-react";;
 import { toast } from "sonner";
 
-import { registerSchema, type RegisterValues } from "@/lib/schemas/auth";
+import { hearAboutUsEnum, registerSchema, type RegisterValues } from "@/lib/schemas/auth";
 import { useAuth } from "@/lib/auth-context";
 import { RegisterStepOne } from "@/components/auth/RegisterStepOne";
 import { RegisterStepTwo } from "@/components/auth/RegisterStepTwo";
@@ -17,8 +18,18 @@ import type { RegisterStepOneValues, RegisterStepTwoValues } from "@/lib/schemas
 import type { ApiError } from "@/lib/api";
 import type { AuthTokensDto } from "@/lib/types/api";
 
-export default function RegisterPage() {
+function RegisterPageContent() {
     const { register: registerUser, login } = useAuth();
+    const searchParams = useSearchParams();
+
+    // A marketer's partner link / QR code carries their attribution code as
+    // `?mkt=` (captured silently, never rendered as an input) and may also
+    // prefill the "How did you hear about us?" answer via `?hear=` and
+    // `?hearOther=` — the customer can still change those before submitting.
+    const marketerCodeFromUrl = searchParams.get("mkt")?.trim() ?? "";
+    const hearParsed = hearAboutUsEnum.safeParse(searchParams.get("hear"));
+    const hearFromUrl = hearParsed.success ? hearParsed.data : undefined;
+    const hearOtherFromUrl = hearFromUrl === "OTHER" ? (searchParams.get("hearOther")?.trim().slice(0, 120) ?? "") : "";
     const [step, setStep] = React.useState<1 | 2 | 3>(1);
     const [stepOneData, setStepOneData] = React.useState<RegisterStepOneValues | null>(null);
     const [tempCredentials, setTempCredentials] = React.useState<{email: string; password: string} | null>(null);
@@ -48,6 +59,9 @@ export default function RegisterPage() {
                 username: stepTwoData.username,
                 email: stepTwoData.email,
                 password: stepTwoData.password,
+                referredByMarketerCode: marketerCodeFromUrl || undefined,
+                hearAboutUs: stepTwoData.hearAboutUs,
+                hearAboutUsOther: stepTwoData.hearAboutUs === "OTHER" ? stepTwoData.hearAboutUsOther : undefined,
             });
 
             if (user) {
@@ -108,6 +122,9 @@ export default function RegisterPage() {
             {step === 2 && (
                 <RegisterStepTwo 
                     isSubmitting={isSubmitting} 
+                    fromPartnerLink={!!marketerCodeFromUrl}
+                    defaultHearAboutUs={hearFromUrl}
+                    defaultHearAboutUsOther={hearOtherFromUrl}
                     onBack={() => setStep(1)} 
                     onSubmitFinal={onSubmitFinal} 
                 />
@@ -141,5 +158,14 @@ export default function RegisterPage() {
                 </p>
             )}
         </div>
+    );
+}
+
+// useSearchParams() requires a Suspense boundary for the ?mkt=/?hear= read.
+export default function RegisterPage() {
+    return (
+        <React.Suspense fallback={null}>
+            <RegisterPageContent />
+        </React.Suspense>
     );
 }

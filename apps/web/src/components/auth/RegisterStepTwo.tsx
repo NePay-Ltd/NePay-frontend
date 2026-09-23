@@ -4,7 +4,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IconEye as Eye, IconEyeOff as EyeOff } from "@/components/icons";
-import { AtSign, UserPlus, FileText, CheckCircle2 } from "lucide-react";
+import { AtSign, UserPlus, FileText, CheckCircle2, Users } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -29,9 +29,21 @@ interface RegisterStepTwoProps {
     isSubmitting: boolean;
     onBack: () => void;
     onSubmitFinal: (data: RegisterStepTwoValues) => void;
+    /** Arrived via a marketer's `?mkt=` partner link / QR code. */
+    fromPartnerLink?: boolean;
+    /** Prefills from the partner link's `?hear=` / `?hearOther=` params — still editable. */
+    defaultHearAboutUs?: RegisterStepTwoValues["hearAboutUs"];
+    defaultHearAboutUsOther?: string;
 }
 
-export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: RegisterStepTwoProps) {
+export function RegisterStepTwo({
+    isSubmitting,
+    onBack,
+    onSubmitFinal,
+    fromPartnerLink = false,
+    defaultHearAboutUs,
+    defaultHearAboutUsOther = "",
+}: RegisterStepTwoProps) {
     const [showPassword, setShowPassword] = React.useState(false);
     const [showConfirm, setShowConfirm] = React.useState(false);
     const [isTermsModalOpen, setIsTermsModalOpen] = React.useState(false);
@@ -53,6 +65,8 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
             password: "",
             confirmPassword: "",
             acceptTerms: false,
+            hearAboutUs: defaultHearAboutUs,
+            hearAboutUsOther: defaultHearAboutUsOther,
         },
     });
 
@@ -235,6 +249,13 @@ export function RegisterStepTwo({ isSubmitting, onBack, onSubmitFinal }: Registe
                     </Field>
                 )}
             </div>
+
+            {fromPartnerLink && (
+                <div className="flex items-center gap-2 rounded-lg border border-violet-100 bg-violet-50 px-3 py-2 text-xs text-violet-700">
+                    <Users className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                    Signing up via a partner referral link.
+                </div>
+            )}
 
             {/* Terms */}
             <div className="text-center text-sm text-muted mt-2 mb-6">
