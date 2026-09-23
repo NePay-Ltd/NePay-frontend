@@ -249,7 +249,7 @@ export default function AddMoneyPage() {
                             loading and false in a live build, so this only
                             ever renders `=== true`.
                         */}
-                        {process.env.NODE_ENV !== "production" && testMode === true && (
+                        {testMode === true && (
                             <div className="rounded-lg bg-transparent overflow-hidden">
                                 <RowItem
                                     icon={FlaskConical}
