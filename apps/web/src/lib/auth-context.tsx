@@ -49,6 +49,24 @@ export interface AuthContextValue {
 
 const AuthContext = React.createContext<AuthContextValue | null>(null);
 
+/**
+ * Only a same-origin relative path is a safe post-login redirect target.
+ * `returnTo` comes from a URL query parameter — anyone can craft a link
+ * carrying it — so accepting an absolute or protocol-relative URL here is
+ * an open redirect (CWE-601): a link like
+ * `/login?returnTo=https://attacker.example/fake-verify` would send a user
+ * straight to an attacker's page immediately after a real, successful
+ * login. Browsers also treat a leading backslash as a forward slash, so
+ * `/\evil.com` and `\/evil.com` are rejected the same way `//evil.com` is.
+ */
+function safeReturnTo(value: string | null): string {
+    const fallback = "/overview";
+    if (!value || !/^\/(?!\/|\\)/.test(value)) {
+        return fallback;
+    }
+    return value;
+}
+
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -90,8 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         toast.success(`Welcome back, ${data.user.firstName}!`);
 
         const searchParams = new URLSearchParams(window.location.search);
-        const returnTo = searchParams.get("returnTo") || "/overview";
-        window.location.href = returnTo;
+        window.location.href = safeReturnTo(searchParams.get("returnTo"));
     }, []);
 
     const login = React.useCallback(

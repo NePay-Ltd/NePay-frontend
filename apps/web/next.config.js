@@ -7,16 +7,14 @@ const nextConfig = {
     async headers() {
         return [
             {
-                // Apply these security headers to every route
+                // Apply these security headers to every route.
+                // Content-Security-Policy is deliberately NOT set here — it's
+                // set per-request in middleware.ts instead, where a real,
+                // nonce-based policy can be built (a static header here can't
+                // carry a per-request nonce). Setting it in both places would
+                // just leave two sources of truth to keep in sync.
                 source: "/(.*)",
                 headers: [
-                    {
-                        // Force ALL mixed-content (http://) sub-resources to be
-                        // loaded as https:// automatically. This is the primary
-                        // fix for the "Not Secure" padlock warning.
-                        key: "Content-Security-Policy",
-                        value: "upgrade-insecure-requests",
-                    },
                     {
                         // Tell browsers to always use HTTPS for this domain
                         // for the next 2 years, including subdomains.

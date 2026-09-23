@@ -100,8 +100,8 @@ function BvnNumberStep({ onApproved, onRejected }: BvnNumberStepProps) {
                     Enter your Bank Verification Number
                 </h2>
                 <p className="text-sm text-body">
-                    Your BVN is an 11-digit number issued by the CBN. Korapay will verify it
-                    against its identity records immediately.
+                    Your BVN is an 11-digit number issued by the CBN. We&apos;ll verify it
+                    against your identity records immediately.
                 </p>
             </div>
 
