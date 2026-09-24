@@ -118,6 +118,26 @@ jobs:
           publish_dir: apps/web/cypress/reports
           keep_files: false
 
+      - name: Extract Test Stats
+        if: always()
+        run: |
+          if [ -f "apps/web/cypress/reports/combined.json" ]; then
+            PASSES=$(jq -r '.stats.passes' apps/web/cypress/reports/combined.json)
+            FAILURES=$(jq -r '.stats.failures' apps/web/cypress/reports/combined.json)
+            TESTS=$(jq -r '.stats.tests' apps/web/cypress/reports/combined.json)
+            DURATION_MS=$(jq -r '.stats.duration' apps/web/cypress/reports/combined.json)
+            DURATION_SEC=$(echo "scale=1; $DURATION_MS / 1000" | bc 2>/dev/null || echo "0")
+            echo "TEST_PASSES=$PASSES" >> $GITHUB_ENV
+            echo "TEST_FAILURES=$FAILURES" >> $GITHUB_ENV
+            echo "TEST_TOTAL=$TESTS" >> $GITHUB_ENV
+            echo "TEST_DURATION=$DURATION_SEC" >> $GITHUB_ENV
+          else
+            echo "TEST_PASSES=0" >> $GITHUB_ENV
+            echo "TEST_FAILURES=0" >> $GITHUB_ENV
+            echo "TEST_TOTAL=0" >> $GITHUB_ENV
+            echo "TEST_DURATION=0" >> $GITHUB_ENV
+          fi
+
       - name: Send Telegram Notification
         if: always()
         uses: appleboy/telegram-action@master
@@ -127,7 +147,13 @@ jobs:
           message: |
             🤖 *NePay Test Automation* 🤖
             
-            Status: ${{ job.status == 'success' && '✅ All Passed!' || '❌ Failed Tests Found' }}
+            📊 *E2E Test Results:*
+            ✅ Passed: ${{ env.TEST_PASSES }}
+            ❌ Failed: ${{ env.TEST_FAILURES }}
+            📝 Total: ${{ env.TEST_TOTAL }}
+            ⏱️ Duration: ${{ env.TEST_DURATION }}s
             
-            🌐 *View Live Dashboard:*
+            Status: ${{ job.status == 'success' && '🟢 ALL CLEAR' || '🔴 ATTENTION NEEDED' }}
+            
+            🌐 *View Full Report:*
             https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/combined.html
