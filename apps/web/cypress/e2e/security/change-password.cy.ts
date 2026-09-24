@@ -86,7 +86,7 @@ describe("Security — Login Activity", () => {
   });
 
   it("N1 | API error → graceful error state, no crash", () => {
-    cy.intercept("GET", "**/auth/sessions**", {
+    cy.intercept("GET", "**/security/login-activity**", {
       statusCode: 500,
       body: { success: false, message: "Server error" },
     }).as("sessionsError");
