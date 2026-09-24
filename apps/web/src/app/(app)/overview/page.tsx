@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { IconPlus as Plus, IconAirtime as Smartphone, IconGift as Gift, IconPlane as Plane, IconClock as Clock, IconTv as Tv, IconData as Wifi, IconChevronRight as ChevronRight } from "@/components/icons";
-import { Lightbulb, ShieldCheck, ArrowRight, Dices, MoreHorizontal } from "lucide-react";;
+import { Lightbulb, ShieldCheck, ArrowRight, Dices, MoreHorizontal, X } from "lucide-react";;
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-context";
@@ -43,6 +43,30 @@ export default function OverviewPage() {
     const router = useRouter();
     const { data: summary, isLoading: queryLoading } = useOverviewSummary();
     const { data: virtualAccount } = useVirtualAccount();
+
+    // Dismissal is per-tier, not permanent: dismissing the Tier 1 prompt
+    // shouldn't silently suppress a genuinely new one once the account
+    // reaches Tier 2 — that's a different opportunity, not a repeat of the
+    // same message. A per-viewer preference, so localStorage is the right
+    // home for it, not the backend.
+    const [tierBannerDismissedFor, setTierBannerDismissedFor] = React.useState<number | null>(null);
+    React.useEffect(() => {
+        try {
+            const raw = window.localStorage.getItem("nepay:tier-banner-dismissed-for-tier");
+            if (raw) setTierBannerDismissedFor(Number(raw));
+        } catch {
+            // Private mode / blocked storage — banner just always shows; not worth failing the page over.
+        }
+    }, []);
+    const dismissTierBanner = () => {
+        if (!virtualAccount) return;
+        setTierBannerDismissedFor(virtualAccount.tier);
+        try {
+            window.localStorage.setItem("nepay:tier-banner-dismissed-for-tier", String(virtualAccount.tier));
+        } catch {
+            // Best-effort only — see the read side's own note.
+        }
+    };
 
     const [isMounted, setIsMounted] = React.useState(false);
     const [selectedTransaction, setSelectedTransaction] = React.useState<TransactionDetailData | null>(null);
@@ -99,9 +123,16 @@ export default function OverviewPage() {
                 </div>
             )}
 
-            {/* ── Tier Upgrade Banner — shown once BVN is done but the account isn't at the highest tier yet ── */}
-            {isMounted && user?.kycVerified && virtualAccount && virtualAccount.tier < 3 && (
-                <div className="mb-6 sm:mb-8 flex items-center gap-3 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 shadow-sm sm:gap-4 sm:px-6 sm:py-5">
+            {/* ── Tier Upgrade Banner — shown once BVN is done but the account isn't at the highest tier yet, unless dismissed for this specific tier ── */}
+            {isMounted && user?.kycVerified && virtualAccount && virtualAccount.tier < 3 && tierBannerDismissedFor !== virtualAccount.tier && (
+                <div className="relative mb-6 sm:mb-8 flex items-center gap-3 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 pr-10 shadow-sm sm:gap-4 sm:px-6 sm:py-5 sm:pr-12">
+                    <button
+                        onClick={dismissTierBanner}
+                        aria-label="Dismiss"
+                        className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full text-violet-700/60 hover:bg-violet-100 hover:text-violet-900 transition-colors sm:right-4 sm:top-4"
+                    >
+                        <X className="h-4 w-4" />
+                    </button>
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 sm:h-10 sm:w-10">
                         <ShieldCheck className="h-4 w-4 text-violet-700 sm:h-5 sm:w-5" />
                     </div>
