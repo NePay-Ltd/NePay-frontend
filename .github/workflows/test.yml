@@ -83,6 +83,7 @@ jobs:
           working-directory: apps/web
           browser: chrome
           record: false
+          install: false
         env:
           CYPRESS_BASE_URL: https://staging-nepay.vercel.app
 
