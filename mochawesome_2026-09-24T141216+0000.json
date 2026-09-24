@@ -5,9 +5,9 @@
     "passes": 1,
     "pending": 0,
     "failures": 1,
-    "start": "2026-09-24T13:49:29.399Z",
-    "end": "2026-09-24T13:50:31.508Z",
-    "duration": 62109,
+    "start": "2026-09-24T14:11:14.430Z",
+    "end": "2026-09-24T14:12:16.978Z",
+    "duration": 62548,
     "testsRegistered": 3,
     "passPercent": 33.33333333333333,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "3cacc3c0-8b03-4e3e-a7f2-3690efc09e50",
+      "uuid": "e6099a36-0dc8-4749-86b2-9c4f6514248a",
       "title": "",
       "fullFile": "cypress/e2e/notifications/notifications.cy.ts",
       "file": "cypress/e2e/notifications/notifications.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "ef1b77cf-9d12-4090-96fd-63d0a2964180",
+          "uuid": "ddd26bc6-3c19-4d86-90c2-639c1c77de08",
           "title": "Notifications",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | Notifications page loads",
               "fullTitle": "Notifications P1 | Notifications page loads",
               "timedOut": null,
-              "duration": 866,
+              "duration": 920,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -47,8 +47,8 @@
               "context": null,
               "code": "cy.get(\"body\").should(\"be.visible\");\ncy.softAssert(() => {\n    cy.contains(/notification/i, { timeout: 10000 }).should(\"be.visible\");\n}, \"Notifications heading\");\ncy.assertAll();",
               "err": {},
-              "uuid": "7d4fc9f5-4b00-48dd-89fb-675e04f7e73a",
-              "parentUUID": "ef1b77cf-9d12-4090-96fd-63d0a2964180",
+              "uuid": "c8623f14-65d5-4197-885c-e56ee2cd7aae",
+              "parentUUID": "ddd26bc6-3c19-4d86-90c2-639c1c77de08",
               "isHook": false,
               "skipped": false
             },
@@ -56,7 +56,7 @@
               "title": "P2 | Empty notifications → empty state shown",
               "fullTitle": "Notifications P2 | Empty notifications → empty state shown",
               "timedOut": null,
-              "duration": 30125,
+              "duration": 30202,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -69,8 +69,8 @@
                 "estack": "TypeError: Timed out retrying after 30000ms: Cannot read properties of undefined (reading 'origin')\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Notifications`\n    at $Cy.ensureCommandCanCommunicateWithAUT (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:148084:40)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152522:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at retryValue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152520:65)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at whenStable (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:153099:65)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152508:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11002:46)",
                 "diff": null
               },
-              "uuid": "c7f2c5ea-3c96-4752-9e70-060d75c48b47",
-              "parentUUID": "ef1b77cf-9d12-4090-96fd-63d0a2964180",
+              "uuid": "6e53ce8d-b56c-48b1-915f-c5c4b7067ed3",
+              "parentUUID": "ddd26bc6-3c19-4d86-90c2-639c1c77de08",
               "isHook": false,
               "skipped": false
             },
@@ -87,24 +87,24 @@
               "context": null,
               "code": "cy.intercept(\"GET\", \"**/notifications**\", {\n    statusCode: 500,\n    body: { success: false, message: \"Server error\" },\n}).as(\"notifsError\");\ncy.reload();\ncy.wait(\"@notifsError\");\ncy.get(\"body\").should(\"be.visible\");\ncy.contains(/error occurred|unexpected/i).should(\"not.exist\");",
               "err": {},
-              "uuid": "b512c4ab-9a17-4b15-b697-d484e8cffff1",
-              "parentUUID": "ef1b77cf-9d12-4090-96fd-63d0a2964180",
+              "uuid": "01c16e5c-3715-4b88-a652-0ddcbd1c68d0",
+              "parentUUID": "ddd26bc6-3c19-4d86-90c2-639c1c77de08",
               "isHook": false,
               "skipped": true
             }
           ],
           "suites": [],
           "passes": [
-            "7d4fc9f5-4b00-48dd-89fb-675e04f7e73a"
+            "c8623f14-65d5-4197-885c-e56ee2cd7aae"
           ],
           "failures": [
-            "c7f2c5ea-3c96-4752-9e70-060d75c48b47"
+            "6e53ce8d-b56c-48b1-915f-c5c4b7067ed3"
           ],
           "pending": [],
           "skipped": [
-            "b512c4ab-9a17-4b15-b697-d484e8cffff1"
+            "01c16e5c-3715-4b88-a652-0ddcbd1c68d0"
           ],
-          "duration": 30991,
+          "duration": 31122,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
