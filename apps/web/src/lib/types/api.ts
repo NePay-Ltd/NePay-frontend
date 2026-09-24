@@ -162,7 +162,15 @@ export interface VirtualAccountResponseDto {
     bankName: string;
     accountName: string;
     status: VirtualAccountStatus;
+    /** CBN tier (1/2/3) this account currently sits at. */
+    tier: number;
     createdAt: string;
+}
+
+/** Body of POST /wallet/virtual-account/upgrade-tier — at least one of the two is required; which is enforced server-side since it depends on the account's current tier. */
+export interface UpgradeTierDto {
+    nin?: string;
+    address?: string;
 }
 
 /** Body of POST /wallet/virtual-account/simulate-deposit — test mode only, no account number (always the caller's own account). */
