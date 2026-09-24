@@ -6,7 +6,13 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint"
+        "lint": "next lint",
+        "test": "node run-tests.mjs",
+        "test:watch": "node run-tests.mjs --watch",
+        "test:coverage": "VITE_CONFIG_NATIVE_IGNORE_WARNING=true vitest run --coverage",
+        "test:e2e": "cypress run",
+        "test:e2e:open": "cypress open",
+        "test:report": "npx mochawesome-merge cypress/reports/*.json -o cypress/reports/combined.json && npx marge cypress/reports/combined.json --reportDir cypress/reports --inline"
     },
     "dependencies": {
         "@hookform/resolvers": "^3.9.0",
@@ -57,8 +63,13 @@
         "@types/react-dom": "^18.3.0",
         "@types/three": "^0.185.4",
         "autoprefixer": "^10.4.20",
+        "cypress": "^11.2.0",
+        "cypress-soft-assertions": "^1.1.0",
         "eslint": "^8.57.0",
         "eslint-config-next": "^14.2.33",
+        "mochawesome": "^8.1.1",
+        "mochawesome-merge": "^5.1.1",
+        "mochawesome-report-generator": "^6.3.2",
         "postcss": "^8.4.47",
         "tailwindcss": "^3.4.11",
         "typescript": "^5.4.0"
