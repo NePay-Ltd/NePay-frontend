@@ -1,0 +1,271 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 8,
+    "passes": 0,
+    "pending": 0,
+    "failures": 8,
+    "start": "2026-09-24T12:40:35.643Z",
+    "end": "2026-09-24T12:51:08.086Z",
+    "duration": 632443,
+    "testsRegistered": 8,
+    "passPercent": 0,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "e3a28a47-f8e1-412d-967f-0fea771adc85",
+      "title": "",
+      "fullFile": "cypress/e2e/transfer/transfer.cy.ts",
+      "file": "cypress/e2e/transfer/transfer.cy.ts",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "c166feda-ee6a-4f6c-bcfb-aac77a397711",
+          "title": "Transfer",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "P1 | Transfer page loads with recipient search field",
+              "fullTitle": "Transfer P1 | Transfer page loads with recipient search field",
+              "timedOut": null,
+              "duration": 31438,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "// HARD\ncy.get(\"input\", { timeout: 10000 }).should(\"be.visible\");\ncy.contains(/transfer|send|recipient/i).should(\"be.visible\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 30000ms: Expected to find content: '/transfer|send|recipient/i' but never did.",
+                "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find content: '/transfer|send|recipient/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:14:0)",
+                "diff": null
+              },
+              "uuid": "4d442687-dcf3-4bcb-a0a5-b3d52971c27d",
+              "parentUUID": "c166feda-ee6a-4f6c-bcfb-aac77a397711",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P2 | Amount field formats correctly (no more than 2 decimal places shown)",
+              "fullTitle": "Transfer P2 | Amount field formats correctly (no more than 2 decimal places shown)",
+              "timedOut": null,
+              "duration": 31275,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "// Find the amount input and check formatting\ncy.get('input[name=\"amount\"], input[placeholder*=\"amount\" i], input[placeholder*=\"Amount\" i]')\n    .first()\n    .type(\"12500\")\n    .should(($el) => {\n    // SOFT: formatted value check\n    const val = $el.val();\n    expect(val).to.match(/12[,.]?500/);\n});",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input[name=\"amount\"], input[placeholder*=\"amount\" i], input[placeholder*=\"Amount\" i]`, but never found it.",
+                "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input[name=\"amount\"], input[placeholder*=\"amount\" i], input[placeholder*=\"Amount\" i]`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:18:0)",
+                "diff": null
+              },
+              "uuid": "c4d1e08d-48a7-48e6-ad06-f74d1f0763a9",
+              "parentUUID": "c166feda-ee6a-4f6c-bcfb-aac77a397711",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P3 | Empty amount → submit blocked",
+              "fullTitle": "Transfer P3 | Empty amount → submit blocked",
+              "timedOut": null,
+              "duration": 31559,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('button[type=\"submit\"]').first().click();\n// HARD: should not proceed without an amount\ncy.url().should(\"include\", \"/transfer\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 30000ms: expected 'https://staging-nepay.vercel.app/login' to include '/transfer'",
+                "estack": "AssertionError: Timed out retrying after 30000ms: expected 'https://staging-nepay.vercel.app/login' to include '/transfer'\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:30:0)",
+                "diff": null
+              },
+              "uuid": "e93b4aab-43c4-4204-9d6a-912311d680d4",
+              "parentUUID": "c166feda-ee6a-4f6c-bcfb-aac77a397711",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N1 | Non-existent username search → 'not found' error shown",
+              "fullTitle": "Transfer N1 | Non-existent username search → 'not found' error shown",
+              "timedOut": null,
+              "duration": 61944,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.intercept(\"GET\", \"**/users/search**\", {\n    statusCode: 404,\n    body: { success: false, message: \"User not found\" },\n}).as(\"userNotFound\");\n// Type in search field\ncy.get(\"input\").first().type(\"xyznonexistentuser999\");\ncy.wait(\"@userNotFound\");\n// HARD\ncy.contains(/not found|no user|does not exist/i, { timeout: 8000 }).should(\"be.visible\");",
+              "err": {
+                "message": "CypressError: Timed out retrying after 60000ms: `cy.wait()` timed out waiting `60000ms` for the 1st request to the route: `userNotFound`. No request ever occurred.\n\nhttps://on.cypress.io/wait",
+                "estack": "CypressError: Timed out retrying after 60000ms: `cy.wait()` timed out waiting `60000ms` for the 1st request to the route: `userNotFound`. No request ever occurred.\n\nhttps://on.cypress.io/wait\n    at cypressErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161339:18)\n    at Object.errByPath (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161408:10)\n    at checkForXhr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:146476:92)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:146499:28)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at whenStable (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:153099:65)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152508:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11002:46)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:40:0)",
+                "diff": null
+              },
+              "uuid": "4d937947-7338-4475-888d-7a0dadb43c29",
+              "parentUUID": "c166feda-ee6a-4f6c-bcfb-aac77a397711",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N2 | Amount = 0 → validation error before API call",
+              "fullTitle": "Transfer N2 | Amount = 0 → validation error before API call",
+              "timedOut": null,
+              "duration": 31461,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"amount\"], input[placeholder*=\"amount\" i]')\n    .first()\n    .type(\"0\");\ncy.get('button[type=\"submit\"]').first().click();\n// HARD: 0 amount should be rejected\ncy.contains(/invalid|minimum|greater than/i).should(\"be.visible\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input[name=\"amount\"], input[placeholder*=\"amount\" i]`, but never found it.",
+                "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input[name=\"amount\"], input[placeholder*=\"amount\" i]`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:45:0)",
+                "diff": null
+              },
+              "uuid": "8f7a5e8a-c243-4431-b768-b141ddb4d9aa",
+              "parentUUID": "c166feda-ee6a-4f6c-bcfb-aac77a397711",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N3 | Insufficient balance → error shown on confirm",
+              "fullTitle": "Transfer N3 | Insufficient balance → error shown on confirm",
+              "timedOut": null,
+              "duration": 7131,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.intercept(\"POST\", \"**/transfers**\", {\n    statusCode: 400,\n    body: {\n        success: false,\n        code: \"INSUFFICIENT_BALANCE\",\n        message: \"Insufficient wallet balance\",\n    },\n}).as(\"insufficientBalance\");\ncy.intercept(\"GET\", \"**/users/search**\", {\n    statusCode: 200,\n    body: {\n        success: true,\n        data: { id: \"user-123\", username: \"testrecipient\", firstName: \"Test\", lastName: \"User\" },\n    },\n});\ncy.get(\"input\").first().type(\"testrecipient\");\ncy.contains(\"testrecipient\", { timeout: 5000 }).click();\ncy.get('input[name=\"amount\"], input[placeholder*=\"amount\" i]').first().type(\"9999999\");\ncy.get('button[type=\"submit\"]').first().click();\ncy.wait(\"@insufficientBalance\");\n// HARD\ncy.contains(/insufficient|balance|funds/i, { timeout: 8000 }).should(\"be.visible\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 5000ms: Expected to find content: 'testrecipient' but never did.",
+                "estack": "AssertionError: Timed out retrying after 5000ms: Expected to find content: 'testrecipient' but never did.\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:69:0)",
+                "diff": null
+              },
+              "uuid": "10a40b26-7f9d-4860-abae-a71da62ffb7c",
+              "parentUUID": "c166feda-ee6a-4f6c-bcfb-aac77a397711",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N4 | API failure on confirm → error shown, no duplicate deduction",
+              "fullTitle": "Transfer N4 | API failure on confirm → error shown, no duplicate deduction",
+              "timedOut": null,
+              "duration": 9593,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.intercept(\"POST\", \"**/transfers/confirm**\", {\n    statusCode: 500,\n    body: { success: false, message: \"Transfer failed. Please try again.\" },\n}).as(\"transferFail\");\n// SOFT: error message shown\ncy.softAssert(() => {\n    cy.contains(/failed|error|try again/i, { timeout: 8000 }).should(\"exist\");\n}, \"Error message on transfer API failure\");\ncy.assertAll();",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/failed|error|try again/i' but never did.",
+                "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/failed|error|try again/i' but never did.\n    at eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:83:68)\n    at Context.eval (webpack:///./cypress/support/commands.ts:60:0)",
+                "diff": null
+              },
+              "uuid": "3aace409-a4dd-4097-af02-4e63862a7303",
+              "parentUUID": "c166feda-ee6a-4f6c-bcfb-aac77a397711",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N5 | Special characters in recipient search → no crash",
+              "fullTitle": "Transfer N5 | Special characters in recipient search → no crash",
+              "timedOut": null,
+              "duration": 7364,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.get(\"input\").first().type(\"<script>alert('xss')</script>\");\n// HARD: no crash, no script execution\ncy.get(\"body\").should(\"be.visible\");\ncy.contains(/not found|no user|no result/i, { timeout: 5000 }).should(\"be.visible\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 5000ms: Expected to find content: '/not found|no user|no result/i' but never did.",
+                "estack": "AssertionError: Timed out retrying after 5000ms: Expected to find content: '/not found|no user|no result/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:91:69)",
+                "diff": null
+              },
+              "uuid": "5f78ddf2-8478-4347-9175-3752475563d0",
+              "parentUUID": "c166feda-ee6a-4f6c-bcfb-aac77a397711",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [],
+          "failures": [
+            "4d442687-dcf3-4bcb-a0a5-b3d52971c27d",
+            "c4d1e08d-48a7-48e6-ad06-f74d1f0763a9",
+            "e93b4aab-43c4-4204-9d6a-912311d680d4",
+            "4d937947-7338-4475-888d-7a0dadb43c29",
+            "8f7a5e8a-c243-4431-b768-b141ddb4d9aa",
+            "10a40b26-7f9d-4860-abae-a71da62ffb7c",
+            "3aace409-a4dd-4097-af02-4e63862a7303",
+            "5f78ddf2-8478-4347-9175-3752475563d0"
+          ],
+          "pending": [],
+          "skipped": [],
+          "duration": 211765,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.0.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "8.1.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime"
+      },
+      "version": "6.3.2"
+    }
+  }
+}

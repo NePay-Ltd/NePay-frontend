@@ -1,0 +1,313 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 11,
+    "passes": 7,
+    "pending": 0,
+    "failures": 4,
+    "start": "2026-09-24T11:39:48.720Z",
+    "end": "2026-09-24T11:46:27.647Z",
+    "duration": 398927,
+    "testsRegistered": 11,
+    "passPercent": 63.63636363636363,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "aa16702b-56ad-4919-9f67-8c8d59d90407",
+      "title": "",
+      "fullFile": "cypress/e2e/auth/register.cy.ts",
+      "file": "cypress/e2e/auth/register.cy.ts",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "f9f8f07e-f50e-4850-837c-d813e12615e7",
+          "title": "Auth — Register",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "P1 | Step 1: Fill name + phone → Step 2 renders",
+              "fullTitle": "Auth — Register P1 | Step 1: Fill name + phone → Step 2 renders",
+              "timedOut": null,
+              "duration": 1702,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.contains(\"Next\").click(); // try to proceed with empty fields first\n// HARD: Step 1 validation blocks\ncy.contains(/first name|required/i).should(\"be.visible\");\n// Now fill valid data\ncy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\n// HARD: must advance to Step 2\ncy.contains(/email|username|password/i, { timeout: 5000 }).should(\"be.visible\");",
+              "err": {},
+              "uuid": "ce926d81-8c39-4b9a-b8c9-120dc6bcba06",
+              "parentUUID": "f9f8f07e-f50e-4850-837c-d813e12615e7",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P2 | hearAboutUs = OTHER → 'Please specify' field appears",
+              "fullTitle": "Auth — Register P2 | hearAboutUs = OTHER → 'Please specify' field appears",
+              "timedOut": null,
+              "duration": 31814,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "// Navigate to Step 2\ncy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\n// Select \"Other\" in the picker\ncy.contains(/how did you hear/i).should(\"be.visible\");\ncy.contains(\"Select an option\").click();\ncy.contains(\"Other\").click();\n// HARD: 'Please specify' field must appear\ncy.contains(/please specify/i, { timeout: 3000 }).should(\"be.visible\");\ncy.get('input[name=\"hearAboutUsOther\"]').should(\"be.visible\");",
+              "err": {
+                "message": "CypressError: Timed out retrying after 30050ms: `cy.click()` failed because this element:\n\n          `<option value=\"OTHER\">Other (...</option>`\n\n          has CSS `pointer-events: none`, inherited from this element:\n\n`<body class=\"__variable_a76894 font-sans text-ink bg-bg antialiased selection:bg-violet-200 selection:text-violet-900 min-h-screen flex flex-col overflow-x-hidden\" data-scroll-locked=\"1\" style=\"pointer-events: none;\">...</body>`\n\n          `pointer-events: none` prevents user mouse interaction.\n\n          Fix this problem, or use {force: true} to disable error checking.\n\nhttps://on.cypress.io/element-cannot-be-interacted-with",
+                "estack": "CypressError: Timed out retrying after 30050ms: `cy.click()` failed because this element:\n\n          `<option value=\"OTHER\">Other (...</option>`\n\n          has CSS `pointer-events: none`, inherited from this element:\n\n`<body class=\"__variable_a76894 font-sans text-ink bg-bg antialiased selection:bg-violet-200 selection:text-violet-900 min-h-screen flex flex-col overflow-x-hidden\" data-scroll-locked=\"1\" style=\"pointer-events: none;\">...</body>`\n\n          `pointer-events: none` prevents user mouse interaction.\n\n          Fix this problem, or use {force: true} to disable error checking.\n\nhttps://on.cypress.io/element-cannot-be-interacted-with\n    at $Cy.ensureElDoesNotHaveCSS (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:147981:76)\n    at ensureDescendents (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:133246:8)\n    at ensureDescendentsAndScroll (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:133255:14)\n    at ensureElIsNotCovered (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:133387:5)\n    at runAllChecks (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:133577:52)\n    at retryActionability (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:133601:16)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at whenStable (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:153099:65)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152508:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11002:46)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/auth/register.cy.ts:31:0)",
+                "diff": null
+              },
+              "uuid": "74c649c8-2be6-4a5a-8752-f953611bd84e",
+              "parentUUID": "f9f8f07e-f50e-4850-837c-d813e12615e7",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P3 | Show/hide password toggle works",
+              "fullTitle": "Auth — Register P3 | Show/hide password toggle works",
+              "timedOut": null,
+              "duration": 31626,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\ncy.get('input[name=\"password\"]').should(\"have.attr\", \"type\", \"password\");\n// SOFT: toggle exists and switches type\ncy.softAssert(() => {\n    cy.get('[data-testid=\"toggle-password\"]').click();\n    cy.get('input[name=\"password\"]').should(\"have.attr\", \"type\", \"text\");\n}, \"Password show/hide toggle\");\ncy.assertAll();",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `[data-testid=\"toggle-password\"]`, but never found it.",
+                "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `[data-testid=\"toggle-password\"]`, but never found it.\n    at eval (webpack:///./cypress/e2e/auth/register.cy.ts:44:0)\n    at Context.eval (webpack:///./cypress/support/commands.ts:60:0)",
+                "diff": null
+              },
+              "uuid": "8a9b021f-17bd-4686-b9f0-b1ee21149f30",
+              "parentUUID": "f9f8f07e-f50e-4850-837c-d813e12615e7",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P4 | Password strength meter updates as user types",
+              "fullTitle": "Auth — Register P4 | Password strength meter updates as user types",
+              "timedOut": null,
+              "duration": 31972,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\ncy.get('input[name=\"password\"]').type(\"weak\");\n// SOFT: strength meter should change\ncy.softAssert(() => {\n    cy.get('[data-testid=\"password-strength\"]').should(\"be.visible\");\n}, \"Password strength meter visible\");\ncy.get('input[name=\"password\"]').clear().type(\"StrongPass123!\");\ncy.softAssert(() => {\n    cy.get('[data-testid=\"password-strength\"]').should(\"be.visible\");\n}, \"Password strength meter updates\");\ncy.assertAll();",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `[data-testid=\"password-strength\"]`, but never found it.",
+                "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `[data-testid=\"password-strength\"]`, but never found it.\n    at eval (webpack:///./cypress/e2e/auth/register.cy.ts:57:0)\n    at Context.eval (webpack:///./cypress/support/commands.ts:60:0)",
+                "diff": null
+              },
+              "uuid": "b985bbf1-b9f1-4abc-a646-0acf33790f67",
+              "parentUUID": "f9f8f07e-f50e-4850-837c-d813e12615e7",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N1 | Password < 6 chars → validation error",
+              "fullTitle": "Auth — Register N1 | Password < 6 chars → validation error",
+              "timedOut": null,
+              "duration": 2479,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\ncy.get('input[name=\"username\"]').type(\"testuser123\");\ncy.get('input[name=\"email\"]').type(\"test@example.com\");\ncy.get('input[name=\"password\"]').type(\"abc\");\ncy.get('input[name=\"confirmPassword\"]').type(\"abc\");\ncy.contains(\"Create Account\").click();\n// HARD\ncy.contains(/at least 6 characters/i).should(\"be.visible\");",
+              "err": {},
+              "uuid": "1af2f633-9e82-475a-8643-a47596f984ef",
+              "parentUUID": "f9f8f07e-f50e-4850-837c-d813e12615e7",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N2 | Passwords do not match → confirm password error",
+              "fullTitle": "Auth — Register N2 | Passwords do not match → confirm password error",
+              "timedOut": null,
+              "duration": 1937,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\ncy.get('input[name=\"password\"]').type(\"ValidPass1\");\ncy.get('input[name=\"confirmPassword\"]').type(\"DifferentPass1\");\ncy.contains(\"Create Account\").click();\n// HARD\ncy.contains(/passwords do not match/i).should(\"be.visible\");",
+              "err": {},
+              "uuid": "5991f003-34ea-43c6-af68-8d4cb5f38f70",
+              "parentUUID": "f9f8f07e-f50e-4850-837c-d813e12615e7",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N3 | Username with spaces → validation error",
+              "fullTitle": "Auth — Register N3 | Username with spaces → validation error",
+              "timedOut": null,
+              "duration": 1707,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\ncy.get('input[name=\"username\"]').type(\"invalid username\");\ncy.contains(\"Create Account\").click();\n// HARD\ncy.contains(/letters, numbers and underscores/i).should(\"be.visible\");",
+              "err": {},
+              "uuid": "8f3f8048-f3ca-4627-8e43-45be58bc0ad9",
+              "parentUUID": "f9f8f07e-f50e-4850-837c-d813e12615e7",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N4 | Invalid Nigerian phone format → validation error",
+              "fullTitle": "Auth — Register N4 | Invalid Nigerian phone format → validation error",
+              "timedOut": null,
+              "duration": 1128,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"12345\");\ncy.contains(\"Next\").click();\n// HARD: must not advance\ncy.contains(/valid Nigerian phone/i).should(\"be.visible\");",
+              "err": {},
+              "uuid": "1ad22745-9de2-4d96-8c59-474acc93ba9f",
+              "parentUUID": "f9f8f07e-f50e-4850-837c-d813e12615e7",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N5 | hearAboutUs = OTHER + empty 'Please specify' → error on submit",
+              "fullTitle": "Auth — Register N5 | hearAboutUs = OTHER + empty 'Please specify' → error on submit",
+              "timedOut": null,
+              "duration": 33423,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\ncy.get('input[name=\"username\"]').type(\"testuser9999\");\ncy.get('input[name=\"email\"]').type(\"testuser9999@example.com\");\ncy.get('input[name=\"password\"]').type(\"ValidPass1\");\ncy.get('input[name=\"confirmPassword\"]').type(\"ValidPass1\");\ncy.contains(\"Select an option\").click();\ncy.contains(\"Other\").click();\n// Leave hearAboutUsOther empty\ncy.contains(\"Create Account\").click();\n// HARD\ncy.contains(/please specify/i).should(\"be.visible\");",
+              "err": {
+                "message": "CypressError: Timed out retrying after 30050ms: `cy.click()` failed because this element:\n\n          `<option value=\"OTHER\">Other (...</option>`\n\n          has CSS `pointer-events: none`, inherited from this element:\n\n`<body class=\"__variable_a76894 font-sans text-ink bg-bg antialiased selection:bg-violet-200 selection:text-violet-900 min-h-screen flex flex-col overflow-x-hidden\" data-scroll-locked=\"1\" style=\"pointer-events: none;\">...</body>`\n\n          `pointer-events: none` prevents user mouse interaction.\n\n          Fix this problem, or use {force: true} to disable error checking.\n\nhttps://on.cypress.io/element-cannot-be-interacted-with",
+                "estack": "CypressError: Timed out retrying after 30050ms: `cy.click()` failed because this element:\n\n          `<option value=\"OTHER\">Other (...</option>`\n\n          has CSS `pointer-events: none`, inherited from this element:\n\n`<body class=\"__variable_a76894 font-sans text-ink bg-bg antialiased selection:bg-violet-200 selection:text-violet-900 min-h-screen flex flex-col overflow-x-hidden\" data-scroll-locked=\"1\" style=\"pointer-events: none;\">...</body>`\n\n          `pointer-events: none` prevents user mouse interaction.\n\n          Fix this problem, or use {force: true} to disable error checking.\n\nhttps://on.cypress.io/element-cannot-be-interacted-with\n    at $Cy.ensureElDoesNotHaveCSS (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:147981:76)\n    at ensureDescendents (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:133246:8)\n    at ensureDescendentsAndScroll (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:133255:14)\n    at ensureElIsNotCovered (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:133387:5)\n    at runAllChecks (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:133577:52)\n    at retryActionability (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:133601:16)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at whenStable (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:153099:65)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152508:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11002:46)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/auth/register.cy.ts:118:0)",
+                "diff": null
+              },
+              "uuid": "890930f4-4b0a-4eef-9a3e-1a9b49b85bab",
+              "parentUUID": "f9f8f07e-f50e-4850-837c-d813e12615e7",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N6 | Terms checkbox not checked → submit blocked",
+              "fullTitle": "Auth — Register N6 | Terms checkbox not checked → submit blocked",
+              "timedOut": null,
+              "duration": 2800,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\ncy.get('input[name=\"username\"]').type(\"testuser9988\");\ncy.get('input[name=\"email\"]').type(\"test9988@example.com\");\ncy.get('input[name=\"password\"]').type(\"ValidPass1\");\ncy.get('input[name=\"confirmPassword\"]').type(\"ValidPass1\");\n// Do NOT check terms\ncy.contains(\"Create Account\").click();\n// HARD: should not call the API — stay on register page\ncy.url().should(\"include\", \"/register\");",
+              "err": {},
+              "uuid": "59b47fcb-9331-4565-bd55-417b43576726",
+              "parentUUID": "f9f8f07e-f50e-4850-837c-d813e12615e7",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N7 | Back button on Step 2 → returns to Step 1 with data intact",
+              "fullTitle": "Auth — Register N7 | Back button on Step 2 → returns to Step 1 with data intact",
+              "timedOut": null,
+              "duration": 1368,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"firstName\"]').type(\"Dubem\");\ncy.get('input[name=\"lastName\"]').type(\"Test\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\n// Go back\ncy.contains(\"Back\").click();\n// SOFT: Step 1 data should be retained\ncy.softAssert(() => {\n    cy.get('input[name=\"firstName\"]').should(\"have.value\", \"Dubem\");\n}, \"First name retained on back navigation\");\ncy.softAssert(() => {\n    cy.get('input[name=\"phone\"]').should(\"have.value\", \"08012345678\");\n}, \"Phone retained on back navigation\");\ncy.assertAll();",
+              "err": {},
+              "uuid": "a3d0140f-a580-4307-b539-e48f2086661c",
+              "parentUUID": "f9f8f07e-f50e-4850-837c-d813e12615e7",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "ce926d81-8c39-4b9a-b8c9-120dc6bcba06",
+            "1af2f633-9e82-475a-8643-a47596f984ef",
+            "5991f003-34ea-43c6-af68-8d4cb5f38f70",
+            "8f3f8048-f3ca-4627-8e43-45be58bc0ad9",
+            "1ad22745-9de2-4d96-8c59-474acc93ba9f",
+            "59b47fcb-9331-4565-bd55-417b43576726",
+            "a3d0140f-a580-4307-b539-e48f2086661c"
+          ],
+          "failures": [
+            "74c649c8-2be6-4a5a-8752-f953611bd84e",
+            "8a9b021f-17bd-4686-b9f0-b1ee21149f30",
+            "b985bbf1-b9f1-4abc-a646-0acf33790f67",
+            "890930f4-4b0a-4eef-9a3e-1a9b49b85bab"
+          ],
+          "pending": [],
+          "skipped": [],
+          "duration": 141956,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.0.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "8.1.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime"
+      },
+      "version": "6.3.2"
+    }
+  }
+}

@@ -1,0 +1,379 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 13,
+    "passes": 2,
+    "pending": 0,
+    "failures": 11,
+    "start": "2026-09-24T11:34:21.644Z",
+    "end": "2026-09-24T11:36:27.762Z",
+    "duration": 126118,
+    "testsRegistered": 13,
+    "passPercent": 15.384615384615385,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "1b078264-ff00-493c-8e71-77515ddb4187",
+      "title": "",
+      "fullFile": "cypress/e2e/auth/login.cy.ts",
+      "file": "cypress/e2e/auth/login.cy.ts",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "747a766e-7858-4a13-8c2e-da35adfdee16",
+          "title": "Auth — Login",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "P1 | Valid credentials → redirects to /overview",
+              "fullTitle": "Auth — Login P1 | Valid credentials → redirects to /overview",
+              "timedOut": null,
+              "duration": 909,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"identifier\"]').type(Cypress.env(\"TEST_EMAIL\"));\ncy.get('input[name=\"password\"]').type(Cypress.env(\"TEST_PASSWORD\"));\ncy.get('button[type=\"submit\"]').click();\n// HARD: must land on overview — no point running further checks without this\ncy.url({ timeout: 60000 }).should(\"include\", \"/overview\");",
+              "err": {
+                "message": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type",
+                "estack": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type\n    at Context.type (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:137630:76)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/auth/login.cy.ts:12:0)",
+                "diff": null
+              },
+              "uuid": "8535698d-5649-4899-9cfb-591daae8e055",
+              "parentUUID": "747a766e-7858-4a13-8c2e-da35adfdee16",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P2 | nepay_refresh cookie is set after successful login",
+              "fullTitle": "Auth — Login P2 | nepay_refresh cookie is set after successful login",
+              "timedOut": null,
+              "duration": 735,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"identifier\"]').type(Cypress.env(\"TEST_EMAIL\"));\ncy.get('input[name=\"password\"]').type(Cypress.env(\"TEST_PASSWORD\"));\ncy.get('button[type=\"submit\"]').click();\ncy.url({ timeout: 60000 }).should(\"include\", \"/overview\");\n// HARD: cookie is the middleware session gate — must be present\ncy.getCookie(\"nepay_refresh\").should(\"exist\").and(\"have.property\", \"value\", \"true\");",
+              "err": {
+                "message": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type",
+                "estack": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type\n    at Context.type (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:137630:76)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/auth/login.cy.ts:19:0)",
+                "diff": null
+              },
+              "uuid": "fe5ae649-e087-4ea7-997d-c790d8391d1c",
+              "parentUUID": "747a766e-7858-4a13-8c2e-da35adfdee16",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P3 | Welcome toast shows user's first name after login",
+              "fullTitle": "Auth — Login P3 | Welcome toast shows user's first name after login",
+              "timedOut": null,
+              "duration": 1047,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"identifier\"]').type(Cypress.env(\"TEST_EMAIL\"));\ncy.get('input[name=\"password\"]').type(Cypress.env(\"TEST_PASSWORD\"));\ncy.get('button[type=\"submit\"]').click();\ncy.url({ timeout: 60000 }).should(\"include\", \"/overview\");\n// SOFT: cosmetic — toast should appear, but shouldn't block the flow\ncy.softAssert(() => {\n    cy.get('[data-sonner-toast]', { timeout: 5000 }).should(\"be.visible\");\n}, \"Welcome toast visibility\");\ncy.assertAll();",
+              "err": {
+                "message": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type",
+                "estack": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type\n    at Context.type (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:137630:76)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/auth/login.cy.ts:27:0)",
+                "diff": null
+              },
+              "uuid": "a0508c06-7ed6-4900-b39e-0553c189ea4b",
+              "parentUUID": "747a766e-7858-4a13-8c2e-da35adfdee16",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P4 | returnTo query param redirects to original route after login",
+              "fullTitle": "Auth — Login P4 | returnTo query param redirects to original route after login",
+              "timedOut": null,
+              "duration": 1141,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.visit(\"/login?returnTo=/transfer\");\ncy.get('input[name=\"identifier\"]').type(Cypress.env(\"TEST_EMAIL\"));\ncy.get('input[name=\"password\"]').type(Cypress.env(\"TEST_PASSWORD\"));\ncy.get('button[type=\"submit\"]').click();\n// HARD: must honour the returnTo param\ncy.url({ timeout: 60000 }).should(\"include\", \"/transfer\");",
+              "err": {
+                "message": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type",
+                "estack": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type\n    at Context.type (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:137630:76)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/auth/login.cy.ts:39:0)",
+                "diff": null
+              },
+              "uuid": "98ab2a57-9675-456c-9b14-915aeb2aacd1",
+              "parentUUID": "747a766e-7858-4a13-8c2e-da35adfdee16",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P5 | Accessing /login when already logged in → bounced to /overview",
+              "fullTitle": "Auth — Login P5 | Accessing /login when already logged in → bounced to /overview",
+              "timedOut": null,
+              "duration": 11301,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.login();\ncy.visit(\"/login\");\n// HARD: middleware should redirect away\ncy.url({ timeout: 10000 }).should(\"include\", \"/overview\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 10000ms: expected 'https://staging-nepay.vercel.app/login' to include '/overview'",
+                "estack": "AssertionError: Timed out retrying after 10000ms: expected 'https://staging-nepay.vercel.app/login' to include '/overview'\n    at Context.eval (webpack:///./cypress/e2e/auth/login.cy.ts:49:33)",
+                "diff": null
+              },
+              "uuid": "5c1a97f8-09f0-4842-ae75-1a0030986d70",
+              "parentUUID": "747a766e-7858-4a13-8c2e-da35adfdee16",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N1 | Wrong password → inline error shown (not a toast)",
+              "fullTitle": "Auth — Login N1 | Wrong password → inline error shown (not a toast)",
+              "timedOut": null,
+              "duration": 889,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"identifier\"]').type(Cypress.env(\"TEST_EMAIL\"));\ncy.get('input[name=\"password\"]').type(\"WrongPassword999!\");\ncy.get('button[type=\"submit\"]').click();\n// HARD: must stay on login page\ncy.url().should(\"include\", \"/login\");\n// HARD: inline error must appear (not just a toast that auto-dismisses)\ncy.contains(/invalid|incorrect|wrong|credentials/i, { timeout: 8000 }).should(\"be.visible\");\n// SOFT: no toast shown for invalid credentials (per auth-context.tsx design)\ncy.softAssert(() => {\n    cy.get('[data-sonner-toast]').should(\"not.exist\");\n}, \"No toast for invalid credentials\");\ncy.assertAll();",
+              "err": {
+                "message": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type",
+                "estack": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type\n    at Context.type (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:137630:76)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/auth/login.cy.ts:53:0)",
+                "diff": null
+              },
+              "uuid": "5ac216ca-d30e-44ad-82bd-f1c46428d7ff",
+              "parentUUID": "747a766e-7858-4a13-8c2e-da35adfdee16",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N2 | Empty email field → validation error before API call",
+              "fullTitle": "Auth — Login N2 | Empty email field → validation error before API call",
+              "timedOut": null,
+              "duration": 1004,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"password\"]').type(\"SomePassword1\");\ncy.get('button[type=\"submit\"]').click();\n// HARD: form validation should block submission\ncy.contains(/email|required|enter/i).should(\"be.visible\");\ncy.url().should(\"include\", \"/login\");",
+              "err": {},
+              "uuid": "7b696a46-8f41-48df-b56f-b70e76eee7e2",
+              "parentUUID": "747a766e-7858-4a13-8c2e-da35adfdee16",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N3 | Empty password field → validation error before API call",
+              "fullTitle": "Auth — Login N3 | Empty password field → validation error before API call",
+              "timedOut": null,
+              "duration": 900,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"identifier\"]').type(Cypress.env(\"TEST_EMAIL\"));\ncy.get('button[type=\"submit\"]').click();\n// HARD\ncy.contains(/password|required/i).should(\"be.visible\");\ncy.url().should(\"include\", \"/login\");",
+              "err": {
+                "message": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type",
+                "estack": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type\n    at Context.type (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:137630:76)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/auth/login.cy.ts:74:0)",
+                "diff": null
+              },
+              "uuid": "72ca603b-1d57-4265-90e5-33665a8a4691",
+              "parentUUID": "747a766e-7858-4a13-8c2e-da35adfdee16",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N4 | Submit button disabled while login request is in-flight (no double submit)",
+              "fullTitle": "Auth — Login N4 | Submit button disabled while login request is in-flight (no double submit)",
+              "timedOut": null,
+              "duration": 818,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"identifier\"]').type(Cypress.env(\"TEST_EMAIL\"));\ncy.get('input[name=\"password\"]').type(Cypress.env(\"TEST_PASSWORD\"));\ncy.intercept(\"POST\", \"**/auth/login\").as(\"loginRequest\");\ncy.get('button[type=\"submit\"]').click();\n// HARD: button must be disabled or show loading state during the request\ncy.get('button[type=\"submit\"]').should(\"be.disabled\");\ncy.wait(\"@loginRequest\");",
+              "err": {
+                "message": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type",
+                "estack": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type\n    at Context.type (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:137630:76)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/auth/login.cy.ts:81:0)",
+                "diff": null
+              },
+              "uuid": "b518442e-09fa-4e2e-8f48-1fdfea41ab41",
+              "parentUUID": "747a766e-7858-4a13-8c2e-da35adfdee16",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N5 | Network error during login → graceful error shown",
+              "fullTitle": "Auth — Login N5 | Network error during login → graceful error shown",
+              "timedOut": null,
+              "duration": 1032,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.intercept(\"POST\", \"**/auth/login\", { forceNetworkError: true }).as(\"loginFail\");\ncy.get('input[name=\"identifier\"]').type(Cypress.env(\"TEST_EMAIL\"));\ncy.get('input[name=\"password\"]').type(Cypress.env(\"TEST_PASSWORD\"));\ncy.get('button[type=\"submit\"]').click();\ncy.wait(\"@loginFail\");\n// HARD: error message should appear — no crash/blank page\ncy.softAssert(() => {\n    cy.contains(/error|failed|try again|problem/i, { timeout: 8000 }).should(\"be.visible\");\n}, \"Error message on network failure\");\n// HARD: still on login page\ncy.url().should(\"include\", \"/login\");\ncy.assertAll();",
+              "err": {
+                "message": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type",
+                "estack": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type\n    at Context.type (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:137630:76)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/auth/login.cy.ts:91:0)",
+                "diff": null
+              },
+              "uuid": "ef5e3c99-1a36-4f5a-92ac-c318fd4b9bcc",
+              "parentUUID": "747a766e-7858-4a13-8c2e-da35adfdee16",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N6 | Suspended account → persistent banner shown (not just toast)",
+              "fullTitle": "Auth — Login N6 | Suspended account → persistent banner shown (not just toast)",
+              "timedOut": null,
+              "duration": 1306,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.intercept(\"POST\", \"**/auth/login\", {\n    statusCode: 403,\n    body: {\n        success: false,\n        code: \"ACCOUNT_SUSPENDED\",\n        message: \"Your account has been suspended. Please contact support.\",\n    },\n}).as(\"suspendedLogin\");\ncy.get('input[name=\"identifier\"]').type(\"suspended@test.com\");\ncy.get('input[name=\"password\"]').type(\"AnyPass123\");\ncy.get('button[type=\"submit\"]').click();\ncy.wait(\"@suspendedLogin\");\n// HARD: must show a visible, persistent suspended banner\ncy.contains(/suspended|contact support/i, { timeout: 8000 }).should(\"be.visible\");\n// SOFT: no toast (per auth-context.tsx design decision)\ncy.softAssert(() => {\n    cy.get('[data-sonner-toast]').should(\"not.exist\");\n}, \"No auto-dismiss toast for suspended account\");\ncy.assertAll();",
+              "err": {},
+              "uuid": "5d3c5cc7-e285-430b-93f9-892e9e27a329",
+              "parentUUID": "747a766e-7858-4a13-8c2e-da35adfdee16",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N7 | Open redirect — returnTo with external URL → fallback to /overview",
+              "fullTitle": "Auth — Login N7 | Open redirect — returnTo with external URL → fallback to /overview",
+              "timedOut": null,
+              "duration": 11381,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.login();\ncy.visit(\"/login?returnTo=https://evil.com\");\n// HARD: middleware safeReturnTo must reject the external URL\ncy.url({ timeout: 10000 }).should(\"include\", \"/overview\");\ncy.url().should(\"not.include\", \"evil.com\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 10000ms: expected 'https://staging-nepay.vercel.app/login?returnTo=https://evil.com' to include '/overview'",
+                "estack": "AssertionError: Timed out retrying after 10000ms: expected 'https://staging-nepay.vercel.app/login?returnTo=https://evil.com' to include '/overview'\n    at Context.eval (webpack:///./cypress/e2e/auth/login.cy.ts:128:33)",
+                "diff": null
+              },
+              "uuid": "0c65b738-f44d-404a-9937-96bb83cef6fb",
+              "parentUUID": "747a766e-7858-4a13-8c2e-da35adfdee16",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N8 | Open redirect — returnTo with protocol-relative URL → fallback to /overview",
+              "fullTitle": "Auth — Login N8 | Open redirect — returnTo with protocol-relative URL → fallback to /overview",
+              "timedOut": null,
+              "duration": 11270,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.login();\ncy.visit(\"/login?returnTo=//evil.com\");\ncy.url({ timeout: 10000 }).should(\"include\", \"/overview\");\ncy.url().should(\"not.include\", \"evil.com\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 10000ms: expected 'https://staging-nepay.vercel.app/login?returnTo=//evil.com' to include '/overview'",
+                "estack": "AssertionError: Timed out retrying after 10000ms: expected 'https://staging-nepay.vercel.app/login?returnTo=//evil.com' to include '/overview'\n    at Context.eval (webpack:///./cypress/e2e/auth/login.cy.ts:134:33)",
+                "diff": null
+              },
+              "uuid": "193d2693-c387-4527-a64e-68207cd1e6e7",
+              "parentUUID": "747a766e-7858-4a13-8c2e-da35adfdee16",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "7b696a46-8f41-48df-b56f-b70e76eee7e2",
+            "5d3c5cc7-e285-430b-93f9-892e9e27a329"
+          ],
+          "failures": [
+            "8535698d-5649-4899-9cfb-591daae8e055",
+            "fe5ae649-e087-4ea7-997d-c790d8391d1c",
+            "a0508c06-7ed6-4900-b39e-0553c189ea4b",
+            "98ab2a57-9675-456c-9b14-915aeb2aacd1",
+            "5c1a97f8-09f0-4842-ae75-1a0030986d70",
+            "5ac216ca-d30e-44ad-82bd-f1c46428d7ff",
+            "72ca603b-1d57-4265-90e5-33665a8a4691",
+            "b518442e-09fa-4e2e-8f48-1fdfea41ab41",
+            "ef5e3c99-1a36-4f5a-92ac-c318fd4b9bcc",
+            "0c65b738-f44d-404a-9937-96bb83cef6fb",
+            "193d2693-c387-4527-a64e-68207cd1e6e7"
+          ],
+          "pending": [],
+          "skipped": [],
+          "duration": 43733,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.0.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "8.1.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime"
+      },
+      "version": "6.3.2"
+    }
+  }
+}

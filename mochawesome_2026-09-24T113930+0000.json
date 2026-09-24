@@ -1,0 +1,225 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 6,
+    "passes": 0,
+    "pending": 0,
+    "failures": 6,
+    "start": "2026-09-24T11:36:42.719Z",
+    "end": "2026-09-24T11:39:30.871Z",
+    "duration": 168152,
+    "testsRegistered": 6,
+    "passPercent": 0,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "52284197-6b74-4618-a7a6-629011712850",
+      "title": "",
+      "fullFile": "cypress/e2e/auth/logout.cy.ts",
+      "file": "cypress/e2e/auth/logout.cy.ts",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "781586a0-31f5-4415-8cec-be01688bb563",
+          "title": "Auth — Logout",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "P1 | Logout clears nepay_refresh cookie",
+              "fullTitle": "Auth — Logout P1 | Logout clears nepay_refresh cookie",
+              "timedOut": null,
+              "duration": 9225,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "// Find and click the logout trigger\ncy.contains(/log out|sign out/i, { timeout: 8000 }).click();\n// HARD: cookie must be gone\ncy.getCookie(\"nepay_refresh\", { timeout: 8000 }).should(\"not.exist\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.",
+                "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:11:0)",
+                "diff": null
+              },
+              "uuid": "e3195aa8-6f40-4a36-a601-43de39d9ce14",
+              "parentUUID": "781586a0-31f5-4415-8cec-be01688bb563",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P2 | Logout redirects to /login",
+              "fullTitle": "Auth — Logout P2 | Logout redirects to /login",
+              "timedOut": null,
+              "duration": 9637,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.contains(/log out|sign out/i, { timeout: 8000 }).click();\n// HARD\ncy.url({ timeout: 8000 }).should(\"include\", \"/login\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.",
+                "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:16:0)",
+                "diff": null
+              },
+              "uuid": "8d2467f1-8a99-42b5-abe2-3af7eafe7dbd",
+              "parentUUID": "781586a0-31f5-4415-8cec-be01688bb563",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P3 | Signed out toast is shown",
+              "fullTitle": "Auth — Logout P3 | Signed out toast is shown",
+              "timedOut": null,
+              "duration": 9295,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.contains(/log out|sign out/i, { timeout: 8000 }).click();\n// SOFT: toast is cosmetic\ncy.softAssert(() => {\n    cy.contains(/signed out|logged out/i, { timeout: 5000 }).should(\"be.visible\");\n}, \"Signed out toast\");\ncy.assertAll();",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.",
+                "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:21:0)",
+                "diff": null
+              },
+              "uuid": "f28e4612-e6d6-4f5e-bb34-2c7d4c8e6983",
+              "parentUUID": "781586a0-31f5-4415-8cec-be01688bb563",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P4 | localStorage is cleared after logout",
+              "fullTitle": "Auth — Logout P4 | localStorage is cleared after logout",
+              "timedOut": null,
+              "duration": 9288,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.contains(/log out|sign out/i, { timeout: 8000 }).click();\ncy.url({ timeout: 8000 }).should(\"include\", \"/login\");\n// HARD: tokens must be gone from localStorage\ncy.window().then((win) => {\n    expect(win.localStorage.getItem(\"nepay-auth\")).to.be.null;\n});",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.",
+                "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:29:0)",
+                "diff": null
+              },
+              "uuid": "f474905a-58ba-4d00-911f-4c576c64bd95",
+              "parentUUID": "781586a0-31f5-4415-8cec-be01688bb563",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N1 | After logout, browser back to protected route → redirected to /login",
+              "fullTitle": "Auth — Logout N1 | After logout, browser back to protected route → redirected to /login",
+              "timedOut": null,
+              "duration": 9338,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.contains(/log out|sign out/i, { timeout: 8000 }).click();\ncy.url({ timeout: 8000 }).should(\"include\", \"/login\");\ncy.go(\"back\");\n// HARD: middleware must gate the route\ncy.url({ timeout: 8000 }).should(\"include\", \"/login\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.",
+                "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:37:0)",
+                "diff": null
+              },
+              "uuid": "5d4408d6-1e5b-4ec3-85d0-d081fc0a1341",
+              "parentUUID": "781586a0-31f5-4415-8cec-be01688bb563",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N2 | Logout when API fails → still clears state and redirects",
+              "fullTitle": "Auth — Logout N2 | Logout when API fails → still clears state and redirects",
+              "timedOut": null,
+              "duration": 9303,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.intercept(\"POST\", \"**/auth/logout\", { forceNetworkError: true }).as(\"logoutFail\");\ncy.contains(/log out|sign out/i, { timeout: 8000 }).click();\ncy.wait(\"@logoutFail\");\n// HARD: even on API failure, user must be logged out locally\ncy.url({ timeout: 8000 }).should(\"include\", \"/login\");\ncy.getCookie(\"nepay_refresh\").should(\"not.exist\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.",
+                "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:45:0)",
+                "diff": null
+              },
+              "uuid": "e2f36987-cd31-44b8-bd7e-5571ef53ee27",
+              "parentUUID": "781586a0-31f5-4415-8cec-be01688bb563",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [],
+          "failures": [
+            "e3195aa8-6f40-4a36-a601-43de39d9ce14",
+            "8d2467f1-8a99-42b5-abe2-3af7eafe7dbd",
+            "f28e4612-e6d6-4f5e-bb34-2c7d4c8e6983",
+            "f474905a-58ba-4d00-911f-4c576c64bd95",
+            "5d4408d6-1e5b-4ec3-85d0-d081fc0a1341",
+            "e2f36987-cd31-44b8-bd7e-5571ef53ee27"
+          ],
+          "pending": [],
+          "skipped": [],
+          "duration": 56086,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.0.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "8.1.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime"
+      },
+      "version": "6.3.2"
+    }
+  }
+}

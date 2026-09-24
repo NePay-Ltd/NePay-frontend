@@ -1,0 +1,225 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 6,
+    "passes": 0,
+    "pending": 0,
+    "failures": 6,
+    "start": "2026-09-24T12:33:58.746Z",
+    "end": "2026-09-24T12:38:24.226Z",
+    "duration": 265480,
+    "testsRegistered": 6,
+    "passPercent": 0,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "e359cf8b-1b62-4ba6-b88c-b89ce3b13c28",
+      "title": "",
+      "fullFile": "cypress/e2e/services/airtime.cy.ts",
+      "file": "cypress/e2e/services/airtime.cy.ts",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "b712fc4a-29ed-4620-8a71-315206594138",
+          "title": "Services — Airtime",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "P1 | Airtime page loads with provider list",
+              "fullTitle": "Services — Airtime P1 | Airtime page loads with provider list",
+              "timedOut": null,
+              "duration": 11341,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.softAssert(() => {\n    cy.contains(/MTN|Airtel|Glo|9mobile/i, { timeout: 10000 }).should(\"be.visible\");\n}, \"Network providers listed\");\ncy.assertAll();",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/MTN|Airtel|Glo|9mobile/i' but never did.",
+                "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/MTN|Airtel|Glo|9mobile/i' but never did.\n    at eval (webpack:///./cypress/e2e/services/airtime.cy.ts:12:69)\n    at Context.eval (webpack:///./cypress/support/commands.ts:60:0)",
+                "diff": null
+              },
+              "uuid": "d51ba4ce-90a9-4e3e-8d8c-fd6970df7f18",
+              "parentUUID": "b712fc4a-29ed-4620-8a71-315206594138",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P2 | Select provider → amount/phone form shown",
+              "fullTitle": "Services — Airtime P2 | Select provider → amount/phone form shown",
+              "timedOut": null,
+              "duration": 11301,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.contains(/MTN|Airtel|Glo/i, { timeout: 10000 }).first().click();\ncy.softAssert(() => {\n    cy.get(\"input\", { timeout: 5000 }).should(\"be.visible\");\n}, \"Form appears after selecting provider\");\ncy.assertAll();",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/MTN|Airtel|Glo/i' but never did.",
+                "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/MTN|Airtel|Glo/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/services/airtime.cy.ts:17:0)",
+                "diff": null
+              },
+              "uuid": "425b5bdc-1ed5-48b2-a35d-abe5f34457c3",
+              "parentUUID": "b712fc4a-29ed-4620-8a71-315206594138",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N1 | Invalid phone number → validation error",
+              "fullTitle": "Services — Airtime N1 | Invalid phone number → validation error",
+              "timedOut": null,
+              "duration": 11319,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.contains(/MTN|Airtel|Glo/i, { timeout: 10000 }).first().click();\ncy.get('input[name=\"phone\"], input[placeholder*=\"phone\" i], input[placeholder*=\"number\" i]')\n    .first()\n    .type(\"12345\");\ncy.get('button[type=\"submit\"]').click();\ncy.contains(/valid|Nigerian|phone/i, { timeout: 5000 }).should(\"be.visible\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/MTN|Airtel|Glo/i' but never did.",
+                "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/MTN|Airtel|Glo/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/services/airtime.cy.ts:24:0)",
+                "diff": null
+              },
+              "uuid": "9a2329c0-81ac-472b-b5ca-5de728708394",
+              "parentUUID": "b712fc4a-29ed-4620-8a71-315206594138",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N2 | Empty amount → submit blocked",
+              "fullTitle": "Services — Airtime N2 | Empty amount → submit blocked",
+              "timedOut": null,
+              "duration": 11272,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.contains(/MTN|Airtel|Glo/i, { timeout: 10000 }).first().click();\ncy.get('input[name=\"phone\"], input[placeholder*=\"phone\" i]').first().type(\"08012345678\");\ncy.get('button[type=\"submit\"]').click();\ncy.contains(/amount|required/i, { timeout: 5000 }).should(\"be.visible\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/MTN|Airtel|Glo/i' but never did.",
+                "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/MTN|Airtel|Glo/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/services/airtime.cy.ts:32:0)",
+                "diff": null
+              },
+              "uuid": "3d783662-fff6-49c6-8cc5-65b4da52c4b2",
+              "parentUUID": "b712fc4a-29ed-4620-8a71-315206594138",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N3 | No provider selected → submit blocked or provider selection highlighted",
+              "fullTitle": "Services — Airtime N3 | No provider selected → submit blocked or provider selection highlighted",
+              "timedOut": null,
+              "duration": 31782,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('button[type=\"submit\"]').click();\ncy.url().should(\"include\", \"/services/airtime\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 30000ms: expected 'https://staging-nepay.vercel.app/login' to include '/services/airtime'",
+                "estack": "AssertionError: Timed out retrying after 30000ms: expected 'https://staging-nepay.vercel.app/login' to include '/services/airtime'\n    at Context.eval (webpack:///./cypress/e2e/services/airtime.cy.ts:39:0)",
+                "diff": null
+              },
+              "uuid": "f0024f20-24c0-497f-8b4a-a2821770fd11",
+              "parentUUID": "b712fc4a-29ed-4620-8a71-315206594138",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N4 | Insufficient balance → error shown",
+              "fullTitle": "Services — Airtime N4 | Insufficient balance → error shown",
+              "timedOut": null,
+              "duration": 11480,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.intercept(\"POST\", \"**/services/airtime**\", {\n    statusCode: 400,\n    body: { success: false, code: \"INSUFFICIENT_BALANCE\", message: \"Insufficient wallet balance\" },\n}).as(\"airtimeInsufficient\");\ncy.contains(/MTN/i, { timeout: 10000 }).first().click();\ncy.get('input[name=\"phone\"], input[placeholder*=\"phone\" i]').first().type(\"08012345678\");\ncy.get('input[name=\"amount\"], input[placeholder*=\"amount\" i]').first().type(\"999999999\");\ncy.get('button[type=\"submit\"]').click();\ncy.wait(\"@airtimeInsufficient\");\ncy.contains(/insufficient|balance/i, { timeout: 8000 }).should(\"be.visible\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/MTN/i' but never did.",
+                "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/MTN/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/services/airtime.cy.ts:46:0)",
+                "diff": null
+              },
+              "uuid": "d9460182-0f13-48d0-be1f-6fd2a2a7511a",
+              "parentUUID": "b712fc4a-29ed-4620-8a71-315206594138",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [],
+          "failures": [
+            "d51ba4ce-90a9-4e3e-8d8c-fd6970df7f18",
+            "425b5bdc-1ed5-48b2-a35d-abe5f34457c3",
+            "9a2329c0-81ac-472b-b5ca-5de728708394",
+            "3d783662-fff6-49c6-8cc5-65b4da52c4b2",
+            "f0024f20-24c0-497f-8b4a-a2821770fd11",
+            "d9460182-0f13-48d0-be1f-6fd2a2a7511a"
+          ],
+          "pending": [],
+          "skipped": [],
+          "duration": 88495,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.0.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "8.1.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime"
+      },
+      "version": "6.3.2"
+    }
+  }
+}

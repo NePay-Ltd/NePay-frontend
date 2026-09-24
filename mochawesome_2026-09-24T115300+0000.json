@@ -1,0 +1,279 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 9,
+    "passes": 4,
+    "pending": 0,
+    "failures": 5,
+    "start": "2026-09-24T11:47:05.189Z",
+    "end": "2026-09-24T11:53:00.098Z",
+    "duration": 354909,
+    "testsRegistered": 9,
+    "passPercent": 44.44444444444444,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "ac71f7e3-1c02-4a1f-a773-ec9cec033b14",
+      "title": "",
+      "fullFile": "cypress/e2e/dashboard/overview.cy.ts",
+      "file": "cypress/e2e/dashboard/overview.cy.ts",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "de944c2e-d7a0-4542-a139-138e413fb9b8",
+          "title": "Dashboard — Overview",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "P1 | Dashboard loads — wallet balance card visible with formatted value",
+              "fullTitle": "Dashboard — Overview P1 | Dashboard loads — wallet balance card visible with formatted value",
+              "timedOut": null,
+              "duration": 1022,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// SOFT: balance card exists\ncy.softAssert(() => {\n    cy.contains(/₦|balance/i, { timeout: 10000 }).should(\"be.visible\");\n}, \"Wallet balance visible\");\ncy.assertAll();",
+              "err": {},
+              "uuid": "845b0601-1b59-4516-b1e9-e897d6329fd4",
+              "parentUUID": "de944c2e-d7a0-4542-a139-138e413fb9b8",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P2 | Recent transactions list renders",
+              "fullTitle": "Dashboard — Overview P2 | Recent transactions list renders",
+              "timedOut": null,
+              "duration": 779,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// SOFT: at least one transaction, or an empty state\ncy.softAssert(() => {\n    cy.get(\"body\").then(($body) => {\n        const hasTransactions = $body.text().match(/transaction|debit|credit|transfer/i);\n        const hasEmptyState = $body.text().match(/no transaction|nothing here/i);\n        expect(hasTransactions || hasEmptyState).to.be.ok;\n    });\n}, \"Transactions list or empty state visible\");\ncy.assertAll();",
+              "err": {},
+              "uuid": "b49c7888-7f29-47bb-b7dc-f4f65315569e",
+              "parentUUID": "de944c2e-d7a0-4542-a139-138e413fb9b8",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P3 | Quick action buttons visible on dashboard",
+              "fullTitle": "Dashboard — Overview P3 | Quick action buttons visible on dashboard",
+              "timedOut": null,
+              "duration": 9290,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "// SOFT: check all quick actions exist\nconst actions = [\"Transfer\", \"Add Money\"];\nactions.forEach((action) => {\n    cy.softAssert(() => {\n        cy.contains(action, { timeout: 8000 }).should(\"be.visible\");\n    }, `Quick action: ${action}`);\n});\ncy.assertAll();",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 8000ms: Expected to find content: 'Add Money' but never did.",
+                "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: 'Add Money' but never did.\n    at eval (webpack:///./cypress/e2e/dashboard/overview.cy.ts:35:53)\n    at Context.eval (webpack:///./cypress/support/commands.ts:60:0)",
+                "diff": null
+              },
+              "uuid": "ecc9dd3c-0491-4526-9f7e-1ff7db5be322",
+              "parentUUID": "de944c2e-d7a0-4542-a139-138e413fb9b8",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P4 | Sidebar navigation links are all present",
+              "fullTitle": "Dashboard — Overview P4 | Sidebar navigation links are all present",
+              "timedOut": null,
+              "duration": 538,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const navItems = [\"Overview\", \"Transactions\", \"Transfer to bank\", \"Bills & services\"];\nnavItems.forEach((item) => {\n    cy.softAssert(() => {\n        cy.contains(item, { timeout: 8000 }).should(\"exist\");\n    }, `Sidebar nav item: ${item}`);\n});\ncy.assertAll();",
+              "err": {},
+              "uuid": "3a636e0e-d66a-403f-92e3-d4b6b6de61e9",
+              "parentUUID": "de944c2e-d7a0-4542-a139-138e413fb9b8",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P5 | Clicking Transfer in sidebar navigates to /transfer",
+              "fullTitle": "Dashboard — Overview P5 | Clicking Transfer in sidebar navigates to /transfer",
+              "timedOut": null,
+              "duration": 11400,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.contains(\"Transfer to bank\", { timeout: 8000 }).first().click();\n// HARD\ncy.url({ timeout: 10000 }).should(\"include\", \"/transfer\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 10000ms: expected 'https://staging-nepay.vercel.app/login' to include '/transfer'",
+                "estack": "AssertionError: Timed out retrying after 10000ms: expected 'https://staging-nepay.vercel.app/login' to include '/transfer'\n    at Context.eval (webpack:///./cypress/e2e/dashboard/overview.cy.ts:52:33)",
+                "diff": null
+              },
+              "uuid": "7d562a25-787c-46c6-b8ba-2924599f1518",
+              "parentUUID": "de944c2e-d7a0-4542-a139-138e413fb9b8",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P6 | Page has no visible error or crash",
+              "fullTitle": "Dashboard — Overview P6 | Page has no visible error or crash",
+              "timedOut": null,
+              "duration": 510,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// HARD: no error boundary or crash message\ncy.contains(/something went wrong|error occurred|unexpected/i).should(\"not.exist\");\ncy.get(\"body\").should(\"be.visible\");",
+              "err": {},
+              "uuid": "724589ca-b532-40fd-875c-5368c3035800",
+              "parentUUID": "de944c2e-d7a0-4542-a139-138e413fb9b8",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P7 | Can toggle balance visibility (eye icon)",
+              "fullTitle": "Dashboard — Overview P7 | Can toggle balance visibility (eye icon)",
+              "timedOut": null,
+              "duration": 31498,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "// Make sure balance is visible first\ncy.contains(/₦/i, { timeout: 10000 }).should(\"be.visible\");\n// Click the hide balance button\ncy.get('button[aria-label=\"Hide balance\"]').click();\n// Verify it turns into asterisks\ncy.contains(\"******\").should(\"be.visible\");\ncy.get('button[aria-label=\"Show balance\"]').should(\"be.visible\");\n// Click to show again\ncy.get('button[aria-label=\"Show balance\"]').click();\n// Verify asterisks are gone and balance is back\ncy.contains(\"******\").should(\"not.exist\");\ncy.contains(/₦/i).should(\"be.visible\");",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `button[aria-label=\"Hide balance\"]`, but never found it.",
+                "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `button[aria-label=\"Hide balance\"]`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/dashboard/overview.cy.ts:63:0)",
+                "diff": null
+              },
+              "uuid": "a7caa9eb-b1a9-4dc9-b739-71ff4a48f313",
+              "parentUUID": "de944c2e-d7a0-4542-a139-138e413fb9b8",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N1 | Wallet API error → error state shown, page does not crash",
+              "fullTitle": "Dashboard — Overview N1 | Wallet API error → error state shown, page does not crash",
+              "timedOut": null,
+              "duration": 61878,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.intercept(\"GET\", \"**/wallet**\", {\n    statusCode: 500,\n    body: { success: false, message: \"Internal server error\" },\n}).as(\"walletError\");\ncy.reload();\ncy.wait(\"@walletError\");\n// HARD: no crash\ncy.get(\"body\").should(\"be.visible\");\n// SOFT: some error state or graceful fallback shown\ncy.softAssert(() => {\n    cy.contains(/error|failed|unavailable|try again/i, { timeout: 8000 }).should(\"be.visible\");\n}, \"Error state on wallet API failure\");\ncy.assertAll();",
+              "err": {
+                "message": "CypressError: Timed out retrying after 60000ms: `cy.wait()` timed out waiting `60000ms` for the 1st request to the route: `walletError`. No request ever occurred.\n\nhttps://on.cypress.io/wait",
+                "estack": "CypressError: Timed out retrying after 60000ms: `cy.wait()` timed out waiting `60000ms` for the 1st request to the route: `walletError`. No request ever occurred.\n\nhttps://on.cypress.io/wait\n    at cypressErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161339:18)\n    at Object.errByPath (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161408:10)\n    at checkForXhr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:146476:92)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:146499:28)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at whenStable (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:153099:65)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152508:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11002:46)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/dashboard/overview.cy.ts:80:0)",
+                "diff": null
+              },
+              "uuid": "371addd4-ab26-4a05-9430-fc2729b9914c",
+              "parentUUID": "de944c2e-d7a0-4542-a139-138e413fb9b8",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N2 | Skeleton loaders shown during slow API response",
+              "fullTitle": "Dashboard — Overview N2 | Skeleton loaders shown during slow API response",
+              "timedOut": null,
+              "duration": 3808,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.intercept(\"GET\", \"**/wallet**\", (req) => {\n    req.on(\"response\", (res) => {\n        res.setDelay(3000); // 3-second artificial delay\n    });\n}).as(\"slowWallet\");\ncy.reload();\n// SOFT: loading skeleton should be visible before data arrives\ncy.softAssert(() => {\n    cy.get(\"[class*=skeleton], [class*=loading], [data-testid*=skeleton]\", { timeout: 2000 })\n        .should(\"exist\");\n}, \"Skeleton loaders during slow API\");\ncy.wait(\"@slowWallet\");\ncy.assertAll();",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 2000ms: Expected to find element: `[class*=skeleton], [class*=loading], [data-testid*=skeleton]`, but never found it.",
+                "estack": "AssertionError: Timed out retrying after 2000ms: Expected to find element: `[class*=skeleton], [class*=loading], [data-testid*=skeleton]`, but never found it.\n    at eval (webpack:///./cypress/e2e/dashboard/overview.cy.ts:99:0)\n    at Context.eval (webpack:///./cypress/support/commands.ts:60:0)",
+                "diff": null
+              },
+              "uuid": "5e8daade-3d54-43a3-9087-cbe79731b7cf",
+              "parentUUID": "de944c2e-d7a0-4542-a139-138e413fb9b8",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "845b0601-1b59-4516-b1e9-e897d6329fd4",
+            "b49c7888-7f29-47bb-b7dc-f4f65315569e",
+            "3a636e0e-d66a-403f-92e3-d4b6b6de61e9",
+            "724589ca-b532-40fd-875c-5368c3035800"
+          ],
+          "failures": [
+            "ecc9dd3c-0491-4526-9f7e-1ff7db5be322",
+            "7d562a25-787c-46c6-b8ba-2924599f1518",
+            "a7caa9eb-b1a9-4dc9-b739-71ff4a48f313",
+            "371addd4-ab26-4a05-9430-fc2729b9914c",
+            "5e8daade-3d54-43a3-9087-cbe79731b7cf"
+          ],
+          "pending": [],
+          "skipped": [],
+          "duration": 120723,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.0.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "8.1.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime"
+      },
+      "version": "6.3.2"
+    }
+  }
+}
