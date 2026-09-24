@@ -1,14 +1,17 @@
 name: NePay Tests
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - 'apps/web/**'
+      - '.github/workflows/**'
   pull_request:
     branches: [main]
     paths:
       - 'apps/web/**'
+      - '.github/workflows/**'
   schedule:
     # Run every 6 hours
     - cron: '0 */6 * * *'
