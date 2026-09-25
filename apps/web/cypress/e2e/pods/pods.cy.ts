@@ -14,12 +14,14 @@ describe("Pods", () => {
   });
 
   it("P2 | Empty pods → empty state shown", () => {
+    // Intercept BEFORE visiting so it catches the initial data fetch
     cy.intercept("GET", "**/pods**", {
       statusCode: 200,
       body: { success: true, data: [] },
     }).as("emptyPods");
 
-    cy.reload();
+    cy.login();
+    cy.visit("/pods");
     cy.wait("@emptyPods");
 
     cy.softAssert(() => {
@@ -52,12 +54,14 @@ describe("Pods", () => {
   });
 
   it("N3 | API error on pod load → page doesn't crash", () => {
+    // Intercept BEFORE visiting so it catches the initial data fetch
     cy.intercept("GET", "**/pods**", {
       statusCode: 500,
       body: { success: false, message: "Server error" },
     }).as("podsError");
 
-    cy.reload();
+    cy.login();
+    cy.visit("/pods");
     cy.wait("@podsError");
 
     cy.get("body").should("be.visible");
