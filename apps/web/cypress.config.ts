@@ -8,6 +8,7 @@ export default defineConfig({
     // ── Spec pattern ────────────────────────────────────────────────────
     specPattern: "cypress/e2e/**/*.cy.ts",
     supportFile: "cypress/support/e2e.ts",
+    experimentalSessionAndOrigin: true,
 
     // ── Viewport ────────────────────────────────────────────────────────
     viewportWidth: 1280,
@@ -26,8 +27,11 @@ export default defineConfig({
     },
 
     // ── Screenshot / Video ──────────────────────────────────────────────
+    // Screenshots on failure are kept — useful for debugging.
+    // Video is OFF locally (large files, fills disk fast).
+    // CI overrides this via CYPRESS_video=true in the workflow env.
     screenshotOnRunFailure: true,
-    video: true,
+    video: false,
     videosFolder: "cypress/videos",
     screenshotsFolder: "cypress/screenshots",
 

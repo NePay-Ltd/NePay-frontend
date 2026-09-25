@@ -31,12 +31,14 @@ describe("Transactions", () => {
   });
 
   it("N1 | Empty history → empty state message shown", () => {
+    // Intercept BEFORE visiting so it catches the initial data fetch
     cy.intercept("GET", "**/transactions**", {
       statusCode: 200,
       body: { success: true, data: { items: [], total: 0 } },
     }).as("emptyTxn");
 
-    cy.reload();
+    cy.login();
+    cy.visit("/transactions");
     cy.wait("@emptyTxn");
 
     cy.softAssert(() => {
@@ -47,12 +49,14 @@ describe("Transactions", () => {
   });
 
   it("N2 | API error → graceful fallback, no crash", () => {
+    // Intercept BEFORE visiting so it catches the initial data fetch
     cy.intercept("GET", "**/transactions**", {
       statusCode: 500,
       body: { success: false, message: "Server error" },
     }).as("txnError");
 
-    cy.reload();
+    cy.login();
+    cy.visit("/transactions");
     cy.wait("@txnError");
 
     cy.get("body").should("be.visible");

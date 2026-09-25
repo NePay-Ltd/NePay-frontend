@@ -56,28 +56,26 @@ describe("Security — Change PIN", () => {
   });
 
   it("N1 | PINs don't match → error", () => {
-    cy.get('input[name="pin"]').first().type("1234");
-    cy.get('input[name="confirmPin"]').first().type("5678");
+    cy.get('#currentPin').type("0000");
+    cy.get('#newPin').type("1234");
+    cy.get('#confirmPin').type("5678");
     cy.get('button[type="submit"]').click();
 
-    cy.contains(/match|same/i).should("be.visible");
+    cy.contains(/do not match|match/i).should("be.visible");
   });
 
   it("N2 | PIN not 4 digits → validation error", () => {
-    cy.get('input[name="pin"]').first().type("12");
+    cy.get('#newPin').type("12");
     cy.get('button[type="submit"]').click();
 
-    cy.contains(/4|digits|length/i).should("be.visible");
+    cy.contains(/4 digits|exactly 4|length/i).should("be.visible");
   });
 });
 
 describe("Security — Login Activity", () => {
-  beforeEach(() => {
+  it("P1 | Login activity page loads", () => {
     cy.login();
     cy.visit("/security/login-activity");
-  });
-
-  it("P1 | Login activity page loads", () => {
     cy.get("body").should("be.visible");
     cy.softAssert(() => {
       cy.contains(/device|session|login|activity/i, { timeout: 8000 }).should("be.visible");
@@ -86,12 +84,14 @@ describe("Security — Login Activity", () => {
   });
 
   it("N1 | API error → graceful error state, no crash", () => {
+    // Intercept BEFORE visiting so it catches the initial page load request
     cy.intercept("GET", "**/security/login-activity**", {
       statusCode: 500,
       body: { success: false, message: "Server error" },
     }).as("sessionsError");
 
-    cy.reload();
+    cy.login();
+    cy.visit("/security/login-activity");
     cy.wait("@sessionsError");
 
     cy.get("body").should("be.visible");

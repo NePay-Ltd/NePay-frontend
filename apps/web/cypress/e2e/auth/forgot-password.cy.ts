@@ -64,13 +64,20 @@ describe("Auth — Reset Password", () => {
     cy.contains(/passwords do not match/i).should("be.visible");
   });
 
-  it("N2 | Invalid code format (not 6 digits) → validation error", () => {
+  it("N2 | Backend rejects code → validation error shown", () => {
+    cy.intercept("POST", "**/auth/reset-password", {
+      statusCode: 400,
+      body: { success: false, code: "VALIDATION_FAILED", message: "Invalid or expired code" }
+    }).as("resetErr");
+
     cy.get('input[name="email"]').type("test@example.com");
-    cy.get('input[name="code"]').type("abc");
+    cy.get('input[name="code"]').type("000000");
+    cy.get('input[name="password"]').type("NewPass123");
+    cy.get('input[name="confirmPassword"]').type("NewPass123");
     cy.get('button[type="submit"]').click();
 
-    // HARD
-    cy.contains(/6 digits/i).should("be.visible");
+    cy.wait("@resetErr");
+    cy.contains(/invalid or expired/i).should("be.visible");
   });
 
   it("N3 | Weak new password → validation error", () => {

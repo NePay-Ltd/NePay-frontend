@@ -32,10 +32,10 @@ describe("Auth — Register", () => {
     cy.get('input[name="phone"]').type("08012345678");
     cy.contains("Next").click();
 
-    // Select "Other" in the picker
+    // Radix UI Select — click the trigger then force-click the portal item
     cy.contains(/how did you hear/i).should("be.visible");
-    cy.contains("Select an option").click();
-    cy.contains("Other").click();
+    cy.get('#reg-hear').click();
+    cy.contains("Other (Please specify)", { timeout: 5000 }).click({ force: true });
 
     // HARD: 'Please specify' field must appear
     cy.contains(/please specify/i, { timeout: 3000 }).should("be.visible");
@@ -50,9 +50,9 @@ describe("Auth — Register", () => {
 
     cy.get('input[name="password"]').should("have.attr", "type", "password");
 
-    // SOFT: toggle exists and switches type
+    // SOFT: toggle exists and switches type (button identified by aria-label)
     cy.softAssert(() => {
-      cy.get('[data-testid="toggle-password"]').click();
+      cy.get('button[aria-label="Show password"]').first().click();
       cy.get('input[name="password"]').should("have.attr", "type", "text");
     }, "Password show/hide toggle");
 
@@ -65,17 +65,17 @@ describe("Auth — Register", () => {
     cy.get('input[name="phone"]').type("08012345678");
     cy.contains("Next").click();
 
-    cy.get('input[name="password"]').type("weak");
-
-    // SOFT: strength meter should change
+    // SOFT: strength bar row renders when password is typed
+    // The meter is 4 sibling divs inside a flex row after the password input
     cy.softAssert(() => {
-      cy.get('[data-testid="password-strength"]').should("be.visible");
+      cy.get('#reg-password').type("weak");
+      // The strength bar container sits right after the password input in the DOM
+      cy.get('#reg-password').parent().find('div.flex.h-1').should("exist");
     }, "Password strength meter visible");
 
-    cy.get('input[name="password"]').clear().type("StrongPass123!");
-
     cy.softAssert(() => {
-      cy.get('[data-testid="password-strength"]').should("be.visible");
+      cy.get('#reg-password').clear().type("StrongPass123!");
+      cy.get('#reg-password').parent().find('div.flex.h-1').should("exist");
     }, "Password strength meter updates");
 
     cy.assertAll();
@@ -147,9 +147,10 @@ describe("Auth — Register", () => {
     cy.get('input[name="password"]').type("ValidPass1");
     cy.get('input[name="confirmPassword"]').type("ValidPass1");
 
-    cy.contains("Select an option").click();
-    cy.contains("Other").click();
-    // Leave hearAboutUsOther empty
+    // Radix UI Select
+    cy.get('#reg-hear').click();
+    cy.contains("Other (Please specify)", { timeout: 5000 }).click({ force: true });
+    // Leave hearAboutUsOther empty intentionally
     cy.contains("Create Account").click();
 
     // HARD

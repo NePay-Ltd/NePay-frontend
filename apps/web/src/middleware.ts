@@ -155,15 +155,20 @@ export function middleware(request: NextRequest) {
         return passThrough();
     }
 
-    // Pass through exact public auth pages
-    if (PUBLIC_PATHS.has(pathname)) {
-        return passThrough();
-    }
-
     // The nepay_refresh flag cookie is the only persistent, readable signal
     // available here — see this file's class-level note on why it's a
     // routing UX gate, not the real auth boundary.
     const hasSession = request.cookies.has("nepay_refresh");
+
+    // If the user is logged in and visiting an auth page, bounce to overview
+    if (hasSession && PUBLIC_PATHS.has(pathname)) {
+        return withCsp(NextResponse.redirect(new URL("/overview", request.url)));
+    }
+
+    // Pass through exact public auth pages (for non-logged in users)
+    if (PUBLIC_PATHS.has(pathname)) {
+        return passThrough();
+    }
 
     if (!hasSession) {
         // If it's a public content page, let them view it without logging in
@@ -178,11 +183,6 @@ export function middleware(request: NextRequest) {
             loginUrl.searchParams.set("returnTo", returnTo);
         }
         return withCsp(NextResponse.redirect(loginUrl));
-    }
-
-    // If the user is logged in and visiting an auth page, bounce to overview
-    if (PUBLIC_PATHS.has(pathname)) {
-        return withCsp(NextResponse.redirect(new URL("/overview", request.url)));
     }
 
     return passThrough();

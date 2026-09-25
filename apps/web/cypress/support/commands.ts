@@ -8,6 +8,8 @@
 // cy.getBySel()    — query by data-testid attribute
 
 // Extend Cypress types
+export {}; // Make this an external module so `declare global` works correctly
+
 declare global {
   namespace Cypress {
     interface Chainable {
@@ -38,34 +40,43 @@ Cypress.Commands.add("login", (email?: string, password?: string) => {
   const testPassword = password || Cypress.env("TEST_PASSWORD");
   const apiUrl = Cypress.env("API_URL");
 
-  cy.request({
-    method: "POST",
-    url: `${apiUrl}/auth/login`,
-    body: { email: testEmail, password: testPassword },
-    failOnStatusCode: false,
-  }).then((response) => {
-    // Handle the response
-    expect(response.status, "Login API should return 200 or 201").to.be.oneOf([200, 201]);
+  // cy.session caches localStorage and cookies so we only hit the API once
+  cy.session(
+    [testEmail, testPassword],
+    () => {
+      cy.request({
+        method: "POST",
+        url: `${apiUrl}/auth/login`,
+        body: { email: testEmail, password: testPassword },
+        failOnStatusCode: false,
+      }).then((response) => {
+        // Handle the response
+        expect(response.status, "Login API should return 200 or 201").to.be.oneOf([200, 201]);
 
-    const data = response.body && response.body.data;
+        const data = response.body && response.body.data;
 
-    // Guard: if MFA is required on this account, skip test gracefully
-    if (data && data.mfaRequired) {
-      throw new Error(
-        "cy.login() — MFA is enabled on the test account. Disable MFA or use a non-MFA test account."
-      );
+        // Guard: if MFA is required on this account, skip test gracefully
+        if (data && data.mfaRequired) {
+          throw new Error(
+            "cy.login() — MFA is enabled on the test account. Disable MFA or use a non-MFA test account."
+          );
+        }
+
+        // Store tokens in localStorage so api-client interceptor picks them up
+        window.localStorage.setItem("nepay-auth", JSON.stringify(data));
+
+        // Set the session cookie so the Next.js middleware lets the request through
+        cy.setCookie("nepay_refresh", "true", {
+          path: "/",
+          secure: true,
+          sameSite: "lax",
+        });
+      });
+    },
+    {
+      cacheAcrossSpecs: true, // Keep the session alive across different test files!
     }
-
-    // Store tokens in localStorage so api-client interceptor picks them up
-    window.localStorage.setItem("nepay-auth", JSON.stringify(data));
-
-    // Set the session cookie so the Next.js middleware lets the request through
-    cy.setCookie("nepay_refresh", "true", {
-      path: "/",
-      secure: true,
-      sameSite: "lax",
-    });
-  });
+  );
 });
 
 // ─── cy.logout() ─────────────────────────────────────────────────────────────

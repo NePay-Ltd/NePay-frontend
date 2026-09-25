@@ -92,6 +92,7 @@ jobs:
           install: false
         env:
           CYPRESS_BASE_URL: https://staging-nepay.vercel.app
+          CYPRESS_video: true
 
       - name: Merge Mochawesome reports
         if: always()

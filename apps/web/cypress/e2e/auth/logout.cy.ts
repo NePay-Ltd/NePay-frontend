@@ -1,6 +1,13 @@
 // cypress/e2e/auth/logout.cy.ts
 // ─── Logout Test Suite ────────────────────────────────────────────────────────
 
+// Helper: clicks the logout icon button then confirms in the AlertDialog
+function clickLogout() {
+  cy.get('button[title="Log out"]', { timeout: 10000 }).click();
+  cy.contains("Are you sure to log out of NePay?", { timeout: 8000 }).should("be.visible");
+  cy.contains("button", "Yes").click();
+}
+
 describe("Auth — Logout", () => {
   beforeEach(() => {
     cy.login();
@@ -8,22 +15,21 @@ describe("Auth — Logout", () => {
   });
 
   it("P1 | Logout clears nepay_refresh cookie", () => {
-    // Find and click the logout trigger
-    cy.contains(/log out|sign out/i, { timeout: 8000 }).click();
+    clickLogout();
 
     // HARD: cookie must be gone
     cy.getCookie("nepay_refresh", { timeout: 8000 }).should("not.exist");
   });
 
   it("P2 | Logout redirects to /login", () => {
-    cy.contains(/log out|sign out/i, { timeout: 8000 }).click();
+    clickLogout();
 
     // HARD
     cy.url({ timeout: 8000 }).should("include", "/login");
   });
 
   it("P3 | Signed out toast is shown", () => {
-    cy.contains(/log out|sign out/i, { timeout: 8000 }).click();
+    clickLogout();
 
     // SOFT: toast is cosmetic
     cy.softAssert(() => {
@@ -34,7 +40,7 @@ describe("Auth — Logout", () => {
   });
 
   it("P4 | localStorage is cleared after logout", () => {
-    cy.contains(/log out|sign out/i, { timeout: 8000 }).click();
+    clickLogout();
     cy.url({ timeout: 8000 }).should("include", "/login");
 
     // HARD: tokens must be gone from localStorage
@@ -44,7 +50,7 @@ describe("Auth — Logout", () => {
   });
 
   it("N1 | After logout, browser back to protected route → redirected to /login", () => {
-    cy.contains(/log out|sign out/i, { timeout: 8000 }).click();
+    clickLogout();
     cy.url({ timeout: 8000 }).should("include", "/login");
 
     cy.go("back");
@@ -56,8 +62,7 @@ describe("Auth — Logout", () => {
   it("N2 | Logout when API fails → still clears state and redirects", () => {
     cy.intercept("POST", "**/auth/logout", { forceNetworkError: true }).as("logoutFail");
 
-    cy.contains(/log out|sign out/i, { timeout: 8000 }).click();
-    cy.wait("@logoutFail");
+    clickLogout();
 
     // HARD: even on API failure, user must be logged out locally
     cy.url({ timeout: 8000 }).should("include", "/login");
