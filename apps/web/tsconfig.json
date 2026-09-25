@@ -39,7 +39,10 @@
   ],
   "exclude": [
     "node_modules",
-    "cypress"
+    "cypress",
+    "cypress.config.ts",
+    "vitest.config.ts",
+    "src/__tests__"
   ],
   "ts-node": {
     "compilerOptions": {
