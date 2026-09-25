@@ -5,9 +5,9 @@
     "passes": 0,
     "pending": 0,
     "failures": 8,
-    "start": "2026-09-24T23:55:44.160Z",
-    "end": "2026-09-25T00:06:26.667Z",
-    "duration": 642507,
+    "start": "2026-09-25T00:11:45.581Z",
+    "end": "2026-09-25T00:22:17.013Z",
+    "duration": 631432,
     "testsRegistered": 8,
     "passPercent": 0,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "dced8503-cecd-443a-92a3-6177e34a141c",
+      "uuid": "7ea4a878-3546-4fc4-a1a1-2666e219a8e9",
       "title": "",
       "fullFile": "cypress/e2e/transfer/transfer.cy.ts",
       "file": "cypress/e2e/transfer/transfer.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "aeadfe8f-1033-406d-b5e8-11e85aac5767",
+          "uuid": "7a165a2f-5c0d-427c-a5d1-1e35f919b7dc",
           "title": "Transfer",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | Transfer page loads with recipient search field",
               "fullTitle": "Transfer P1 | Transfer page loads with recipient search field",
               "timedOut": null,
-              "duration": 31884,
+              "duration": 31302,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -51,8 +51,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find content: '/transfer|send|recipient/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:14:0)",
                 "diff": null
               },
-              "uuid": "d98f1aa5-558a-4db2-b5d8-9d3f5318e551",
-              "parentUUID": "aeadfe8f-1033-406d-b5e8-11e85aac5767",
+              "uuid": "a2d442ad-3ef0-4473-99d9-b45802845e33",
+              "parentUUID": "7a165a2f-5c0d-427c-a5d1-1e35f919b7dc",
               "isHook": false,
               "skipped": false
             },
@@ -60,7 +60,7 @@
               "title": "P2 | Amount field formats correctly (no more than 2 decimal places shown)",
               "fullTitle": "Transfer P2 | Amount field formats correctly (no more than 2 decimal places shown)",
               "timedOut": null,
-              "duration": 31694,
+              "duration": 31388,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -73,8 +73,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input[name=\"amount\"], input[placeholder*=\"amount\" i], input[placeholder*=\"Amount\" i]`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:18:0)",
                 "diff": null
               },
-              "uuid": "723416b9-8478-4f71-8367-b7f5f685fb83",
-              "parentUUID": "aeadfe8f-1033-406d-b5e8-11e85aac5767",
+              "uuid": "3f95c54f-df87-4572-9e95-8cc1d48dcedb",
+              "parentUUID": "7a165a2f-5c0d-427c-a5d1-1e35f919b7dc",
               "isHook": false,
               "skipped": false
             },
@@ -82,7 +82,7 @@
               "title": "P3 | Empty amount → submit blocked",
               "fullTitle": "Transfer P3 | Empty amount → submit blocked",
               "timedOut": null,
-              "duration": 32007,
+              "duration": 31484,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -95,8 +95,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: expected 'https://staging-nepay.vercel.app/login' to include '/transfer'\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:30:0)",
                 "diff": null
               },
-              "uuid": "1fe6563e-8391-4008-9163-d23e183f9138",
-              "parentUUID": "aeadfe8f-1033-406d-b5e8-11e85aac5767",
+              "uuid": "b9c8537d-e1e8-473e-8b5f-32736cc4c1b7",
+              "parentUUID": "7a165a2f-5c0d-427c-a5d1-1e35f919b7dc",
               "isHook": false,
               "skipped": false
             },
@@ -104,7 +104,7 @@
               "title": "N1 | Non-existent username search → 'not found' error shown",
               "fullTitle": "Transfer N1 | Non-existent username search → 'not found' error shown",
               "timedOut": null,
-              "duration": 62969,
+              "duration": 62016,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -117,8 +117,8 @@
                 "estack": "CypressError: Timed out retrying after 60000ms: `cy.wait()` timed out waiting `60000ms` for the 1st request to the route: `userNotFound`. No request ever occurred.\n\nhttps://on.cypress.io/wait\n    at cypressErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161339:18)\n    at Object.errByPath (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161408:10)\n    at checkForXhr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:146476:92)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:146499:28)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at whenStable (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:153099:65)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152508:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11002:46)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:40:0)",
                 "diff": null
               },
-              "uuid": "7fefa713-b317-4bbb-bb57-98cb574990b3",
-              "parentUUID": "aeadfe8f-1033-406d-b5e8-11e85aac5767",
+              "uuid": "153daa51-8202-46f1-a671-b32a6cfe84d9",
+              "parentUUID": "7a165a2f-5c0d-427c-a5d1-1e35f919b7dc",
               "isHook": false,
               "skipped": false
             },
@@ -126,7 +126,7 @@
               "title": "N2 | Amount = 0 → validation error before API call",
               "fullTitle": "Transfer N2 | Amount = 0 → validation error before API call",
               "timedOut": null,
-              "duration": 31754,
+              "duration": 31454,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -139,8 +139,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input[name=\"amount\"], input[placeholder*=\"amount\" i]`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:45:0)",
                 "diff": null
               },
-              "uuid": "38104d56-cfb5-4726-a4e7-1c3dab7118d3",
-              "parentUUID": "aeadfe8f-1033-406d-b5e8-11e85aac5767",
+              "uuid": "aae76bbe-587e-4789-9800-cae47f76681f",
+              "parentUUID": "7a165a2f-5c0d-427c-a5d1-1e35f919b7dc",
               "isHook": false,
               "skipped": false
             },
@@ -148,7 +148,7 @@
               "title": "N3 | Insufficient balance → error shown on confirm",
               "fullTitle": "Transfer N3 | Insufficient balance → error shown on confirm",
               "timedOut": null,
-              "duration": 7306,
+              "duration": 6935,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -161,8 +161,8 @@
                 "estack": "AssertionError: Timed out retrying after 5000ms: Expected to find content: 'testrecipient' but never did.\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:69:0)",
                 "diff": null
               },
-              "uuid": "20024cb3-00c1-4f13-b4bd-ea3b0c5318a3",
-              "parentUUID": "aeadfe8f-1033-406d-b5e8-11e85aac5767",
+              "uuid": "0fc3f697-7fc6-443d-a8ea-526020646511",
+              "parentUUID": "7a165a2f-5c0d-427c-a5d1-1e35f919b7dc",
               "isHook": false,
               "skipped": false
             },
@@ -170,7 +170,7 @@
               "title": "N4 | API failure on confirm → error shown, no duplicate deduction",
               "fullTitle": "Transfer N4 | API failure on confirm → error shown, no duplicate deduction",
               "timedOut": null,
-              "duration": 9753,
+              "duration": 9296,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -183,8 +183,8 @@
                 "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/failed|error|try again/i' but never did.\n    at eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:83:68)\n    at Context.eval (webpack:///./cypress/support/commands.ts:60:0)",
                 "diff": null
               },
-              "uuid": "13e62523-10a0-4f93-bb78-51b22574cf8d",
-              "parentUUID": "aeadfe8f-1033-406d-b5e8-11e85aac5767",
+              "uuid": "df4f07a2-a887-46ef-b3f0-47640ac0e795",
+              "parentUUID": "7a165a2f-5c0d-427c-a5d1-1e35f919b7dc",
               "isHook": false,
               "skipped": false
             },
@@ -192,7 +192,7 @@
               "title": "N5 | Special characters in recipient search → no crash",
               "fullTitle": "Transfer N5 | Special characters in recipient search → no crash",
               "timedOut": null,
-              "duration": 7817,
+              "duration": 7339,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -205,8 +205,8 @@
                 "estack": "AssertionError: Timed out retrying after 5000ms: Expected to find content: '/not found|no user|no result/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:91:69)",
                 "diff": null
               },
-              "uuid": "dad216ad-d57e-4fb7-afe0-0e97eaf103af",
-              "parentUUID": "aeadfe8f-1033-406d-b5e8-11e85aac5767",
+              "uuid": "f1f63955-5997-47fb-88f3-8623e36b6bea",
+              "parentUUID": "7a165a2f-5c0d-427c-a5d1-1e35f919b7dc",
               "isHook": false,
               "skipped": false
             }
@@ -214,18 +214,18 @@
           "suites": [],
           "passes": [],
           "failures": [
-            "d98f1aa5-558a-4db2-b5d8-9d3f5318e551",
-            "723416b9-8478-4f71-8367-b7f5f685fb83",
-            "1fe6563e-8391-4008-9163-d23e183f9138",
-            "7fefa713-b317-4bbb-bb57-98cb574990b3",
-            "38104d56-cfb5-4726-a4e7-1c3dab7118d3",
-            "20024cb3-00c1-4f13-b4bd-ea3b0c5318a3",
-            "13e62523-10a0-4f93-bb78-51b22574cf8d",
-            "dad216ad-d57e-4fb7-afe0-0e97eaf103af"
+            "a2d442ad-3ef0-4473-99d9-b45802845e33",
+            "3f95c54f-df87-4572-9e95-8cc1d48dcedb",
+            "b9c8537d-e1e8-473e-8b5f-32736cc4c1b7",
+            "153daa51-8202-46f1-a671-b32a6cfe84d9",
+            "aae76bbe-587e-4789-9800-cae47f76681f",
+            "0fc3f697-7fc6-443d-a8ea-526020646511",
+            "df4f07a2-a887-46ef-b3f0-47640ac0e795",
+            "f1f63955-5997-47fb-88f3-8623e36b6bea"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 215184,
+          "duration": 211214,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000

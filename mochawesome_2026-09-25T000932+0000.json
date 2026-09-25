@@ -5,9 +5,9 @@
     "passes": 0,
     "pending": 0,
     "failures": 6,
-    "start": "2026-09-24T23:49:32.570Z",
-    "end": "2026-09-24T23:54:04.152Z",
-    "duration": 271582,
+    "start": "2026-09-25T00:05:07.545Z",
+    "end": "2026-09-25T00:09:32.799Z",
+    "duration": 265254,
     "testsRegistered": 6,
     "passPercent": 0,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "d3b50e93-d94f-4c9e-b5f7-b6545bc78368",
+      "uuid": "fc22d8b4-3893-4932-a367-78f0ec399565",
       "title": "",
       "fullFile": "cypress/e2e/services/airtime.cy.ts",
       "file": "cypress/e2e/services/airtime.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "98bc290b-07c7-426a-8eda-c2ebc060a5c7",
+          "uuid": "9c64a45b-a2ec-4df0-b7c3-73ab033991ac",
           "title": "Services — Airtime",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | Airtime page loads with provider list",
               "fullTitle": "Services — Airtime P1 | Airtime page loads with provider list",
               "timedOut": null,
-              "duration": 11685,
+              "duration": 11214,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -51,8 +51,8 @@
                 "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/MTN|Airtel|Glo|9mobile/i' but never did.\n    at eval (webpack:///./cypress/e2e/services/airtime.cy.ts:12:69)\n    at Context.eval (webpack:///./cypress/support/commands.ts:60:0)",
                 "diff": null
               },
-              "uuid": "040a4077-4e87-43dc-9703-fe6e173809d3",
-              "parentUUID": "98bc290b-07c7-426a-8eda-c2ebc060a5c7",
+              "uuid": "4b3ebec5-9521-4721-a1c2-12c01eadfd5d",
+              "parentUUID": "9c64a45b-a2ec-4df0-b7c3-73ab033991ac",
               "isHook": false,
               "skipped": false
             },
@@ -60,7 +60,7 @@
               "title": "P2 | Select provider → amount/phone form shown",
               "fullTitle": "Services — Airtime P2 | Select provider → amount/phone form shown",
               "timedOut": null,
-              "duration": 11678,
+              "duration": 11479,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -73,8 +73,8 @@
                 "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/MTN|Airtel|Glo/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/services/airtime.cy.ts:17:0)",
                 "diff": null
               },
-              "uuid": "578d265c-c319-4cd0-976c-7c8850ab319e",
-              "parentUUID": "98bc290b-07c7-426a-8eda-c2ebc060a5c7",
+              "uuid": "2dc8694d-5734-4587-a37b-2f7920ed2adb",
+              "parentUUID": "9c64a45b-a2ec-4df0-b7c3-73ab033991ac",
               "isHook": false,
               "skipped": false
             },
@@ -82,7 +82,7 @@
               "title": "N1 | Invalid phone number → validation error",
               "fullTitle": "Services — Airtime N1 | Invalid phone number → validation error",
               "timedOut": null,
-              "duration": 11732,
+              "duration": 11384,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -95,8 +95,8 @@
                 "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/MTN|Airtel|Glo/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/services/airtime.cy.ts:24:0)",
                 "diff": null
               },
-              "uuid": "21a7d503-8d9d-4e92-a408-bc790015323a",
-              "parentUUID": "98bc290b-07c7-426a-8eda-c2ebc060a5c7",
+              "uuid": "53cb0956-1aea-4409-9603-62e19677fb3e",
+              "parentUUID": "9c64a45b-a2ec-4df0-b7c3-73ab033991ac",
               "isHook": false,
               "skipped": false
             },
@@ -104,7 +104,7 @@
               "title": "N2 | Empty amount → submit blocked",
               "fullTitle": "Services — Airtime N2 | Empty amount → submit blocked",
               "timedOut": null,
-              "duration": 11638,
+              "duration": 11272,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -117,8 +117,8 @@
                 "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/MTN|Airtel|Glo/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/services/airtime.cy.ts:32:0)",
                 "diff": null
               },
-              "uuid": "d38ed9b8-a4d6-4fb0-b798-41c39b9ea68b",
-              "parentUUID": "98bc290b-07c7-426a-8eda-c2ebc060a5c7",
+              "uuid": "3a1bd026-2857-4e8c-8b3c-1fb25b1727a6",
+              "parentUUID": "9c64a45b-a2ec-4df0-b7c3-73ab033991ac",
               "isHook": false,
               "skipped": false
             },
@@ -126,7 +126,7 @@
               "title": "N3 | No provider selected → submit blocked or provider selection highlighted",
               "fullTitle": "Services — Airtime N3 | No provider selected → submit blocked or provider selection highlighted",
               "timedOut": null,
-              "duration": 32008,
+              "duration": 31619,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -139,8 +139,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: expected 'https://staging-nepay.vercel.app/login' to include '/services/airtime'\n    at Context.eval (webpack:///./cypress/e2e/services/airtime.cy.ts:39:0)",
                 "diff": null
               },
-              "uuid": "f3b53431-64d9-42fd-9f6b-216e0b89f851",
-              "parentUUID": "98bc290b-07c7-426a-8eda-c2ebc060a5c7",
+              "uuid": "930bf240-1b8b-497d-8f7f-b25067ded258",
+              "parentUUID": "9c64a45b-a2ec-4df0-b7c3-73ab033991ac",
               "isHook": false,
               "skipped": false
             },
@@ -148,7 +148,7 @@
               "title": "N4 | Insufficient balance → error shown",
               "fullTitle": "Services — Airtime N4 | Insufficient balance → error shown",
               "timedOut": null,
-              "duration": 11909,
+              "duration": 11453,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -161,8 +161,8 @@
                 "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find content: '/MTN/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/services/airtime.cy.ts:46:0)",
                 "diff": null
               },
-              "uuid": "d8fc7e7e-5da4-45a2-a1fa-3d6faa9c0cfe",
-              "parentUUID": "98bc290b-07c7-426a-8eda-c2ebc060a5c7",
+              "uuid": "2acf1693-7d64-42b6-b5ff-46588026d610",
+              "parentUUID": "9c64a45b-a2ec-4df0-b7c3-73ab033991ac",
               "isHook": false,
               "skipped": false
             }
@@ -170,16 +170,16 @@
           "suites": [],
           "passes": [],
           "failures": [
-            "040a4077-4e87-43dc-9703-fe6e173809d3",
-            "578d265c-c319-4cd0-976c-7c8850ab319e",
-            "21a7d503-8d9d-4e92-a408-bc790015323a",
-            "d38ed9b8-a4d6-4fb0-b798-41c39b9ea68b",
-            "f3b53431-64d9-42fd-9f6b-216e0b89f851",
-            "d8fc7e7e-5da4-45a2-a1fa-3d6faa9c0cfe"
+            "4b3ebec5-9521-4721-a1c2-12c01eadfd5d",
+            "2dc8694d-5734-4587-a37b-2f7920ed2adb",
+            "53cb0956-1aea-4409-9603-62e19677fb3e",
+            "3a1bd026-2857-4e8c-8b3c-1fb25b1727a6",
+            "930bf240-1b8b-497d-8f7f-b25067ded258",
+            "2acf1693-7d64-42b6-b5ff-46588026d610"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 90650,
+          "duration": 88421,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
