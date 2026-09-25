@@ -32,10 +32,7 @@ jobs:
           cache-dependency-path: 'package-lock.json'
 
       - name: Install dependencies
-        run: |
-          rm -f package-lock.json
-          rm -rf node_modules
-          npm install
+        run: npm ci
 
       - name: Run unit tests
         run: npm run test
@@ -70,10 +67,7 @@ jobs:
           cache-dependency-path: 'package-lock.json'
 
       - name: Install dependencies
-        run: |
-          rm -f package-lock.json
-          rm -rf node_modules
-          npm install
+        run: npm ci
 
       - name: Write cypress.env.json
         run: |
