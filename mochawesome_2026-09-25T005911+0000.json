@@ -5,9 +5,9 @@
     "passes": 2,
     "pending": 0,
     "failures": 6,
-    "start": "2026-09-24T23:57:34.379Z",
-    "end": "2026-09-25T00:04:27.857Z",
-    "duration": 413478,
+    "start": "2026-09-25T00:53:21.520Z",
+    "end": "2026-09-25T00:59:11.962Z",
+    "duration": 350442,
     "testsRegistered": 8,
     "passPercent": 25,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "430c1e23-0d6d-45ad-8fc9-4b328e6e80c1",
+      "uuid": "ddf38443-767a-436e-9ad9-509615fddecf",
       "title": "",
       "fullFile": "cypress/e2e/security/change-password.cy.ts",
       "file": "cypress/e2e/security/change-password.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "3b71c28a-3905-49af-87c9-5200179d2522",
+          "uuid": "8d1b559d-6dee-43df-b145-a093232b85ce",
           "title": "Security — Change Password",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | Change password page loads with 3 fields",
               "fullTitle": "Security — Change Password P1 | Change password page loads with 3 fields",
               "timedOut": null,
-              "duration": 871,
+              "duration": 702,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -47,8 +47,8 @@
               "context": null,
               "code": "cy.softAssert(() => {\n    cy.contains(/current password|old password/i, { timeout: 8000 }).should(\"be.visible\");\n}, \"Current password label\");\ncy.softAssert(() => {\n    cy.contains(/new password/i).should(\"be.visible\");\n}, \"New password label\");\ncy.assertAll();",
               "err": {},
-              "uuid": "3d6ef1cb-ef51-4ecc-aeb0-7763fe506ff3",
-              "parentUUID": "3b71c28a-3905-49af-87c9-5200179d2522",
+              "uuid": "f33726c2-ce1a-497e-b6b9-2cd30e185664",
+              "parentUUID": "8d1b559d-6dee-43df-b145-a093232b85ce",
               "isHook": false,
               "skipped": false
             },
@@ -56,7 +56,7 @@
               "title": "N1 | Wrong current password → API error shown",
               "fullTitle": "Security — Change Password N1 | Wrong current password → API error shown",
               "timedOut": null,
-              "duration": 1381,
+              "duration": 1240,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -69,8 +69,8 @@
                 "estack": "TypeError: Cannot read properties of undefined (reading 'KeyboardEvent')\n    at Keyboard.fireSimulatedEvent (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:149298:28)\n    at Keyboard.simulatedKeydown (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:149443:58)\n    at Keyboard.typeSimulatedKey (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:149490:10)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:149143:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:149153:67)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Object.gotValue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:10469:18)\n    at Object.gotAccum (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:10458:25)\n    at Object.tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at Promise._resolveCallback (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9182:57)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9274:17)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)",
                 "diff": null
               },
-              "uuid": "63810330-32b4-49b0-8008-910af8ae62ad",
-              "parentUUID": "3b71c28a-3905-49af-87c9-5200179d2522",
+              "uuid": "4e210338-039b-4ed7-b469-3b314b263e1b",
+              "parentUUID": "8d1b559d-6dee-43df-b145-a093232b85ce",
               "isHook": false,
               "skipped": false
             },
@@ -78,7 +78,7 @@
               "title": "N2 | New passwords don't match → validation error",
               "fullTitle": "Security — Change Password N2 | New passwords don't match → validation error",
               "timedOut": null,
-              "duration": 1351,
+              "duration": 1368,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -91,8 +91,8 @@
                 "estack": "TypeError: Cannot read properties of undefined (reading 'KeyboardEvent')\n    at Keyboard.fireSimulatedEvent (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:149298:28)\n    at Keyboard.simulatedKeydown (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:149443:58)\n    at Keyboard.typeSimulatedKey (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:149490:10)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:149143:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:149153:67)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Object.gotValue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:10469:18)\n    at Object.gotAccum (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:10458:25)\n    at Object.tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at Promise._resolveCallback (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9182:57)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9274:17)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)",
                 "diff": null
               },
-              "uuid": "eee7c42c-73a7-422d-a1ac-6ffd9f101a1d",
-              "parentUUID": "3b71c28a-3905-49af-87c9-5200179d2522",
+              "uuid": "82f9326b-c6a3-492d-834d-1517cb09d0b4",
+              "parentUUID": "8d1b559d-6dee-43df-b145-a093232b85ce",
               "isHook": false,
               "skipped": false
             },
@@ -100,7 +100,7 @@
               "title": "N3 | Weak new password → validation error",
               "fullTitle": "Security — Change Password N3 | Weak new password → validation error",
               "timedOut": null,
-              "duration": 31579,
+              "duration": 31646,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -113,30 +113,30 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find content: '/6 characters|strong|minimum/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/security/change-password.cy.ts:40:0)",
                 "diff": null
               },
-              "uuid": "3d254f76-3ab2-47ba-8857-a7846ccd448a",
-              "parentUUID": "3b71c28a-3905-49af-87c9-5200179d2522",
+              "uuid": "24fb4b48-e0dc-4f9b-9d47-fb599390fe13",
+              "parentUUID": "8d1b559d-6dee-43df-b145-a093232b85ce",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "3d6ef1cb-ef51-4ecc-aeb0-7763fe506ff3"
+            "f33726c2-ce1a-497e-b6b9-2cd30e185664"
           ],
           "failures": [
-            "63810330-32b4-49b0-8008-910af8ae62ad",
-            "eee7c42c-73a7-422d-a1ac-6ffd9f101a1d",
-            "3d254f76-3ab2-47ba-8857-a7846ccd448a"
+            "4e210338-039b-4ed7-b469-3b314b263e1b",
+            "82f9326b-c6a3-492d-834d-1517cb09d0b4",
+            "24fb4b48-e0dc-4f9b-9d47-fb599390fe13"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 35182,
+          "duration": 34956,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
         },
         {
-          "uuid": "f2db1482-17fd-4f0b-83f2-19bc775b168a",
+          "uuid": "b0e4a2aa-64d8-4f6a-b443-7e4a4275fced",
           "title": "Security — Change PIN",
           "fullFile": "",
           "file": "",
@@ -147,7 +147,7 @@
               "title": "N1 | PINs don't match → error",
               "fullTitle": "Security — Change PIN N1 | PINs don't match → error",
               "timedOut": null,
-              "duration": 31397,
+              "duration": 31172,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -160,8 +160,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input[name=\"pin\"]`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/security/change-password.cy.ts:49:0)",
                 "diff": null
               },
-              "uuid": "8ce7897c-24e6-4d8e-baed-6f7e3e720049",
-              "parentUUID": "f2db1482-17fd-4f0b-83f2-19bc775b168a",
+              "uuid": "d72c83e5-4adb-4d38-bb87-2049ccc596f1",
+              "parentUUID": "b0e4a2aa-64d8-4f6a-b443-7e4a4275fced",
               "isHook": false,
               "skipped": false
             },
@@ -169,7 +169,7 @@
               "title": "N2 | PIN not 4 digits → validation error",
               "fullTitle": "Security — Change PIN N2 | PIN not 4 digits → validation error",
               "timedOut": null,
-              "duration": 31385,
+              "duration": 31231,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -182,8 +182,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input[name=\"pin\"]`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/security/change-password.cy.ts:55:0)",
                 "diff": null
               },
-              "uuid": "4da5fc73-fca4-4cdf-8f56-e4220150ace0",
-              "parentUUID": "f2db1482-17fd-4f0b-83f2-19bc775b168a",
+              "uuid": "6f68d978-1cf8-4bd3-b46e-78f53edb887d",
+              "parentUUID": "b0e4a2aa-64d8-4f6a-b443-7e4a4275fced",
               "isHook": false,
               "skipped": false
             }
@@ -191,18 +191,18 @@
           "suites": [],
           "passes": [],
           "failures": [
-            "8ce7897c-24e6-4d8e-baed-6f7e3e720049",
-            "4da5fc73-fca4-4cdf-8f56-e4220150ace0"
+            "d72c83e5-4adb-4d38-bb87-2049ccc596f1",
+            "6f68d978-1cf8-4bd3-b46e-78f53edb887d"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 62782,
+          "duration": 62403,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
         },
         {
-          "uuid": "5543e0d9-fc6e-4128-9518-883a0413f562",
+          "uuid": "bb23c156-7f42-421b-86fa-756d975ea5fe",
           "title": "Security — Login Activity",
           "fullFile": "",
           "file": "",
@@ -213,7 +213,7 @@
               "title": "P1 | Login activity page loads",
               "fullTitle": "Security — Login Activity P1 | Login activity page loads",
               "timedOut": null,
-              "duration": 696,
+              "duration": 579,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -222,8 +222,8 @@
               "context": null,
               "code": "cy.get(\"body\").should(\"be.visible\");\ncy.softAssert(() => {\n    cy.contains(/device|session|login|activity/i, { timeout: 8000 }).should(\"be.visible\");\n}, \"Activity page heading\");\ncy.assertAll();",
               "err": {},
-              "uuid": "046bff8a-e3dc-4e73-80c2-58f03e05a8ec",
-              "parentUUID": "5543e0d9-fc6e-4128-9518-883a0413f562",
+              "uuid": "6f5efed6-0bd0-4a48-85c0-f2b004ab5c95",
+              "parentUUID": "bb23c156-7f42-421b-86fa-756d975ea5fe",
               "isHook": false,
               "skipped": false
             },
@@ -231,7 +231,7 @@
               "title": "N1 | API error → graceful error state, no crash",
               "fullTitle": "Security — Login Activity N1 | API error → graceful error state, no crash",
               "timedOut": null,
-              "duration": 30233,
+              "duration": 30146,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -244,22 +244,22 @@
                 "estack": "TypeError: Timed out retrying after 30000ms: Cannot read properties of undefined (reading 'origin')\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Security — Login Activity`\n    at $Cy.ensureCommandCanCommunicateWithAUT (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:148084:40)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152522:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at retryValue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152520:65)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at whenStable (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:153099:65)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152508:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11002:46)",
                 "diff": null
               },
-              "uuid": "a2bcbd5b-a82f-4bf4-a017-6b22e1f4ab77",
-              "parentUUID": "5543e0d9-fc6e-4128-9518-883a0413f562",
+              "uuid": "5c74f4c9-7f78-41c0-b545-eee9cbc707ef",
+              "parentUUID": "bb23c156-7f42-421b-86fa-756d975ea5fe",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "046bff8a-e3dc-4e73-80c2-58f03e05a8ec"
+            "6f5efed6-0bd0-4a48-85c0-f2b004ab5c95"
           ],
           "failures": [
-            "a2bcbd5b-a82f-4bf4-a017-6b22e1f4ab77"
+            "5c74f4c9-7f78-41c0-b545-eee9cbc707ef"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 30929,
+          "duration": 30725,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
