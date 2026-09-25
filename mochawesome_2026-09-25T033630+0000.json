@@ -5,9 +5,9 @@
     "passes": 5,
     "pending": 0,
     "failures": 2,
-    "start": "2026-09-25T00:01:46.526Z",
-    "end": "2026-09-25T00:03:29.874Z",
-    "duration": 103348,
+    "start": "2026-09-25T03:34:42.062Z",
+    "end": "2026-09-25T03:36:30.837Z",
+    "duration": 108775,
     "testsRegistered": 7,
     "passPercent": 71.42857142857143,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "b50ee0e6-16ac-448d-a7ba-f6469390e621",
+      "uuid": "b850a95b-ebd5-4d22-afd3-2d73faf4eb9c",
       "title": "",
       "fullFile": "cypress/e2e/auth/forgot-password.cy.ts",
       "file": "cypress/e2e/auth/forgot-password.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "71085fc4-67e6-46d9-9f90-919d4a02fb91",
+          "uuid": "cc94428a-f6fe-4ead-b814-12342c2fbf0e",
           "title": "Auth — Forgot Password",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | Valid email → success message shown",
               "fullTitle": "Auth — Forgot Password P1 | Valid email → success message shown",
               "timedOut": null,
-              "duration": 637,
+              "duration": 1183,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -51,8 +51,8 @@
                 "estack": "CypressError: `cy.type()` cannot accept an empty string. You need to actually type something.\n\nhttps://on.cypress.io/type\n    at Context.type (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:137630:76)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/auth/forgot-password.cy.ts:10:0)",
                 "diff": null
               },
-              "uuid": "fdeb678a-676a-4d8d-953b-916165fc3a7a",
-              "parentUUID": "71085fc4-67e6-46d9-9f90-919d4a02fb91",
+              "uuid": "19125d45-3d86-46fd-9602-ee45c0579d21",
+              "parentUUID": "cc94428a-f6fe-4ead-b814-12342c2fbf0e",
               "isHook": false,
               "skipped": false
             },
@@ -60,7 +60,7 @@
               "title": "N1 | Empty email → validation error before API call",
               "fullTitle": "Auth — Forgot Password N1 | Empty email → validation error before API call",
               "timedOut": null,
-              "duration": 677,
+              "duration": 916,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -69,8 +69,8 @@
               "context": null,
               "code": "cy.get('button[type=\"submit\"]').click();\n// HARD: form validation blocks API call\ncy.contains(/email|required/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "a3daa995-dcbf-46d2-ae6b-97f4e4bf8787",
-              "parentUUID": "71085fc4-67e6-46d9-9f90-919d4a02fb91",
+              "uuid": "c2c5dec5-14ff-4b1e-a2ef-88e5be4cbe74",
+              "parentUUID": "cc94428a-f6fe-4ead-b814-12342c2fbf0e",
               "isHook": false,
               "skipped": false
             },
@@ -78,7 +78,7 @@
               "title": "N2 | Malformed email → validation error",
               "fullTitle": "Auth — Forgot Password N2 | Malformed email → validation error",
               "timedOut": null,
-              "duration": 806,
+              "duration": 1269,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -87,8 +87,8 @@
               "context": null,
               "code": "cy.get('input[name=\"email\"]').type(\"not-an-email\");\ncy.get('button[type=\"submit\"]').click();\n// HARD\ncy.contains(/valid email/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "65f8eede-539e-4f8d-acac-7bc5ebdc3a18",
-              "parentUUID": "71085fc4-67e6-46d9-9f90-919d4a02fb91",
+              "uuid": "f327875f-911c-480e-8d2b-c7cea098ead5",
+              "parentUUID": "cc94428a-f6fe-4ead-b814-12342c2fbf0e",
               "isHook": false,
               "skipped": false
             },
@@ -96,7 +96,7 @@
               "title": "N3 | Non-existent email → neutral message (no user enumeration)",
               "fullTitle": "Auth — Forgot Password N3 | Non-existent email → neutral message (no user enumeration)",
               "timedOut": null,
-              "duration": 950,
+              "duration": 1340,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -105,30 +105,30 @@
               "context": null,
               "code": "cy.get('input[name=\"email\"]').type(\"doesnotexist99999@nepay.io\");\ncy.get('button[type=\"submit\"]').click();\n// SOFT: should show same success message regardless (security best practice)\ncy.softAssert(() => {\n    cy.contains(/check your|sent|email/i, { timeout: 10000 }).should(\"be.visible\");\n}, \"Neutral response for non-existent email (no user enumeration)\");\ncy.assertAll();",
               "err": {},
-              "uuid": "d5300647-5d33-464a-a25c-d1d1d95054e9",
-              "parentUUID": "71085fc4-67e6-46d9-9f90-919d4a02fb91",
+              "uuid": "3a08ad48-e77f-43c8-ab19-005dd7c548e9",
+              "parentUUID": "cc94428a-f6fe-4ead-b814-12342c2fbf0e",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "a3daa995-dcbf-46d2-ae6b-97f4e4bf8787",
-            "65f8eede-539e-4f8d-acac-7bc5ebdc3a18",
-            "d5300647-5d33-464a-a25c-d1d1d95054e9"
+            "c2c5dec5-14ff-4b1e-a2ef-88e5be4cbe74",
+            "f327875f-911c-480e-8d2b-c7cea098ead5",
+            "3a08ad48-e77f-43c8-ab19-005dd7c548e9"
           ],
           "failures": [
-            "fdeb678a-676a-4d8d-953b-916165fc3a7a"
+            "19125d45-3d86-46fd-9602-ee45c0579d21"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 3070,
+          "duration": 4708,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
         },
         {
-          "uuid": "fcac6a7d-35d8-47b2-a4a9-b185deebe726",
+          "uuid": "50b3e51e-d946-450a-8f0c-c397852755ab",
           "title": "Auth — Reset Password",
           "fullFile": "",
           "file": "",
@@ -139,7 +139,7 @@
               "title": "N1 | Passwords don't match → confirm error",
               "fullTitle": "Auth — Reset Password N1 | Passwords don't match → confirm error",
               "timedOut": null,
-              "duration": 2067,
+              "duration": 2311,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -148,8 +148,8 @@
               "context": null,
               "code": "cy.get('input[name=\"email\"]').type(\"test@example.com\");\ncy.get('input[name=\"code\"]').type(\"123456\");\ncy.get('input[name=\"password\"]').type(\"NewPass123\");\ncy.get('input[name=\"confirmPassword\"]').type(\"DifferentPass123\");\ncy.get('button[type=\"submit\"]').click();\n// HARD\ncy.contains(/passwords do not match/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "0f2d43ea-b4d6-476c-a4d5-edc473f9a166",
-              "parentUUID": "fcac6a7d-35d8-47b2-a4a9-b185deebe726",
+              "uuid": "04e100ab-b1cd-497b-a163-e60361da0dab",
+              "parentUUID": "50b3e51e-d946-450a-8f0c-c397852755ab",
               "isHook": false,
               "skipped": false
             },
@@ -157,7 +157,7 @@
               "title": "N2 | Invalid code format (not 6 digits) → validation error",
               "fullTitle": "Auth — Reset Password N2 | Invalid code format (not 6 digits) → validation error",
               "timedOut": null,
-              "duration": 31419,
+              "duration": 31714,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -170,8 +170,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find content: '/6 digits/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/auth/forgot-password.cy.ts:55:0)",
                 "diff": null
               },
-              "uuid": "a8b32e67-10b1-4628-921a-2715619474b6",
-              "parentUUID": "fcac6a7d-35d8-47b2-a4a9-b185deebe726",
+              "uuid": "ba521621-bc31-4f87-997f-b49a367b2fa2",
+              "parentUUID": "50b3e51e-d946-450a-8f0c-c397852755ab",
               "isHook": false,
               "skipped": false
             },
@@ -179,7 +179,7 @@
               "title": "N3 | Weak new password → validation error",
               "fullTitle": "Auth — Reset Password N3 | Weak new password → validation error",
               "timedOut": null,
-              "duration": 1463,
+              "duration": 1793,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -188,23 +188,23 @@
               "context": null,
               "code": "cy.get('input[name=\"email\"]').type(\"test@example.com\");\ncy.get('input[name=\"code\"]').type(\"123456\");\ncy.get('input[name=\"password\"]').type(\"weak\");\ncy.get('input[name=\"confirmPassword\"]').type(\"weak\");\ncy.get('button[type=\"submit\"]').click();\n// HARD\ncy.contains(/at least 6 characters/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "64cca524-b85d-4f59-8a27-263eea2a6747",
-              "parentUUID": "fcac6a7d-35d8-47b2-a4a9-b185deebe726",
+              "uuid": "2c2556f7-3039-4338-94c8-13edb6a0aec4",
+              "parentUUID": "50b3e51e-d946-450a-8f0c-c397852755ab",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "0f2d43ea-b4d6-476c-a4d5-edc473f9a166",
-            "64cca524-b85d-4f59-8a27-263eea2a6747"
+            "04e100ab-b1cd-497b-a163-e60361da0dab",
+            "2c2556f7-3039-4338-94c8-13edb6a0aec4"
           ],
           "failures": [
-            "a8b32e67-10b1-4628-921a-2715619474b6"
+            "ba521621-bc31-4f87-997f-b49a367b2fa2"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 34949,
+          "duration": 35818,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
