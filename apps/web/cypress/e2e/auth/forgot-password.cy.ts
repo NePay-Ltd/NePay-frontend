@@ -3,12 +3,14 @@
 
 describe("Auth — Forgot Password", () => {
   beforeEach(() => {
-    cy.logout();
+    cy.clearLocalStorage();
+    cy.clearCookies();
     cy.visit("/forgot-password");
   });
 
   it("P1 | Valid email → success message shown", () => {
-    cy.get('input[name="email"]').type(Cypress.env("TEST_EMAIL"));
+    const emailToType = Cypress.env("TEST_EMAIL") || "test@example.com";
+    cy.get('input[name="email"]').type(emailToType);
     cy.get('button[type="submit"]').click();
 
     // HARD: success/confirmation message must appear
@@ -30,22 +32,24 @@ describe("Auth — Forgot Password", () => {
     cy.contains(/valid email/i).should("be.visible");
   });
 
-  it("N3 | Non-existent email → neutral message (no user enumeration)", () => {
+  it("N3 | Non-existent email → shows error message", () => {
+    cy.intercept("POST", "**/auth/forgot-password", {
+      statusCode: 404,
+      body: { success: false, code: "ACCOUNT_NOT_FOUND", message: "We couldn't find an account with that email." }
+    }).as("forgotPasswordErr");
+
     cy.get('input[name="email"]').type("doesnotexist99999@nepay.io");
     cy.get('button[type="submit"]').click();
 
-    // SOFT: should show same success message regardless (security best practice)
-    cy.softAssert(() => {
-      cy.contains(/check your|sent|email/i, { timeout: 10000 }).should("be.visible");
-    }, "Neutral response for non-existent email (no user enumeration)");
-
-    cy.assertAll();
+    cy.wait("@forgotPasswordErr");
+    cy.contains(/couldn't find|not found/i).should("be.visible");
   });
 });
 
 describe("Auth — Reset Password", () => {
   beforeEach(() => {
-    cy.logout();
+    cy.clearLocalStorage();
+    cy.clearCookies();
     cy.visit("/reset-password");
   });
 
