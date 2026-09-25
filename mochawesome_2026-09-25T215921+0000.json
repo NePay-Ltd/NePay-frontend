@@ -5,9 +5,9 @@
     "passes": 1,
     "pending": 0,
     "failures": 1,
-    "start": "2026-09-25T17:27:36.406Z",
-    "end": "2026-09-25T17:28:39.529Z",
-    "duration": 63123,
+    "start": "2026-09-25T21:58:18.704Z",
+    "end": "2026-09-25T21:59:21.878Z",
+    "duration": 63174,
     "testsRegistered": 5,
     "passPercent": 20,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "88fd7b63-1e77-4156-b139-997867819634",
+      "uuid": "60e8cabe-1828-44e1-a885-e8c08f7c2236",
       "title": "",
       "fullFile": "cypress/e2e/pods/pods.cy.ts",
       "file": "cypress/e2e/pods/pods.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "9f48cca2-4516-4ed1-9a1f-40337ceaced7",
+          "uuid": "41d437ca-4ff8-40da-bff3-f6bb2688a636",
           "title": "Pods",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | Pods page loads",
               "fullTitle": "Pods P1 | Pods page loads",
               "timedOut": null,
-              "duration": 1089,
+              "duration": 1037,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -47,8 +47,8 @@
               "context": null,
               "code": "cy.get(\"body\").should(\"be.visible\");\ncy.contains(/pod|saving|group/i, { timeout: 10000 }).should(\"be.visible\");",
               "err": {},
-              "uuid": "9bd68a57-3fc5-4c89-b382-7edee394c4fb",
-              "parentUUID": "9f48cca2-4516-4ed1-9a1f-40337ceaced7",
+              "uuid": "1ea9301e-821a-4451-b8f9-4f623b77ce85",
+              "parentUUID": "41d437ca-4ff8-40da-bff3-f6bb2688a636",
               "isHook": false,
               "skipped": false
             },
@@ -56,7 +56,7 @@
               "title": "P2 | Empty pods → empty state shown",
               "fullTitle": "Pods P2 | Empty pods → empty state shown",
               "timedOut": null,
-              "duration": 30288,
+              "duration": 30317,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -69,8 +69,8 @@
                 "estack": "TypeError: Timed out retrying after 30000ms: Cannot read properties of undefined (reading 'origin')\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Pods`\n    at $Cy.ensureCommandCanCommunicateWithAUT (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:148084:40)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152522:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at retryValue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152520:65)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at whenStable (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:153099:65)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152508:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11002:46)",
                 "diff": null
               },
-              "uuid": "1fbf3700-6b03-441f-a67a-3ff4b766190e",
-              "parentUUID": "9f48cca2-4516-4ed1-9a1f-40337ceaced7",
+              "uuid": "3049b17c-7b9f-4c55-bfc7-7507fb6def4f",
+              "parentUUID": "41d437ca-4ff8-40da-bff3-f6bb2688a636",
               "isHook": false,
               "skipped": false
             },
@@ -87,8 +87,8 @@
               "context": null,
               "code": "cy.contains(/create|new pod/i, { timeout: 8000 }).click();\ncy.get('button[type=\"submit\"]').click();\ncy.contains(/name|required/i, { timeout: 5000 }).should(\"be.visible\");",
               "err": {},
-              "uuid": "32b3e8a9-72dd-4e70-a039-fd95fc91e651",
-              "parentUUID": "9f48cca2-4516-4ed1-9a1f-40337ceaced7",
+              "uuid": "d261cacd-b68e-42c4-81fa-3d292b4b094b",
+              "parentUUID": "41d437ca-4ff8-40da-bff3-f6bb2688a636",
               "isHook": false,
               "skipped": true
             },
@@ -105,8 +105,8 @@
               "context": null,
               "code": "cy.contains(/create|new pod/i, { timeout: 8000 }).click();\ncy.get('input[name=\"name\"], input[placeholder*=\"name\" i]').first().type(\"My Pod\");\ncy.get('input[name=\"targetAmount\"], input[placeholder*=\"target\" i], input[placeholder*=\"amount\" i]')\n    .first()\n    .type(\"0\");\ncy.get('button[type=\"submit\"]').click();\ncy.softAssert(() => {\n    cy.contains(/invalid|greater than|minimum/i, { timeout: 5000 }).should(\"be.visible\");\n}, \"Zero target amount validation\");\ncy.assertAll();",
               "err": {},
-              "uuid": "1f69b7bd-a02f-4947-95f3-88c0c20e50a8",
-              "parentUUID": "9f48cca2-4516-4ed1-9a1f-40337ceaced7",
+              "uuid": "5285fc2f-c58d-4d74-82fc-e3907eaae5a7",
+              "parentUUID": "41d437ca-4ff8-40da-bff3-f6bb2688a636",
               "isHook": false,
               "skipped": true
             },
@@ -123,26 +123,26 @@
               "context": null,
               "code": "cy.intercept(\"GET\", \"**/pods**\", {\n    statusCode: 500,\n    body: { success: false, message: \"Server error\" },\n}).as(\"podsError\");\ncy.reload();\ncy.wait(\"@podsError\");\ncy.get(\"body\").should(\"be.visible\");\ncy.contains(/something went wrong|unhandled/i).should(\"not.exist\");",
               "err": {},
-              "uuid": "17eb935f-3dcf-4b2f-8c27-477f3e6b7602",
-              "parentUUID": "9f48cca2-4516-4ed1-9a1f-40337ceaced7",
+              "uuid": "ac9bd8be-36bd-4b9e-9dd0-ef1ab2ad7edc",
+              "parentUUID": "41d437ca-4ff8-40da-bff3-f6bb2688a636",
               "isHook": false,
               "skipped": true
             }
           ],
           "suites": [],
           "passes": [
-            "9bd68a57-3fc5-4c89-b382-7edee394c4fb"
+            "1ea9301e-821a-4451-b8f9-4f623b77ce85"
           ],
           "failures": [
-            "1fbf3700-6b03-441f-a67a-3ff4b766190e"
+            "3049b17c-7b9f-4c55-bfc7-7507fb6def4f"
           ],
           "pending": [],
           "skipped": [
-            "32b3e8a9-72dd-4e70-a039-fd95fc91e651",
-            "1f69b7bd-a02f-4947-95f3-88c0c20e50a8",
-            "17eb935f-3dcf-4b2f-8c27-477f3e6b7602"
+            "d261cacd-b68e-42c4-81fa-3d292b4b094b",
+            "5285fc2f-c58d-4d74-82fc-e3907eaae5a7",
+            "ac9bd8be-36bd-4b9e-9dd0-ef1ab2ad7edc"
           ],
-          "duration": 31377,
+          "duration": 31354,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
