@@ -5,9 +5,9 @@
     "passes": 0,
     "pending": 0,
     "failures": 4,
-    "start": "2026-09-24T23:43:22.370Z",
-    "end": "2026-09-24T23:43:32.197Z",
-    "duration": 9827,
+    "start": "2026-09-25T00:07:25.009Z",
+    "end": "2026-09-25T00:08:13.002Z",
+    "duration": 47993,
     "testsRegistered": 4,
     "passPercent": 0,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "6f922661-e58c-4479-86f9-6b451731dd76",
+      "uuid": "39f3c4f7-fa3d-4374-b65a-2011dfaf5b23",
       "title": "",
       "fullFile": "cypress/e2e/wallet/wallet.cy.ts",
       "file": "cypress/e2e/wallet/wallet.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "fb91441c-a5a3-42f1-bf64-0b1cfc42fb65",
+          "uuid": "0ac0d8be-63f9-49e0-bccd-9eb94ff999be",
           "title": "Wallet",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | Wallet page loads with balance breakdown",
               "fullTitle": "Wallet P1 | Wallet page loads with balance breakdown",
               "timedOut": null,
-              "duration": 722,
+              "duration": 1491,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -51,8 +51,8 @@
                 "estack": "Error: The following error originated from your application code, not from Cypress.\n\n  > Minified React error #419; visit https://react.dev/errors/419 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\n\nWhen Cypress detects uncaught errors originating from your application it will automatically fail the current test.\n\nThis behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.\n\nhttps://on.cypress.io/uncaught-exception-from-application\n    at <unknown> (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:64468)\n    at lZ (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:65339)\n    at iZ (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:121134)\n    at ia (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:95163)\n    at <unknown> (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:94985)\n    at il (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:94992)\n    at oJ (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:92348)\n    at oZ (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:91767)\n    at MessagePort.M (https://staging-nepay.vercel.app/_next/static/chunks/1528-4baf740f6c18ad8f.js:1:85053)",
                 "diff": null
               },
-              "uuid": "8eeb593d-aaa2-4521-a409-4c1b450d1561",
-              "parentUUID": "fb91441c-a5a3-42f1-bf64-0b1cfc42fb65",
+              "uuid": "3e0dd4d5-2807-44a6-8088-eeea85234dfb",
+              "parentUUID": "0ac0d8be-63f9-49e0-bccd-9eb94ff999be",
               "isHook": false,
               "skipped": false
             },
@@ -60,7 +60,7 @@
               "title": "P2 | Transaction history list renders",
               "fullTitle": "Wallet P2 | Transaction history list renders",
               "timedOut": null,
-              "duration": 699,
+              "duration": 2021,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -73,8 +73,8 @@
                 "estack": "AssertionError: expected null to be truthy\n    at Context.eval (webpack:///./cypress/e2e/wallet/wallet.cy.ts:21:0)",
                 "diff": null
               },
-              "uuid": "dc010726-f69e-4bf5-af02-6b7812090e8e",
-              "parentUUID": "fb91441c-a5a3-42f1-bf64-0b1cfc42fb65",
+              "uuid": "029211f4-4982-4d3d-9b6e-c9d79b15184e",
+              "parentUUID": "0ac0d8be-63f9-49e0-bccd-9eb94ff999be",
               "isHook": false,
               "skipped": false
             },
@@ -82,7 +82,7 @@
               "title": "N1 | Empty transaction history → empty state message shown",
               "fullTitle": "Wallet N1 | Empty transaction history → empty state message shown",
               "timedOut": null,
-              "duration": 647,
+              "duration": 1415,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -95,8 +95,8 @@
                 "estack": "Error: The following error originated from your application code, not from Cypress.\n\n  > Minified React error #419; visit https://react.dev/errors/419 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\n\nWhen Cypress detects uncaught errors originating from your application it will automatically fail the current test.\n\nThis behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.\n\nhttps://on.cypress.io/uncaught-exception-from-application\n    at <unknown> (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:64468)\n    at lZ (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:65339)\n    at iZ (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:121134)\n    at ia (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:95163)\n    at <unknown> (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:94985)\n    at il (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:94992)\n    at oJ (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:92348)\n    at oZ (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:91767)\n    at MessagePort.M (https://staging-nepay.vercel.app/_next/static/chunks/1528-4baf740f6c18ad8f.js:1:85053)",
                 "diff": null
               },
-              "uuid": "3876712c-b4b9-43f4-9e4e-b901282dd140",
-              "parentUUID": "fb91441c-a5a3-42f1-bf64-0b1cfc42fb65",
+              "uuid": "b792c333-c5ac-4fba-9173-2ca7e1681489",
+              "parentUUID": "0ac0d8be-63f9-49e0-bccd-9eb94ff999be",
               "isHook": false,
               "skipped": false
             },
@@ -104,7 +104,7 @@
               "title": "N2 | API error on wallet fetch → error state shown, no crash",
               "fullTitle": "Wallet N2 | API error on wallet fetch → error state shown, no crash",
               "timedOut": null,
-              "duration": 1195,
+              "duration": 30358,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -113,12 +113,12 @@
               "context": null,
               "code": "cy.intercept(\"GET\", \"**/wallet**\", {\n    statusCode: 500,\n    body: { success: false, message: \"Server error\" },\n}).as(\"walletError\");\ncy.reload();\ncy.wait(\"@walletError\");\n// HARD: page must not crash\ncy.get(\"body\").should(\"be.visible\");\ncy.contains(/something went wrong|error occurred/i).should(\"not.exist\");",
               "err": {
-                "message": "Error: The following error originated from your application code, not from Cypress.\n\n  > Minified React error #419; visit https://react.dev/errors/419 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\n\nWhen Cypress detects uncaught errors originating from your application it will automatically fail the current test.\n\nThis behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.\n\nhttps://on.cypress.io/uncaught-exception-from-application",
-                "estack": "Error: The following error originated from your application code, not from Cypress.\n\n  > Minified React error #419; visit https://react.dev/errors/419 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\n\nWhen Cypress detects uncaught errors originating from your application it will automatically fail the current test.\n\nThis behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.\n\nhttps://on.cypress.io/uncaught-exception-from-application\n    at <unknown> (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:64468)\n    at lZ (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:65339)\n    at iZ (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:121134)\n    at ia (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:95163)\n    at <unknown> (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:94985)\n    at il (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:94992)\n    at oJ (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:92348)\n    at oZ (https://staging-nepay.vercel.app/_next/static/chunks/1dd3208c-09b141c9f7f692b6.js:1:91767)\n    at MessagePort.M (https://staging-nepay.vercel.app/_next/static/chunks/1528-4baf740f6c18ad8f.js:1:85053)",
+                "message": "TypeError: Timed out retrying after 30000ms: Cannot read properties of undefined (reading 'origin')\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Wallet`",
+                "estack": "TypeError: Timed out retrying after 30000ms: Cannot read properties of undefined (reading 'origin')\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Wallet`\n    at $Cy.ensureCommandCanCommunicateWithAUT (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:148084:40)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152522:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at retryValue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152520:65)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at whenStable (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:153099:65)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152508:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11002:46)",
                 "diff": null
               },
-              "uuid": "fed9d33a-0fc8-47cf-8887-ea65d872ff3f",
-              "parentUUID": "fb91441c-a5a3-42f1-bf64-0b1cfc42fb65",
+              "uuid": "df3a243b-28e4-44f2-98c3-97fd3c8604f4",
+              "parentUUID": "0ac0d8be-63f9-49e0-bccd-9eb94ff999be",
               "isHook": false,
               "skipped": false
             }
@@ -126,14 +126,14 @@
           "suites": [],
           "passes": [],
           "failures": [
-            "8eeb593d-aaa2-4521-a409-4c1b450d1561",
-            "dc010726-f69e-4bf5-af02-6b7812090e8e",
-            "3876712c-b4b9-43f4-9e4e-b901282dd140",
-            "fed9d33a-0fc8-47cf-8887-ea65d872ff3f"
+            "3e0dd4d5-2807-44a6-8088-eeea85234dfb",
+            "029211f4-4982-4d3d-9b6e-c9d79b15184e",
+            "b792c333-c5ac-4fba-9173-2ca7e1681489",
+            "df3a243b-28e4-44f2-98c3-97fd3c8604f4"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 3263,
+          "duration": 35285,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
