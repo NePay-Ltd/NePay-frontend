@@ -5,9 +5,9 @@
     "passes": 0,
     "pending": 0,
     "failures": 9,
-    "start": "2026-09-25T03:59:02.633Z",
-    "end": "2026-09-25T04:18:46.276Z",
-    "duration": 1183643,
+    "start": "2026-09-25T09:20:52.716Z",
+    "end": "2026-09-25T09:40:23.924Z",
+    "duration": 1171208,
     "testsRegistered": 9,
     "passPercent": 0,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "b8b61d2c-2197-479d-bf34-4cd788479046",
+      "uuid": "63450bc7-de72-4d9c-93eb-73c1c5316e24",
       "title": "",
       "fullFile": "cypress/e2e/kyc/kyc.cy.ts",
       "file": "cypress/e2e/kyc/kyc.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "9082a1ab-43cb-4dce-ab05-3f23ad40edc4",
+          "uuid": "61a2b324-e9c2-4b27-aedd-4ca3d0e71f38",
           "title": "KYC — Identity Verification",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | KYC page loads with BVN input form",
               "fullTitle": "KYC — Identity Verification P1 | KYC page loads with BVN input form",
               "timedOut": null,
-              "duration": 9518,
+              "duration": 9057,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -51,8 +51,8 @@
                 "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/BVN|verification|identity/i' but never did.\n    at eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:17:71)\n    at Context.eval (webpack:///./cypress/support/commands.ts:60:0)",
                 "diff": null
               },
-              "uuid": "0dea96c2-e0fc-4650-9dc8-a851a583cee3",
-              "parentUUID": "9082a1ab-43cb-4dce-ab05-3f23ad40edc4",
+              "uuid": "b898d605-f9a4-4870-bda3-b28dc5726b86",
+              "parentUUID": "61a2b324-e9c2-4b27-aedd-4ca3d0e71f38",
               "isHook": false,
               "skipped": false
             },
@@ -60,7 +60,7 @@
               "title": "P2 | Valid BVN submitted → pending/success state shown",
               "fullTitle": "KYC — Identity Verification P2 | Valid BVN submitted → pending/success state shown",
               "timedOut": null,
-              "duration": 62176,
+              "duration": 61672,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -73,8 +73,8 @@
                 "estack": "CypressError: Timed out retrying after 60000ms: `cy.wait()` timed out waiting `60000ms` for the 1st request to the route: `kycSubmit`. No request ever occurred.\n\nhttps://on.cypress.io/wait\n    at cypressErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161339:18)\n    at Object.errByPath (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161408:10)\n    at checkForXhr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:146476:92)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:146499:28)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at whenStable (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:153099:65)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152508:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11002:46)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:28:0)",
                 "diff": null
               },
-              "uuid": "cbb2171b-1d3d-4934-82f1-071476a58930",
-              "parentUUID": "9082a1ab-43cb-4dce-ab05-3f23ad40edc4",
+              "uuid": "9d2c0293-9dfc-498c-a69b-8844468b36f7",
+              "parentUUID": "61a2b324-e9c2-4b27-aedd-4ca3d0e71f38",
               "isHook": false,
               "skipped": false
             },
@@ -82,7 +82,7 @@
               "title": "P3 | KYC banner on overview disappears after approval",
               "fullTitle": "KYC — Identity Verification P3 | KYC banner on overview disappears after approval",
               "timedOut": null,
-              "duration": 61642,
+              "duration": 61827,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -95,8 +95,8 @@
                 "estack": "CypressError: Timed out retrying after 60000ms: `cy.wait()` timed out waiting `60000ms` for the 1st request to the route: `verifiedUser`. No request ever occurred.\n\nhttps://on.cypress.io/wait\n    at cypressErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161339:18)\n    at Object.errByPath (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161408:10)\n    at checkForXhr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:146476:92)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:146499:28)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at whenStable (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:153099:65)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152508:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11002:46)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:42:0)",
                 "diff": null
               },
-              "uuid": "10697cfe-9dc8-4121-ba9c-1e85d93186ca",
-              "parentUUID": "9082a1ab-43cb-4dce-ab05-3f23ad40edc4",
+              "uuid": "dd05ae91-641c-449d-b402-205381fe7d93",
+              "parentUUID": "61a2b324-e9c2-4b27-aedd-4ca3d0e71f38",
               "isHook": false,
               "skipped": false
             },
@@ -104,7 +104,7 @@
               "title": "P4 | KYC banner visible on overview for unverified user",
               "fullTitle": "KYC — Identity Verification P4 | KYC banner visible on overview for unverified user",
               "timedOut": null,
-              "duration": 62245,
+              "duration": 61730,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -117,8 +117,8 @@
                 "estack": "CypressError: Timed out retrying after 60000ms: `cy.wait()` timed out waiting `60000ms` for the 1st request to the route: `unverifiedUser`. No request ever occurred.\n\nhttps://on.cypress.io/wait\n    at cypressErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161339:18)\n    at Object.errByPath (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161408:10)\n    at checkForXhr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:146476:92)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:146499:28)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at whenStable (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:153099:65)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152508:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11002:46)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:55:0)",
                 "diff": null
               },
-              "uuid": "1045ebfa-30ce-4a68-854c-8dc7a60d3b3f",
-              "parentUUID": "9082a1ab-43cb-4dce-ab05-3f23ad40edc4",
+              "uuid": "b36c40d7-dc8e-419a-9e7a-2da609ddd85a",
+              "parentUUID": "61a2b324-e9c2-4b27-aedd-4ca3d0e71f38",
               "isHook": false,
               "skipped": false
             },
@@ -126,7 +126,7 @@
               "title": "N1 | BVN shorter than 11 digits → validation error",
               "fullTitle": "KYC — Identity Verification N1 | BVN shorter than 11 digits → validation error",
               "timedOut": null,
-              "duration": 32290,
+              "duration": 31797,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -139,8 +139,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find content: '/11|invalid|BVN/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:67:0)",
                 "diff": null
               },
-              "uuid": "6de8efdd-b575-4288-8166-0fd869decaef",
-              "parentUUID": "9082a1ab-43cb-4dce-ab05-3f23ad40edc4",
+              "uuid": "28b0ae66-fe73-4b8f-a69b-80bfca623a91",
+              "parentUUID": "61a2b324-e9c2-4b27-aedd-4ca3d0e71f38",
               "isHook": false,
               "skipped": false
             },
@@ -148,7 +148,7 @@
               "title": "N2 | BVN with letters → validation error",
               "fullTitle": "KYC — Identity Verification N2 | BVN with letters → validation error",
               "timedOut": null,
-              "duration": 32245,
+              "duration": 31776,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -161,8 +161,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find content: '/invalid|digits only|numeric/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:74:0)",
                 "diff": null
               },
-              "uuid": "dc43cf5c-0eb2-4aa9-ba81-b91c41441301",
-              "parentUUID": "9082a1ab-43cb-4dce-ab05-3f23ad40edc4",
+              "uuid": "b7c780c0-86fd-411c-98f3-f2f4d045cfa2",
+              "parentUUID": "61a2b324-e9c2-4b27-aedd-4ca3d0e71f38",
               "isHook": false,
               "skipped": false
             },
@@ -170,7 +170,7 @@
               "title": "N3 | BVN already used by another account → API error shown",
               "fullTitle": "KYC — Identity Verification N3 | BVN already used by another account → API error shown",
               "timedOut": null,
-              "duration": 62652,
+              "duration": 62032,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -183,8 +183,8 @@
                 "estack": "CypressError: Timed out retrying after 60000ms: `cy.wait()` timed out waiting `60000ms` for the 1st request to the route: `bvnConflict`. No request ever occurred.\n\nhttps://on.cypress.io/wait\n    at cypressErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161339:18)\n    at Object.errByPath (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161408:10)\n    at checkForXhr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:146476:92)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:146499:28)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at whenStable (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:153099:65)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152508:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11002:46)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:87:0)",
                 "diff": null
               },
-              "uuid": "b6722d36-afd5-4de2-9fe6-207d31de6572",
-              "parentUUID": "9082a1ab-43cb-4dce-ab05-3f23ad40edc4",
+              "uuid": "9d6a846b-12d8-4145-a9e0-18660aab872e",
+              "parentUUID": "61a2b324-e9c2-4b27-aedd-4ca3d0e71f38",
               "isHook": false,
               "skipped": false
             },
@@ -192,7 +192,7 @@
               "title": "N4 | Already verified user → form not shown, verified state shown",
               "fullTitle": "KYC — Identity Verification N4 | Already verified user → form not shown, verified state shown",
               "timedOut": null,
-              "duration": 9906,
+              "duration": 9383,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -205,8 +205,8 @@
                 "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/verified|approved|complete/i' but never did.\n    at eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:98:72)\n    at Context.eval (webpack:///./cypress/support/commands.ts:60:0)",
                 "diff": null
               },
-              "uuid": "7cf03bba-d0ee-488c-a717-f2bc06f67c53",
-              "parentUUID": "9082a1ab-43cb-4dce-ab05-3f23ad40edc4",
+              "uuid": "a02dd604-cb91-4488-ab05-d0b9429630a1",
+              "parentUUID": "61a2b324-e9c2-4b27-aedd-4ca3d0e71f38",
               "isHook": false,
               "skipped": false
             },
@@ -214,7 +214,7 @@
               "title": "N5 | API error on BVN submit → error shown, form not locked",
               "fullTitle": "KYC — Identity Verification N5 | API error on BVN submit → error shown, form not locked",
               "timedOut": null,
-              "duration": 62710,
+              "duration": 62194,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -227,8 +227,8 @@
                 "estack": "CypressError: Timed out retrying after 60000ms: `cy.wait()` timed out waiting `60000ms` for the 1st request to the route: `kycError`. No request ever occurred.\n\nhttps://on.cypress.io/wait\n    at cypressErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161339:18)\n    at Object.errByPath (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161408:10)\n    at checkForXhr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:146476:92)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:146499:28)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at whenStable (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:153099:65)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:152508:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11002:46)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:109:0)",
                 "diff": null
               },
-              "uuid": "b5c116cb-577d-4bf5-9ac3-b27a28eab513",
-              "parentUUID": "9082a1ab-43cb-4dce-ab05-3f23ad40edc4",
+              "uuid": "8ea48c3f-0108-4c40-9a1e-6d684dd2d180",
+              "parentUUID": "61a2b324-e9c2-4b27-aedd-4ca3d0e71f38",
               "isHook": false,
               "skipped": false
             }
@@ -236,19 +236,19 @@
           "suites": [],
           "passes": [],
           "failures": [
-            "0dea96c2-e0fc-4650-9dc8-a851a583cee3",
-            "cbb2171b-1d3d-4934-82f1-071476a58930",
-            "10697cfe-9dc8-4121-ba9c-1e85d93186ca",
-            "1045ebfa-30ce-4a68-854c-8dc7a60d3b3f",
-            "6de8efdd-b575-4288-8166-0fd869decaef",
-            "dc43cf5c-0eb2-4aa9-ba81-b91c41441301",
-            "b6722d36-afd5-4de2-9fe6-207d31de6572",
-            "7cf03bba-d0ee-488c-a717-f2bc06f67c53",
-            "b5c116cb-577d-4bf5-9ac3-b27a28eab513"
+            "b898d605-f9a4-4870-bda3-b28dc5726b86",
+            "9d2c0293-9dfc-498c-a69b-8844468b36f7",
+            "dd05ae91-641c-449d-b402-205381fe7d93",
+            "b36c40d7-dc8e-419a-9e7a-2da609ddd85a",
+            "28b0ae66-fe73-4b8f-a69b-80bfca623a91",
+            "b7c780c0-86fd-411c-98f3-f2f4d045cfa2",
+            "9d6a846b-12d8-4145-a9e0-18660aab872e",
+            "a02dd604-cb91-4488-ab05-d0b9429630a1",
+            "8ea48c3f-0108-4c40-9a1e-6d684dd2d180"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 395384,
+          "duration": 391468,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000

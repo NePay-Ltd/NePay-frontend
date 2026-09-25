@@ -5,9 +5,9 @@
     "passes": 0,
     "pending": 0,
     "failures": 6,
-    "start": "2026-09-25T03:39:13.166Z",
-    "end": "2026-09-25T03:42:05.693Z",
-    "duration": 172527,
+    "start": "2026-09-25T09:01:36.374Z",
+    "end": "2026-09-25T09:04:22.003Z",
+    "duration": 165629,
     "testsRegistered": 6,
     "passPercent": 0,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "5f0c7d2b-63f8-4cfc-8af8-c5256a31782c",
+      "uuid": "3abb77be-407c-47da-bb4e-6dc1c4784324",
       "title": "",
       "fullFile": "cypress/e2e/auth/logout.cy.ts",
       "file": "cypress/e2e/auth/logout.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "99130218-28ba-4d04-808d-58548f3f58cb",
+          "uuid": "87493d07-c015-4d3b-a13c-16eb4ce44275",
           "title": "Auth — Logout",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | Logout clears nepay_refresh cookie",
               "fullTitle": "Auth — Logout P1 | Logout clears nepay_refresh cookie",
               "timedOut": null,
-              "duration": 9557,
+              "duration": 9409,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -51,8 +51,8 @@
                 "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:11:0)",
                 "diff": null
               },
-              "uuid": "4458e562-6408-4fbf-9b1f-4e3480b9b634",
-              "parentUUID": "99130218-28ba-4d04-808d-58548f3f58cb",
+              "uuid": "990a365b-78c5-4369-bbf9-4b5c354e655f",
+              "parentUUID": "87493d07-c015-4d3b-a13c-16eb4ce44275",
               "isHook": false,
               "skipped": false
             },
@@ -60,7 +60,7 @@
               "title": "P2 | Logout redirects to /login",
               "fullTitle": "Auth — Logout P2 | Logout redirects to /login",
               "timedOut": null,
-              "duration": 9508,
+              "duration": 9326,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -73,8 +73,8 @@
                 "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:16:0)",
                 "diff": null
               },
-              "uuid": "6289e2e1-4739-447c-bc28-8332215a882d",
-              "parentUUID": "99130218-28ba-4d04-808d-58548f3f58cb",
+              "uuid": "433eb062-2cea-47d9-965a-7955c79519b6",
+              "parentUUID": "87493d07-c015-4d3b-a13c-16eb4ce44275",
               "isHook": false,
               "skipped": false
             },
@@ -82,7 +82,7 @@
               "title": "P3 | Signed out toast is shown",
               "fullTitle": "Auth — Logout P3 | Signed out toast is shown",
               "timedOut": null,
-              "duration": 9567,
+              "duration": 9109,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -95,8 +95,8 @@
                 "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:21:0)",
                 "diff": null
               },
-              "uuid": "f5a8df02-f165-45a9-b1c4-cf6ca3e3a497",
-              "parentUUID": "99130218-28ba-4d04-808d-58548f3f58cb",
+              "uuid": "b92080fb-6ac5-42d6-a604-e5daea65f666",
+              "parentUUID": "87493d07-c015-4d3b-a13c-16eb4ce44275",
               "isHook": false,
               "skipped": false
             },
@@ -104,7 +104,7 @@
               "title": "P4 | localStorage is cleared after logout",
               "fullTitle": "Auth — Logout P4 | localStorage is cleared after logout",
               "timedOut": null,
-              "duration": 9802,
+              "duration": 9181,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -117,8 +117,8 @@
                 "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:29:0)",
                 "diff": null
               },
-              "uuid": "ae282f91-4e9e-40c1-8ee0-e230b4c88375",
-              "parentUUID": "99130218-28ba-4d04-808d-58548f3f58cb",
+              "uuid": "4624e6a9-2c0d-43c2-a4bb-7f9557e53807",
+              "parentUUID": "87493d07-c015-4d3b-a13c-16eb4ce44275",
               "isHook": false,
               "skipped": false
             },
@@ -126,7 +126,7 @@
               "title": "N1 | After logout, browser back to protected route → redirected to /login",
               "fullTitle": "Auth — Logout N1 | After logout, browser back to protected route → redirected to /login",
               "timedOut": null,
-              "duration": 9599,
+              "duration": 9186,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -139,8 +139,8 @@
                 "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:37:0)",
                 "diff": null
               },
-              "uuid": "874cba59-16bf-4cd5-9ccc-9204a23d9afd",
-              "parentUUID": "99130218-28ba-4d04-808d-58548f3f58cb",
+              "uuid": "28e17205-82fc-4c12-8b4e-3cad2a6ed003",
+              "parentUUID": "87493d07-c015-4d3b-a13c-16eb4ce44275",
               "isHook": false,
               "skipped": false
             },
@@ -148,7 +148,7 @@
               "title": "N2 | Logout when API fails → still clears state and redirects",
               "fullTitle": "Auth — Logout N2 | Logout when API fails → still clears state and redirects",
               "timedOut": null,
-              "duration": 9572,
+              "duration": 9247,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -161,8 +161,8 @@
                 "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/log out|sign out/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:45:0)",
                 "diff": null
               },
-              "uuid": "d525951b-02c8-4d6d-a38a-17252f55c999",
-              "parentUUID": "99130218-28ba-4d04-808d-58548f3f58cb",
+              "uuid": "183e3157-198f-4ac0-af1f-6af85fdcd49e",
+              "parentUUID": "87493d07-c015-4d3b-a13c-16eb4ce44275",
               "isHook": false,
               "skipped": false
             }
@@ -170,16 +170,16 @@
           "suites": [],
           "passes": [],
           "failures": [
-            "4458e562-6408-4fbf-9b1f-4e3480b9b634",
-            "6289e2e1-4739-447c-bc28-8332215a882d",
-            "f5a8df02-f165-45a9-b1c4-cf6ca3e3a497",
-            "ae282f91-4e9e-40c1-8ee0-e230b4c88375",
-            "874cba59-16bf-4cd5-9ccc-9204a23d9afd",
-            "d525951b-02c8-4d6d-a38a-17252f55c999"
+            "990a365b-78c5-4369-bbf9-4b5c354e655f",
+            "433eb062-2cea-47d9-965a-7955c79519b6",
+            "b92080fb-6ac5-42d6-a604-e5daea65f666",
+            "4624e6a9-2c0d-43c2-a4bb-7f9557e53807",
+            "28e17205-82fc-4c12-8b4e-3cad2a6ed003",
+            "183e3157-198f-4ac0-af1f-6af85fdcd49e"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 57605,
+          "duration": 55458,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
