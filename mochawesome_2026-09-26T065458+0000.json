@@ -5,9 +5,9 @@
     "passes": 0,
     "pending": 0,
     "failures": 1,
-    "start": "2026-09-26T06:17:49.408Z",
-    "end": "2026-09-26T06:17:50.151Z",
-    "duration": 743,
+    "start": "2026-09-26T06:54:21.427Z",
+    "end": "2026-09-26T06:54:58.777Z",
+    "duration": 37350,
     "testsRegistered": 6,
     "passPercent": 0,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "76ab3804-82d6-415b-8eba-4ad0cabc5172",
+      "uuid": "5313dcba-f7ff-40ec-9d2b-f1f53471d300",
       "title": "",
       "fullFile": "cypress/e2e/services/airtime.cy.ts",
       "file": "cypress/e2e/services/airtime.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "24ec458a-ee31-4f36-862e-821bf5ec6f92",
+          "uuid": "c67cc45b-8ca4-4d7d-b68d-8553e2f1a1cf",
           "title": "Services — Airtime",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | Airtime page loads with provider list",
               "fullTitle": "Services — Airtime P1 | Airtime page loads with provider list",
               "timedOut": null,
-              "duration": 161,
+              "duration": 13350,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -47,12 +47,12 @@
               "context": null,
               "code": "cy.softAssert(() => {\n    cy.contains(/MTN|Airtel|Glo|9mobile/i, { timeout: 10000 }).should(\"be.visible\");\n}, \"Network providers listed\");\ncy.assertAll();",
               "err": {
-                "message": "AssertionError: Login API should return 200 or 201: expected 404 to be one of [ 200, 201 ]\n\nThis error occurred while creating the session. Because the session setup failed, we failed the test.\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Services — Airtime`",
-                "estack": "AssertionError: Login API should return 200 or 201: expected 404 to be one of [ 200, 201 ]\n\nThis error occurred while creating the session. Because the session setup failed, we failed the test.\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Services — Airtime`\n    at Context.eval (webpack:///./cypress/support/commands.ts:33:0)",
-                "diff": "- '404'\n+ '[ 200, 201 ]'\n"
+                "message": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Services — Airtime`",
+                "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Services — Airtime`\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/services/airtime.cy.ts:9:65)",
+                "diff": null
               },
-              "uuid": "e16d3d1a-4b1b-43b2-b6cc-1bf130ba0a11",
-              "parentUUID": "24ec458a-ee31-4f36-862e-821bf5ec6f92",
+              "uuid": "2b8f43f0-e09d-42f4-848c-7d756aa81d02",
+              "parentUUID": "c67cc45b-8ca4-4d7d-b68d-8553e2f1a1cf",
               "isHook": false,
               "skipped": false
             },
@@ -69,8 +69,8 @@
               "context": null,
               "code": "// The phone input is always visible — just confirm it exists\ncy.softAssert(() => {\n    cy.get(\"#phone-input\", { timeout: 5000 }).should(\"be.visible\");\n}, \"Form appears after selecting provider\");\ncy.assertAll();",
               "err": {},
-              "uuid": "16f7e00b-9596-4400-8a59-05a5170a71cf",
-              "parentUUID": "24ec458a-ee31-4f36-862e-821bf5ec6f92",
+              "uuid": "55c86af8-98db-45ce-a8e1-34cde9eecc10",
+              "parentUUID": "c67cc45b-8ca4-4d7d-b68d-8553e2f1a1cf",
               "isHook": false,
               "skipped": true
             },
@@ -87,8 +87,8 @@
               "context": null,
               "code": "// Type a short invalid phone number\ncy.get(\"#phone-input\").clear().type(\"12345\");\n// Set a valid amount via the ₦50 preset so the Pay button enables\ncy.contains(\"button\", \"50\").click();\n// Click the sticky Pay bar\ncy.contains(\"button\", \"Pay\").click();\n// SOFT: validation fires as a toast\ncy.softAssert(() => {\n    cy.contains(/valid|phone|number/i, { timeout: 5000 }).should(\"be.visible\");\n}, \"Invalid phone toast shown\");\ncy.assertAll();",
               "err": {},
-              "uuid": "613aa936-da07-4ecf-91c4-a95f9b5e977d",
-              "parentUUID": "24ec458a-ee31-4f36-862e-821bf5ec6f92",
+              "uuid": "00fac948-192e-4b61-85a7-7c989a3e082a",
+              "parentUUID": "c67cc45b-8ca4-4d7d-b68d-8553e2f1a1cf",
               "isHook": false,
               "skipped": true
             },
@@ -105,8 +105,8 @@
               "context": null,
               "code": "// Type a valid phone but leave amount at 0\ncy.get(\"#phone-input\").clear().type(\"08012345678\");\n// Don't select any amount preset — amount stays 0\ncy.contains(\"button\", \"Pay\").click();\n// SOFT: minimum amount toast should appear\ncy.softAssert(() => {\n    cy.contains(/minimum|amount/i, { timeout: 5000 }).should(\"be.visible\");\n}, \"Minimum amount toast shown\");\ncy.assertAll();",
               "err": {},
-              "uuid": "927798ff-7306-41c5-ab88-cc21624be8f3",
-              "parentUUID": "24ec458a-ee31-4f36-862e-821bf5ec6f92",
+              "uuid": "b7585f0b-27ae-474f-a908-10de38808da8",
+              "parentUUID": "c67cc45b-8ca4-4d7d-b68d-8553e2f1a1cf",
               "isHook": false,
               "skipped": true
             },
@@ -123,8 +123,8 @@
               "context": null,
               "code": "// The Pay button is disabled when no valid state exists\n// On load the amount is 0, so the Pay button should be disabled\ncy.contains(\"button\", \"Pay\").should(\"be.disabled\");\ncy.url().should(\"include\", \"/services/airtime\");",
               "err": {},
-              "uuid": "cdeb7819-48c0-4f55-8509-f65ccd3e49ad",
-              "parentUUID": "24ec458a-ee31-4f36-862e-821bf5ec6f92",
+              "uuid": "73ce6884-b3c7-43f3-a02e-aa7c3cce833b",
+              "parentUUID": "c67cc45b-8ca4-4d7d-b68d-8553e2f1a1cf",
               "isHook": false,
               "skipped": true
             },
@@ -141,8 +141,8 @@
               "context": null,
               "code": "cy.intercept(\"POST\", \"**/services/airtime**\", {\n    statusCode: 400,\n    body: { success: false, code: \"INSUFFICIENT_BALANCE\", message: \"Insufficient wallet balance\" },\n}).as(\"airtimeInsufficient\");\ncy.get(\"#phone-input\").clear().type(\"08012345678\");\n// Select ₦5000 preset to maximise amount\ncy.contains(\"button\", \"5000\").click();\ncy.contains(\"button\", \"Pay\").click();\n// PIN modal will open — enter any pin\ncy.get('input[inputmode=\"numeric\"]', { timeout: 8000 }).type(\"0000\");\ncy.wait(\"@airtimeInsufficient\");\ncy.contains(/insufficient|balance/i, { timeout: 8000 }).should(\"be.visible\");",
               "err": {},
-              "uuid": "4f4a97de-13c3-4626-9844-053c4d4dee00",
-              "parentUUID": "24ec458a-ee31-4f36-862e-821bf5ec6f92",
+              "uuid": "27489ed5-6d98-430f-89f3-329dd6506d6d",
+              "parentUUID": "c67cc45b-8ca4-4d7d-b68d-8553e2f1a1cf",
               "isHook": false,
               "skipped": true
             }
@@ -150,17 +150,17 @@
           "suites": [],
           "passes": [],
           "failures": [
-            "e16d3d1a-4b1b-43b2-b6cc-1bf130ba0a11"
+            "2b8f43f0-e09d-42f4-848c-7d756aa81d02"
           ],
           "pending": [],
           "skipped": [
-            "16f7e00b-9596-4400-8a59-05a5170a71cf",
-            "613aa936-da07-4ecf-91c4-a95f9b5e977d",
-            "927798ff-7306-41c5-ab88-cc21624be8f3",
-            "cdeb7819-48c0-4f55-8509-f65ccd3e49ad",
-            "4f4a97de-13c3-4626-9844-053c4d4dee00"
+            "55c86af8-98db-45ce-a8e1-34cde9eecc10",
+            "00fac948-192e-4b61-85a7-7c989a3e082a",
+            "b7585f0b-27ae-474f-a908-10de38808da8",
+            "73ce6884-b3c7-43f3-a02e-aa7c3cce833b",
+            "27489ed5-6d98-430f-89f3-329dd6506d6d"
           ],
-          "duration": 161,
+          "duration": 13350,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
