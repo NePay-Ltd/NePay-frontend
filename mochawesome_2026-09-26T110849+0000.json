@@ -5,9 +5,9 @@
     "passes": 2,
     "pending": 0,
     "failures": 4,
-    "start": "2026-09-26T06:30:30.596Z",
-    "end": "2026-09-26T06:37:05.082Z",
-    "duration": 394486,
+    "start": "2026-09-26T11:02:14.254Z",
+    "end": "2026-09-26T11:08:49.102Z",
+    "duration": 394848,
     "testsRegistered": 6,
     "passPercent": 33.33333333333333,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "42ea527d-7e3f-4efd-972e-08d334a35420",
+      "uuid": "b4427d7e-2066-4406-942d-d7101be2da8c",
       "title": "",
       "fullFile": "cypress/e2e/gift-cards/gift-cards.cy.ts",
       "file": "cypress/e2e/gift-cards/gift-cards.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "2ab707fd-227c-41d8-a7af-5c2990752e69",
+          "uuid": "ffb7575f-f332-4cca-8de8-271e7d5edbb0",
           "title": "Gift Cards",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | Gift cards page loads with available cards",
               "fullTitle": "Gift Cards P1 | Gift cards page loads with available cards",
               "timedOut": null,
-              "duration": 759,
+              "duration": 632,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -47,8 +47,8 @@
               "context": null,
               "code": "cy.get(\"body\").should(\"be.visible\");\ncy.softAssert(() => {\n    cy.contains(/gift card|Amazon|iTunes|Google Play/i, { timeout: 10000 }).should(\"be.visible\");\n}, \"Gift cards listed\");\ncy.assertAll();",
               "err": {},
-              "uuid": "90353288-22a3-4ecc-a4f3-f9b0732fa043",
-              "parentUUID": "2ab707fd-227c-41d8-a7af-5c2990752e69",
+              "uuid": "7d380353-d1c9-4d29-952a-9704169221b7",
+              "parentUUID": "ffb7575f-f332-4cca-8de8-271e7d5edbb0",
               "isHook": false,
               "skipped": false
             },
@@ -56,7 +56,7 @@
               "title": "P2 | History tab navigates to gift card history",
               "fullTitle": "Gift Cards P2 | History tab navigates to gift card history",
               "timedOut": null,
-              "duration": 8411,
+              "duration": 8425,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -69,8 +69,8 @@
                 "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/history/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/gift-cards/gift-cards.cy.ts:17:0)",
                 "diff": null
               },
-              "uuid": "2418af50-1d2b-49bd-b3ab-7496231963dd",
-              "parentUUID": "2ab707fd-227c-41d8-a7af-5c2990752e69",
+              "uuid": "0659a276-28cd-4b64-80d8-09f614ed8970",
+              "parentUUID": "ffb7575f-f332-4cca-8de8-271e7d5edbb0",
               "isHook": false,
               "skipped": false
             },
@@ -78,7 +78,7 @@
               "title": "P3 | Sell tab navigates to gift card submission",
               "fullTitle": "Gift Cards P3 | Sell tab navigates to gift card submission",
               "timedOut": null,
-              "duration": 465,
+              "duration": 454,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -87,8 +87,8 @@
               "context": null,
               "code": "cy.contains(/sell/i, { timeout: 8000 }).click();\ncy.softAssert(() => {\n    cy.contains(/sell|upload|submit/i).should(\"be.visible\");\n}, \"Sell tab content\");\ncy.assertAll();",
               "err": {},
-              "uuid": "b2b613ec-3ba4-4cab-8832-6d3511552916",
-              "parentUUID": "2ab707fd-227c-41d8-a7af-5c2990752e69",
+              "uuid": "1b09f8dc-1f50-4729-93a3-cf05f2ed1dc6",
+              "parentUUID": "ffb7575f-f332-4cca-8de8-271e7d5edbb0",
               "isHook": false,
               "skipped": false
             },
@@ -96,7 +96,7 @@
               "title": "N1 | Sell gift card with no image uploaded → validation error",
               "fullTitle": "Gift Cards N1 | Sell gift card with no image uploaded → validation error",
               "timedOut": null,
-              "duration": 30887,
+              "duration": 30672,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -109,8 +109,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `button[type=\"submit\"]`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/gift-cards/gift-cards.cy.ts:33:0)",
                 "diff": null
               },
-              "uuid": "ad1aabc2-e76c-407e-ae9c-22ef48c916ea",
-              "parentUUID": "2ab707fd-227c-41d8-a7af-5c2990752e69",
+              "uuid": "dd247c01-9f96-4043-bace-6c068b5ae06e",
+              "parentUUID": "ffb7575f-f332-4cca-8de8-271e7d5edbb0",
               "isHook": false,
               "skipped": false
             },
@@ -118,7 +118,7 @@
               "title": "N2 | Buy with insufficient balance → error shown",
               "fullTitle": "Gift Cards N2 | Buy with insufficient balance → error shown",
               "timedOut": null,
-              "duration": 31358,
+              "duration": 31619,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -131,8 +131,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `button[type=\"submit\"]`, but never found it.\n    at eval (webpack:///./cypress/e2e/gift-cards/gift-cards.cy.ts:46:0)\n    at Context.eval (webpack:///./cypress/support/commands.ts:64:0)",
                 "diff": null
               },
-              "uuid": "42037666-a61e-4fe1-83be-2748282f3d7d",
-              "parentUUID": "2ab707fd-227c-41d8-a7af-5c2990752e69",
+              "uuid": "ea960426-16d8-4474-b920-cca07fd672d7",
+              "parentUUID": "ffb7575f-f332-4cca-8de8-271e7d5edbb0",
               "isHook": false,
               "skipped": false
             },
@@ -140,7 +140,7 @@
               "title": "N3 | API error on gift card load → no crash",
               "fullTitle": "Gift Cards N3 | API error on gift card load → no crash",
               "timedOut": null,
-              "duration": 60622,
+              "duration": 60644,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -153,26 +153,26 @@
                 "estack": "CypressError: Timed out after waiting `60000ms` for your remote page to load.\n\nYour page did not fire its `load` event within `60000ms`.\n\nYou can try increasing the `pageLoadTimeout` value in `home/runner/work/NePay-frontend/NePay-frontend/apps/web/cypress.config.ts` to wait longer.\n\nBrowsers will not fire the `load` event until all stylesheets and scripts are done downloading.\n\nWhen this `load` event occurs, Cypress will continue running commands.\n    at timedOutWaitingForPageLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141258:72)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141832:16)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6449:41)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9440:18)\n    at _drainQueueStep (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6034:12)\n    at _drainQueue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6027:9)\n    at ../../node_modules/bluebird/js/release/async.js.Async._drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6043:5)\n    at Async.drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:5913:14)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/gift-cards/gift-cards.cy.ts:55:0)",
                 "diff": null
               },
-              "uuid": "a959fa92-9c3d-4c5a-8036-3600bf7df211",
-              "parentUUID": "2ab707fd-227c-41d8-a7af-5c2990752e69",
+              "uuid": "91780e5e-8a89-4ad2-aecb-24aaaee75dc9",
+              "parentUUID": "ffb7575f-f332-4cca-8de8-271e7d5edbb0",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "90353288-22a3-4ecc-a4f3-f9b0732fa043",
-            "b2b613ec-3ba4-4cab-8832-6d3511552916"
+            "7d380353-d1c9-4d29-952a-9704169221b7",
+            "1b09f8dc-1f50-4729-93a3-cf05f2ed1dc6"
           ],
           "failures": [
-            "2418af50-1d2b-49bd-b3ab-7496231963dd",
-            "ad1aabc2-e76c-407e-ae9c-22ef48c916ea",
-            "42037666-a61e-4fe1-83be-2748282f3d7d",
-            "a959fa92-9c3d-4c5a-8036-3600bf7df211"
+            "0659a276-28cd-4b64-80d8-09f614ed8970",
+            "dd247c01-9f96-4043-bace-6c068b5ae06e",
+            "ea960426-16d8-4474-b920-cca07fd672d7",
+            "91780e5e-8a89-4ad2-aecb-24aaaee75dc9"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 132502,
+          "duration": 132446,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
