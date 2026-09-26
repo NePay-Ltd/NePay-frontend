@@ -5,9 +5,9 @@
     "passes": 0,
     "pending": 0,
     "failures": 1,
-    "start": "2026-09-26T13:33:58.053Z",
-    "end": "2026-09-26T13:34:44.830Z",
-    "duration": 46777,
+    "start": "2026-09-26T14:26:12.406Z",
+    "end": "2026-09-26T14:26:49.694Z",
+    "duration": 37288,
     "testsRegistered": 6,
     "passPercent": 0,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "e65f94c2-cddd-4f77-895b-e4498852c8a8",
+      "uuid": "eb36cca7-29f7-481e-8166-213e321f8428",
       "title": "",
       "fullFile": "cypress/e2e/services/airtime.cy.ts",
       "file": "cypress/e2e/services/airtime.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "4fe26cbf-da7f-46f5-9cd8-1a714d308149",
+          "uuid": "c497192c-77bc-4fec-a6b2-2a58b2053be4",
           "title": "Services — Airtime",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | Airtime page loads with provider list",
               "fullTitle": "Services — Airtime P1 | Airtime page loads with provider list",
               "timedOut": null,
-              "duration": 16665,
+              "duration": 13336,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -51,8 +51,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Services — Airtime`\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/services/airtime.cy.ts:9:65)",
                 "diff": null
               },
-              "uuid": "4348773a-4caa-46aa-b83c-8f4296301e7c",
-              "parentUUID": "4fe26cbf-da7f-46f5-9cd8-1a714d308149",
+              "uuid": "9ea546f0-d506-47f5-991a-f26d04f8d75b",
+              "parentUUID": "c497192c-77bc-4fec-a6b2-2a58b2053be4",
               "isHook": false,
               "skipped": false
             },
@@ -69,8 +69,8 @@
               "context": null,
               "code": "// The phone input is always visible — just confirm it exists\ncy.softAssert(() => {\n    cy.get(\"#phone-input\", { timeout: 5000 }).should(\"be.visible\");\n}, \"Form appears after selecting provider\");\ncy.assertAll();",
               "err": {},
-              "uuid": "1b07119a-2fb5-4299-bab2-dd0b6f6d05e4",
-              "parentUUID": "4fe26cbf-da7f-46f5-9cd8-1a714d308149",
+              "uuid": "29f46d30-c344-4fef-9cad-c8c15b70c1a8",
+              "parentUUID": "c497192c-77bc-4fec-a6b2-2a58b2053be4",
               "isHook": false,
               "skipped": true
             },
@@ -87,8 +87,8 @@
               "context": null,
               "code": "// Type a short invalid phone number\ncy.get(\"#phone-input\").clear().type(\"12345\");\n// Set a valid amount via the ₦50 preset so the Pay button enables\ncy.contains(\"button\", \"50\").click();\n// Click the sticky Pay bar\ncy.contains(\"button\", \"Pay\").click();\n// SOFT: validation fires as a toast\ncy.softAssert(() => {\n    cy.contains(/valid|phone|number/i, { timeout: 5000 }).should(\"be.visible\");\n}, \"Invalid phone toast shown\");\ncy.assertAll();",
               "err": {},
-              "uuid": "2d10ba95-e4b4-4eac-aacd-e8f068080e3f",
-              "parentUUID": "4fe26cbf-da7f-46f5-9cd8-1a714d308149",
+              "uuid": "2271b4aa-a163-40f2-8bdb-c14a06a6cc1a",
+              "parentUUID": "c497192c-77bc-4fec-a6b2-2a58b2053be4",
               "isHook": false,
               "skipped": true
             },
@@ -105,8 +105,8 @@
               "context": null,
               "code": "// Type a valid phone but leave amount at 0\ncy.get(\"#phone-input\").clear().type(\"08012345678\");\n// Don't select any amount preset — amount stays 0\ncy.contains(\"button\", \"Pay\").click();\n// SOFT: minimum amount toast should appear\ncy.softAssert(() => {\n    cy.contains(/minimum|amount/i, { timeout: 5000 }).should(\"be.visible\");\n}, \"Minimum amount toast shown\");\ncy.assertAll();",
               "err": {},
-              "uuid": "7bd22306-bf54-448b-9060-e997b4250e2a",
-              "parentUUID": "4fe26cbf-da7f-46f5-9cd8-1a714d308149",
+              "uuid": "d1e978a8-499b-4b4c-b2fc-b45c7cbe1018",
+              "parentUUID": "c497192c-77bc-4fec-a6b2-2a58b2053be4",
               "isHook": false,
               "skipped": true
             },
@@ -123,8 +123,8 @@
               "context": null,
               "code": "// The Pay button is disabled when no valid state exists\n// On load the amount is 0, so the Pay button should be disabled\ncy.contains(\"button\", \"Pay\").should(\"be.disabled\");\ncy.url().should(\"include\", \"/services/airtime\");",
               "err": {},
-              "uuid": "aa9ff556-579e-4554-81a5-1b55c68646a3",
-              "parentUUID": "4fe26cbf-da7f-46f5-9cd8-1a714d308149",
+              "uuid": "853eb762-c758-4406-9deb-3ad81fdaac05",
+              "parentUUID": "c497192c-77bc-4fec-a6b2-2a58b2053be4",
               "isHook": false,
               "skipped": true
             },
@@ -141,8 +141,8 @@
               "context": null,
               "code": "cy.intercept(\"POST\", \"**/services/airtime**\", {\n    statusCode: 400,\n    body: { success: false, code: \"INSUFFICIENT_BALANCE\", message: \"Insufficient wallet balance\" },\n}).as(\"airtimeInsufficient\");\ncy.get(\"#phone-input\").clear().type(\"08012345678\");\n// Select ₦5000 preset to maximise amount\ncy.contains(\"button\", \"5000\").click();\ncy.contains(\"button\", \"Pay\").click();\n// PIN modal will open — enter any pin\ncy.get('input[inputmode=\"numeric\"]', { timeout: 8000 }).type(\"0000\");\ncy.wait(\"@airtimeInsufficient\");\ncy.contains(/insufficient|balance/i, { timeout: 8000 }).should(\"be.visible\");",
               "err": {},
-              "uuid": "0fa32355-0cb0-4fca-9206-cc88100aa3c9",
-              "parentUUID": "4fe26cbf-da7f-46f5-9cd8-1a714d308149",
+              "uuid": "7bf489fe-9199-4e8f-891c-80ee8ee85fbf",
+              "parentUUID": "c497192c-77bc-4fec-a6b2-2a58b2053be4",
               "isHook": false,
               "skipped": true
             }
@@ -150,17 +150,17 @@
           "suites": [],
           "passes": [],
           "failures": [
-            "4348773a-4caa-46aa-b83c-8f4296301e7c"
+            "9ea546f0-d506-47f5-991a-f26d04f8d75b"
           ],
           "pending": [],
           "skipped": [
-            "1b07119a-2fb5-4299-bab2-dd0b6f6d05e4",
-            "2d10ba95-e4b4-4eac-aacd-e8f068080e3f",
-            "7bd22306-bf54-448b-9060-e997b4250e2a",
-            "aa9ff556-579e-4554-81a5-1b55c68646a3",
-            "0fa32355-0cb0-4fca-9206-cc88100aa3c9"
+            "29f46d30-c344-4fef-9cad-c8c15b70c1a8",
+            "2271b4aa-a163-40f2-8bdb-c14a06a6cc1a",
+            "d1e978a8-499b-4b4c-b2fc-b45c7cbe1018",
+            "853eb762-c758-4406-9deb-3ad81fdaac05",
+            "7bf489fe-9199-4e8f-891c-80ee8ee85fbf"
           ],
-          "duration": 16665,
+          "duration": 13336,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
