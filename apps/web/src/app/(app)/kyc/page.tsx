@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IconBuilding as Building2, IconCard as CreditCard, IconLock as Lock } from "@/components/icons";
@@ -16,6 +17,7 @@ import {
     useKycStatus,
     useSubmitBvn,
 } from "@/lib/queries/kyc";
+import { walletKeys } from "@/lib/queries/wallet";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/shared/button";
 import { Field } from "@/components/shared/field";
@@ -326,6 +328,7 @@ type KycStep = "bvn-number" | "bvn-rejected" | "bridge-optional" | "done";
 export default function KycPage() {
     const { user, markKycVerified } = useAuth();
     const { data: kycStatus, isLoading: statusLoading } = useKycStatus();
+    const queryClient = useQueryClient();
 
     const [step, setStep] = React.useState<KycStep | null>(null);
     const [rejectionReason, setRejectionReason] = React.useState<string | null>(null);
@@ -381,8 +384,19 @@ export default function KycPage() {
                         <BvnNumberStep
                             onApproved={() => {
                                 // Approval also auto-provisioned the virtual
-                                // account server-side (BvnVerifiedListener,
-                                // via publishAndWait) — nothing left to call.
+                                // account server-side (BvnVerifiedListener, via
+                                // publishAndWait) — but the client's own cached
+                                // "no virtual account yet" result from before
+                                // approval doesn't know that on its own.
+                                // Confirmed live 2026-09-26: without this
+                                // invalidation, a user could pass BVN
+                                // verification while the virtual-account query
+                                // was already cached empty/404 from an earlier
+                                // visit, and keep seeing "please verify" even
+                                // though the account now exists server-side —
+                                // with no way back in, since re-submitting BVN
+                                // just 409s on the now-APPROVED record.
+                                queryClient.invalidateQueries({ queryKey: walletKeys.virtualAccount() });
                                 markKycVerified();
                                 toast.success("BVN verified!");
                                 setStep("bridge-optional");
