@@ -95,15 +95,22 @@ export default function TransferPage() {
     // unresolved, switch to the modal's existing "review" state (amber
     // clock, closeable, "we'll notify you once it clears") instead of
     // leaving them stuck staring at a spinner with no way out.
+    //
+    // Also confirmed live 2026-09-27: the initiate call itself can hang
+    // just as long if VFD's own gateway never responds at all — covered
+    // here via `initiateMutation.isPending`, not just `txId` (which only
+    // exists once that call has already succeeded). Deliberately excludes
+    // the earlier account-resolution "processing" step, where no withdrawal
+    // exists yet, so there's nothing to "still processing" about.
     React.useEffect(() => {
-        if (txState !== "processing" || !txId) return;
+        if (txState !== "processing" || !(txId || initiateMutation.isPending)) return;
 
         const timer = setTimeout(() => {
             setTxState((current) => (current === "processing" ? "review" : current));
         }, 45_000);
 
         return () => clearTimeout(timer);
-    }, [txState, txId]);
+    }, [txState, txId, initiateMutation.isPending]);
 
     // ── Bank Account State ──
     const [bankCode, setBankCode] = React.useState("");
