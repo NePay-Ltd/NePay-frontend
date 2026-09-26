@@ -2,23 +2,23 @@
   "stats": {
     "suites": 14,
     "tests": 107,
-    "passes": 58,
+    "passes": 59,
     "pending": 0,
-    "failures": 44,
+    "failures": 43,
     "testsRegistered": 107,
-    "passPercent": 54.205607476635514,
+    "passPercent": 55.14018691588785,
     "pendingPercent": 0,
     "other": 0,
     "hasOther": false,
     "skipped": 5,
     "hasSkipped": true,
-    "start": "2026-09-26T10:52:07.316Z",
-    "end": "2026-09-26T11:37:35.993Z",
-    "duration": 2728677
+    "start": "2026-09-26T13:00:34.869Z",
+    "end": "2026-09-26T13:43:35.208Z",
+    "duration": 2580339
   },
   "results": [
     {
-      "uuid": "56df49af-24a5-47d1-910a-9c6a9d84a792",
+      "uuid": "242b4b90-610e-4ab4-94a3-775ba38ddc79",
       "title": "",
       "fullFile": "cypress/e2e/auth/forgot-password.cy.ts",
       "file": "cypress/e2e/auth/forgot-password.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "737b7dbf-f216-44ee-a086-3be254346cd6",
+          "uuid": "26f4de58-2ac0-44f1-917d-3bcf0d2f2403",
           "title": "Auth — Forgot Password",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | Valid email → success message shown",
               "fullTitle": "Auth — Forgot Password P1 | Valid email → success message shown",
               "timedOut": null,
-              "duration": 3240,
+              "duration": 3584,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -47,8 +47,8 @@
               "context": null,
               "code": "const emailToType = Cypress.env(\"TEST_EMAIL\") || \"test@example.com\";\ncy.get('input[name=\"email\"]').type(emailToType);\ncy.get('button[type=\"submit\"]').click();\n// HARD: success/confirmation message must appear\ncy.contains(/check your|sent|email/i, { timeout: 10000 }).should(\"be.visible\");",
               "err": {},
-              "uuid": "8c12b2cd-5e20-4d3d-b722-aa288de8fa02",
-              "parentUUID": "737b7dbf-f216-44ee-a086-3be254346cd6",
+              "uuid": "d95e78e0-1638-41c3-8e62-9888284923ca",
+              "parentUUID": "26f4de58-2ac0-44f1-917d-3bcf0d2f2403",
               "isHook": false,
               "skipped": false
             },
@@ -56,7 +56,7 @@
               "title": "N1 | Empty email → validation error before API call",
               "fullTitle": "Auth — Forgot Password N1 | Empty email → validation error before API call",
               "timedOut": null,
-              "duration": 626,
+              "duration": 405,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -65,8 +65,8 @@
               "context": null,
               "code": "cy.get('button[type=\"submit\"]').click();\n// HARD: form validation blocks API call\ncy.contains(/email|required/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "4bc508e4-215d-48ba-92be-9e8ce2c0ea64",
-              "parentUUID": "737b7dbf-f216-44ee-a086-3be254346cd6",
+              "uuid": "a10566c6-6902-4a03-a0e1-e600b4d2371a",
+              "parentUUID": "26f4de58-2ac0-44f1-917d-3bcf0d2f2403",
               "isHook": false,
               "skipped": false
             },
@@ -74,7 +74,7 @@
               "title": "N2 | Malformed email → validation error",
               "fullTitle": "Auth — Forgot Password N2 | Malformed email → validation error",
               "timedOut": null,
-              "duration": 623,
+              "duration": 608,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -83,8 +83,8 @@
               "context": null,
               "code": "cy.get('input[name=\"email\"]').type(\"not-an-email\");\ncy.get('button[type=\"submit\"]').click();\n// HARD\ncy.contains(/valid email/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "7370bc90-e750-4714-aa6d-91181b70e6ae",
-              "parentUUID": "737b7dbf-f216-44ee-a086-3be254346cd6",
+              "uuid": "f8cd7791-c1a8-4fc0-8ec8-fb3662d6f815",
+              "parentUUID": "26f4de58-2ac0-44f1-917d-3bcf0d2f2403",
               "isHook": false,
               "skipped": false
             },
@@ -92,7 +92,7 @@
               "title": "N3 | Non-existent email → shows error message",
               "fullTitle": "Auth — Forgot Password N3 | Non-existent email → shows error message",
               "timedOut": null,
-              "duration": 912,
+              "duration": 851,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -101,29 +101,29 @@
               "context": null,
               "code": "cy.intercept(\"POST\", \"**/auth/forgot-password\", {\n    statusCode: 404,\n    body: { success: false, code: \"ACCOUNT_NOT_FOUND\", message: \"We couldn't find an account with that email.\" }\n}).as(\"forgotPasswordErr\");\ncy.get('input[name=\"email\"]').type(\"doesnotexist99999@nepay.io\");\ncy.get('button[type=\"submit\"]').click();\ncy.wait(\"@forgotPasswordErr\");\ncy.contains(/couldn't find|not found/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "bb563471-eb2d-448d-b824-84b84058aeec",
-              "parentUUID": "737b7dbf-f216-44ee-a086-3be254346cd6",
+              "uuid": "092d1033-5470-4ee5-bc26-2b781d3a4e1f",
+              "parentUUID": "26f4de58-2ac0-44f1-917d-3bcf0d2f2403",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "8c12b2cd-5e20-4d3d-b722-aa288de8fa02",
-            "4bc508e4-215d-48ba-92be-9e8ce2c0ea64",
-            "7370bc90-e750-4714-aa6d-91181b70e6ae",
-            "bb563471-eb2d-448d-b824-84b84058aeec"
+            "d95e78e0-1638-41c3-8e62-9888284923ca",
+            "a10566c6-6902-4a03-a0e1-e600b4d2371a",
+            "f8cd7791-c1a8-4fc0-8ec8-fb3662d6f815",
+            "092d1033-5470-4ee5-bc26-2b781d3a4e1f"
           ],
           "failures": [],
           "pending": [],
           "skipped": [],
-          "duration": 5401,
+          "duration": 5448,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
         },
         {
-          "uuid": "f0d8c085-1475-4ef3-8f7b-cd43fb09f86f",
+          "uuid": "3591cbe4-501f-4279-a53f-9ec42035d7b5",
           "title": "Auth — Reset Password",
           "fullFile": "",
           "file": "",
@@ -134,7 +134,7 @@
               "title": "N1 | Passwords don't match → confirm error",
               "fullTitle": "Auth — Reset Password N1 | Passwords don't match → confirm error",
               "timedOut": null,
-              "duration": 1742,
+              "duration": 1551,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -143,8 +143,8 @@
               "context": null,
               "code": "cy.get('input[name=\"email\"]').type(\"test@example.com\");\ncy.get('input[name=\"code\"]').type(\"123456\");\ncy.get('input[name=\"password\"]').type(\"NewPass123\");\ncy.get('input[name=\"confirmPassword\"]').type(\"DifferentPass123\");\ncy.get('button[type=\"submit\"]').click();\n// HARD\ncy.contains(/passwords do not match/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "30666666-80ad-4f7d-a06c-e0f0e3b9b409",
-              "parentUUID": "f0d8c085-1475-4ef3-8f7b-cd43fb09f86f",
+              "uuid": "b671ec39-dcc4-482d-99aa-cad0147ed41d",
+              "parentUUID": "3591cbe4-501f-4279-a53f-9ec42035d7b5",
               "isHook": false,
               "skipped": false
             },
@@ -152,7 +152,7 @@
               "title": "N2 | Backend rejects code → validation error shown",
               "fullTitle": "Auth — Reset Password N2 | Backend rejects code → validation error shown",
               "timedOut": null,
-              "duration": 1684,
+              "duration": 1523,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -161,8 +161,8 @@
               "context": null,
               "code": "cy.intercept(\"POST\", \"**/auth/reset-password\", {\n    statusCode: 400,\n    body: { success: false, code: \"VALIDATION_FAILED\", message: \"Invalid or expired code\" }\n}).as(\"resetErr\");\ncy.get('input[name=\"email\"]').type(\"test@example.com\");\ncy.get('input[name=\"code\"]').type(\"000000\");\ncy.get('input[name=\"password\"]').type(\"NewPass123\");\ncy.get('input[name=\"confirmPassword\"]').type(\"NewPass123\");\ncy.get('button[type=\"submit\"]').click();\ncy.wait(\"@resetErr\");\ncy.contains(/invalid or expired/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "c89f180d-8f3d-47c1-8bf6-c4fc4bffea24",
-              "parentUUID": "f0d8c085-1475-4ef3-8f7b-cd43fb09f86f",
+              "uuid": "282150e3-fcef-4f4c-984f-5d94f2b293f7",
+              "parentUUID": "3591cbe4-501f-4279-a53f-9ec42035d7b5",
               "isHook": false,
               "skipped": false
             },
@@ -170,7 +170,7 @@
               "title": "N3 | Weak new password → validation error",
               "fullTitle": "Auth — Reset Password N3 | Weak new password → validation error",
               "timedOut": null,
-              "duration": 1235,
+              "duration": 1244,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -179,22 +179,22 @@
               "context": null,
               "code": "cy.get('input[name=\"email\"]').type(\"test@example.com\");\ncy.get('input[name=\"code\"]').type(\"123456\");\ncy.get('input[name=\"password\"]').type(\"weak\");\ncy.get('input[name=\"confirmPassword\"]').type(\"weak\");\ncy.get('button[type=\"submit\"]').click();\n// HARD\ncy.contains(/at least 6 characters/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "c345ef4e-3f54-4258-abb2-e579d3513a04",
-              "parentUUID": "f0d8c085-1475-4ef3-8f7b-cd43fb09f86f",
+              "uuid": "ecd2f21e-81f8-41e4-be53-4076448fe2b4",
+              "parentUUID": "3591cbe4-501f-4279-a53f-9ec42035d7b5",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "30666666-80ad-4f7d-a06c-e0f0e3b9b409",
-            "c89f180d-8f3d-47c1-8bf6-c4fc4bffea24",
-            "c345ef4e-3f54-4258-abb2-e579d3513a04"
+            "b671ec39-dcc4-482d-99aa-cad0147ed41d",
+            "282150e3-fcef-4f4c-984f-5d94f2b293f7",
+            "ecd2f21e-81f8-41e4-be53-4076448fe2b4"
           ],
           "failures": [],
           "pending": [],
           "skipped": [],
-          "duration": 4661,
+          "duration": 4318,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
@@ -210,7 +210,7 @@
       "_timeout": 2000
     },
     {
-      "uuid": "95168364-d207-4f6f-a802-78026dd0eb35",
+      "uuid": "1cfcfa80-2f71-4515-a211-04da4b31d624",
       "title": "",
       "fullFile": "cypress/e2e/auth/login.cy.ts",
       "file": "cypress/e2e/auth/login.cy.ts",
@@ -219,7 +219,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "5f3223be-d20d-4e5d-8bab-10aac3aa3043",
+          "uuid": "d7cd113a-f657-4b44-a55c-24c1b432d398",
           "title": "Auth — Login",
           "fullFile": "",
           "file": "",
@@ -230,21 +230,17 @@
               "title": "P1 | Valid credentials → redirects to /overview",
               "fullTitle": "Auth — Login P1 | Valid credentials → redirects to /overview",
               "timedOut": null,
-              "duration": 61648,
-              "state": "failed",
-              "speed": null,
-              "pass": false,
-              "fail": true,
+              "duration": 57225,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
               "pending": false,
               "context": null,
               "code": "cy.get('input[name=\"identifier\"]').type(Cypress.env(\"TEST_EMAIL\"));\ncy.get('input[name=\"password\"]').type(Cypress.env(\"TEST_PASSWORD\"));\ncy.get('button[type=\"submit\"]').click();\n// HARD: must land on overview — no point running further checks without this\ncy.url({ timeout: 60000 }).should(\"include\", \"/overview\");",
-              "err": {
-                "message": "AssertionError: Timed out retrying after 60000ms: expected 'https://staging-nepay.vercel.app/login' to include '/overview'",
-                "estack": "AssertionError: Timed out retrying after 60000ms: expected 'https://staging-nepay.vercel.app/login' to include '/overview'\n    at Context.eval (webpack:///./cypress/e2e/auth/login.cy.ts:15:33)",
-                "diff": null
-              },
-              "uuid": "78f991b4-adb3-422f-ae44-9cc21da385e0",
-              "parentUUID": "5f3223be-d20d-4e5d-8bab-10aac3aa3043",
+              "err": {},
+              "uuid": "2e6b6fa6-1d7a-41cb-b275-d974aaf7fe98",
+              "parentUUID": "d7cd113a-f657-4b44-a55c-24c1b432d398",
               "isHook": false,
               "skipped": false
             },
@@ -252,17 +248,17 @@
               "title": "P2 | nepay_refresh cookie is set after successful login",
               "fullTitle": "Auth — Login P2 | nepay_refresh cookie is set after successful login",
               "timedOut": null,
-              "duration": 41345,
+              "duration": 6255,
               "state": "passed",
-              "speed": "slow",
+              "speed": "medium",
               "pass": true,
               "fail": false,
               "pending": false,
               "context": null,
               "code": "cy.get('input[name=\"identifier\"]').type(Cypress.env(\"TEST_EMAIL\"));\ncy.get('input[name=\"password\"]').type(Cypress.env(\"TEST_PASSWORD\"));\ncy.get('button[type=\"submit\"]').click();\ncy.url({ timeout: 60000 }).should(\"include\", \"/overview\");\n// HARD: cookie is the middleware session gate — must be present\ncy.getCookie(\"nepay_refresh\").should(\"exist\").and(\"have.property\", \"value\", \"true\");",
               "err": {},
-              "uuid": "3d83c6c2-bd1a-4c93-9ee3-209c325d9d14",
-              "parentUUID": "5f3223be-d20d-4e5d-8bab-10aac3aa3043",
+              "uuid": "27f54521-d779-48d3-8ae4-87c0233f1080",
+              "parentUUID": "d7cd113a-f657-4b44-a55c-24c1b432d398",
               "isHook": false,
               "skipped": false
             },
@@ -270,7 +266,7 @@
               "title": "P4 | returnTo query param redirects to original route after login",
               "fullTitle": "Auth — Login P4 | returnTo query param redirects to original route after login",
               "timedOut": null,
-              "duration": 1570,
+              "duration": 1601,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -279,8 +275,8 @@
               "context": null,
               "code": "cy.visit(\"/login?returnTo=/transfer\");\ncy.get('input[name=\"identifier\"]').type(Cypress.env(\"TEST_EMAIL\"));\ncy.get('input[name=\"password\"]').type(Cypress.env(\"TEST_PASSWORD\"));\ncy.get('button[type=\"submit\"]').click();\n// HARD: must honour the returnTo param\ncy.url({ timeout: 60000 }).should(\"include\", \"/transfer\");",
               "err": {},
-              "uuid": "763148d3-bf4a-40f2-bf2b-76802ec18eb2",
-              "parentUUID": "5f3223be-d20d-4e5d-8bab-10aac3aa3043",
+              "uuid": "bc49bd24-b64d-4885-9343-f4a15fafbe56",
+              "parentUUID": "d7cd113a-f657-4b44-a55c-24c1b432d398",
               "isHook": false,
               "skipped": false
             },
@@ -288,7 +284,7 @@
               "title": "P5 | Accessing /login when already logged in → bounced to /overview",
               "fullTitle": "Auth — Login P5 | Accessing /login when already logged in → bounced to /overview",
               "timedOut": null,
-              "duration": 5772,
+              "duration": 6565,
               "state": "passed",
               "speed": "medium",
               "pass": true,
@@ -297,8 +293,8 @@
               "context": null,
               "code": "cy.login();\ncy.visit(\"/login\");\n// HARD: middleware should redirect away\ncy.url({ timeout: 10000 }).should(\"include\", \"/overview\");",
               "err": {},
-              "uuid": "fd4bd751-228f-417f-baaf-575b133b3fbb",
-              "parentUUID": "5f3223be-d20d-4e5d-8bab-10aac3aa3043",
+              "uuid": "6bde85f7-f510-40d8-8bf6-efa51fe699cf",
+              "parentUUID": "d7cd113a-f657-4b44-a55c-24c1b432d398",
               "isHook": false,
               "skipped": false
             },
@@ -306,7 +302,7 @@
               "title": "N1 | Wrong password → inline error shown (not a toast)",
               "fullTitle": "Auth — Login N1 | Wrong password → inline error shown (not a toast)",
               "timedOut": null,
-              "duration": 4427,
+              "duration": 3054,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -315,8 +311,8 @@
               "context": null,
               "code": "cy.get('input[name=\"identifier\"]').type(Cypress.env(\"TEST_EMAIL\"));\ncy.get('input[name=\"password\"]').type(\"WrongPassword999!\");\ncy.get('button[type=\"submit\"]').click();\n// HARD: must stay on login page\ncy.url().should(\"include\", \"/login\");\n// HARD: inline error must appear (not just a toast that auto-dismisses)\ncy.contains(/invalid|incorrect|wrong|credentials/i, { timeout: 8000 }).should(\"be.visible\");\n// SOFT: no toast shown for invalid credentials (per auth-context.tsx design)\ncy.softAssert(() => {\n    cy.get('[data-sonner-toast]').should(\"not.exist\");\n}, \"No toast for invalid credentials\");\ncy.assertAll();",
               "err": {},
-              "uuid": "d173f95c-04e8-462f-90b4-5fce14c7fa4a",
-              "parentUUID": "5f3223be-d20d-4e5d-8bab-10aac3aa3043",
+              "uuid": "0c0d91cc-dc90-4572-97e2-7a7b7e75d14b",
+              "parentUUID": "d7cd113a-f657-4b44-a55c-24c1b432d398",
               "isHook": false,
               "skipped": false
             },
@@ -324,7 +320,7 @@
               "title": "N2 | Empty email field → validation error before API call",
               "fullTitle": "Auth — Login N2 | Empty email field → validation error before API call",
               "timedOut": null,
-              "duration": 958,
+              "duration": 870,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -333,8 +329,8 @@
               "context": null,
               "code": "cy.get('input[name=\"password\"]').type(\"SomePassword1\");\ncy.get('button[type=\"submit\"]').click();\n// HARD: form validation should block submission\ncy.contains(/email|required|enter/i).should(\"be.visible\");\ncy.url().should(\"include\", \"/login\");",
               "err": {},
-              "uuid": "5412fb5e-f757-4182-b0a0-92ddecd952fc",
-              "parentUUID": "5f3223be-d20d-4e5d-8bab-10aac3aa3043",
+              "uuid": "eb90792a-0d9d-4706-a7a6-2439fdf9ced0",
+              "parentUUID": "d7cd113a-f657-4b44-a55c-24c1b432d398",
               "isHook": false,
               "skipped": false
             },
@@ -342,7 +338,7 @@
               "title": "N3 | Empty password field → validation error before API call",
               "fullTitle": "Auth — Login N3 | Empty password field → validation error before API call",
               "timedOut": null,
-              "duration": 1046,
+              "duration": 921,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -351,8 +347,8 @@
               "context": null,
               "code": "cy.get('input[name=\"identifier\"]').type(Cypress.env(\"TEST_EMAIL\"));\ncy.get('button[type=\"submit\"]').click();\n// HARD\ncy.contains(/password|required/i).should(\"be.visible\");\ncy.url().should(\"include\", \"/login\");",
               "err": {},
-              "uuid": "baded9fa-715e-42c1-b2fc-eacc2932056e",
-              "parentUUID": "5f3223be-d20d-4e5d-8bab-10aac3aa3043",
+              "uuid": "57456fd0-b5e8-4a5d-a445-e3db9261cbf7",
+              "parentUUID": "d7cd113a-f657-4b44-a55c-24c1b432d398",
               "isHook": false,
               "skipped": false
             },
@@ -360,7 +356,7 @@
               "title": "N4 | Submit button disabled while login request is in-flight (no double submit)",
               "fullTitle": "Auth — Login N4 | Submit button disabled while login request is in-flight (no double submit)",
               "timedOut": null,
-              "duration": 3834,
+              "duration": 1227,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -369,8 +365,8 @@
               "context": null,
               "code": "cy.get('input[name=\"identifier\"]').type(Cypress.env(\"TEST_EMAIL\"));\ncy.get('input[name=\"password\"]').type(Cypress.env(\"TEST_PASSWORD\"));\ncy.intercept(\"POST\", \"**/auth/login\").as(\"loginRequest\");\ncy.get('button[type=\"submit\"]').click();\n// HARD: button must be disabled or show loading state during the request\ncy.get('button[type=\"submit\"]').should(\"be.disabled\");\ncy.wait(\"@loginRequest\");",
               "err": {},
-              "uuid": "42d7dcdf-3a35-4a5b-ae40-18d18f54d9f0",
-              "parentUUID": "5f3223be-d20d-4e5d-8bab-10aac3aa3043",
+              "uuid": "8f31f0ca-07ed-420d-a11d-448b766ebb28",
+              "parentUUID": "d7cd113a-f657-4b44-a55c-24c1b432d398",
               "isHook": false,
               "skipped": false
             },
@@ -378,7 +374,7 @@
               "title": "N5 | Network error during login → graceful error shown",
               "fullTitle": "Auth — Login N5 | Network error during login → graceful error shown",
               "timedOut": null,
-              "duration": 1422,
+              "duration": 1329,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -387,8 +383,8 @@
               "context": null,
               "code": "cy.intercept(\"POST\", \"**/auth/login\", { forceNetworkError: true }).as(\"loginFail\");\ncy.get('input[name=\"identifier\"]').type(Cypress.env(\"TEST_EMAIL\"));\ncy.get('input[name=\"password\"]').type(Cypress.env(\"TEST_PASSWORD\"));\ncy.get('button[type=\"submit\"]').click();\ncy.wait(\"@loginFail\");\n// HARD: error message should appear — no crash/blank page\ncy.softAssert(() => {\n    cy.contains(/error|failed|try again|problem/i, { timeout: 8000 }).should(\"be.visible\");\n}, \"Error message on network failure\");\n// HARD: still on login page\ncy.url().should(\"include\", \"/login\");\ncy.assertAll();",
               "err": {},
-              "uuid": "34195479-f943-4cb7-92e3-dbef9895cefe",
-              "parentUUID": "5f3223be-d20d-4e5d-8bab-10aac3aa3043",
+              "uuid": "1822eaea-5630-4eba-a14f-4784f516fe46",
+              "parentUUID": "d7cd113a-f657-4b44-a55c-24c1b432d398",
               "isHook": false,
               "skipped": false
             },
@@ -396,7 +392,7 @@
               "title": "N6 | Suspended account → persistent banner shown (not just toast)",
               "fullTitle": "Auth — Login N6 | Suspended account → persistent banner shown (not just toast)",
               "timedOut": null,
-              "duration": 1192,
+              "duration": 1204,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -405,8 +401,8 @@
               "context": null,
               "code": "cy.intercept(\"POST\", \"**/auth/login\", {\n    statusCode: 403,\n    body: {\n        success: false,\n        code: \"ACCOUNT_SUSPENDED\",\n        message: \"Your account has been suspended. Please contact support.\",\n    },\n}).as(\"suspendedLogin\");\ncy.get('input[name=\"identifier\"]').type(\"suspended@test.com\");\ncy.get('input[name=\"password\"]').type(\"AnyPass123\");\ncy.get('button[type=\"submit\"]').click();\ncy.wait(\"@suspendedLogin\");\n// HARD: must show a visible, persistent suspended banner\ncy.contains(/suspended|contact support/i, { timeout: 8000 }).should(\"be.visible\");\n// SOFT: no toast (per auth-context.tsx design decision)\ncy.softAssert(() => {\n    cy.get('[data-sonner-toast]').should(\"not.exist\");\n}, \"No auto-dismiss toast for suspended account\");\ncy.assertAll();",
               "err": {},
-              "uuid": "768dd8b3-f1aa-4bd5-9aac-9616c4661c82",
-              "parentUUID": "5f3223be-d20d-4e5d-8bab-10aac3aa3043",
+              "uuid": "66f9f9c2-5a68-4453-910c-5fff693bc3ed",
+              "parentUUID": "d7cd113a-f657-4b44-a55c-24c1b432d398",
               "isHook": false,
               "skipped": false
             },
@@ -414,7 +410,7 @@
               "title": "N7 | Open redirect — returnTo with external URL → fallback to /overview",
               "fullTitle": "Auth — Login N7 | Open redirect — returnTo with external URL → fallback to /overview",
               "timedOut": null,
-              "duration": 865,
+              "duration": 962,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -423,8 +419,8 @@
               "context": null,
               "code": "cy.login();\ncy.visit(\"/login?returnTo=https://evil.com\");\n// HARD: middleware safeReturnTo must reject the external URL\ncy.url({ timeout: 10000 }).should(\"include\", \"/overview\");\ncy.url().should(\"not.include\", \"evil.com\");",
               "err": {},
-              "uuid": "d765bb86-5ff2-4ff0-9409-d1021e068cfc",
-              "parentUUID": "5f3223be-d20d-4e5d-8bab-10aac3aa3043",
+              "uuid": "f868eb35-f3b4-4ef2-ae4c-d651293a0292",
+              "parentUUID": "d7cd113a-f657-4b44-a55c-24c1b432d398",
               "isHook": false,
               "skipped": false
             },
@@ -432,7 +428,7 @@
               "title": "N8 | Open redirect — returnTo with protocol-relative URL → fallback to /overview",
               "fullTitle": "Auth — Login N8 | Open redirect — returnTo with protocol-relative URL → fallback to /overview",
               "timedOut": null,
-              "duration": 784,
+              "duration": 790,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -441,32 +437,31 @@
               "context": null,
               "code": "cy.login();\ncy.visit(\"/login?returnTo=//evil.com\");\ncy.url({ timeout: 10000 }).should(\"include\", \"/overview\");\ncy.url().should(\"not.include\", \"evil.com\");",
               "err": {},
-              "uuid": "5b90b194-c31c-40c1-9150-da21a94ed921",
-              "parentUUID": "5f3223be-d20d-4e5d-8bab-10aac3aa3043",
+              "uuid": "d4ed3b2b-6955-404c-84f3-21947439cf9a",
+              "parentUUID": "d7cd113a-f657-4b44-a55c-24c1b432d398",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "3d83c6c2-bd1a-4c93-9ee3-209c325d9d14",
-            "763148d3-bf4a-40f2-bf2b-76802ec18eb2",
-            "fd4bd751-228f-417f-baaf-575b133b3fbb",
-            "d173f95c-04e8-462f-90b4-5fce14c7fa4a",
-            "5412fb5e-f757-4182-b0a0-92ddecd952fc",
-            "baded9fa-715e-42c1-b2fc-eacc2932056e",
-            "42d7dcdf-3a35-4a5b-ae40-18d18f54d9f0",
-            "34195479-f943-4cb7-92e3-dbef9895cefe",
-            "768dd8b3-f1aa-4bd5-9aac-9616c4661c82",
-            "d765bb86-5ff2-4ff0-9409-d1021e068cfc",
-            "5b90b194-c31c-40c1-9150-da21a94ed921"
+            "2e6b6fa6-1d7a-41cb-b275-d974aaf7fe98",
+            "27f54521-d779-48d3-8ae4-87c0233f1080",
+            "bc49bd24-b64d-4885-9343-f4a15fafbe56",
+            "6bde85f7-f510-40d8-8bf6-efa51fe699cf",
+            "0c0d91cc-dc90-4572-97e2-7a7b7e75d14b",
+            "eb90792a-0d9d-4706-a7a6-2439fdf9ced0",
+            "57456fd0-b5e8-4a5d-a445-e3db9261cbf7",
+            "8f31f0ca-07ed-420d-a11d-448b766ebb28",
+            "1822eaea-5630-4eba-a14f-4784f516fe46",
+            "66f9f9c2-5a68-4453-910c-5fff693bc3ed",
+            "f868eb35-f3b4-4ef2-ae4c-d651293a0292",
+            "d4ed3b2b-6955-404c-84f3-21947439cf9a"
           ],
-          "failures": [
-            "78f991b4-adb3-422f-ae44-9cc21da385e0"
-          ],
+          "failures": [],
           "pending": [],
           "skipped": [],
-          "duration": 124863,
+          "duration": 82003,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
@@ -482,7 +477,7 @@
       "_timeout": 2000
     },
     {
-      "uuid": "4bcbbdc0-b663-422d-92f7-1589b2b2addc",
+      "uuid": "b3dfe6a1-c07c-4877-b37c-dda650c3cd3b",
       "title": "",
       "fullFile": "cypress/e2e/auth/logout.cy.ts",
       "file": "cypress/e2e/auth/logout.cy.ts",
@@ -491,7 +486,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "bfba5e66-0d50-4476-aaf6-75a8e4b0f7d2",
+          "uuid": "40aff099-8b3b-47fd-9513-5163b2cd1f30",
           "title": "Auth — Logout",
           "fullFile": "",
           "file": "",
@@ -502,7 +497,7 @@
               "title": "P1 | Logout clears nepay_refresh cookie",
               "fullTitle": "Auth — Logout P1 | Logout clears nepay_refresh cookie",
               "timedOut": null,
-              "duration": 835,
+              "duration": 632,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -515,8 +510,8 @@
                 "estack": "CypressError: `cy.click()` can only be called on a single element. Your subject contained 2 elements. Pass `{ multiple: true }` if you want to serially click each element.\n\nhttps://on.cypress.io/click\n    at mouseAction (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135434:76)\n    at Context.click (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135612:14)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at clickLogout (webpack:///./cypress/e2e/auth/logout.cy.ts:5:56)\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:15:0)",
                 "diff": null
               },
-              "uuid": "cd309367-aaae-4ffa-9225-e5f26eb8bc43",
-              "parentUUID": "bfba5e66-0d50-4476-aaf6-75a8e4b0f7d2",
+              "uuid": "717a9aee-9fce-4832-ae7f-eddcb1037791",
+              "parentUUID": "40aff099-8b3b-47fd-9513-5163b2cd1f30",
               "isHook": false,
               "skipped": false
             },
@@ -524,7 +519,7 @@
               "title": "P2 | Logout redirects to /login",
               "fullTitle": "Auth — Logout P2 | Logout redirects to /login",
               "timedOut": null,
-              "duration": 694,
+              "duration": 614,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -537,8 +532,8 @@
                 "estack": "CypressError: `cy.click()` can only be called on a single element. Your subject contained 2 elements. Pass `{ multiple: true }` if you want to serially click each element.\n\nhttps://on.cypress.io/click\n    at mouseAction (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135434:76)\n    at Context.click (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135612:14)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at clickLogout (webpack:///./cypress/e2e/auth/logout.cy.ts:5:56)\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:20:0)",
                 "diff": null
               },
-              "uuid": "255d84b5-1af7-4212-8245-0f037738829b",
-              "parentUUID": "bfba5e66-0d50-4476-aaf6-75a8e4b0f7d2",
+              "uuid": "d6699ea5-0eb7-459a-91d4-caad1087f32c",
+              "parentUUID": "40aff099-8b3b-47fd-9513-5163b2cd1f30",
               "isHook": false,
               "skipped": false
             },
@@ -546,7 +541,7 @@
               "title": "P3 | Signed out toast is shown",
               "fullTitle": "Auth — Logout P3 | Signed out toast is shown",
               "timedOut": null,
-              "duration": 741,
+              "duration": 729,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -559,8 +554,8 @@
                 "estack": "CypressError: `cy.click()` can only be called on a single element. Your subject contained 2 elements. Pass `{ multiple: true }` if you want to serially click each element.\n\nhttps://on.cypress.io/click\n    at mouseAction (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135434:76)\n    at Context.click (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135612:14)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at clickLogout (webpack:///./cypress/e2e/auth/logout.cy.ts:5:56)\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:25:0)",
                 "diff": null
               },
-              "uuid": "627b2c12-7acf-4321-a207-0bbab237d38f",
-              "parentUUID": "bfba5e66-0d50-4476-aaf6-75a8e4b0f7d2",
+              "uuid": "2e5d9175-48ff-4ac2-9bad-6d6683ecdba9",
+              "parentUUID": "40aff099-8b3b-47fd-9513-5163b2cd1f30",
               "isHook": false,
               "skipped": false
             },
@@ -568,7 +563,7 @@
               "title": "P4 | localStorage is cleared after logout",
               "fullTitle": "Auth — Logout P4 | localStorage is cleared after logout",
               "timedOut": null,
-              "duration": 917,
+              "duration": 955,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -581,8 +576,8 @@
                 "estack": "CypressError: `cy.click()` can only be called on a single element. Your subject contained 2 elements. Pass `{ multiple: true }` if you want to serially click each element.\n\nhttps://on.cypress.io/click\n    at mouseAction (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135434:76)\n    at Context.click (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135612:14)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at clickLogout (webpack:///./cypress/e2e/auth/logout.cy.ts:5:56)\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:33:0)",
                 "diff": null
               },
-              "uuid": "f9ef5a28-5e5b-42e7-b162-30188b3f4e21",
-              "parentUUID": "bfba5e66-0d50-4476-aaf6-75a8e4b0f7d2",
+              "uuid": "1781ff95-0a93-45d7-90db-988f23c5fe9f",
+              "parentUUID": "40aff099-8b3b-47fd-9513-5163b2cd1f30",
               "isHook": false,
               "skipped": false
             },
@@ -590,7 +585,7 @@
               "title": "N1 | After logout, browser back to protected route → redirected to /login",
               "fullTitle": "Auth — Logout N1 | After logout, browser back to protected route → redirected to /login",
               "timedOut": null,
-              "duration": 791,
+              "duration": 858,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -603,8 +598,8 @@
                 "estack": "CypressError: `cy.click()` can only be called on a single element. Your subject contained 2 elements. Pass `{ multiple: true }` if you want to serially click each element.\n\nhttps://on.cypress.io/click\n    at mouseAction (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135434:76)\n    at Context.click (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135612:14)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at clickLogout (webpack:///./cypress/e2e/auth/logout.cy.ts:5:56)\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:41:0)",
                 "diff": null
               },
-              "uuid": "f25a10e9-4f3e-4e29-b137-e0bcc8e19b32",
-              "parentUUID": "bfba5e66-0d50-4476-aaf6-75a8e4b0f7d2",
+              "uuid": "35f6682c-a3c0-4594-b655-298c079c02bd",
+              "parentUUID": "40aff099-8b3b-47fd-9513-5163b2cd1f30",
               "isHook": false,
               "skipped": false
             },
@@ -612,7 +607,7 @@
               "title": "N2 | Logout when API fails → still clears state and redirects",
               "fullTitle": "Auth — Logout N2 | Logout when API fails → still clears state and redirects",
               "timedOut": null,
-              "duration": 829,
+              "duration": 809,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -625,8 +620,8 @@
                 "estack": "CypressError: `cy.click()` can only be called on a single element. Your subject contained 2 elements. Pass `{ multiple: true }` if you want to serially click each element.\n\nhttps://on.cypress.io/click\n    at mouseAction (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135434:76)\n    at Context.click (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135612:14)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at clickLogout (webpack:///./cypress/e2e/auth/logout.cy.ts:5:56)\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:49:0)",
                 "diff": null
               },
-              "uuid": "e39764df-f2cd-434d-835f-4e200d1f5ef2",
-              "parentUUID": "bfba5e66-0d50-4476-aaf6-75a8e4b0f7d2",
+              "uuid": "b06964bc-17e8-45c9-b92f-931595177ca0",
+              "parentUUID": "40aff099-8b3b-47fd-9513-5163b2cd1f30",
               "isHook": false,
               "skipped": false
             }
@@ -634,16 +629,16 @@
           "suites": [],
           "passes": [],
           "failures": [
-            "cd309367-aaae-4ffa-9225-e5f26eb8bc43",
-            "255d84b5-1af7-4212-8245-0f037738829b",
-            "627b2c12-7acf-4321-a207-0bbab237d38f",
-            "f9ef5a28-5e5b-42e7-b162-30188b3f4e21",
-            "f25a10e9-4f3e-4e29-b137-e0bcc8e19b32",
-            "e39764df-f2cd-434d-835f-4e200d1f5ef2"
+            "717a9aee-9fce-4832-ae7f-eddcb1037791",
+            "d6699ea5-0eb7-459a-91d4-caad1087f32c",
+            "2e5d9175-48ff-4ac2-9bad-6d6683ecdba9",
+            "1781ff95-0a93-45d7-90db-988f23c5fe9f",
+            "35f6682c-a3c0-4594-b655-298c079c02bd",
+            "b06964bc-17e8-45c9-b92f-931595177ca0"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 4807,
+          "duration": 4597,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
@@ -659,7 +654,7 @@
       "_timeout": 2000
     },
     {
-      "uuid": "79cf2b80-f62d-45ad-882e-c439601d9548",
+      "uuid": "8c382862-1826-49a9-9c8e-eb2db778277c",
       "title": "",
       "fullFile": "cypress/e2e/auth/register.cy.ts",
       "file": "cypress/e2e/auth/register.cy.ts",
@@ -668,7 +663,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "adf3e588-ef34-492c-96e4-62f8ad323275",
+          "uuid": "75903e2c-7256-49cc-9485-088aa40897a9",
           "title": "Auth — Register",
           "fullFile": "",
           "file": "",
@@ -679,7 +674,7 @@
               "title": "P1 | Step 1: Fill name + phone → Step 2 renders",
               "fullTitle": "Auth — Register P1 | Step 1: Fill name + phone → Step 2 renders",
               "timedOut": null,
-              "duration": 1553,
+              "duration": 1669,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -688,8 +683,8 @@
               "context": null,
               "code": "cy.contains(\"Next\").click(); // try to proceed with empty fields first\n// HARD: Step 1 validation blocks\ncy.contains(/first name|required/i).should(\"be.visible\");\n// Now fill valid data\ncy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\n// HARD: must advance to Step 2\ncy.contains(/email|username|password/i, { timeout: 5000 }).should(\"be.visible\");",
               "err": {},
-              "uuid": "264264aa-3621-4d06-a05d-f0a691315d52",
-              "parentUUID": "adf3e588-ef34-492c-96e4-62f8ad323275",
+              "uuid": "e6b6e415-1128-4ae1-99fb-b618b43cf383",
+              "parentUUID": "75903e2c-7256-49cc-9485-088aa40897a9",
               "isHook": false,
               "skipped": false
             },
@@ -697,7 +692,7 @@
               "title": "P2 | hearAboutUs = OTHER → 'Please specify' field appears",
               "fullTitle": "Auth — Register P2 | hearAboutUs = OTHER → 'Please specify' field appears",
               "timedOut": null,
-              "duration": 31869,
+              "duration": 31904,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -710,8 +705,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input[name=\"hearAboutUsOther\"]`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/auth/register.cy.ts:33:0)",
                 "diff": null
               },
-              "uuid": "c04fa75d-fb03-4ed5-8bdf-66229b59cc01",
-              "parentUUID": "adf3e588-ef34-492c-96e4-62f8ad323275",
+              "uuid": "ef979231-278d-45b0-bb24-b677184ab0c3",
+              "parentUUID": "75903e2c-7256-49cc-9485-088aa40897a9",
               "isHook": false,
               "skipped": false
             },
@@ -719,7 +714,7 @@
               "title": "P3 | Show/hide password toggle works",
               "fullTitle": "Auth — Register P3 | Show/hide password toggle works",
               "timedOut": null,
-              "duration": 1362,
+              "duration": 1360,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -728,8 +723,8 @@
               "context": null,
               "code": "cy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\ncy.get('input[name=\"password\"]').should(\"have.attr\", \"type\", \"password\");\n// SOFT: toggle exists and switches type (button identified by aria-label)\ncy.softAssert(() => {\n    cy.get('button[aria-label=\"Show password\"]').first().click();\n    cy.get('input[name=\"password\"]').should(\"have.attr\", \"type\", \"text\");\n}, \"Password show/hide toggle\");\ncy.assertAll();",
               "err": {},
-              "uuid": "ccd33a05-69e4-4104-9b06-ddd27500d8f9",
-              "parentUUID": "adf3e588-ef34-492c-96e4-62f8ad323275",
+              "uuid": "6ab0a11d-400b-4bb9-ac8f-5ac2291e7688",
+              "parentUUID": "75903e2c-7256-49cc-9485-088aa40897a9",
               "isHook": false,
               "skipped": false
             },
@@ -737,7 +732,7 @@
               "title": "P4 | Password strength meter updates as user types",
               "fullTitle": "Auth — Register P4 | Password strength meter updates as user types",
               "timedOut": null,
-              "duration": 1693,
+              "duration": 1716,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -746,8 +741,8 @@
               "context": null,
               "code": "cy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\n// SOFT: strength bar row renders when password is typed\n// The meter is 4 sibling divs inside a flex row after the password input\ncy.softAssert(() => {\n    cy.get('#reg-password').type(\"weak\");\n    // The strength bar container sits right after the password input in the DOM\n    cy.get('#reg-password').parent().find('div.flex.h-1').should(\"exist\");\n}, \"Password strength meter visible\");\ncy.softAssert(() => {\n    cy.get('#reg-password').clear().type(\"StrongPass123!\");\n    cy.get('#reg-password').parent().find('div.flex.h-1').should(\"exist\");\n}, \"Password strength meter updates\");\ncy.assertAll();",
               "err": {},
-              "uuid": "ab8bdc57-610a-4a54-835a-4f6607aee4fc",
-              "parentUUID": "adf3e588-ef34-492c-96e4-62f8ad323275",
+              "uuid": "d5e67619-f7c4-4c96-a458-5c47a3076b86",
+              "parentUUID": "75903e2c-7256-49cc-9485-088aa40897a9",
               "isHook": false,
               "skipped": false
             },
@@ -755,7 +750,7 @@
               "title": "N1 | Password < 6 chars → validation error",
               "fullTitle": "Auth — Register N1 | Password < 6 chars → validation error",
               "timedOut": null,
-              "duration": 2303,
+              "duration": 2355,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -764,8 +759,8 @@
               "context": null,
               "code": "cy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\ncy.get('input[name=\"username\"]').type(\"testuser123\");\ncy.get('input[name=\"email\"]').type(\"test@example.com\");\ncy.get('input[name=\"password\"]').type(\"abc\");\ncy.get('input[name=\"confirmPassword\"]').type(\"abc\");\ncy.contains(\"Create Account\").click();\n// HARD\ncy.contains(/at least 6 characters/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "79775cc6-5a23-4663-a0aa-05cad29a8c3b",
-              "parentUUID": "adf3e588-ef34-492c-96e4-62f8ad323275",
+              "uuid": "c95b4b05-ed72-491a-8527-15a25e3aaaa0",
+              "parentUUID": "75903e2c-7256-49cc-9485-088aa40897a9",
               "isHook": false,
               "skipped": false
             },
@@ -773,7 +768,7 @@
               "title": "N2 | Passwords do not match → confirm password error",
               "fullTitle": "Auth — Register N2 | Passwords do not match → confirm password error",
               "timedOut": null,
-              "duration": 1917,
+              "duration": 1815,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -782,8 +777,8 @@
               "context": null,
               "code": "cy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\ncy.get('input[name=\"password\"]').type(\"ValidPass1\");\ncy.get('input[name=\"confirmPassword\"]').type(\"DifferentPass1\");\ncy.contains(\"Create Account\").click();\n// HARD\ncy.contains(/passwords do not match/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "94fe0c24-d51b-4926-98c1-80a76678323b",
-              "parentUUID": "adf3e588-ef34-492c-96e4-62f8ad323275",
+              "uuid": "007020c7-83c9-47cf-83a2-719d2dffce2f",
+              "parentUUID": "75903e2c-7256-49cc-9485-088aa40897a9",
               "isHook": false,
               "skipped": false
             },
@@ -791,7 +786,7 @@
               "title": "N3 | Username with spaces → validation error",
               "fullTitle": "Auth — Register N3 | Username with spaces → validation error",
               "timedOut": null,
-              "duration": 1635,
+              "duration": 1619,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -800,8 +795,8 @@
               "context": null,
               "code": "cy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\ncy.get('input[name=\"username\"]').type(\"invalid username\");\ncy.contains(\"Create Account\").click();\n// HARD\ncy.contains(/letters, numbers and underscores/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "7fde8520-19ee-47df-b5c8-7dfda552091a",
-              "parentUUID": "adf3e588-ef34-492c-96e4-62f8ad323275",
+              "uuid": "485b39d5-6b32-4656-9f05-52415cda8bd5",
+              "parentUUID": "75903e2c-7256-49cc-9485-088aa40897a9",
               "isHook": false,
               "skipped": false
             },
@@ -809,7 +804,7 @@
               "title": "N4 | Invalid Nigerian phone format → validation error",
               "fullTitle": "Auth — Register N4 | Invalid Nigerian phone format → validation error",
               "timedOut": null,
-              "duration": 1107,
+              "duration": 1094,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -818,8 +813,8 @@
               "context": null,
               "code": "cy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"12345\");\ncy.contains(\"Next\").click();\n// HARD: must not advance\ncy.contains(/valid Nigerian phone/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "541100af-cd80-42d8-a207-81121c708d10",
-              "parentUUID": "adf3e588-ef34-492c-96e4-62f8ad323275",
+              "uuid": "977c6b25-2378-46b2-8a0d-221e9cf413b7",
+              "parentUUID": "75903e2c-7256-49cc-9485-088aa40897a9",
               "isHook": false,
               "skipped": false
             },
@@ -827,7 +822,7 @@
               "title": "N5 | hearAboutUs = OTHER + empty 'Please specify' → error on submit",
               "fullTitle": "Auth — Register N5 | hearAboutUs = OTHER + empty 'Please specify' → error on submit",
               "timedOut": null,
-              "duration": 2819,
+              "duration": 2881,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -836,8 +831,8 @@
               "context": null,
               "code": "cy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\ncy.get('input[name=\"username\"]').type(\"testuser9999\");\ncy.get('input[name=\"email\"]').type(\"testuser9999@example.com\");\ncy.get('input[name=\"password\"]').type(\"ValidPass1\");\ncy.get('input[name=\"confirmPassword\"]').type(\"ValidPass1\");\n// Radix UI Select\ncy.get('#reg-hear').click();\ncy.contains(\"Other (Please specify)\", { timeout: 5000 }).click({ force: true });\n// Leave hearAboutUsOther empty intentionally\ncy.contains(\"Create Account\").click();\n// HARD\ncy.contains(/please specify/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "32a62e19-d2c4-44db-864e-8efa12e8c7ee",
-              "parentUUID": "adf3e588-ef34-492c-96e4-62f8ad323275",
+              "uuid": "cc1f9811-9894-40b7-99be-7ab2b42786cc",
+              "parentUUID": "75903e2c-7256-49cc-9485-088aa40897a9",
               "isHook": false,
               "skipped": false
             },
@@ -845,7 +840,7 @@
               "title": "N6 | Terms checkbox not checked → submit blocked",
               "fullTitle": "Auth — Register N6 | Terms checkbox not checked → submit blocked",
               "timedOut": null,
-              "duration": 2464,
+              "duration": 2564,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -854,8 +849,8 @@
               "context": null,
               "code": "cy.get('input[name=\"firstName\"]').type(\"Test\");\ncy.get('input[name=\"lastName\"]').type(\"User\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\ncy.get('input[name=\"username\"]').type(\"testuser9988\");\ncy.get('input[name=\"email\"]').type(\"test9988@example.com\");\ncy.get('input[name=\"password\"]').type(\"ValidPass1\");\ncy.get('input[name=\"confirmPassword\"]').type(\"ValidPass1\");\n// Do NOT check terms\ncy.contains(\"Create Account\").click();\n// HARD: should not call the API — stay on register page\ncy.url().should(\"include\", \"/register\");",
               "err": {},
-              "uuid": "7e9f259e-6913-49cf-8d25-c922f75c199e",
-              "parentUUID": "adf3e588-ef34-492c-96e4-62f8ad323275",
+              "uuid": "0c0ef0b6-b3ed-4eaa-9182-67db05f05d33",
+              "parentUUID": "75903e2c-7256-49cc-9485-088aa40897a9",
               "isHook": false,
               "skipped": false
             },
@@ -863,7 +858,7 @@
               "title": "N7 | Back button on Step 2 → returns to Step 1 with data intact",
               "fullTitle": "Auth — Register N7 | Back button on Step 2 → returns to Step 1 with data intact",
               "timedOut": null,
-              "duration": 1260,
+              "duration": 1297,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -872,31 +867,31 @@
               "context": null,
               "code": "cy.get('input[name=\"firstName\"]').type(\"Dubem\");\ncy.get('input[name=\"lastName\"]').type(\"Test\");\ncy.get('input[name=\"phone\"]').type(\"08012345678\");\ncy.contains(\"Next\").click();\n// Go back\ncy.contains(\"Back\").click();\n// SOFT: Step 1 data should be retained\ncy.softAssert(() => {\n    cy.get('input[name=\"firstName\"]').should(\"have.value\", \"Dubem\");\n}, \"First name retained on back navigation\");\ncy.softAssert(() => {\n    cy.get('input[name=\"phone\"]').should(\"have.value\", \"08012345678\");\n}, \"Phone retained on back navigation\");\ncy.assertAll();",
               "err": {},
-              "uuid": "4a7f6e16-34f1-4f29-a5d0-7943c618f587",
-              "parentUUID": "adf3e588-ef34-492c-96e4-62f8ad323275",
+              "uuid": "9d74c2d1-e8a2-4bee-af0e-2f18c58af01c",
+              "parentUUID": "75903e2c-7256-49cc-9485-088aa40897a9",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "264264aa-3621-4d06-a05d-f0a691315d52",
-            "ccd33a05-69e4-4104-9b06-ddd27500d8f9",
-            "ab8bdc57-610a-4a54-835a-4f6607aee4fc",
-            "79775cc6-5a23-4663-a0aa-05cad29a8c3b",
-            "94fe0c24-d51b-4926-98c1-80a76678323b",
-            "7fde8520-19ee-47df-b5c8-7dfda552091a",
-            "541100af-cd80-42d8-a207-81121c708d10",
-            "32a62e19-d2c4-44db-864e-8efa12e8c7ee",
-            "7e9f259e-6913-49cf-8d25-c922f75c199e",
-            "4a7f6e16-34f1-4f29-a5d0-7943c618f587"
+            "e6b6e415-1128-4ae1-99fb-b618b43cf383",
+            "6ab0a11d-400b-4bb9-ac8f-5ac2291e7688",
+            "d5e67619-f7c4-4c96-a458-5c47a3076b86",
+            "c95b4b05-ed72-491a-8527-15a25e3aaaa0",
+            "007020c7-83c9-47cf-83a2-719d2dffce2f",
+            "485b39d5-6b32-4656-9f05-52415cda8bd5",
+            "977c6b25-2378-46b2-8a0d-221e9cf413b7",
+            "cc1f9811-9894-40b7-99be-7ab2b42786cc",
+            "0c0ef0b6-b3ed-4eaa-9182-67db05f05d33",
+            "9d74c2d1-e8a2-4bee-af0e-2f18c58af01c"
           ],
           "failures": [
-            "c04fa75d-fb03-4ed5-8bdf-66229b59cc01"
+            "ef979231-278d-45b0-bb24-b677184ab0c3"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 49982,
+          "duration": 50274,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
@@ -912,7 +907,7 @@
       "_timeout": 2000
     },
     {
-      "uuid": "02362239-63f1-4e87-8cb7-ea2cee0cd52e",
+      "uuid": "9faa7cf7-b1ee-464f-93bb-4d2de2884d34",
       "title": "",
       "fullFile": "cypress/e2e/dashboard/overview.cy.ts",
       "file": "cypress/e2e/dashboard/overview.cy.ts",
@@ -921,7 +916,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "de372072-eec9-47a8-a587-051476933ef1",
+          "uuid": "abc0ab1b-e0f3-4661-9c04-18a4bce61c42",
           "title": "Dashboard — Overview",
           "fullFile": "",
           "file": "",
@@ -932,7 +927,7 @@
               "title": "P1 | Dashboard loads — wallet balance card visible with formatted value",
               "fullTitle": "Dashboard — Overview P1 | Dashboard loads — wallet balance card visible with formatted value",
               "timedOut": null,
-              "duration": 831,
+              "duration": 822,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -941,8 +936,8 @@
               "context": null,
               "code": "// SOFT: balance card exists\ncy.softAssert(() => {\n    cy.contains(/₦|balance/i, { timeout: 10000 }).should(\"be.visible\");\n}, \"Wallet balance visible\");\ncy.assertAll();",
               "err": {},
-              "uuid": "ab04a2bb-ff0d-4a62-84ec-9a13918ec4c2",
-              "parentUUID": "de372072-eec9-47a8-a587-051476933ef1",
+              "uuid": "25def78f-9ba7-40cb-ba9d-83e0a3600ab7",
+              "parentUUID": "abc0ab1b-e0f3-4661-9c04-18a4bce61c42",
               "isHook": false,
               "skipped": false
             },
@@ -950,7 +945,7 @@
               "title": "P2 | Recent transactions list renders",
               "fullTitle": "Dashboard — Overview P2 | Recent transactions list renders",
               "timedOut": null,
-              "duration": 533,
+              "duration": 356,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -959,8 +954,8 @@
               "context": null,
               "code": "// SOFT: at least one transaction, or an empty state\ncy.softAssert(() => {\n    cy.get(\"body\").then(($body) => {\n        const hasTransactions = $body.text().match(/transaction|debit|credit|transfer/i);\n        const hasEmptyState = $body.text().match(/no transaction|nothing here/i);\n        expect(hasTransactions || hasEmptyState).to.be.ok;\n    });\n}, \"Transactions list or empty state visible\");\ncy.assertAll();",
               "err": {},
-              "uuid": "e1315b64-861a-49da-9f31-4ebfe6e5e929",
-              "parentUUID": "de372072-eec9-47a8-a587-051476933ef1",
+              "uuid": "9c0493f5-8e49-4d93-9ee7-e54377f4c091",
+              "parentUUID": "abc0ab1b-e0f3-4661-9c04-18a4bce61c42",
               "isHook": false,
               "skipped": false
             },
@@ -968,7 +963,7 @@
               "title": "P3 | Quick action buttons visible on dashboard",
               "fullTitle": "Dashboard — Overview P3 | Quick action buttons visible on dashboard",
               "timedOut": null,
-              "duration": 8495,
+              "duration": 8556,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -981,8 +976,8 @@
                 "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: 'Add Money' but never did.\n    at eval (webpack:///./cypress/e2e/dashboard/overview.cy.ts:34:53)\n    at Context.eval (webpack:///./cypress/support/commands.ts:64:0)",
                 "diff": null
               },
-              "uuid": "1f9641ac-e1a6-488e-89fe-9875100d83c5",
-              "parentUUID": "de372072-eec9-47a8-a587-051476933ef1",
+              "uuid": "01b72951-cb55-42c5-bedd-59de89b8ba5c",
+              "parentUUID": "abc0ab1b-e0f3-4661-9c04-18a4bce61c42",
               "isHook": false,
               "skipped": false
             },
@@ -990,7 +985,7 @@
               "title": "P4 | Sidebar navigation links are all present",
               "fullTitle": "Dashboard — Overview P4 | Sidebar navigation links are all present",
               "timedOut": null,
-              "duration": 341,
+              "duration": 352,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -999,8 +994,8 @@
               "context": null,
               "code": "const navItems = [\"Overview\", \"Transactions\", \"Transfer to bank\", \"Bills & services\"];\nnavItems.forEach((item) => {\n    cy.softAssert(() => {\n        cy.contains(item, { timeout: 8000 }).should(\"exist\");\n    }, `Sidebar nav item: ${item}`);\n});\ncy.assertAll();",
               "err": {},
-              "uuid": "b054663b-e178-404d-ba94-1f0a94650c31",
-              "parentUUID": "de372072-eec9-47a8-a587-051476933ef1",
+              "uuid": "1af4d84e-2f8e-4633-ba25-b70746455086",
+              "parentUUID": "abc0ab1b-e0f3-4661-9c04-18a4bce61c42",
               "isHook": false,
               "skipped": false
             },
@@ -1008,7 +1003,7 @@
               "title": "P5 | Clicking Transfer in sidebar navigates to /transfer",
               "fullTitle": "Dashboard — Overview P5 | Clicking Transfer in sidebar navigates to /transfer",
               "timedOut": null,
-              "duration": 799,
+              "duration": 863,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1017,8 +1012,8 @@
               "context": null,
               "code": "cy.contains(\"Transfer to bank\", { timeout: 8000 }).first().click();\n// HARD\ncy.url({ timeout: 10000 }).should(\"include\", \"/transfer\");",
               "err": {},
-              "uuid": "af0d9327-1e14-4d23-910c-ad49cddeb920",
-              "parentUUID": "de372072-eec9-47a8-a587-051476933ef1",
+              "uuid": "118644b5-cc67-4f3c-9416-aadc3a9bd08e",
+              "parentUUID": "abc0ab1b-e0f3-4661-9c04-18a4bce61c42",
               "isHook": false,
               "skipped": false
             },
@@ -1026,7 +1021,7 @@
               "title": "P6 | Page has no visible error or crash",
               "fullTitle": "Dashboard — Overview P6 | Page has no visible error or crash",
               "timedOut": null,
-              "duration": 393,
+              "duration": 513,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1035,8 +1030,8 @@
               "context": null,
               "code": "// HARD: no error boundary or crash message\ncy.contains(/something went wrong|error occurred|unexpected/i).should(\"not.exist\");\ncy.get(\"body\").should(\"be.visible\");",
               "err": {},
-              "uuid": "c8ce9b0e-ba1e-4605-b159-05d9c7395072",
-              "parentUUID": "de372072-eec9-47a8-a587-051476933ef1",
+              "uuid": "316bb64d-916c-41f2-b2e8-702a85140f64",
+              "parentUUID": "abc0ab1b-e0f3-4661-9c04-18a4bce61c42",
               "isHook": false,
               "skipped": false
             },
@@ -1044,7 +1039,7 @@
               "title": "P7 | Can toggle balance visibility (eye icon)",
               "fullTitle": "Dashboard — Overview P7 | Can toggle balance visibility (eye icon)",
               "timedOut": null,
-              "duration": 30802,
+              "duration": 30804,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -1057,8 +1052,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `button[aria-label=\"Hide balance\"]`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/dashboard/overview.cy.ts:62:0)",
                 "diff": null
               },
-              "uuid": "1bb74ed9-208c-4bf8-8551-659d55e83a85",
-              "parentUUID": "de372072-eec9-47a8-a587-051476933ef1",
+              "uuid": "171bf057-070f-49e9-a58f-9df87b0a5f35",
+              "parentUUID": "abc0ab1b-e0f3-4661-9c04-18a4bce61c42",
               "isHook": false,
               "skipped": false
             },
@@ -1066,7 +1061,7 @@
               "title": "N1 | Wallet API error → error state shown, page does not crash",
               "fullTitle": "Dashboard — Overview N1 | Wallet API error → error state shown, page does not crash",
               "timedOut": null,
-              "duration": 9223,
+              "duration": 9318,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -1079,8 +1074,8 @@
                 "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/error|failed|unavailable|try again/i' but never did.\n    at eval (webpack:///./cypress/e2e/dashboard/overview.cy.ts:84:80)\n    at Context.eval (webpack:///./cypress/support/commands.ts:64:0)",
                 "diff": null
               },
-              "uuid": "6ebb7d72-a667-4283-b91f-2ac1354eb813",
-              "parentUUID": "de372072-eec9-47a8-a587-051476933ef1",
+              "uuid": "321e3bf7-c187-45d0-93f5-bfe1197e059a",
+              "parentUUID": "abc0ab1b-e0f3-4661-9c04-18a4bce61c42",
               "isHook": false,
               "skipped": false
             },
@@ -1088,7 +1083,7 @@
               "title": "N2 | Skeleton loaders shown during slow API response",
               "fullTitle": "Dashboard — Overview N2 | Skeleton loaders shown during slow API response",
               "timedOut": null,
-              "duration": 3293,
+              "duration": 3039,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -1101,29 +1096,29 @@
                 "estack": "AssertionError: Timed out retrying after 2000ms: Expected to find element: `[class*=skeleton], [class*=loading], [data-testid*=skeleton]`, but never found it.\n    at eval (webpack:///./cypress/e2e/dashboard/overview.cy.ts:98:0)\n    at Context.eval (webpack:///./cypress/support/commands.ts:64:0)",
                 "diff": null
               },
-              "uuid": "cdcb9e39-04a7-4313-b3b0-885fe4f91c04",
-              "parentUUID": "de372072-eec9-47a8-a587-051476933ef1",
+              "uuid": "41d401ae-b676-4a17-bdc0-fab0fc464bd6",
+              "parentUUID": "abc0ab1b-e0f3-4661-9c04-18a4bce61c42",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "ab04a2bb-ff0d-4a62-84ec-9a13918ec4c2",
-            "e1315b64-861a-49da-9f31-4ebfe6e5e929",
-            "b054663b-e178-404d-ba94-1f0a94650c31",
-            "af0d9327-1e14-4d23-910c-ad49cddeb920",
-            "c8ce9b0e-ba1e-4605-b159-05d9c7395072"
+            "25def78f-9ba7-40cb-ba9d-83e0a3600ab7",
+            "9c0493f5-8e49-4d93-9ee7-e54377f4c091",
+            "1af4d84e-2f8e-4633-ba25-b70746455086",
+            "118644b5-cc67-4f3c-9416-aadc3a9bd08e",
+            "316bb64d-916c-41f2-b2e8-702a85140f64"
           ],
           "failures": [
-            "1f9641ac-e1a6-488e-89fe-9875100d83c5",
-            "1bb74ed9-208c-4bf8-8551-659d55e83a85",
-            "6ebb7d72-a667-4283-b91f-2ac1354eb813",
-            "cdcb9e39-04a7-4313-b3b0-885fe4f91c04"
+            "01b72951-cb55-42c5-bedd-59de89b8ba5c",
+            "171bf057-070f-49e9-a58f-9df87b0a5f35",
+            "321e3bf7-c187-45d0-93f5-bfe1197e059a",
+            "41d401ae-b676-4a17-bdc0-fab0fc464bd6"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 54710,
+          "duration": 54623,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
@@ -1139,7 +1134,7 @@
       "_timeout": 2000
     },
     {
-      "uuid": "b4427d7e-2066-4406-942d-d7101be2da8c",
+      "uuid": "40cb08c2-4f51-480e-98d9-68abac23919f",
       "title": "",
       "fullFile": "cypress/e2e/gift-cards/gift-cards.cy.ts",
       "file": "cypress/e2e/gift-cards/gift-cards.cy.ts",
@@ -1148,7 +1143,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "ffb7575f-f332-4cca-8de8-271e7d5edbb0",
+          "uuid": "0fb84c00-625f-48d2-8578-9fb8714ca541",
           "title": "Gift Cards",
           "fullFile": "",
           "file": "",
@@ -1159,7 +1154,7 @@
               "title": "P1 | Gift cards page loads with available cards",
               "fullTitle": "Gift Cards P1 | Gift cards page loads with available cards",
               "timedOut": null,
-              "duration": 632,
+              "duration": 841,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1168,8 +1163,8 @@
               "context": null,
               "code": "cy.get(\"body\").should(\"be.visible\");\ncy.softAssert(() => {\n    cy.contains(/gift card|Amazon|iTunes|Google Play/i, { timeout: 10000 }).should(\"be.visible\");\n}, \"Gift cards listed\");\ncy.assertAll();",
               "err": {},
-              "uuid": "7d380353-d1c9-4d29-952a-9704169221b7",
-              "parentUUID": "ffb7575f-f332-4cca-8de8-271e7d5edbb0",
+              "uuid": "8f6eca11-f92c-4b1d-a950-6a00fa1a584b",
+              "parentUUID": "0fb84c00-625f-48d2-8578-9fb8714ca541",
               "isHook": false,
               "skipped": false
             },
@@ -1177,7 +1172,7 @@
               "title": "P2 | History tab navigates to gift card history",
               "fullTitle": "Gift Cards P2 | History tab navigates to gift card history",
               "timedOut": null,
-              "duration": 8425,
+              "duration": 8444,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -1190,8 +1185,8 @@
                 "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find content: '/history/i' but never did.\n    at Context.eval (webpack:///./cypress/e2e/gift-cards/gift-cards.cy.ts:17:0)",
                 "diff": null
               },
-              "uuid": "0659a276-28cd-4b64-80d8-09f614ed8970",
-              "parentUUID": "ffb7575f-f332-4cca-8de8-271e7d5edbb0",
+              "uuid": "9c4eb857-71f6-49e2-acee-a22d01f1dc57",
+              "parentUUID": "0fb84c00-625f-48d2-8578-9fb8714ca541",
               "isHook": false,
               "skipped": false
             },
@@ -1199,7 +1194,7 @@
               "title": "P3 | Sell tab navigates to gift card submission",
               "fullTitle": "Gift Cards P3 | Sell tab navigates to gift card submission",
               "timedOut": null,
-              "duration": 454,
+              "duration": 527,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1208,8 +1203,8 @@
               "context": null,
               "code": "cy.contains(/sell/i, { timeout: 8000 }).click();\ncy.softAssert(() => {\n    cy.contains(/sell|upload|submit/i).should(\"be.visible\");\n}, \"Sell tab content\");\ncy.assertAll();",
               "err": {},
-              "uuid": "1b09f8dc-1f50-4729-93a3-cf05f2ed1dc6",
-              "parentUUID": "ffb7575f-f332-4cca-8de8-271e7d5edbb0",
+              "uuid": "3fe43af7-f521-4bac-8ae3-fa9722326930",
+              "parentUUID": "0fb84c00-625f-48d2-8578-9fb8714ca541",
               "isHook": false,
               "skipped": false
             },
@@ -1217,7 +1212,7 @@
               "title": "N1 | Sell gift card with no image uploaded → validation error",
               "fullTitle": "Gift Cards N1 | Sell gift card with no image uploaded → validation error",
               "timedOut": null,
-              "duration": 30672,
+              "duration": 30700,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -1230,8 +1225,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `button[type=\"submit\"]`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/gift-cards/gift-cards.cy.ts:33:0)",
                 "diff": null
               },
-              "uuid": "dd247c01-9f96-4043-bace-6c068b5ae06e",
-              "parentUUID": "ffb7575f-f332-4cca-8de8-271e7d5edbb0",
+              "uuid": "89ddd373-ffcb-4b46-b8d0-927d369ada35",
+              "parentUUID": "0fb84c00-625f-48d2-8578-9fb8714ca541",
               "isHook": false,
               "skipped": false
             },
@@ -1239,7 +1234,7 @@
               "title": "N2 | Buy with insufficient balance → error shown",
               "fullTitle": "Gift Cards N2 | Buy with insufficient balance → error shown",
               "timedOut": null,
-              "duration": 31619,
+              "duration": 31580,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -1252,8 +1247,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `button[type=\"submit\"]`, but never found it.\n    at eval (webpack:///./cypress/e2e/gift-cards/gift-cards.cy.ts:46:0)\n    at Context.eval (webpack:///./cypress/support/commands.ts:64:0)",
                 "diff": null
               },
-              "uuid": "ea960426-16d8-4474-b920-cca07fd672d7",
-              "parentUUID": "ffb7575f-f332-4cca-8de8-271e7d5edbb0",
+              "uuid": "0b7562b8-2bb6-4a4a-b86d-22771be3d96e",
+              "parentUUID": "0fb84c00-625f-48d2-8578-9fb8714ca541",
               "isHook": false,
               "skipped": false
             },
@@ -1261,7 +1256,7 @@
               "title": "N3 | API error on gift card load → no crash",
               "fullTitle": "Gift Cards N3 | API error on gift card load → no crash",
               "timedOut": null,
-              "duration": 60644,
+              "duration": 60614,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -1274,26 +1269,26 @@
                 "estack": "CypressError: Timed out after waiting `60000ms` for your remote page to load.\n\nYour page did not fire its `load` event within `60000ms`.\n\nYou can try increasing the `pageLoadTimeout` value in `home/runner/work/NePay-frontend/NePay-frontend/apps/web/cypress.config.ts` to wait longer.\n\nBrowsers will not fire the `load` event until all stylesheets and scripts are done downloading.\n\nWhen this `load` event occurs, Cypress will continue running commands.\n    at timedOutWaitingForPageLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141258:72)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141832:16)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6449:41)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9440:18)\n    at _drainQueueStep (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6034:12)\n    at _drainQueue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6027:9)\n    at ../../node_modules/bluebird/js/release/async.js.Async._drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6043:5)\n    at Async.drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:5913:14)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/gift-cards/gift-cards.cy.ts:55:0)",
                 "diff": null
               },
-              "uuid": "91780e5e-8a89-4ad2-aecb-24aaaee75dc9",
-              "parentUUID": "ffb7575f-f332-4cca-8de8-271e7d5edbb0",
+              "uuid": "8ea05fc8-12fb-4fa4-9054-84c5cfdd43a6",
+              "parentUUID": "0fb84c00-625f-48d2-8578-9fb8714ca541",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "7d380353-d1c9-4d29-952a-9704169221b7",
-            "1b09f8dc-1f50-4729-93a3-cf05f2ed1dc6"
+            "8f6eca11-f92c-4b1d-a950-6a00fa1a584b",
+            "3fe43af7-f521-4bac-8ae3-fa9722326930"
           ],
           "failures": [
-            "0659a276-28cd-4b64-80d8-09f614ed8970",
-            "dd247c01-9f96-4043-bace-6c068b5ae06e",
-            "ea960426-16d8-4474-b920-cca07fd672d7",
-            "91780e5e-8a89-4ad2-aecb-24aaaee75dc9"
+            "9c4eb857-71f6-49e2-acee-a22d01f1dc57",
+            "89ddd373-ffcb-4b46-b8d0-927d369ada35",
+            "0b7562b8-2bb6-4a4a-b86d-22771be3d96e",
+            "8ea05fc8-12fb-4fa4-9054-84c5cfdd43a6"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 132446,
+          "duration": 132706,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
@@ -1309,7 +1304,7 @@
       "_timeout": 2000
     },
     {
-      "uuid": "89c0f2c3-5d44-483a-8268-83985b5c437d",
+      "uuid": "2855dcb0-8c79-4f92-9c54-bffd0e3a3acd",
       "title": "",
       "fullFile": "cypress/e2e/kyc/kyc.cy.ts",
       "file": "cypress/e2e/kyc/kyc.cy.ts",
@@ -1318,7 +1313,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "bb2a8119-6ed5-466f-a9bc-89a216907ad5",
+          "uuid": "b04f21c1-e624-4c9c-87c5-3d114c9f64c3",
           "title": "KYC — Identity Verification",
           "fullFile": "",
           "file": "",
@@ -1329,7 +1324,7 @@
               "title": "P1 | KYC page loads with BVN input form",
               "fullTitle": "KYC — Identity Verification P1 | KYC page loads with BVN input form",
               "timedOut": null,
-              "duration": 8431,
+              "duration": 8472,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -1342,8 +1337,8 @@
                 "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find element: `input`, but never found it.\n    at eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:13:45)\n    at Context.eval (webpack:///./cypress/support/commands.ts:64:0)",
                 "diff": null
               },
-              "uuid": "7c7799f0-6166-4066-90dc-a49834df9fe6",
-              "parentUUID": "bb2a8119-6ed5-466f-a9bc-89a216907ad5",
+              "uuid": "5aa7eb6a-7671-4532-8156-b3453dbdc119",
+              "parentUUID": "b04f21c1-e624-4c9c-87c5-3d114c9f64c3",
               "isHook": false,
               "skipped": false
             },
@@ -1351,7 +1346,7 @@
               "title": "P2 | Valid BVN submitted → pending/success state shown",
               "fullTitle": "KYC — Identity Verification P2 | Valid BVN submitted → pending/success state shown",
               "timedOut": null,
-              "duration": 30572,
+              "duration": 30532,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -1364,8 +1359,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:25:0)",
                 "diff": null
               },
-              "uuid": "a8b400c1-d696-4ee6-ba3d-583bc30168ad",
-              "parentUUID": "bb2a8119-6ed5-466f-a9bc-89a216907ad5",
+              "uuid": "fd4a855d-13da-44bb-92b0-00f6cc8bd41e",
+              "parentUUID": "b04f21c1-e624-4c9c-87c5-3d114c9f64c3",
               "isHook": false,
               "skipped": false
             },
@@ -1373,7 +1368,7 @@
               "title": "P3 | KYC banner on overview disappears after approval",
               "fullTitle": "KYC — Identity Verification P3 | KYC banner on overview disappears after approval",
               "timedOut": null,
-              "duration": 821,
+              "duration": 925,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1382,8 +1377,8 @@
               "context": null,
               "code": "// Mock a verified user\ncy.intercept(\"GET\", \"**/users/me\", {\n    statusCode: 200,\n    body: {\n        success: true,\n        data: { id: \"user-1\", firstName: \"Dubem\", kycVerified: true },\n    },\n}).as(\"verifiedUser\");\ncy.visit(\"/overview\");\ncy.wait(\"@verifiedUser\");\n// HARD: banner should not be visible for verified users\ncy.contains(/verify your identity|complete KYC|BVN verification/i).should(\"not.exist\");",
               "err": {},
-              "uuid": "ea9ef80e-6c9e-4cec-979d-811cfc2cb8b1",
-              "parentUUID": "bb2a8119-6ed5-466f-a9bc-89a216907ad5",
+              "uuid": "48206a49-d5ba-4017-816d-b28f9add5a9e",
+              "parentUUID": "b04f21c1-e624-4c9c-87c5-3d114c9f64c3",
               "isHook": false,
               "skipped": false
             },
@@ -1391,7 +1386,7 @@
               "title": "P4 | KYC banner visible on overview for unverified user",
               "fullTitle": "KYC — Identity Verification P4 | KYC banner visible on overview for unverified user",
               "timedOut": null,
-              "duration": 957,
+              "duration": 719,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1400,8 +1395,8 @@
               "context": null,
               "code": "cy.intercept(\"GET\", \"**/users/me\", {\n    statusCode: 200,\n    body: {\n        success: true,\n        data: { id: \"user-1\", firstName: \"Dubem\", kycVerified: false },\n    },\n}).as(\"unverifiedUser\");\ncy.visit(\"/overview\");\ncy.wait(\"@unverifiedUser\");\n// HARD: banner must prompt user to verify\ncy.softAssert(() => {\n    cy.contains(/verify|KYC|identity/i, { timeout: 8000 }).should(\"be.visible\");\n}, \"KYC prompt visible for unverified users\");\ncy.assertAll();",
               "err": {},
-              "uuid": "3178de22-4fd7-4a91-bdb0-633fbc4cd8ac",
-              "parentUUID": "bb2a8119-6ed5-466f-a9bc-89a216907ad5",
+              "uuid": "353c9d66-6ec2-4714-83a1-8ff3d02640b4",
+              "parentUUID": "b04f21c1-e624-4c9c-87c5-3d114c9f64c3",
               "isHook": false,
               "skipped": false
             },
@@ -1409,7 +1404,7 @@
               "title": "N1 | BVN shorter than 11 digits → validation error",
               "fullTitle": "KYC — Identity Verification N1 | BVN shorter than 11 digits → validation error",
               "timedOut": null,
-              "duration": 17316,
+              "duration": 13395,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -1422,8 +1417,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:63:0)",
                 "diff": null
               },
-              "uuid": "f0091b11-bed9-4b04-9258-d774064539b2",
-              "parentUUID": "bb2a8119-6ed5-466f-a9bc-89a216907ad5",
+              "uuid": "fafe0c7e-1586-473d-bdf6-fdaa55cbba44",
+              "parentUUID": "b04f21c1-e624-4c9c-87c5-3d114c9f64c3",
               "isHook": false,
               "skipped": false
             },
@@ -1431,7 +1426,7 @@
               "title": "N2 | BVN with letters → validation error",
               "fullTitle": "KYC — Identity Verification N2 | BVN with letters → validation error",
               "timedOut": null,
-              "duration": 22032,
+              "duration": 19264,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -1444,8 +1439,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:70:0)",
                 "diff": null
               },
-              "uuid": "8d3cdca3-2ce4-48a3-826c-56f4924cc390",
-              "parentUUID": "bb2a8119-6ed5-466f-a9bc-89a216907ad5",
+              "uuid": "b4a62468-b384-45e1-9632-c93c933a500d",
+              "parentUUID": "b04f21c1-e624-4c9c-87c5-3d114c9f64c3",
               "isHook": false,
               "skipped": false
             },
@@ -1453,7 +1448,7 @@
               "title": "N3 | BVN already used by another account → API error shown",
               "fullTitle": "KYC — Identity Verification N3 | BVN already used by another account → API error shown",
               "timedOut": null,
-              "duration": 21920,
+              "duration": 22050,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -1466,8 +1461,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:84:0)",
                 "diff": null
               },
-              "uuid": "1d5b9839-8788-4c34-b31f-74c7e54c08ab",
-              "parentUUID": "bb2a8119-6ed5-466f-a9bc-89a216907ad5",
+              "uuid": "2f48089c-8f1f-426b-929e-23fb4bf2d299",
+              "parentUUID": "b04f21c1-e624-4c9c-87c5-3d114c9f64c3",
               "isHook": false,
               "skipped": false
             },
@@ -1475,7 +1470,7 @@
               "title": "N4 | Already verified user → form not shown, verified state shown",
               "fullTitle": "KYC — Identity Verification N4 | Already verified user → form not shown, verified state shown",
               "timedOut": null,
-              "duration": 24913,
+              "duration": 26056,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -1488,8 +1483,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:97:72)\n    at Context.eval (webpack:///./cypress/support/commands.ts:64:0)",
                 "diff": null
               },
-              "uuid": "e9ddabf2-2d5b-4de2-a76f-c9f059f8677d",
-              "parentUUID": "bb2a8119-6ed5-466f-a9bc-89a216907ad5",
+              "uuid": "69d2b8e4-279c-4789-8bd6-a9b6f3e72231",
+              "parentUUID": "b04f21c1-e624-4c9c-87c5-3d114c9f64c3",
               "isHook": false,
               "skipped": false
             },
@@ -1497,7 +1492,7 @@
               "title": "N5 | API error on BVN submit → error shown, form not locked",
               "fullTitle": "KYC — Identity Verification N5 | API error on BVN submit → error shown, form not locked",
               "timedOut": null,
-              "duration": 25635,
+              "duration": 25665,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -1510,29 +1505,29 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:106:0)",
                 "diff": null
               },
-              "uuid": "4e56c4ca-63ac-494c-bc9c-2463c0f6180e",
-              "parentUUID": "bb2a8119-6ed5-466f-a9bc-89a216907ad5",
+              "uuid": "11cbeced-fb2b-4023-9e13-7b1a6ace1094",
+              "parentUUID": "b04f21c1-e624-4c9c-87c5-3d114c9f64c3",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "ea9ef80e-6c9e-4cec-979d-811cfc2cb8b1",
-            "3178de22-4fd7-4a91-bdb0-633fbc4cd8ac"
+            "48206a49-d5ba-4017-816d-b28f9add5a9e",
+            "353c9d66-6ec2-4714-83a1-8ff3d02640b4"
           ],
           "failures": [
-            "7c7799f0-6166-4066-90dc-a49834df9fe6",
-            "a8b400c1-d696-4ee6-ba3d-583bc30168ad",
-            "f0091b11-bed9-4b04-9258-d774064539b2",
-            "8d3cdca3-2ce4-48a3-826c-56f4924cc390",
-            "1d5b9839-8788-4c34-b31f-74c7e54c08ab",
-            "e9ddabf2-2d5b-4de2-a76f-c9f059f8677d",
-            "4e56c4ca-63ac-494c-bc9c-2463c0f6180e"
+            "5aa7eb6a-7671-4532-8156-b3453dbdc119",
+            "fd4a855d-13da-44bb-92b0-00f6cc8bd41e",
+            "fafe0c7e-1586-473d-bdf6-fdaa55cbba44",
+            "b4a62468-b384-45e1-9632-c93c933a500d",
+            "2f48089c-8f1f-426b-929e-23fb4bf2d299",
+            "69d2b8e4-279c-4789-8bd6-a9b6f3e72231",
+            "11cbeced-fb2b-4023-9e13-7b1a6ace1094"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 152597,
+          "duration": 147078,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
@@ -1548,7 +1543,7 @@
       "_timeout": 2000
     },
     {
-      "uuid": "c5fab631-8d15-426e-93fb-6cb1e5869919",
+      "uuid": "a1521508-9b51-47be-a2b2-cf96d475f0f1",
       "title": "",
       "fullFile": "cypress/e2e/middleware/route-protection.cy.ts",
       "file": "cypress/e2e/middleware/route-protection.cy.ts",
@@ -1557,7 +1552,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "061a57da-aa8d-46e1-aa01-fcb7a35bdac8",
+          "uuid": "d4a6e42e-7c19-4e38-a2fa-e36fdfe5874a",
           "title": "Middleware — Route Protection",
           "fullFile": "",
           "file": "",
@@ -1568,7 +1563,7 @@
               "title": "P1 | No session + protected route → redirect to /login with returnTo param",
               "fullTitle": "Middleware — Route Protection P1 | No session + protected route → redirect to /login with returnTo param",
               "timedOut": null,
-              "duration": 562,
+              "duration": 568,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1577,8 +1572,8 @@
               "context": null,
               "code": "cy.visit(\"/overview\");\n// HARD\ncy.url().should(\"include\", \"/login\");\ncy.url().should(\"include\", \"returnTo=%2Foverview\");",
               "err": {},
-              "uuid": "eb593c95-8023-41db-97df-f78932078686",
-              "parentUUID": "061a57da-aa8d-46e1-aa01-fcb7a35bdac8",
+              "uuid": "c70e91e2-8abc-4798-b14a-22ba4e576207",
+              "parentUUID": "d4a6e42e-7c19-4e38-a2fa-e36fdfe5874a",
               "isHook": false,
               "skipped": false
             },
@@ -1586,7 +1581,7 @@
               "title": "P2 | /terms accessible without session",
               "fullTitle": "Middleware — Route Protection P2 | /terms accessible without session",
               "timedOut": null,
-              "duration": 439,
+              "duration": 501,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1595,8 +1590,8 @@
               "context": null,
               "code": "cy.visit(\"/terms\");\n// HARD: must not redirect\ncy.url().should(\"include\", \"/terms\");\ncy.url().should(\"not.include\", \"/login\");",
               "err": {},
-              "uuid": "ba712c1a-23fb-46bc-aa79-9b182af8d250",
-              "parentUUID": "061a57da-aa8d-46e1-aa01-fcb7a35bdac8",
+              "uuid": "ab3d69d0-fff1-43fc-8878-db4b1a253ec2",
+              "parentUUID": "d4a6e42e-7c19-4e38-a2fa-e36fdfe5874a",
               "isHook": false,
               "skipped": false
             },
@@ -1604,7 +1599,7 @@
               "title": "P3 | /privacy accessible without session",
               "fullTitle": "Middleware — Route Protection P3 | /privacy accessible without session",
               "timedOut": null,
-              "duration": 317,
+              "duration": 297,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1613,8 +1608,8 @@
               "context": null,
               "code": "cy.visit(\"/privacy\");\ncy.url().should(\"include\", \"/privacy\");",
               "err": {},
-              "uuid": "72184271-76e5-4ed0-b3aa-e94cf8848605",
-              "parentUUID": "061a57da-aa8d-46e1-aa01-fcb7a35bdac8",
+              "uuid": "df7c152c-305c-4728-9d49-aaf320dcb8b2",
+              "parentUUID": "d4a6e42e-7c19-4e38-a2fa-e36fdfe5874a",
               "isHook": false,
               "skipped": false
             },
@@ -1622,7 +1617,7 @@
               "title": "P4 | /faq accessible without session",
               "fullTitle": "Middleware — Route Protection P4 | /faq accessible without session",
               "timedOut": null,
-              "duration": 444,
+              "duration": 471,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1631,8 +1626,8 @@
               "context": null,
               "code": "cy.visit(\"/faq\");\ncy.url().should(\"include\", \"/faq\");",
               "err": {},
-              "uuid": "004169fe-5aa7-48b1-8078-17cea5669e35",
-              "parentUUID": "061a57da-aa8d-46e1-aa01-fcb7a35bdac8",
+              "uuid": "ea30f751-686b-4dc2-b9a7-3480c686ccd1",
+              "parentUUID": "d4a6e42e-7c19-4e38-a2fa-e36fdfe5874a",
               "isHook": false,
               "skipped": false
             },
@@ -1640,7 +1635,7 @@
               "title": "P5 | /about accessible without session",
               "fullTitle": "Middleware — Route Protection P5 | /about accessible without session",
               "timedOut": null,
-              "duration": 447,
+              "duration": 436,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1649,8 +1644,8 @@
               "context": null,
               "code": "cy.visit(\"/about\");\ncy.url().should(\"include\", \"/about\");",
               "err": {},
-              "uuid": "44be4933-55eb-406c-8139-9953833f5dc7",
-              "parentUUID": "061a57da-aa8d-46e1-aa01-fcb7a35bdac8",
+              "uuid": "38b21525-8743-46be-b921-cf88cb760a7a",
+              "parentUUID": "d4a6e42e-7c19-4e38-a2fa-e36fdfe5874a",
               "isHook": false,
               "skipped": false
             },
@@ -1658,7 +1653,7 @@
               "title": "P6 | /marketer/* accessible without nepay_refresh cookie",
               "fullTitle": "Middleware — Route Protection P6 | /marketer/* accessible without nepay_refresh cookie",
               "timedOut": null,
-              "duration": 193,
+              "duration": 217,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1667,8 +1662,8 @@
               "context": null,
               "code": "cy.visit(\"/marketer\", { failOnStatusCode: false });\n// HARD: must NOT redirect to /login (marketer has its own auth)\ncy.url().should(\"not.include\", \"/login\");",
               "err": {},
-              "uuid": "7be30046-cdc1-43a9-a34d-cdce8d154f6f",
-              "parentUUID": "061a57da-aa8d-46e1-aa01-fcb7a35bdac8",
+              "uuid": "c03fd7a6-cfe1-4db3-9df1-a1e2270b547a",
+              "parentUUID": "d4a6e42e-7c19-4e38-a2fa-e36fdfe5874a",
               "isHook": false,
               "skipped": false
             },
@@ -1676,7 +1671,7 @@
               "title": "P7 | Logged-in user visits /login → bounced to /overview",
               "fullTitle": "Middleware — Route Protection P7 | Logged-in user visits /login → bounced to /overview",
               "timedOut": null,
-              "duration": 427,
+              "duration": 437,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1685,8 +1680,8 @@
               "context": null,
               "code": "cy.login();\ncy.visit(\"/login\");\n// HARD\ncy.url({ timeout: 10000 }).should(\"include\", \"/overview\");",
               "err": {},
-              "uuid": "1215af2f-81dc-407c-a764-907687f3e356",
-              "parentUUID": "061a57da-aa8d-46e1-aa01-fcb7a35bdac8",
+              "uuid": "7bd996a1-5c2b-4995-ba56-45a7ca2903f6",
+              "parentUUID": "d4a6e42e-7c19-4e38-a2fa-e36fdfe5874a",
               "isHook": false,
               "skipped": false
             },
@@ -1694,7 +1689,7 @@
               "title": "P8 | Logged-in user visits /register → bounced to /overview",
               "fullTitle": "Middleware — Route Protection P8 | Logged-in user visits /register → bounced to /overview",
               "timedOut": null,
-              "duration": 311,
+              "duration": 351,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1703,8 +1698,8 @@
               "context": null,
               "code": "cy.login();\ncy.visit(\"/register\");\ncy.url({ timeout: 10000 }).should(\"include\", \"/overview\");",
               "err": {},
-              "uuid": "45cfe959-7744-4774-a6f4-540f720022bf",
-              "parentUUID": "061a57da-aa8d-46e1-aa01-fcb7a35bdac8",
+              "uuid": "e555938a-5983-4470-849d-869a359b1707",
+              "parentUUID": "d4a6e42e-7c19-4e38-a2fa-e36fdfe5874a",
               "isHook": false,
               "skipped": false
             },
@@ -1712,7 +1707,7 @@
               "title": "P9 | /transfer without session → redirect to /login?returnTo=/transfer",
               "fullTitle": "Middleware — Route Protection P9 | /transfer without session → redirect to /login?returnTo=/transfer",
               "timedOut": null,
-              "duration": 283,
+              "duration": 280,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1721,8 +1716,8 @@
               "context": null,
               "code": "cy.visit(\"/transfer\");\ncy.url().should(\"include\", \"/login\");\ncy.url().should(\"include\", \"returnTo=%2Ftransfer\");",
               "err": {},
-              "uuid": "a62976b8-3925-4a27-a5fd-588372fe9ccf",
-              "parentUUID": "061a57da-aa8d-46e1-aa01-fcb7a35bdac8",
+              "uuid": "c42b3341-0a1a-4ea6-90a0-32b2253abb0d",
+              "parentUUID": "d4a6e42e-7c19-4e38-a2fa-e36fdfe5874a",
               "isHook": false,
               "skipped": false
             },
@@ -1730,7 +1725,7 @@
               "title": "N1 | returnTo=https://evil.com → rejected, fallback to /overview after login",
               "fullTitle": "Middleware — Route Protection N1 | returnTo=https://evil.com → rejected, fallback to /overview after login",
               "timedOut": null,
-              "duration": 305,
+              "duration": 323,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1739,8 +1734,8 @@
               "context": null,
               "code": "cy.login();\ncy.visit(\"/login?returnTo=https://evil.com\");\ncy.url({ timeout: 10000 }).should(\"include\", \"/overview\");\ncy.url().should(\"not.include\", \"evil.com\");",
               "err": {},
-              "uuid": "170acdec-790a-4224-a00e-0f7675cf1e03",
-              "parentUUID": "061a57da-aa8d-46e1-aa01-fcb7a35bdac8",
+              "uuid": "6a9c1c60-ef41-44f7-9d16-745921493e32",
+              "parentUUID": "d4a6e42e-7c19-4e38-a2fa-e36fdfe5874a",
               "isHook": false,
               "skipped": false
             },
@@ -1748,7 +1743,7 @@
               "title": "N2 | returnTo=//evil.com → rejected (protocol-relative)",
               "fullTitle": "Middleware — Route Protection N2 | returnTo=//evil.com → rejected (protocol-relative)",
               "timedOut": null,
-              "duration": 316,
+              "duration": 326,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1757,8 +1752,8 @@
               "context": null,
               "code": "cy.login();\ncy.visit(\"/login?returnTo=//evil.com\");\ncy.url({ timeout: 10000 }).should(\"include\", \"/overview\");\ncy.url().should(\"not.include\", \"evil.com\");",
               "err": {},
-              "uuid": "db05de34-38d1-45be-8655-733bc58d641e",
-              "parentUUID": "061a57da-aa8d-46e1-aa01-fcb7a35bdac8",
+              "uuid": "80c364af-6a38-4371-a03e-a7257f586388",
+              "parentUUID": "d4a6e42e-7c19-4e38-a2fa-e36fdfe5874a",
               "isHook": false,
               "skipped": false
             },
@@ -1766,7 +1761,7 @@
               "title": "N3 | returnTo=\\/evil.com → rejected (backslash bypass)",
               "fullTitle": "Middleware — Route Protection N3 | returnTo=\\/evil.com → rejected (backslash bypass)",
               "timedOut": null,
-              "duration": 374,
+              "duration": 365,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1775,8 +1770,8 @@
               "context": null,
               "code": "cy.login();\ncy.visit(\"/login?returnTo=\\\\/evil.com\");\ncy.url({ timeout: 10000 }).should(\"include\", \"/overview\");\ncy.url().should(\"not.include\", \"evil.com\");",
               "err": {},
-              "uuid": "ca119875-cc12-42a6-9be9-7928aedcf6a0",
-              "parentUUID": "061a57da-aa8d-46e1-aa01-fcb7a35bdac8",
+              "uuid": "16de111b-3c01-422d-adda-cc6300eb3f4a",
+              "parentUUID": "d4a6e42e-7c19-4e38-a2fa-e36fdfe5874a",
               "isHook": false,
               "skipped": false
             },
@@ -1784,7 +1779,7 @@
               "title": "N4 | Forged nepay_refresh cookie with no real token → API calls fail gracefully",
               "fullTitle": "Middleware — Route Protection N4 | Forged nepay_refresh cookie with no real token → API calls fail gracefully",
               "timedOut": null,
-              "duration": 236,
+              "duration": 256,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1793,32 +1788,32 @@
               "context": null,
               "code": "// Set a cookie without a real token — simulates a forged/expired session\ncy.setCookie(\"nepay_refresh\", \"true\", { path: \"/\" });\n// Do NOT set localStorage tokens\ncy.visit(\"/overview\");\n// SOFT: page shell may load, but data should fail/show error — not crash\ncy.softAssert(() => {\n    cy.get(\"body\").should(\"be.visible\");\n}, \"Page renders without crash on forged cookie\");\ncy.assertAll();",
               "err": {},
-              "uuid": "f6970cf3-74cc-4459-b2f2-add814ea745c",
-              "parentUUID": "061a57da-aa8d-46e1-aa01-fcb7a35bdac8",
+              "uuid": "3de87e7c-a12d-4e76-8227-08c85b6740b9",
+              "parentUUID": "d4a6e42e-7c19-4e38-a2fa-e36fdfe5874a",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "eb593c95-8023-41db-97df-f78932078686",
-            "ba712c1a-23fb-46bc-aa79-9b182af8d250",
-            "72184271-76e5-4ed0-b3aa-e94cf8848605",
-            "004169fe-5aa7-48b1-8078-17cea5669e35",
-            "44be4933-55eb-406c-8139-9953833f5dc7",
-            "7be30046-cdc1-43a9-a34d-cdce8d154f6f",
-            "1215af2f-81dc-407c-a764-907687f3e356",
-            "45cfe959-7744-4774-a6f4-540f720022bf",
-            "a62976b8-3925-4a27-a5fd-588372fe9ccf",
-            "170acdec-790a-4224-a00e-0f7675cf1e03",
-            "db05de34-38d1-45be-8655-733bc58d641e",
-            "ca119875-cc12-42a6-9be9-7928aedcf6a0",
-            "f6970cf3-74cc-4459-b2f2-add814ea745c"
+            "c70e91e2-8abc-4798-b14a-22ba4e576207",
+            "ab3d69d0-fff1-43fc-8878-db4b1a253ec2",
+            "df7c152c-305c-4728-9d49-aaf320dcb8b2",
+            "ea30f751-686b-4dc2-b9a7-3480c686ccd1",
+            "38b21525-8743-46be-b921-cf88cb760a7a",
+            "c03fd7a6-cfe1-4db3-9df1-a1e2270b547a",
+            "7bd996a1-5c2b-4995-ba56-45a7ca2903f6",
+            "e555938a-5983-4470-849d-869a359b1707",
+            "c42b3341-0a1a-4ea6-90a0-32b2253abb0d",
+            "6a9c1c60-ef41-44f7-9d16-745921493e32",
+            "80c364af-6a38-4371-a03e-a7257f586388",
+            "16de111b-3c01-422d-adda-cc6300eb3f4a",
+            "3de87e7c-a12d-4e76-8227-08c85b6740b9"
           ],
           "failures": [],
           "pending": [],
           "skipped": [],
-          "duration": 4654,
+          "duration": 4828,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
@@ -1834,7 +1829,7 @@
       "_timeout": 2000
     },
     {
-      "uuid": "9a292a65-df3c-48a7-9332-e8296e34e79c",
+      "uuid": "3703f61e-d772-4d8f-ad94-3e27afe564b7",
       "title": "",
       "fullFile": "cypress/e2e/notifications/notifications.cy.ts",
       "file": "cypress/e2e/notifications/notifications.cy.ts",
@@ -1843,7 +1838,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "f425fde7-f97a-4ce9-b1bb-74d7afcfaa40",
+          "uuid": "d8a97262-2806-4ef5-9115-4a7416d99123",
           "title": "Notifications",
           "fullFile": "",
           "file": "",
@@ -1854,7 +1849,7 @@
               "title": "P1 | Notifications page loads",
               "fullTitle": "Notifications P1 | Notifications page loads",
               "timedOut": null,
-              "duration": 606,
+              "duration": 628,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1863,8 +1858,8 @@
               "context": null,
               "code": "cy.get(\"body\").should(\"be.visible\");\ncy.softAssert(() => {\n    cy.contains(/notification/i, { timeout: 10000 }).should(\"be.visible\");\n}, \"Notifications heading\");\ncy.assertAll();",
               "err": {},
-              "uuid": "9a71d14b-bfa4-4a84-99d1-67852d485e1e",
-              "parentUUID": "f425fde7-f97a-4ce9-b1bb-74d7afcfaa40",
+              "uuid": "4ee9ca1e-34a9-44cd-bb97-afcfab5b6f5b",
+              "parentUUID": "d8a97262-2806-4ef5-9115-4a7416d99123",
               "isHook": false,
               "skipped": false
             },
@@ -1872,7 +1867,7 @@
               "title": "P2 | Empty notifications → empty state shown",
               "fullTitle": "Notifications P2 | Empty notifications → empty state shown",
               "timedOut": null,
-              "duration": 60620,
+              "duration": 60661,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -1885,8 +1880,8 @@
                 "estack": "CypressError: Timed out after waiting `60000ms` for your remote page to load.\n\nYour page did not fire its `load` event within `60000ms`.\n\nYou can try increasing the `pageLoadTimeout` value in `home/runner/work/NePay-frontend/NePay-frontend/apps/web/cypress.config.ts` to wait longer.\n\nBrowsers will not fire the `load` event until all stylesheets and scripts are done downloading.\n\nWhen this `load` event occurs, Cypress will continue running commands.\n    at timedOutWaitingForPageLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141258:72)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141832:16)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6449:41)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9440:18)\n    at _drainQueueStep (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6034:12)\n    at _drainQueue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6027:9)\n    at ../../node_modules/bluebird/js/release/async.js.Async._drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6043:5)\n    at Async.drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:5913:14)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/notifications/notifications.cy.ts:21:0)",
                 "diff": null
               },
-              "uuid": "0277b7b2-d1dd-4276-9135-9b1074d38bb3",
-              "parentUUID": "f425fde7-f97a-4ce9-b1bb-74d7afcfaa40",
+              "uuid": "c7126012-b047-4623-8091-6b7e0c658775",
+              "parentUUID": "d8a97262-2806-4ef5-9115-4a7416d99123",
               "isHook": false,
               "skipped": false
             },
@@ -1894,7 +1889,7 @@
               "title": "N1 | API error → graceful error state",
               "fullTitle": "Notifications N1 | API error → graceful error state",
               "timedOut": null,
-              "duration": 60549,
+              "duration": 60585,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -1907,23 +1902,23 @@
                 "estack": "CypressError: Timed out after waiting `60000ms` for your remote page to load.\n\nYour page did not fire its `load` event within `60000ms`.\n\nYou can try increasing the `pageLoadTimeout` value in `home/runner/work/NePay-frontend/NePay-frontend/apps/web/cypress.config.ts` to wait longer.\n\nBrowsers will not fire the `load` event until all stylesheets and scripts are done downloading.\n\nWhen this `load` event occurs, Cypress will continue running commands.\n    at timedOutWaitingForPageLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141258:72)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141832:16)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6449:41)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9440:18)\n    at _drainQueueStep (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6034:12)\n    at _drainQueue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6027:9)\n    at ../../node_modules/bluebird/js/release/async.js.Async._drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6043:5)\n    at Async.drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:5913:14)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/notifications/notifications.cy.ts:33:0)",
                 "diff": null
               },
-              "uuid": "f74ba8fe-2768-48f4-a92e-543c4c4dc4e9",
-              "parentUUID": "f425fde7-f97a-4ce9-b1bb-74d7afcfaa40",
+              "uuid": "60003081-6053-4057-b804-9aff727fc432",
+              "parentUUID": "d8a97262-2806-4ef5-9115-4a7416d99123",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "9a71d14b-bfa4-4a84-99d1-67852d485e1e"
+            "4ee9ca1e-34a9-44cd-bb97-afcfab5b6f5b"
           ],
           "failures": [
-            "0277b7b2-d1dd-4276-9135-9b1074d38bb3",
-            "f74ba8fe-2768-48f4-a92e-543c4c4dc4e9"
+            "c7126012-b047-4623-8091-6b7e0c658775",
+            "60003081-6053-4057-b804-9aff727fc432"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 121775,
+          "duration": 121874,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
@@ -1939,7 +1934,7 @@
       "_timeout": 2000
     },
     {
-      "uuid": "86c209b5-82b8-488f-a90b-9bf3cd1818fb",
+      "uuid": "d4b08d72-1913-451c-84cf-e6800f4662b7",
       "title": "",
       "fullFile": "cypress/e2e/pods/pods.cy.ts",
       "file": "cypress/e2e/pods/pods.cy.ts",
@@ -1948,7 +1943,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "19fbce12-f9f5-4a3e-b7a1-ce837c772105",
+          "uuid": "13c097e6-ba79-4fd7-af1c-1123424a9301",
           "title": "Pods",
           "fullFile": "",
           "file": "",
@@ -1959,7 +1954,7 @@
               "title": "P1 | Pods page loads",
               "fullTitle": "Pods P1 | Pods page loads",
               "timedOut": null,
-              "duration": 650,
+              "duration": 1074,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -1968,8 +1963,8 @@
               "context": null,
               "code": "cy.get(\"body\").should(\"be.visible\");\ncy.contains(/pod|saving|group/i, { timeout: 10000 }).should(\"be.visible\");",
               "err": {},
-              "uuid": "fd455ff5-b440-4ba2-a19a-424336ee73dd",
-              "parentUUID": "19fbce12-f9f5-4a3e-b7a1-ce837c772105",
+              "uuid": "d8f211cd-1084-4fb9-aa94-193ad2d858de",
+              "parentUUID": "13c097e6-ba79-4fd7-af1c-1123424a9301",
               "isHook": false,
               "skipped": false
             },
@@ -1990,8 +1985,8 @@
                 "estack": "CypressError: `cy.visit()` failed trying to load:\n\nhttps://staging-nepay.vercel.app/pods\n\nThe `content-type` of the response we received from your web server was:\n\n  > `application/json`\n\nThis was considered a failure because responses must have `content-type: 'text/html'`\n\nHowever, you can likely use `cy.request()` instead of `cy.visit()`.\n\n`cy.request()` will automatically get and set cookies and enable you to parse responses.\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142396:84)\n    at visitFailedByErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141701:12)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142376:13)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9440:18)\n    at _drainQueueStep (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6034:12)\n    at _drainQueue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6027:9)\n    at ../../node_modules/bluebird/js/release/async.js.Async._drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6043:5)\n    at Async.drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:5913:14)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/pods/pods.cy.ts:20:0)",
                 "diff": null
               },
-              "uuid": "2977b7d8-9fd2-4e76-bc21-fb6aac850edc",
-              "parentUUID": "19fbce12-f9f5-4a3e-b7a1-ce837c772105",
+              "uuid": "2a176540-08cb-4e39-b907-975171958414",
+              "parentUUID": "13c097e6-ba79-4fd7-af1c-1123424a9301",
               "isHook": false,
               "skipped": false
             },
@@ -1999,7 +1994,7 @@
               "title": "N1 | Create pod with no name → validation error",
               "fullTitle": "Pods N1 | Create pod with no name → validation error",
               "timedOut": null,
-              "duration": 17488,
+              "duration": 18521,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2012,8 +2007,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/pods/pods.cy.ts:28:0)",
                 "diff": null
               },
-              "uuid": "d95f15a7-e2b0-474b-9dba-fde3ffdfe745",
-              "parentUUID": "19fbce12-f9f5-4a3e-b7a1-ce837c772105",
+              "uuid": "a99ff1d3-f9dc-474b-848e-14913ca738b1",
+              "parentUUID": "13c097e6-ba79-4fd7-af1c-1123424a9301",
               "isHook": false,
               "skipped": false
             },
@@ -2021,7 +2016,7 @@
               "title": "N2 | Create pod with target = 0 → validation error",
               "fullTitle": "Pods N2 | Create pod with target = 0 → validation error",
               "timedOut": null,
-              "duration": 20543,
+              "duration": 20423,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2034,8 +2029,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/pods/pods.cy.ts:33:0)",
                 "diff": null
               },
-              "uuid": "37520a07-8f31-423a-a850-62886f12ec83",
-              "parentUUID": "19fbce12-f9f5-4a3e-b7a1-ce837c772105",
+              "uuid": "49342494-5168-4905-81af-a446ba865d6f",
+              "parentUUID": "13c097e6-ba79-4fd7-af1c-1123424a9301",
               "isHook": false,
               "skipped": false
             },
@@ -2043,7 +2038,7 @@
               "title": "N3 | API error on pod load → page doesn't crash",
               "fullTitle": "Pods N3 | API error on pod load → page doesn't crash",
               "timedOut": null,
-              "duration": 1118,
+              "duration": 1494,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2056,25 +2051,25 @@
                 "estack": "CypressError: `cy.visit()` failed trying to load:\n\nhttps://staging-nepay.vercel.app/pods\n\nThe response we received from your web server was:\n\n  > 500: Internal Server Error\n\nThis was considered a failure because the status code was not `2xx`.\n\nIf you do not want status codes to cause failures pass the option: `failOnStatusCode: false`\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142396:84)\n    at visitFailedByErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141701:12)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142376:13)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9440:18)\n    at _drainQueueStep (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6034:12)\n    at _drainQueue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6027:9)\n    at ../../node_modules/bluebird/js/release/async.js.Async._drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6043:5)\n    at Async.drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:5913:14)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/pods/pods.cy.ts:51:0)",
                 "diff": null
               },
-              "uuid": "5570ef1d-94e8-47ef-afed-831b38d1c32a",
-              "parentUUID": "19fbce12-f9f5-4a3e-b7a1-ce837c772105",
+              "uuid": "ee3dd439-9960-48f3-8de3-3632fe47a7f3",
+              "parentUUID": "13c097e6-ba79-4fd7-af1c-1123424a9301",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "fd455ff5-b440-4ba2-a19a-424336ee73dd"
+            "d8f211cd-1084-4fb9-aa94-193ad2d858de"
           ],
           "failures": [
-            "2977b7d8-9fd2-4e76-bc21-fb6aac850edc",
-            "d95f15a7-e2b0-474b-9dba-fde3ffdfe745",
-            "37520a07-8f31-423a-a850-62886f12ec83",
-            "5570ef1d-94e8-47ef-afed-831b38d1c32a"
+            "2a176540-08cb-4e39-b907-975171958414",
+            "a99ff1d3-f9dc-474b-848e-14913ca738b1",
+            "49342494-5168-4905-81af-a446ba865d6f",
+            "ee3dd439-9960-48f3-8de3-3632fe47a7f3"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 40357,
+          "duration": 42070,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
@@ -2090,7 +2085,7 @@
       "_timeout": 2000
     },
     {
-      "uuid": "92b4db55-41fe-4d43-b7de-1597ad415804",
+      "uuid": "4c89d24f-1368-4ae8-83c5-c9e858f86767",
       "title": "",
       "fullFile": "cypress/e2e/security/change-password.cy.ts",
       "file": "cypress/e2e/security/change-password.cy.ts",
@@ -2099,7 +2094,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "5557b3ac-fd22-483e-9a3c-b49b1cca2d8b",
+          "uuid": "232302b0-a0ca-443a-ab2c-8c728d793571",
           "title": "Security — Change Password",
           "fullFile": "",
           "file": "",
@@ -2110,7 +2105,7 @@
               "title": "P1 | Change password page loads with 3 fields",
               "fullTitle": "Security — Change Password P1 | Change password page loads with 3 fields",
               "timedOut": null,
-              "duration": 633,
+              "duration": 634,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -2119,8 +2114,8 @@
               "context": null,
               "code": "cy.softAssert(() => {\n    cy.contains(/current password|old password/i, { timeout: 8000 }).should(\"be.visible\");\n}, \"Current password label\");\ncy.softAssert(() => {\n    cy.contains(/new password/i).should(\"be.visible\");\n}, \"New password label\");\ncy.assertAll();",
               "err": {},
-              "uuid": "b8d5eb0a-1da6-4d78-b606-0eec35dd8d6b",
-              "parentUUID": "5557b3ac-fd22-483e-9a3c-b49b1cca2d8b",
+              "uuid": "8b9d552a-9086-46de-b8cd-b6a1466ad776",
+              "parentUUID": "232302b0-a0ca-443a-ab2c-8c728d793571",
               "isHook": false,
               "skipped": false
             },
@@ -2128,7 +2123,7 @@
               "title": "N1 | Wrong current password → API error shown",
               "fullTitle": "Security — Change Password N1 | Wrong current password → API error shown",
               "timedOut": null,
-              "duration": 3168,
+              "duration": 2853,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2137,12 +2132,12 @@
               "context": null,
               "code": "cy.intercept(\"POST\", \"**/auth/change-password**\", {\n    statusCode: 401,\n    body: { success: false, message: \"Current password is incorrect\" },\n}).as(\"wrongCurrentPw\");\ncy.get('input[name=\"currentPassword\"]').first().type(\"WrongCurrent1\");\ncy.get('input[name=\"newPassword\"]').first().type(\"NewValidPass1\");\ncy.get('input[name=\"confirmNewPassword\"], input[name=\"confirmPassword\"]').first().type(\"NewValidPass1\");\ncy.get('button[type=\"submit\"]').click();\ncy.wait(\"@wrongCurrentPw\");\ncy.contains(/incorrect|wrong|current/i, { timeout: 8000 }).should(\"be.visible\");",
               "err": {
-                "message": "CypressError: `cy.first()` failed because it requires a DOM element.\n\nThe subject received was:\n\n  > `undefined`\n\nThe previous command that ran was:\n\n  > `cy.get()`\n\nAll 2 subject validations failed on this subject.",
-                "estack": "CypressError: `cy.first()` failed because it requires a DOM element.\n\nThe subject received was:\n\n  > `undefined`\n\nThe previous command that ran was:\n\n  > `cy.get()`\n\nAll 2 subject validations failed on this subject.\n    at ensureElement (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:147893:76)\n    at validateType (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:147716:16)\n    at $Cy.ensureSubjectByType (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:147752:9)\n    at $Cy.pushSubject (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:158327:12)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157858:19)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/security/change-password.cy.ts:25:0)",
+                "message": "TypeError: Cannot read properties of undefined (reading 'KeyboardEvent')",
+                "estack": "TypeError: Cannot read properties of undefined (reading 'KeyboardEvent')\n    at Keyboard.fireSimulatedEvent (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:149298:28)\n    at Keyboard.simulatedKeydown (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:149443:58)\n    at Keyboard.typeSimulatedKey (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:149490:10)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:149143:14)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise.attempt.Promise.try (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:8601:29)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:149153:67)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Object.gotValue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:10469:18)\n    at Object.gotAccum (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:10458:25)\n    at Object.tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)\n    at Promise._resolveCallback (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9182:57)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9274:17)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9444:18)\n    at Promise._fulfill (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9388:18)",
                 "diff": null
               },
-              "uuid": "354552db-c82f-48b0-82fa-9cfed71fe4e5",
-              "parentUUID": "5557b3ac-fd22-483e-9a3c-b49b1cca2d8b",
+              "uuid": "56e89c05-7fb3-46ac-90df-18196a294ed6",
+              "parentUUID": "232302b0-a0ca-443a-ab2c-8c728d793571",
               "isHook": false,
               "skipped": false
             },
@@ -2150,7 +2145,7 @@
               "title": "N2 | New passwords don't match → validation error",
               "fullTitle": "Security — Change Password N2 | New passwords don't match → validation error",
               "timedOut": null,
-              "duration": 18245,
+              "duration": 18535,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2163,8 +2158,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/security/change-password.cy.ts:32:0)",
                 "diff": null
               },
-              "uuid": "70c9ecb3-afd8-4923-945b-6602f8957675",
-              "parentUUID": "5557b3ac-fd22-483e-9a3c-b49b1cca2d8b",
+              "uuid": "aaef5916-54e0-47e5-afc8-45c9b8143141",
+              "parentUUID": "232302b0-a0ca-443a-ab2c-8c728d793571",
               "isHook": false,
               "skipped": false
             },
@@ -2172,7 +2167,7 @@
               "title": "N3 | Weak new password → validation error",
               "fullTitle": "Security — Change Password N3 | Weak new password → validation error",
               "timedOut": null,
-              "duration": 781,
+              "duration": 817,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -2181,30 +2176,30 @@
               "context": null,
               "code": "cy.get('input[name=\"newPassword\"]').first().type(\"weak\");\ncy.get('button[type=\"submit\"]').click();\ncy.contains(/6 characters|strong|minimum/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "c7e56155-e47a-497d-9ac2-6a46f5c2e2bb",
-              "parentUUID": "5557b3ac-fd22-483e-9a3c-b49b1cca2d8b",
+              "uuid": "15c51dda-cbf6-48db-bb82-d6f6118cd822",
+              "parentUUID": "232302b0-a0ca-443a-ab2c-8c728d793571",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "b8d5eb0a-1da6-4d78-b606-0eec35dd8d6b",
-            "c7e56155-e47a-497d-9ac2-6a46f5c2e2bb"
+            "8b9d552a-9086-46de-b8cd-b6a1466ad776",
+            "15c51dda-cbf6-48db-bb82-d6f6118cd822"
           ],
           "failures": [
-            "354552db-c82f-48b0-82fa-9cfed71fe4e5",
-            "70c9ecb3-afd8-4923-945b-6602f8957675"
+            "56e89c05-7fb3-46ac-90df-18196a294ed6",
+            "aaef5916-54e0-47e5-afc8-45c9b8143141"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 22827,
+          "duration": 22839,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
         },
         {
-          "uuid": "e246dd80-71f2-4f6f-8a2e-63c793c32335",
+          "uuid": "1adbe9e6-a14f-4719-a658-aa649260f8b2",
           "title": "Security — Change PIN",
           "fullFile": "",
           "file": "",
@@ -2215,7 +2210,7 @@
               "title": "N1 | PINs don't match → error",
               "fullTitle": "Security — Change PIN N1 | PINs don't match → error",
               "timedOut": null,
-              "duration": 20004,
+              "duration": 4241,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2224,12 +2219,12 @@
               "context": null,
               "code": "cy.get('#currentPin').type(\"0000\");\ncy.get('#newPin').type(\"1234\");\ncy.get('#confirmPin').type(\"5678\");\ncy.get('button[type=\"submit\"]').click();\ncy.contains(/do not match|match/i).should(\"be.visible\");",
               "err": {
-                "message": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.",
-                "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/security/change-password.cy.ts:49:0)",
+                "message": "CypressError: `cy.click()` failed because it requires a DOM element.\n\nThe subject received was:\n\n  > `undefined`\n\nThe previous command that ran was:\n\n  > `cy.get()`",
+                "estack": "CypressError: `cy.click()` failed because it requires a DOM element.\n\nThe subject received was:\n\n  > `undefined`\n\nThe previous command that ran was:\n\n  > `cy.get()`\n    at ensureElement (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:147893:76)\n    at validateType (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:147716:16)\n    at $Cy.ensureSubjectByType (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:147752:9)\n    at $Cy.pushSubject (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:158327:12)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157858:19)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/security/change-password.cy.ts:51:0)",
                 "diff": null
               },
-              "uuid": "5ce1912b-48dd-4918-a8dc-ff7da71a5bbe",
-              "parentUUID": "e246dd80-71f2-4f6f-8a2e-63c793c32335",
+              "uuid": "5c17992c-683c-441b-b0cf-7b8b03356f0a",
+              "parentUUID": "1adbe9e6-a14f-4719-a658-aa649260f8b2",
               "isHook": false,
               "skipped": false
             },
@@ -2237,7 +2232,7 @@
               "title": "N2 | PIN not 4 digits → validation error",
               "fullTitle": "Security — Change PIN N2 | PIN not 4 digits → validation error",
               "timedOut": null,
-              "duration": 865,
+              "duration": 1342,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -2246,28 +2241,28 @@
               "context": null,
               "code": "cy.get('#newPin').type(\"12\");\ncy.get('button[type=\"submit\"]').click();\ncy.contains(/4 digits|exactly 4|length/i).should(\"be.visible\");",
               "err": {},
-              "uuid": "88e2fe8f-481f-4433-aa49-5bebab7b64c0",
-              "parentUUID": "e246dd80-71f2-4f6f-8a2e-63c793c32335",
+              "uuid": "528425f8-b147-4644-bb57-57c587b32b11",
+              "parentUUID": "1adbe9e6-a14f-4719-a658-aa649260f8b2",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "88e2fe8f-481f-4433-aa49-5bebab7b64c0"
+            "528425f8-b147-4644-bb57-57c587b32b11"
           ],
           "failures": [
-            "5ce1912b-48dd-4918-a8dc-ff7da71a5bbe"
+            "5c17992c-683c-441b-b0cf-7b8b03356f0a"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 20869,
+          "duration": 5583,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
         },
         {
-          "uuid": "b7e88ae2-a08a-40dc-930d-69b844f13957",
+          "uuid": "7ff2576e-e560-4bf8-b61f-05312cbe05ae",
           "title": "Security — Login Activity",
           "fullFile": "",
           "file": "",
@@ -2278,7 +2273,7 @@
               "title": "P1 | Login activity page loads",
               "fullTitle": "Security — Login Activity P1 | Login activity page loads",
               "timedOut": null,
-              "duration": 429,
+              "duration": 459,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -2287,8 +2282,8 @@
               "context": null,
               "code": "cy.login();\ncy.visit(\"/security/login-activity\");\ncy.get(\"body\").should(\"be.visible\");\ncy.softAssert(() => {\n    cy.contains(/device|session|login|activity/i, { timeout: 8000 }).should(\"be.visible\");\n}, \"Activity page heading\");\ncy.assertAll();",
               "err": {},
-              "uuid": "1ac08ab9-0c5b-4b41-a813-3c0c6282f78b",
-              "parentUUID": "b7e88ae2-a08a-40dc-930d-69b844f13957",
+              "uuid": "ac8e34f4-2667-4b8f-b180-2c78088691c3",
+              "parentUUID": "7ff2576e-e560-4bf8-b61f-05312cbe05ae",
               "isHook": false,
               "skipped": false
             },
@@ -2296,7 +2291,7 @@
               "title": "N1 | API error → graceful error state, no crash",
               "fullTitle": "Security — Login Activity N1 | API error → graceful error state, no crash",
               "timedOut": null,
-              "duration": 499,
+              "duration": 376,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2309,22 +2304,22 @@
                 "estack": "CypressError: `cy.visit()` failed trying to load:\n\nhttps://staging-nepay.vercel.app/security/login-activity\n\nThe response we received from your web server was:\n\n  > 500: Internal Server Error\n\nThis was considered a failure because the status code was not `2xx`.\n\nIf you do not want status codes to cause failures pass the option: `failOnStatusCode: false`\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142396:84)\n    at visitFailedByErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141701:12)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142376:13)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9440:18)\n    at _drainQueueStep (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6034:12)\n    at _drainQueue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6027:9)\n    at ../../node_modules/bluebird/js/release/async.js.Async._drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6043:5)\n    at Async.drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:5913:14)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/security/change-password.cy.ts:77:0)",
                 "diff": null
               },
-              "uuid": "ae0a3303-0433-4e16-9fc7-336099ddc625",
-              "parentUUID": "b7e88ae2-a08a-40dc-930d-69b844f13957",
+              "uuid": "261eae4a-527b-4691-92f1-912c745f2e81",
+              "parentUUID": "7ff2576e-e560-4bf8-b61f-05312cbe05ae",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "1ac08ab9-0c5b-4b41-a813-3c0c6282f78b"
+            "ac8e34f4-2667-4b8f-b180-2c78088691c3"
           ],
           "failures": [
-            "ae0a3303-0433-4e16-9fc7-336099ddc625"
+            "261eae4a-527b-4691-92f1-912c745f2e81"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 928,
+          "duration": 835,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
@@ -2340,7 +2335,7 @@
       "_timeout": 2000
     },
     {
-      "uuid": "fa4f0110-4fcc-4ef1-a003-1f8829ea722d",
+      "uuid": "e65f94c2-cddd-4f77-895b-e4498852c8a8",
       "title": "",
       "fullFile": "cypress/e2e/services/airtime.cy.ts",
       "file": "cypress/e2e/services/airtime.cy.ts",
@@ -2349,7 +2344,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "089917e8-b1fe-4736-ab2d-69c07c364279",
+          "uuid": "4fe26cbf-da7f-46f5-9cd8-1a714d308149",
           "title": "Services — Airtime",
           "fullFile": "",
           "file": "",
@@ -2360,7 +2355,7 @@
               "title": "P1 | Airtime page loads with provider list",
               "fullTitle": "Services — Airtime P1 | Airtime page loads with provider list",
               "timedOut": null,
-              "duration": 16875,
+              "duration": 16665,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2373,8 +2368,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Services — Airtime`\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/services/airtime.cy.ts:9:65)",
                 "diff": null
               },
-              "uuid": "59ad1b47-6fed-4b26-ac28-afe249b08271",
-              "parentUUID": "089917e8-b1fe-4736-ab2d-69c07c364279",
+              "uuid": "4348773a-4caa-46aa-b83c-8f4296301e7c",
+              "parentUUID": "4fe26cbf-da7f-46f5-9cd8-1a714d308149",
               "isHook": false,
               "skipped": false
             },
@@ -2391,8 +2386,8 @@
               "context": null,
               "code": "// The phone input is always visible — just confirm it exists\ncy.softAssert(() => {\n    cy.get(\"#phone-input\", { timeout: 5000 }).should(\"be.visible\");\n}, \"Form appears after selecting provider\");\ncy.assertAll();",
               "err": {},
-              "uuid": "f84a436f-3548-4c1e-9d09-756156ae818c",
-              "parentUUID": "089917e8-b1fe-4736-ab2d-69c07c364279",
+              "uuid": "1b07119a-2fb5-4299-bab2-dd0b6f6d05e4",
+              "parentUUID": "4fe26cbf-da7f-46f5-9cd8-1a714d308149",
               "isHook": false,
               "skipped": true
             },
@@ -2409,8 +2404,8 @@
               "context": null,
               "code": "// Type a short invalid phone number\ncy.get(\"#phone-input\").clear().type(\"12345\");\n// Set a valid amount via the ₦50 preset so the Pay button enables\ncy.contains(\"button\", \"50\").click();\n// Click the sticky Pay bar\ncy.contains(\"button\", \"Pay\").click();\n// SOFT: validation fires as a toast\ncy.softAssert(() => {\n    cy.contains(/valid|phone|number/i, { timeout: 5000 }).should(\"be.visible\");\n}, \"Invalid phone toast shown\");\ncy.assertAll();",
               "err": {},
-              "uuid": "3d4c8157-caae-4c2e-b1b7-284624ea2b1a",
-              "parentUUID": "089917e8-b1fe-4736-ab2d-69c07c364279",
+              "uuid": "2d10ba95-e4b4-4eac-aacd-e8f068080e3f",
+              "parentUUID": "4fe26cbf-da7f-46f5-9cd8-1a714d308149",
               "isHook": false,
               "skipped": true
             },
@@ -2427,8 +2422,8 @@
               "context": null,
               "code": "// Type a valid phone but leave amount at 0\ncy.get(\"#phone-input\").clear().type(\"08012345678\");\n// Don't select any amount preset — amount stays 0\ncy.contains(\"button\", \"Pay\").click();\n// SOFT: minimum amount toast should appear\ncy.softAssert(() => {\n    cy.contains(/minimum|amount/i, { timeout: 5000 }).should(\"be.visible\");\n}, \"Minimum amount toast shown\");\ncy.assertAll();",
               "err": {},
-              "uuid": "a793b927-2b91-44c7-a48f-37d3c575cbe1",
-              "parentUUID": "089917e8-b1fe-4736-ab2d-69c07c364279",
+              "uuid": "7bd22306-bf54-448b-9060-e997b4250e2a",
+              "parentUUID": "4fe26cbf-da7f-46f5-9cd8-1a714d308149",
               "isHook": false,
               "skipped": true
             },
@@ -2445,8 +2440,8 @@
               "context": null,
               "code": "// The Pay button is disabled when no valid state exists\n// On load the amount is 0, so the Pay button should be disabled\ncy.contains(\"button\", \"Pay\").should(\"be.disabled\");\ncy.url().should(\"include\", \"/services/airtime\");",
               "err": {},
-              "uuid": "0bef3243-bd44-4fc9-b031-aeddc829f9ef",
-              "parentUUID": "089917e8-b1fe-4736-ab2d-69c07c364279",
+              "uuid": "aa9ff556-579e-4554-81a5-1b55c68646a3",
+              "parentUUID": "4fe26cbf-da7f-46f5-9cd8-1a714d308149",
               "isHook": false,
               "skipped": true
             },
@@ -2463,8 +2458,8 @@
               "context": null,
               "code": "cy.intercept(\"POST\", \"**/services/airtime**\", {\n    statusCode: 400,\n    body: { success: false, code: \"INSUFFICIENT_BALANCE\", message: \"Insufficient wallet balance\" },\n}).as(\"airtimeInsufficient\");\ncy.get(\"#phone-input\").clear().type(\"08012345678\");\n// Select ₦5000 preset to maximise amount\ncy.contains(\"button\", \"5000\").click();\ncy.contains(\"button\", \"Pay\").click();\n// PIN modal will open — enter any pin\ncy.get('input[inputmode=\"numeric\"]', { timeout: 8000 }).type(\"0000\");\ncy.wait(\"@airtimeInsufficient\");\ncy.contains(/insufficient|balance/i, { timeout: 8000 }).should(\"be.visible\");",
               "err": {},
-              "uuid": "f49ee62f-5c19-4615-b260-b8bbc373c115",
-              "parentUUID": "089917e8-b1fe-4736-ab2d-69c07c364279",
+              "uuid": "0fa32355-0cb0-4fca-9206-cc88100aa3c9",
+              "parentUUID": "4fe26cbf-da7f-46f5-9cd8-1a714d308149",
               "isHook": false,
               "skipped": true
             }
@@ -2472,17 +2467,17 @@
           "suites": [],
           "passes": [],
           "failures": [
-            "59ad1b47-6fed-4b26-ac28-afe249b08271"
+            "4348773a-4caa-46aa-b83c-8f4296301e7c"
           ],
           "pending": [],
           "skipped": [
-            "f84a436f-3548-4c1e-9d09-756156ae818c",
-            "3d4c8157-caae-4c2e-b1b7-284624ea2b1a",
-            "a793b927-2b91-44c7-a48f-37d3c575cbe1",
-            "0bef3243-bd44-4fc9-b031-aeddc829f9ef",
-            "f49ee62f-5c19-4615-b260-b8bbc373c115"
+            "1b07119a-2fb5-4299-bab2-dd0b6f6d05e4",
+            "2d10ba95-e4b4-4eac-aacd-e8f068080e3f",
+            "7bd22306-bf54-448b-9060-e997b4250e2a",
+            "aa9ff556-579e-4554-81a5-1b55c68646a3",
+            "0fa32355-0cb0-4fca-9206-cc88100aa3c9"
           ],
-          "duration": 16875,
+          "duration": 16665,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
@@ -2498,7 +2493,7 @@
       "_timeout": 2000
     },
     {
-      "uuid": "b1c11acd-ecc1-4cb5-82b3-cb058b343650",
+      "uuid": "4e496dcc-9ae2-474d-ae78-47170c12152b",
       "title": "",
       "fullFile": "cypress/e2e/transactions/transactions.cy.ts",
       "file": "cypress/e2e/transactions/transactions.cy.ts",
@@ -2507,7 +2502,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "72332490-2805-4e25-beab-efad6824f742",
+          "uuid": "b2f096b4-37e4-4c48-801b-38b3076a40f7",
           "title": "Transactions",
           "fullFile": "",
           "file": "",
@@ -2518,7 +2513,7 @@
               "title": "P1 | Transactions page loads with history",
               "fullTitle": "Transactions P1 | Transactions page loads with history",
               "timedOut": null,
-              "duration": 722,
+              "duration": 661,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -2527,8 +2522,8 @@
               "context": null,
               "code": "cy.get(\"body\").should(\"be.visible\");\ncy.softAssert(() => {\n    cy.get(\"body\").then(($body) => {\n        const text = $body.text();\n        expect(text.match(/transaction|debit|credit|₦/i) ||\n            text.match(/no transaction|empty/i)).to.be.ok;\n    });\n}, \"Transaction list or empty state\");\ncy.assertAll();",
               "err": {},
-              "uuid": "0ecca237-1e37-4877-b3eb-cc7a2ff46ae3",
-              "parentUUID": "72332490-2805-4e25-beab-efad6824f742",
+              "uuid": "920c98e7-1995-49cf-b7df-264b6f5654dc",
+              "parentUUID": "b2f096b4-37e4-4c48-801b-38b3076a40f7",
               "isHook": false,
               "skipped": false
             },
@@ -2536,7 +2531,7 @@
               "title": "P2 | Filter by debit type works",
               "fullTitle": "Transactions P2 | Filter by debit type works",
               "timedOut": null,
-              "duration": 462,
+              "duration": 495,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -2545,8 +2540,8 @@
               "context": null,
               "code": "cy.contains(/debit|filter/i, { timeout: 8000 }).first().click();\ncy.softAssert(() => {\n    cy.contains(/debit/i).should(\"be.visible\");\n}, \"Debit filter active\");\ncy.assertAll();",
               "err": {},
-              "uuid": "69c1212b-6acd-4c4d-9652-50548eb8475b",
-              "parentUUID": "72332490-2805-4e25-beab-efad6824f742",
+              "uuid": "59f16200-5afa-47ea-b168-46cc80f58a06",
+              "parentUUID": "b2f096b4-37e4-4c48-801b-38b3076a40f7",
               "isHook": false,
               "skipped": false
             },
@@ -2554,7 +2549,7 @@
               "title": "N1 | Empty history → empty state message shown",
               "fullTitle": "Transactions N1 | Empty history → empty state message shown",
               "timedOut": null,
-              "duration": 556,
+              "duration": 574,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2567,8 +2562,8 @@
                 "estack": "CypressError: `cy.visit()` failed trying to load:\n\nhttps://staging-nepay.vercel.app/transactions\n\nThe `content-type` of the response we received from your web server was:\n\n  > `application/json`\n\nThis was considered a failure because responses must have `content-type: 'text/html'`\n\nHowever, you can likely use `cy.request()` instead of `cy.visit()`.\n\n`cy.request()` will automatically get and set cookies and enable you to parse responses.\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142396:84)\n    at visitFailedByErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141701:12)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142376:13)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9440:18)\n    at _drainQueueStep (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6034:12)\n    at _drainQueue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6027:9)\n    at ../../node_modules/bluebird/js/release/async.js.Async._drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6043:5)\n    at Async.drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:5913:14)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transactions/transactions.cy.ts:34:0)",
                 "diff": null
               },
-              "uuid": "85bbaa9c-1079-4539-933d-01508b287354",
-              "parentUUID": "72332490-2805-4e25-beab-efad6824f742",
+              "uuid": "12caa994-068b-4e15-a00a-19199df1e861",
+              "parentUUID": "b2f096b4-37e4-4c48-801b-38b3076a40f7",
               "isHook": false,
               "skipped": false
             },
@@ -2576,7 +2571,7 @@
               "title": "N2 | API error → graceful fallback, no crash",
               "fullTitle": "Transactions N2 | API error → graceful fallback, no crash",
               "timedOut": null,
-              "duration": 594,
+              "duration": 606,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2589,24 +2584,24 @@
                 "estack": "CypressError: `cy.visit()` failed trying to load:\n\nhttps://staging-nepay.vercel.app/transactions\n\nThe response we received from your web server was:\n\n  > 500: Internal Server Error\n\nThis was considered a failure because the status code was not `2xx`.\n\nIf you do not want status codes to cause failures pass the option: `failOnStatusCode: false`\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142396:84)\n    at visitFailedByErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141701:12)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142376:13)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9440:18)\n    at _drainQueueStep (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6034:12)\n    at _drainQueue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6027:9)\n    at ../../node_modules/bluebird/js/release/async.js.Async._drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6043:5)\n    at Async.drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:5913:14)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transactions/transactions.cy.ts:48:0)",
                 "diff": null
               },
-              "uuid": "951b1c9b-d58c-478d-8a65-37ce2b921c9e",
-              "parentUUID": "72332490-2805-4e25-beab-efad6824f742",
+              "uuid": "b9b15f9b-592e-4de5-9189-e37ea69324bc",
+              "parentUUID": "b2f096b4-37e4-4c48-801b-38b3076a40f7",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "0ecca237-1e37-4877-b3eb-cc7a2ff46ae3",
-            "69c1212b-6acd-4c4d-9652-50548eb8475b"
+            "920c98e7-1995-49cf-b7df-264b6f5654dc",
+            "59f16200-5afa-47ea-b168-46cc80f58a06"
           ],
           "failures": [
-            "85bbaa9c-1079-4539-933d-01508b287354",
-            "951b1c9b-d58c-478d-8a65-37ce2b921c9e"
+            "12caa994-068b-4e15-a00a-19199df1e861",
+            "b9b15f9b-592e-4de5-9189-e37ea69324bc"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 2334,
+          "duration": 2336,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
@@ -2622,7 +2617,7 @@
       "_timeout": 2000
     },
     {
-      "uuid": "8355fb60-c26d-4657-82d5-71852a5ba45e",
+      "uuid": "c22c9d64-a75f-4212-88ea-a9c801982184",
       "title": "",
       "fullFile": "cypress/e2e/transfer/transfer.cy.ts",
       "file": "cypress/e2e/transfer/transfer.cy.ts",
@@ -2631,7 +2626,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "49b339cb-3a4d-43ef-adb6-e1e503eb1d65",
+          "uuid": "a0503cc4-4cb0-41d0-a12c-0377b50f3b55",
           "title": "Transfer",
           "fullFile": "",
           "file": "",
@@ -2642,7 +2637,7 @@
               "title": "P1 | Transfer page loads with recipient search field",
               "fullTitle": "Transfer P1 | Transfer page loads with recipient search field",
               "timedOut": null,
-              "duration": 18689,
+              "duration": 19574,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2655,8 +2650,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:12:57)",
                 "diff": null
               },
-              "uuid": "8a409d1a-91c1-4f7c-8c12-4f6136f751d3",
-              "parentUUID": "49b339cb-3a4d-43ef-adb6-e1e503eb1d65",
+              "uuid": "225726d5-4a79-48c8-a8ae-a782750fe914",
+              "parentUUID": "a0503cc4-4cb0-41d0-a12c-0377b50f3b55",
               "isHook": false,
               "skipped": false
             },
@@ -2664,7 +2659,7 @@
               "title": "P2 | Amount field formats correctly (no more than 2 decimal places shown)",
               "fullTitle": "Transfer P2 | Amount field formats correctly (no more than 2 decimal places shown)",
               "timedOut": null,
-              "duration": 19411,
+              "duration": 19883,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2677,8 +2672,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:17:0)",
                 "diff": null
               },
-              "uuid": "d38655c4-52a7-4e18-adb0-69a127db43e5",
-              "parentUUID": "49b339cb-3a4d-43ef-adb6-e1e503eb1d65",
+              "uuid": "8c73d6cb-d8c6-4cc9-94e5-c7243990d8c5",
+              "parentUUID": "a0503cc4-4cb0-41d0-a12c-0377b50f3b55",
               "isHook": false,
               "skipped": false
             },
@@ -2686,7 +2681,7 @@
               "title": "P3 | Empty amount → submit blocked",
               "fullTitle": "Transfer P3 | Empty amount → submit blocked",
               "timedOut": null,
-              "duration": 21814,
+              "duration": 23098,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2699,8 +2694,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:25:0)",
                 "diff": null
               },
-              "uuid": "3d99c3c4-0ecc-453c-889f-894036d1dc30",
-              "parentUUID": "49b339cb-3a4d-43ef-adb6-e1e503eb1d65",
+              "uuid": "104c128d-6af6-4d65-8eca-ccbf8c4a4974",
+              "parentUUID": "a0503cc4-4cb0-41d0-a12c-0377b50f3b55",
               "isHook": false,
               "skipped": false
             },
@@ -2708,7 +2703,7 @@
               "title": "N1 | Bank search with no results → 'No banks found' shown",
               "fullTitle": "Transfer N1 | Bank search with no results → 'No banks found' shown",
               "timedOut": null,
-              "duration": 23385,
+              "duration": 24767,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2721,8 +2716,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:31:0)",
                 "diff": null
               },
-              "uuid": "b5548801-e104-4014-9ac2-5d69a6429472",
-              "parentUUID": "49b339cb-3a4d-43ef-adb6-e1e503eb1d65",
+              "uuid": "f08b5a5e-529a-40a8-a00f-81adb3f2fb7f",
+              "parentUUID": "a0503cc4-4cb0-41d0-a12c-0377b50f3b55",
               "isHook": false,
               "skipped": false
             },
@@ -2730,7 +2725,7 @@
               "title": "N2 | Amount = 0 → Transfer Now button stays disabled",
               "fullTitle": "Transfer N2 | Amount = 0 → Transfer Now button stays disabled",
               "timedOut": null,
-              "duration": 23782,
+              "duration": 26688,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2743,8 +2738,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:39:0)",
                 "diff": null
               },
-              "uuid": "4fa14b38-2969-4908-8ffd-5af37eccbf88",
-              "parentUUID": "49b339cb-3a4d-43ef-adb6-e1e503eb1d65",
+              "uuid": "2544cd78-82bd-41e9-b266-a6da1c37036e",
+              "parentUUID": "a0503cc4-4cb0-41d0-a12c-0377b50f3b55",
               "isHook": false,
               "skipped": false
             },
@@ -2752,7 +2747,7 @@
               "title": "N3 | Insufficient balance → inline error shown",
               "fullTitle": "Transfer N3 | Insufficient balance → inline error shown",
               "timedOut": null,
-              "duration": 25568,
+              "duration": 28603,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2765,8 +2760,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:44:0)",
                 "diff": null
               },
-              "uuid": "380fc6e6-7d2c-4bff-a433-dc0077590494",
-              "parentUUID": "49b339cb-3a4d-43ef-adb6-e1e503eb1d65",
+              "uuid": "b00aca8e-f80d-400a-adcb-339085b0a49a",
+              "parentUUID": "a0503cc4-4cb0-41d0-a12c-0377b50f3b55",
               "isHook": false,
               "skipped": false
             },
@@ -2774,7 +2769,7 @@
               "title": "N4 | API failure on confirm → error shown in modal",
               "fullTitle": "Transfer N4 | API failure on confirm → error shown in modal",
               "timedOut": null,
-              "duration": 26769,
+              "duration": 29259,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2787,8 +2782,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:58:68)\n    at Context.eval (webpack:///./cypress/support/commands.ts:64:0)",
                 "diff": null
               },
-              "uuid": "2e387d80-2fd2-4c46-b8c3-6c876fa08eaf",
-              "parentUUID": "49b339cb-3a4d-43ef-adb6-e1e503eb1d65",
+              "uuid": "8094ebb9-3fad-49d3-8073-d924bf6c245f",
+              "parentUUID": "a0503cc4-4cb0-41d0-a12c-0377b50f3b55",
               "isHook": false,
               "skipped": false
             },
@@ -2796,7 +2791,7 @@
               "title": "N5 | Special characters in bank search → no crash",
               "fullTitle": "Transfer N5 | Special characters in bank search → no crash",
               "timedOut": null,
-              "duration": 27353,
+              "duration": 27117,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -2809,8 +2804,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:63:0)",
                 "diff": null
               },
-              "uuid": "3689e192-3f71-4dc3-a673-3a2c4190d4d6",
-              "parentUUID": "49b339cb-3a4d-43ef-adb6-e1e503eb1d65",
+              "uuid": "6b5dd1e5-a067-43b7-ba8b-bdb78b5a564b",
+              "parentUUID": "a0503cc4-4cb0-41d0-a12c-0377b50f3b55",
               "isHook": false,
               "skipped": false
             }
@@ -2818,18 +2813,18 @@
           "suites": [],
           "passes": [],
           "failures": [
-            "8a409d1a-91c1-4f7c-8c12-4f6136f751d3",
-            "d38655c4-52a7-4e18-adb0-69a127db43e5",
-            "3d99c3c4-0ecc-453c-889f-894036d1dc30",
-            "b5548801-e104-4014-9ac2-5d69a6429472",
-            "4fa14b38-2969-4908-8ffd-5af37eccbf88",
-            "380fc6e6-7d2c-4bff-a433-dc0077590494",
-            "2e387d80-2fd2-4c46-b8c3-6c876fa08eaf",
-            "3689e192-3f71-4dc3-a673-3a2c4190d4d6"
+            "225726d5-4a79-48c8-a8ae-a782750fe914",
+            "8c73d6cb-d8c6-4cc9-94e5-c7243990d8c5",
+            "104c128d-6af6-4d65-8eca-ccbf8c4a4974",
+            "f08b5a5e-529a-40a8-a00f-81adb3f2fb7f",
+            "2544cd78-82bd-41e9-b266-a6da1c37036e",
+            "b00aca8e-f80d-400a-adcb-339085b0a49a",
+            "8094ebb9-3fad-49d3-8073-d924bf6c245f",
+            "6b5dd1e5-a067-43b7-ba8b-bdb78b5a564b"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 186771,
+          "duration": 198989,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
