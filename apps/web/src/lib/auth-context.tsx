@@ -227,7 +227,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } finally {
             clearTokens();
             setUser(null);
-            document.cookie = "nepay_refresh=; path=/; max-age=0";
             setIsMutating(false);
             toast.info("You have been signed out.");
             router.push("/login");
