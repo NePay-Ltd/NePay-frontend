@@ -85,6 +85,26 @@ export default function TransferPage() {
         if (txStatus.status === "FAILED") setTxState("error");
     }, [txStatus]);
 
+    // A withdrawal can legitimately sit PROCESSING for a long stretch —
+    // confirmed live 2026-09-27: VFD itself can hold a transfer in its own
+    // "Request Processing in Progress" state for many minutes, nothing
+    // wrong on our side, our own reconciliation (WithdrawalService.getById)
+    // resolves it the moment VFD's own status actually changes. Blocking
+    // the customer on an un-closeable spinner for that whole stretch is the
+    // real gap, not a bug in the status itself — after 45s still
+    // unresolved, switch to the modal's existing "review" state (amber
+    // clock, closeable, "we'll notify you once it clears") instead of
+    // leaving them stuck staring at a spinner with no way out.
+    React.useEffect(() => {
+        if (txState !== "processing" || !txId) return;
+
+        const timer = setTimeout(() => {
+            setTxState((current) => (current === "processing" ? "review" : current));
+        }, 45_000);
+
+        return () => clearTimeout(timer);
+    }, [txState, txId]);
+
     // ── Bank Account State ──
     const [bankCode, setBankCode] = React.useState("");
     const [accountNumber, setAccountNumber] = React.useState("");
@@ -466,6 +486,23 @@ export default function TransferPage() {
                 }
                 // Processing UI
                 processingText="Processing your transfer..."
+                // Review UI — shown after 45s if still unresolved; the
+                // transfer isn't stuck, it just hasn't been confirmed by
+                // the receiving bank yet. Safe to close: the money has
+                // already left the wallet (or will be returned
+                // automatically if it ultimately fails), and the real
+                // outcome shows up in Transactions the moment it resolves.
+                reviewTitle="Still Processing"
+                reviewDescription={
+                    <p>
+                        Your transfer of <span className="font-bold">{formatNaira(watchAmount)}</span> is taking longer than usual to confirm. This can happen with some banks — it&apos;s still being processed, and you&apos;ll see the final result in your transaction history once it clears.
+                    </p>
+                }
+                reviewButtonLabel="View transactions"
+                onReviewAction={() => {
+                    setModalOpen(false);
+                    router.push("/transactions");
+                }}
                 // Success UI
                 successTitle="Transfer Successful"
                 successDescription={
