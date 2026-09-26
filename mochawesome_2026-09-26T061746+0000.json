@@ -1,0 +1,297 @@
+{
+  "stats": {
+    "suites": 3,
+    "tests": 4,
+    "passes": 0,
+    "pending": 0,
+    "failures": 4,
+    "start": "2026-09-26T06:17:43.614Z",
+    "end": "2026-09-26T06:17:46.458Z",
+    "duration": 2844,
+    "testsRegistered": 8,
+    "passPercent": 0,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 4,
+    "hasSkipped": true
+  },
+  "results": [
+    {
+      "uuid": "faf63e35-0605-477d-bf3c-fc8ba4782943",
+      "title": "",
+      "fullFile": "cypress/e2e/security/change-password.cy.ts",
+      "file": "cypress/e2e/security/change-password.cy.ts",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "b94ada25-9a13-4c31-a2cc-e5d5610ae703",
+          "title": "Security — Change Password",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "P1 | Change password page loads with 3 fields",
+              "fullTitle": "Security — Change Password P1 | Change password page loads with 3 fields",
+              "timedOut": null,
+              "duration": 179,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.softAssert(() => {\n    cy.contains(/current password|old password/i, { timeout: 8000 }).should(\"be.visible\");\n}, \"Current password label\");\ncy.softAssert(() => {\n    cy.contains(/new password/i).should(\"be.visible\");\n}, \"New password label\");\ncy.assertAll();",
+              "err": {
+                "message": "AssertionError: Login API should return 200 or 201: expected 404 to be one of [ 200, 201 ]\n\nThis error occurred while creating the session. Because the session setup failed, we failed the test.\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Security — Change Password`",
+                "estack": "AssertionError: Login API should return 200 or 201: expected 404 to be one of [ 200, 201 ]\n\nThis error occurred while creating the session. Because the session setup failed, we failed the test.\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Security — Change Password`\n    at Context.eval (webpack:///./cypress/support/commands.ts:33:0)",
+                "diff": "- '404'\n+ '[ 200, 201 ]'\n"
+              },
+              "uuid": "3b999f49-e8bd-4beb-af90-08e0c66cd383",
+              "parentUUID": "b94ada25-9a13-4c31-a2cc-e5d5610ae703",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N1 | Wrong current password → API error shown",
+              "fullTitle": "Security — Change Password N1 | Wrong current password → API error shown",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.intercept(\"POST\", \"**/auth/change-password**\", {\n    statusCode: 401,\n    body: { success: false, message: \"Current password is incorrect\" },\n}).as(\"wrongCurrentPw\");\ncy.get('input[name=\"currentPassword\"]').first().type(\"WrongCurrent1\");\ncy.get('input[name=\"newPassword\"]').first().type(\"NewValidPass1\");\ncy.get('input[name=\"confirmNewPassword\"], input[name=\"confirmPassword\"]').first().type(\"NewValidPass1\");\ncy.get('button[type=\"submit\"]').click();\ncy.wait(\"@wrongCurrentPw\");\ncy.contains(/incorrect|wrong|current/i, { timeout: 8000 }).should(\"be.visible\");",
+              "err": {},
+              "uuid": "53e5ab86-c1c8-49c5-8134-046f6efd6521",
+              "parentUUID": "b94ada25-9a13-4c31-a2cc-e5d5610ae703",
+              "isHook": false,
+              "skipped": true
+            },
+            {
+              "title": "N2 | New passwords don't match → validation error",
+              "fullTitle": "Security — Change Password N2 | New passwords don't match → validation error",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"newPassword\"]').first().type(\"NewPass123\");\ncy.get('input[name=\"confirmNewPassword\"], input[name=\"confirmPassword\"]').first().type(\"DifferentPass123\");\ncy.get('button[type=\"submit\"]').click();\ncy.contains(/do not match|match/i).should(\"be.visible\");",
+              "err": {},
+              "uuid": "6a68bd45-260d-40f8-b5cb-510645b24738",
+              "parentUUID": "b94ada25-9a13-4c31-a2cc-e5d5610ae703",
+              "isHook": false,
+              "skipped": true
+            },
+            {
+              "title": "N3 | Weak new password → validation error",
+              "fullTitle": "Security — Change Password N3 | Weak new password → validation error",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"newPassword\"]').first().type(\"weak\");\ncy.get('button[type=\"submit\"]').click();\ncy.contains(/6 characters|strong|minimum/i).should(\"be.visible\");",
+              "err": {},
+              "uuid": "488f83ee-6430-40aa-8fdc-78d166d50ed7",
+              "parentUUID": "b94ada25-9a13-4c31-a2cc-e5d5610ae703",
+              "isHook": false,
+              "skipped": true
+            }
+          ],
+          "suites": [],
+          "passes": [],
+          "failures": [
+            "3b999f49-e8bd-4beb-af90-08e0c66cd383"
+          ],
+          "pending": [],
+          "skipped": [
+            "53e5ab86-c1c8-49c5-8134-046f6efd6521",
+            "6a68bd45-260d-40f8-b5cb-510645b24738",
+            "488f83ee-6430-40aa-8fdc-78d166d50ed7"
+          ],
+          "duration": 179,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        },
+        {
+          "uuid": "f0e8aa09-ade9-4f77-a45b-ad28eecb812d",
+          "title": "Security — Change PIN",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "N1 | PINs don't match → error",
+              "fullTitle": "Security — Change PIN N1 | PINs don't match → error",
+              "timedOut": null,
+              "duration": 185,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('#currentPin').type(\"0000\");\ncy.get('#newPin').type(\"1234\");\ncy.get('#confirmPin').type(\"5678\");\ncy.get('button[type=\"submit\"]').click();\ncy.contains(/do not match|match/i).should(\"be.visible\");",
+              "err": {
+                "message": "AssertionError: Login API should return 200 or 201: expected 404 to be one of [ 200, 201 ]\n\nThis error occurred while creating the session. Because the session setup failed, we failed the test.\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Security — Change PIN`",
+                "estack": "AssertionError: Login API should return 200 or 201: expected 404 to be one of [ 200, 201 ]\n\nThis error occurred while creating the session. Because the session setup failed, we failed the test.\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Security — Change PIN`\n    at Context.eval (webpack:///./cypress/support/commands.ts:33:0)",
+                "diff": "- '404'\n+ '[ 200, 201 ]'\n"
+              },
+              "uuid": "353d0378-1d08-4f11-80b6-b6e0c861354d",
+              "parentUUID": "f0e8aa09-ade9-4f77-a45b-ad28eecb812d",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N2 | PIN not 4 digits → validation error",
+              "fullTitle": "Security — Change PIN N2 | PIN not 4 digits → validation error",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('#newPin').type(\"12\");\ncy.get('button[type=\"submit\"]').click();\ncy.contains(/4 digits|exactly 4|length/i).should(\"be.visible\");",
+              "err": {},
+              "uuid": "7ecc2e08-f99b-4fbf-9fce-13e6fd1658cb",
+              "parentUUID": "f0e8aa09-ade9-4f77-a45b-ad28eecb812d",
+              "isHook": false,
+              "skipped": true
+            }
+          ],
+          "suites": [],
+          "passes": [],
+          "failures": [
+            "353d0378-1d08-4f11-80b6-b6e0c861354d"
+          ],
+          "pending": [],
+          "skipped": [
+            "7ecc2e08-f99b-4fbf-9fce-13e6fd1658cb"
+          ],
+          "duration": 185,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        },
+        {
+          "uuid": "4c94360f-8123-4e6d-9cb8-e7205b044a7b",
+          "title": "Security — Login Activity",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "P1 | Login activity page loads",
+              "fullTitle": "Security — Login Activity P1 | Login activity page loads",
+              "timedOut": null,
+              "duration": 224,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.login();\ncy.visit(\"/security/login-activity\");\ncy.get(\"body\").should(\"be.visible\");\ncy.softAssert(() => {\n    cy.contains(/device|session|login|activity/i, { timeout: 8000 }).should(\"be.visible\");\n}, \"Activity page heading\");\ncy.assertAll();",
+              "err": {
+                "message": "AssertionError: Login API should return 200 or 201: expected 404 to be one of [ 200, 201 ]\n\nThis error occurred while creating the session. Because the session setup failed, we failed the test.",
+                "estack": "AssertionError: Login API should return 200 or 201: expected 404 to be one of [ 200, 201 ]\n\nThis error occurred while creating the session. Because the session setup failed, we failed the test.\n    at Context.eval (webpack:///./cypress/support/commands.ts:33:0)",
+                "diff": "- 404\n+ [ 200, 201 ]\n"
+              },
+              "uuid": "dba9e9a4-c0f0-430c-9357-1eb8a0b673e4",
+              "parentUUID": "4c94360f-8123-4e6d-9cb8-e7205b044a7b",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N1 | API error → graceful error state, no crash",
+              "fullTitle": "Security — Login Activity N1 | API error → graceful error state, no crash",
+              "timedOut": null,
+              "duration": 255,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "// Intercept BEFORE visiting so it catches the initial page load request\ncy.intercept(\"GET\", \"**/security/login-activity**\", {\n    statusCode: 500,\n    body: { success: false, message: \"Server error\" },\n}).as(\"sessionsError\");\ncy.login();\ncy.visit(\"/security/login-activity\");\ncy.wait(\"@sessionsError\");\ncy.get(\"body\").should(\"be.visible\");",
+              "err": {
+                "message": "AssertionError: Login API should return 200 or 201: expected 404 to be one of [ 200, 201 ]\n\nThis error occurred while creating the session. Because the session setup failed, we failed the test.",
+                "estack": "AssertionError: Login API should return 200 or 201: expected 404 to be one of [ 200, 201 ]\n\nThis error occurred while creating the session. Because the session setup failed, we failed the test.\n    at Context.eval (webpack:///./cypress/support/commands.ts:33:0)",
+                "diff": "- 404\n+ [ 200, 201 ]\n"
+              },
+              "uuid": "954fc174-ea21-412f-b6f1-a71498bfb9a1",
+              "parentUUID": "4c94360f-8123-4e6d-9cb8-e7205b044a7b",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [],
+          "failures": [
+            "dba9e9a4-c0f0-430c-9357-1eb8a0b673e4",
+            "954fc174-ea21-412f-b6f1-a71498bfb9a1"
+          ],
+          "pending": [],
+          "skipped": [],
+          "duration": 479,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.0.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "8.1.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime"
+      },
+      "version": "6.3.2"
+    }
+  }
+}

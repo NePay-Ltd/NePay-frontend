@@ -1,0 +1,263 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 0,
+    "pending": 0,
+    "failures": 1,
+    "start": "2026-09-26T06:17:14.196Z",
+    "end": "2026-09-26T06:17:14.977Z",
+    "duration": 781,
+    "testsRegistered": 9,
+    "passPercent": 0,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 8,
+    "hasSkipped": true
+  },
+  "results": [
+    {
+      "uuid": "4d04d558-6610-4c08-8a19-4d6db4782456",
+      "title": "",
+      "fullFile": "cypress/e2e/dashboard/overview.cy.ts",
+      "file": "cypress/e2e/dashboard/overview.cy.ts",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "f1f0b7f4-463f-4673-a6b5-51ab151c3145",
+          "title": "Dashboard — Overview",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "P1 | Dashboard loads — wallet balance card visible with formatted value",
+              "fullTitle": "Dashboard — Overview P1 | Dashboard loads — wallet balance card visible with formatted value",
+              "timedOut": null,
+              "duration": 165,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "// SOFT: balance card exists\ncy.softAssert(() => {\n    cy.contains(/₦|balance/i, { timeout: 10000 }).should(\"be.visible\");\n}, \"Wallet balance visible\");\ncy.assertAll();",
+              "err": {
+                "message": "AssertionError: Login API should return 200 or 201: expected 404 to be one of [ 200, 201 ]\n\nThis error occurred while creating the session. Because the session setup failed, we failed the test.\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Dashboard — Overview`",
+                "estack": "AssertionError: Login API should return 200 or 201: expected 404 to be one of [ 200, 201 ]\n\nThis error occurred while creating the session. Because the session setup failed, we failed the test.\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Dashboard — Overview`\n    at Context.eval (webpack:///./cypress/support/commands.ts:33:0)",
+                "diff": "- '404'\n+ '[ 200, 201 ]'\n"
+              },
+              "uuid": "7dbf757f-d645-4646-bba7-5dc6241395f5",
+              "parentUUID": "f1f0b7f4-463f-4673-a6b5-51ab151c3145",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P2 | Recent transactions list renders",
+              "fullTitle": "Dashboard — Overview P2 | Recent transactions list renders",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// SOFT: at least one transaction, or an empty state\ncy.softAssert(() => {\n    cy.get(\"body\").then(($body) => {\n        const hasTransactions = $body.text().match(/transaction|debit|credit|transfer/i);\n        const hasEmptyState = $body.text().match(/no transaction|nothing here/i);\n        expect(hasTransactions || hasEmptyState).to.be.ok;\n    });\n}, \"Transactions list or empty state visible\");\ncy.assertAll();",
+              "err": {},
+              "uuid": "4a743295-b63f-400c-a850-d999effb3ab8",
+              "parentUUID": "f1f0b7f4-463f-4673-a6b5-51ab151c3145",
+              "isHook": false,
+              "skipped": true
+            },
+            {
+              "title": "P3 | Quick action buttons visible on dashboard",
+              "fullTitle": "Dashboard — Overview P3 | Quick action buttons visible on dashboard",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// SOFT: check all quick actions exist\nconst actions = [\"Transfer\", \"Add Money\"];\nactions.forEach((action) => {\n    cy.softAssert(() => {\n        cy.contains(action, { timeout: 8000 }).should(\"be.visible\");\n    }, `Quick action: ${action}`);\n});\ncy.assertAll();",
+              "err": {},
+              "uuid": "503cc873-5921-4fa7-87e3-25ceacafbc3e",
+              "parentUUID": "f1f0b7f4-463f-4673-a6b5-51ab151c3145",
+              "isHook": false,
+              "skipped": true
+            },
+            {
+              "title": "P4 | Sidebar navigation links are all present",
+              "fullTitle": "Dashboard — Overview P4 | Sidebar navigation links are all present",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const navItems = [\"Overview\", \"Transactions\", \"Transfer to bank\", \"Bills & services\"];\nnavItems.forEach((item) => {\n    cy.softAssert(() => {\n        cy.contains(item, { timeout: 8000 }).should(\"exist\");\n    }, `Sidebar nav item: ${item}`);\n});\ncy.assertAll();",
+              "err": {},
+              "uuid": "fafa2d5f-1ff4-4cf2-a562-f4b214995a94",
+              "parentUUID": "f1f0b7f4-463f-4673-a6b5-51ab151c3145",
+              "isHook": false,
+              "skipped": true
+            },
+            {
+              "title": "P5 | Clicking Transfer in sidebar navigates to /transfer",
+              "fullTitle": "Dashboard — Overview P5 | Clicking Transfer in sidebar navigates to /transfer",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.contains(\"Transfer to bank\", { timeout: 8000 }).first().click();\n// HARD\ncy.url({ timeout: 10000 }).should(\"include\", \"/transfer\");",
+              "err": {},
+              "uuid": "59d612df-0793-414b-a3c8-1d2943d61550",
+              "parentUUID": "f1f0b7f4-463f-4673-a6b5-51ab151c3145",
+              "isHook": false,
+              "skipped": true
+            },
+            {
+              "title": "P6 | Page has no visible error or crash",
+              "fullTitle": "Dashboard — Overview P6 | Page has no visible error or crash",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// HARD: no error boundary or crash message\ncy.contains(/something went wrong|error occurred|unexpected/i).should(\"not.exist\");\ncy.get(\"body\").should(\"be.visible\");",
+              "err": {},
+              "uuid": "aa71b5f3-43f7-45c1-b2da-f2c8b9a47df3",
+              "parentUUID": "f1f0b7f4-463f-4673-a6b5-51ab151c3145",
+              "isHook": false,
+              "skipped": true
+            },
+            {
+              "title": "P7 | Can toggle balance visibility (eye icon)",
+              "fullTitle": "Dashboard — Overview P7 | Can toggle balance visibility (eye icon)",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Make sure balance is visible first\ncy.contains(/₦/i, { timeout: 10000 }).should(\"be.visible\");\n// Click the hide balance button\ncy.get('button[aria-label=\"Hide balance\"]').click();\n// Verify it turns into asterisks\ncy.contains(\"******\").should(\"be.visible\");\ncy.get('button[aria-label=\"Show balance\"]').should(\"be.visible\");\n// Click to show again\ncy.get('button[aria-label=\"Show balance\"]').click();\n// Verify asterisks are gone and balance is back\ncy.contains(\"******\").should(\"not.exist\");\ncy.contains(/₦/i).should(\"be.visible\");",
+              "err": {},
+              "uuid": "95905d38-9c22-4ec1-b098-9611945b9202",
+              "parentUUID": "f1f0b7f4-463f-4673-a6b5-51ab151c3145",
+              "isHook": false,
+              "skipped": true
+            },
+            {
+              "title": "N1 | Wallet API error → error state shown, page does not crash",
+              "fullTitle": "Dashboard — Overview N1 | Wallet API error → error state shown, page does not crash",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.intercept(\"GET\", \"**/wallet**\", {\n    statusCode: 500,\n    body: { success: false, message: \"Internal server error\" },\n}).as(\"walletError\");\ncy.reload();\ncy.wait(\"@walletError\");\n// HARD: no crash\ncy.get(\"body\").should(\"be.visible\");\n// SOFT: some error state or graceful fallback shown\ncy.softAssert(() => {\n    cy.contains(/error|failed|unavailable|try again/i, { timeout: 8000 }).should(\"be.visible\");\n}, \"Error state on wallet API failure\");\ncy.assertAll();",
+              "err": {},
+              "uuid": "93b4c5e8-a73c-4834-aace-869c29c539c4",
+              "parentUUID": "f1f0b7f4-463f-4673-a6b5-51ab151c3145",
+              "isHook": false,
+              "skipped": true
+            },
+            {
+              "title": "N2 | Skeleton loaders shown during slow API response",
+              "fullTitle": "Dashboard — Overview N2 | Skeleton loaders shown during slow API response",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.intercept(\"GET\", \"**/wallet**\", (req) => {\n    req.on(\"response\", (res) => {\n        res.setDelay(3000); // 3-second artificial delay\n    });\n}).as(\"slowWallet\");\ncy.reload();\n// SOFT: loading skeleton should be visible before data arrives\ncy.softAssert(() => {\n    cy.get(\"[class*=skeleton], [class*=loading], [data-testid*=skeleton]\", { timeout: 2000 })\n        .should(\"exist\");\n}, \"Skeleton loaders during slow API\");\ncy.wait(\"@slowWallet\");\ncy.assertAll();",
+              "err": {},
+              "uuid": "3e49ae0c-7a04-4e01-a384-f18ca0bb546e",
+              "parentUUID": "f1f0b7f4-463f-4673-a6b5-51ab151c3145",
+              "isHook": false,
+              "skipped": true
+            }
+          ],
+          "suites": [],
+          "passes": [],
+          "failures": [
+            "7dbf757f-d645-4646-bba7-5dc6241395f5"
+          ],
+          "pending": [],
+          "skipped": [
+            "4a743295-b63f-400c-a850-d999effb3ab8",
+            "503cc873-5921-4fa7-87e3-25ceacafbc3e",
+            "fafa2d5f-1ff4-4cf2-a562-f4b214995a94",
+            "59d612df-0793-414b-a3c8-1d2943d61550",
+            "aa71b5f3-43f7-45c1-b2da-f2c8b9a47df3",
+            "95905d38-9c22-4ec1-b098-9611945b9202",
+            "93b4c5e8-a73c-4834-aace-869c29c539c4",
+            "3e49ae0c-7a04-4e01-a384-f18ca0bb546e"
+          ],
+          "duration": 165,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.0.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "8.1.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime"
+      },
+      "version": "6.3.2"
+    }
+  }
+}

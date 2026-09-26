@@ -1,0 +1,240 @@
+{
+  "stats": {
+    "suites": 2,
+    "tests": 7,
+    "passes": 7,
+    "pending": 0,
+    "failures": 0,
+    "start": "2026-09-26T06:14:16.221Z",
+    "end": "2026-09-26T06:14:24.546Z",
+    "duration": 8325,
+    "testsRegistered": 7,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "6c485634-8b46-43e5-8ecc-f1f24ad52c7e",
+      "title": "",
+      "fullFile": "cypress/e2e/auth/forgot-password.cy.ts",
+      "file": "cypress/e2e/auth/forgot-password.cy.ts",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "d8dbee34-7f36-426e-ace6-a39a41aa7cd6",
+          "title": "Auth — Forgot Password",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "P1 | Valid email → success message shown",
+              "fullTitle": "Auth — Forgot Password P1 | Valid email → success message shown",
+              "timedOut": null,
+              "duration": 1952,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const emailToType = Cypress.env(\"TEST_EMAIL\") || \"test@example.com\";\ncy.get('input[name=\"email\"]').type(emailToType);\ncy.get('button[type=\"submit\"]').click();\n// HARD: success/confirmation message must appear\ncy.contains(/check your|sent|email/i, { timeout: 10000 }).should(\"be.visible\");",
+              "err": {},
+              "uuid": "21d38230-2d1b-41ff-a2fc-bc2d5edc5029",
+              "parentUUID": "d8dbee34-7f36-426e-ace6-a39a41aa7cd6",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N1 | Empty email → validation error before API call",
+              "fullTitle": "Auth — Forgot Password N1 | Empty email → validation error before API call",
+              "timedOut": null,
+              "duration": 547,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('button[type=\"submit\"]').click();\n// HARD: form validation blocks API call\ncy.contains(/email|required/i).should(\"be.visible\");",
+              "err": {},
+              "uuid": "9bca3910-8026-4645-af8f-e123b3d9d469",
+              "parentUUID": "d8dbee34-7f36-426e-ace6-a39a41aa7cd6",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N2 | Malformed email → validation error",
+              "fullTitle": "Auth — Forgot Password N2 | Malformed email → validation error",
+              "timedOut": null,
+              "duration": 662,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"email\"]').type(\"not-an-email\");\ncy.get('button[type=\"submit\"]').click();\n// HARD\ncy.contains(/valid email/i).should(\"be.visible\");",
+              "err": {},
+              "uuid": "ba77de64-c5d8-4b85-9b78-45d55eb9e911",
+              "parentUUID": "d8dbee34-7f36-426e-ace6-a39a41aa7cd6",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N3 | Non-existent email → shows error message",
+              "fullTitle": "Auth — Forgot Password N3 | Non-existent email → shows error message",
+              "timedOut": null,
+              "duration": 824,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.intercept(\"POST\", \"**/auth/forgot-password\", {\n    statusCode: 404,\n    body: { success: false, code: \"ACCOUNT_NOT_FOUND\", message: \"We couldn't find an account with that email.\" }\n}).as(\"forgotPasswordErr\");\ncy.get('input[name=\"email\"]').type(\"doesnotexist99999@nepay.io\");\ncy.get('button[type=\"submit\"]').click();\ncy.wait(\"@forgotPasswordErr\");\ncy.contains(/couldn't find|not found/i).should(\"be.visible\");",
+              "err": {},
+              "uuid": "7c4dc318-4d26-44f3-9794-0c59178c660f",
+              "parentUUID": "d8dbee34-7f36-426e-ace6-a39a41aa7cd6",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "21d38230-2d1b-41ff-a2fc-bc2d5edc5029",
+            "9bca3910-8026-4645-af8f-e123b3d9d469",
+            "ba77de64-c5d8-4b85-9b78-45d55eb9e911",
+            "7c4dc318-4d26-44f3-9794-0c59178c660f"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 3985,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        },
+        {
+          "uuid": "77e89f65-bd1a-4738-959d-28b5c19c5efd",
+          "title": "Auth — Reset Password",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "N1 | Passwords don't match → confirm error",
+              "fullTitle": "Auth — Reset Password N1 | Passwords don't match → confirm error",
+              "timedOut": null,
+              "duration": 1494,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"email\"]').type(\"test@example.com\");\ncy.get('input[name=\"code\"]').type(\"123456\");\ncy.get('input[name=\"password\"]').type(\"NewPass123\");\ncy.get('input[name=\"confirmPassword\"]').type(\"DifferentPass123\");\ncy.get('button[type=\"submit\"]').click();\n// HARD\ncy.contains(/passwords do not match/i).should(\"be.visible\");",
+              "err": {},
+              "uuid": "46902692-060f-4a6a-a097-83601274bd27",
+              "parentUUID": "77e89f65-bd1a-4738-959d-28b5c19c5efd",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N2 | Backend rejects code → validation error shown",
+              "fullTitle": "Auth — Reset Password N2 | Backend rejects code → validation error shown",
+              "timedOut": null,
+              "duration": 1457,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.intercept(\"POST\", \"**/auth/reset-password\", {\n    statusCode: 400,\n    body: { success: false, code: \"VALIDATION_FAILED\", message: \"Invalid or expired code\" }\n}).as(\"resetErr\");\ncy.get('input[name=\"email\"]').type(\"test@example.com\");\ncy.get('input[name=\"code\"]').type(\"000000\");\ncy.get('input[name=\"password\"]').type(\"NewPass123\");\ncy.get('input[name=\"confirmPassword\"]').type(\"NewPass123\");\ncy.get('button[type=\"submit\"]').click();\ncy.wait(\"@resetErr\");\ncy.contains(/invalid or expired/i).should(\"be.visible\");",
+              "err": {},
+              "uuid": "bf264508-012e-498e-ac24-4e84076cd9e4",
+              "parentUUID": "77e89f65-bd1a-4738-959d-28b5c19c5efd",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "N3 | Weak new password → validation error",
+              "fullTitle": "Auth — Reset Password N3 | Weak new password → validation error",
+              "timedOut": null,
+              "duration": 1321,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input[name=\"email\"]').type(\"test@example.com\");\ncy.get('input[name=\"code\"]').type(\"123456\");\ncy.get('input[name=\"password\"]').type(\"weak\");\ncy.get('input[name=\"confirmPassword\"]').type(\"weak\");\ncy.get('button[type=\"submit\"]').click();\n// HARD\ncy.contains(/at least 6 characters/i).should(\"be.visible\");",
+              "err": {},
+              "uuid": "4a6b5765-a4fe-4bf1-9b20-301c7383c2e8",
+              "parentUUID": "77e89f65-bd1a-4738-959d-28b5c19c5efd",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "46902692-060f-4a6a-a097-83601274bd27",
+            "bf264508-012e-498e-ac24-4e84076cd9e4",
+            "4a6b5765-a4fe-4bf1-9b20-301c7383c2e8"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 4272,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.0.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "8.1.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime"
+      },
+      "version": "6.3.2"
+    }
+  }
+}

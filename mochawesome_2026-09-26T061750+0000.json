@@ -1,0 +1,206 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 0,
+    "pending": 0,
+    "failures": 1,
+    "start": "2026-09-26T06:17:49.408Z",
+    "end": "2026-09-26T06:17:50.151Z",
+    "duration": 743,
+    "testsRegistered": 6,
+    "passPercent": 0,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 5,
+    "hasSkipped": true
+  },
+  "results": [
+    {
+      "uuid": "76ab3804-82d6-415b-8eba-4ad0cabc5172",
+      "title": "",
+      "fullFile": "cypress/e2e/services/airtime.cy.ts",
+      "file": "cypress/e2e/services/airtime.cy.ts",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "24ec458a-ee31-4f36-862e-821bf5ec6f92",
+          "title": "Services — Airtime",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "P1 | Airtime page loads with provider list",
+              "fullTitle": "Services — Airtime P1 | Airtime page loads with provider list",
+              "timedOut": null,
+              "duration": 161,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.softAssert(() => {\n    cy.contains(/MTN|Airtel|Glo|9mobile/i, { timeout: 10000 }).should(\"be.visible\");\n}, \"Network providers listed\");\ncy.assertAll();",
+              "err": {
+                "message": "AssertionError: Login API should return 200 or 201: expected 404 to be one of [ 200, 201 ]\n\nThis error occurred while creating the session. Because the session setup failed, we failed the test.\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Services — Airtime`",
+                "estack": "AssertionError: Login API should return 200 or 201: expected 404 to be one of [ 200, 201 ]\n\nThis error occurred while creating the session. Because the session setup failed, we failed the test.\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Services — Airtime`\n    at Context.eval (webpack:///./cypress/support/commands.ts:33:0)",
+                "diff": "- '404'\n+ '[ 200, 201 ]'\n"
+              },
+              "uuid": "e16d3d1a-4b1b-43b2-b6cc-1bf130ba0a11",
+              "parentUUID": "24ec458a-ee31-4f36-862e-821bf5ec6f92",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "P2 | Select provider → amount/phone form shown",
+              "fullTitle": "Services — Airtime P2 | Select provider → amount/phone form shown",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// The phone input is always visible — just confirm it exists\ncy.softAssert(() => {\n    cy.get(\"#phone-input\", { timeout: 5000 }).should(\"be.visible\");\n}, \"Form appears after selecting provider\");\ncy.assertAll();",
+              "err": {},
+              "uuid": "16f7e00b-9596-4400-8a59-05a5170a71cf",
+              "parentUUID": "24ec458a-ee31-4f36-862e-821bf5ec6f92",
+              "isHook": false,
+              "skipped": true
+            },
+            {
+              "title": "N1 | Invalid phone number → validation error",
+              "fullTitle": "Services — Airtime N1 | Invalid phone number → validation error",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Type a short invalid phone number\ncy.get(\"#phone-input\").clear().type(\"12345\");\n// Set a valid amount via the ₦50 preset so the Pay button enables\ncy.contains(\"button\", \"50\").click();\n// Click the sticky Pay bar\ncy.contains(\"button\", \"Pay\").click();\n// SOFT: validation fires as a toast\ncy.softAssert(() => {\n    cy.contains(/valid|phone|number/i, { timeout: 5000 }).should(\"be.visible\");\n}, \"Invalid phone toast shown\");\ncy.assertAll();",
+              "err": {},
+              "uuid": "613aa936-da07-4ecf-91c4-a95f9b5e977d",
+              "parentUUID": "24ec458a-ee31-4f36-862e-821bf5ec6f92",
+              "isHook": false,
+              "skipped": true
+            },
+            {
+              "title": "N2 | Empty amount → submit blocked",
+              "fullTitle": "Services — Airtime N2 | Empty amount → submit blocked",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Type a valid phone but leave amount at 0\ncy.get(\"#phone-input\").clear().type(\"08012345678\");\n// Don't select any amount preset — amount stays 0\ncy.contains(\"button\", \"Pay\").click();\n// SOFT: minimum amount toast should appear\ncy.softAssert(() => {\n    cy.contains(/minimum|amount/i, { timeout: 5000 }).should(\"be.visible\");\n}, \"Minimum amount toast shown\");\ncy.assertAll();",
+              "err": {},
+              "uuid": "927798ff-7306-41c5-ab88-cc21624be8f3",
+              "parentUUID": "24ec458a-ee31-4f36-862e-821bf5ec6f92",
+              "isHook": false,
+              "skipped": true
+            },
+            {
+              "title": "N3 | No provider selected → submit blocked or provider selection highlighted",
+              "fullTitle": "Services — Airtime N3 | No provider selected → submit blocked or provider selection highlighted",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// The Pay button is disabled when no valid state exists\n// On load the amount is 0, so the Pay button should be disabled\ncy.contains(\"button\", \"Pay\").should(\"be.disabled\");\ncy.url().should(\"include\", \"/services/airtime\");",
+              "err": {},
+              "uuid": "cdeb7819-48c0-4f55-8509-f65ccd3e49ad",
+              "parentUUID": "24ec458a-ee31-4f36-862e-821bf5ec6f92",
+              "isHook": false,
+              "skipped": true
+            },
+            {
+              "title": "N4 | Insufficient balance → error shown",
+              "fullTitle": "Services — Airtime N4 | Insufficient balance → error shown",
+              "timedOut": null,
+              "duration": 0,
+              "state": "skipped",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.intercept(\"POST\", \"**/services/airtime**\", {\n    statusCode: 400,\n    body: { success: false, code: \"INSUFFICIENT_BALANCE\", message: \"Insufficient wallet balance\" },\n}).as(\"airtimeInsufficient\");\ncy.get(\"#phone-input\").clear().type(\"08012345678\");\n// Select ₦5000 preset to maximise amount\ncy.contains(\"button\", \"5000\").click();\ncy.contains(\"button\", \"Pay\").click();\n// PIN modal will open — enter any pin\ncy.get('input[inputmode=\"numeric\"]', { timeout: 8000 }).type(\"0000\");\ncy.wait(\"@airtimeInsufficient\");\ncy.contains(/insufficient|balance/i, { timeout: 8000 }).should(\"be.visible\");",
+              "err": {},
+              "uuid": "4f4a97de-13c3-4626-9844-053c4d4dee00",
+              "parentUUID": "24ec458a-ee31-4f36-862e-821bf5ec6f92",
+              "isHook": false,
+              "skipped": true
+            }
+          ],
+          "suites": [],
+          "passes": [],
+          "failures": [
+            "e16d3d1a-4b1b-43b2-b6cc-1bf130ba0a11"
+          ],
+          "pending": [],
+          "skipped": [
+            "16f7e00b-9596-4400-8a59-05a5170a71cf",
+            "613aa936-da07-4ecf-91c4-a95f9b5e977d",
+            "927798ff-7306-41c5-ab88-cc21624be8f3",
+            "cdeb7819-48c0-4f55-8509-f65ccd3e49ad",
+            "4f4a97de-13c3-4626-9844-053c4d4dee00"
+          ],
+          "duration": 161,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.0.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "8.1.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "timestamp": "isoDateTime"
+      },
+      "version": "6.3.2"
+    }
+  }
+}
