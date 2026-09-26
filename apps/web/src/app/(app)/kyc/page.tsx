@@ -45,7 +45,7 @@ function stripNonDigits(value: string): string {
 
 interface BvnNumberStepProps {
     onApproved: () => void;
-    onRejected: () => void;
+    onRejected: (reason: string | null) => void;
 }
 
 function BvnNumberStep({ onApproved, onRejected }: BvnNumberStepProps) {
@@ -80,7 +80,7 @@ function BvnNumberStep({ onApproved, onRejected }: BvnNumberStepProps) {
                     }
 
                     if (record.status === "REJECTED") {
-                        onRejected();
+                        onRejected(record.failureReason);
                         return;
                     }
 
@@ -166,7 +166,7 @@ function BvnNumberStep({ onApproved, onRejected }: BvnNumberStepProps) {
 
 // ─── Rejected screen ──────────────────────────────────────────────────────────
 
-function KycRejected({ type }: { type: "BVN" }) {
+function KycRejected({ type, reason, onRetry }: { type: "BVN"; reason: string | null; onRetry: () => void }) {
     return (
         <div className="space-y-6 text-center">
             <div className="flex justify-center">
@@ -179,10 +179,12 @@ function KycRejected({ type }: { type: "BVN" }) {
                     We couldn&apos;t verify your {type}
                 </h2>
                 <p className="text-sm text-body">
-                    This verification wasn&apos;t successful and can&apos;t be resubmitted from
-                    here. Please contact support for help completing your verification.
+                    {reason ?? "This verification wasn't successful. Please try again or contact support for help."}
                 </p>
             </div>
+            <Button variant="primary" size="lg" fullWidth onClick={onRetry}>
+                I&apos;ve updated my profile — try again
+            </Button>
         </div>
     );
 }
@@ -326,6 +328,7 @@ export default function KycPage() {
     const { data: kycStatus, isLoading: statusLoading } = useKycStatus();
 
     const [step, setStep] = React.useState<KycStep | null>(null);
+    const [rejectionReason, setRejectionReason] = React.useState<string | null>(null);
 
     // Once the account's real KYC status loads, jump straight to whichever
     // step applies — a returning user shouldn't be asked to resubmit a BVN
@@ -384,10 +387,22 @@ export default function KycPage() {
                                 toast.success("BVN verified!");
                                 setStep("bridge-optional");
                             }}
-                            onRejected={() => setStep("bvn-rejected")}
+                            onRejected={(reason) => {
+                                setRejectionReason(reason);
+                                setStep("bvn-rejected");
+                            }}
                         />
                     )}
-                    {step === "bvn-rejected" && <KycRejected type="BVN" />}
+                    {step === "bvn-rejected" && (
+                        <KycRejected
+                            type="BVN"
+                            reason={rejectionReason}
+                            onRetry={() => {
+                                setRejectionReason(null);
+                                setStep("bvn-number");
+                            }}
+                        />
+                    )}
                     {step === "bridge-optional" && <BridgeOptionalStep onDone={() => setStep("done")} />}
 
                     {isDone && <KycSuccess userName={user?.firstName ?? "there"} />}

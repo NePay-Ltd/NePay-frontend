@@ -118,6 +118,7 @@ export interface KycStatusDto {
 export interface KycRecordDto {
     id: string;
     status: KycRecordStatus;
+    failureReason: string | null;
 }
 
 // ─── Wallet & Ledger ─────────────────────────────────────────────────────────
