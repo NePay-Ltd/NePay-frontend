@@ -5,9 +5,9 @@
     "passes": 2,
     "pending": 0,
     "failures": 7,
-    "start": "2026-09-27T04:06:18.481Z",
-    "end": "2026-09-27T04:14:25.929Z",
-    "duration": 487448,
+    "start": "2026-09-27T11:30:58.527Z",
+    "end": "2026-09-27T11:40:12.503Z",
+    "duration": 553976,
     "testsRegistered": 9,
     "passPercent": 22.22222222222222,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "f66c3ee1-a9a2-443f-90a0-6161d555b214",
+      "uuid": "f314863f-58ad-4ba9-b33f-98a487c24c15",
       "title": "",
       "fullFile": "cypress/e2e/kyc/kyc.cy.ts",
       "file": "cypress/e2e/kyc/kyc.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "3df9c8e1-79f8-4b1a-80c7-d46b739dae00",
+          "uuid": "0fd4f063-8aea-4c56-97cf-17728bf4f666",
           "title": "KYC — Identity Verification",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | KYC page loads with BVN input form",
               "fullTitle": "KYC — Identity Verification P1 | KYC page loads with BVN input form",
               "timedOut": null,
-              "duration": 8547,
+              "duration": 8536,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -51,8 +51,8 @@
                 "estack": "AssertionError: Timed out retrying after 8000ms: Expected to find element: `input`, but never found it.\n    at eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:13:45)\n    at Context.eval (webpack:///./cypress/support/commands.ts:64:0)",
                 "diff": null
               },
-              "uuid": "e47c4e6e-9123-46ed-ab3e-97dbc43cc750",
-              "parentUUID": "3df9c8e1-79f8-4b1a-80c7-d46b739dae00",
+              "uuid": "d351b803-7915-4f57-8825-cb2e579ee6fb",
+              "parentUUID": "0fd4f063-8aea-4c56-97cf-17728bf4f666",
               "isHook": false,
               "skipped": false
             },
@@ -60,7 +60,7 @@
               "title": "P2 | Valid BVN submitted → pending/success state shown",
               "fullTitle": "KYC — Identity Verification P2 | Valid BVN submitted → pending/success state shown",
               "timedOut": null,
-              "duration": 30673,
+              "duration": 30616,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -73,8 +73,8 @@
                 "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:25:0)",
                 "diff": null
               },
-              "uuid": "5e2d5f9c-b2d3-454a-8ae3-b2137565d497",
-              "parentUUID": "3df9c8e1-79f8-4b1a-80c7-d46b739dae00",
+              "uuid": "2a5978d5-c8a0-412a-8760-ed9b3a164780",
+              "parentUUID": "0fd4f063-8aea-4c56-97cf-17728bf4f666",
               "isHook": false,
               "skipped": false
             },
@@ -82,7 +82,7 @@
               "title": "P3 | KYC banner on overview disappears after approval",
               "fullTitle": "KYC — Identity Verification P3 | KYC banner on overview disappears after approval",
               "timedOut": null,
-              "duration": 1176,
+              "duration": 1370,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -91,8 +91,8 @@
               "context": null,
               "code": "// Mock a verified user\ncy.intercept(\"GET\", \"**/users/me\", {\n    statusCode: 200,\n    body: {\n        success: true,\n        data: { id: \"user-1\", firstName: \"Dubem\", kycVerified: true },\n    },\n}).as(\"verifiedUser\");\ncy.visit(\"/overview\");\ncy.wait(\"@verifiedUser\");\n// HARD: banner should not be visible for verified users\ncy.contains(/verify your identity|complete KYC|BVN verification/i).should(\"not.exist\");",
               "err": {},
-              "uuid": "25f8fce9-c657-48eb-8177-440b3178eea5",
-              "parentUUID": "3df9c8e1-79f8-4b1a-80c7-d46b739dae00",
+              "uuid": "f3d925f3-247e-491e-af7f-d9a0ca371b06",
+              "parentUUID": "0fd4f063-8aea-4c56-97cf-17728bf4f666",
               "isHook": false,
               "skipped": false
             },
@@ -100,7 +100,7 @@
               "title": "P4 | KYC banner visible on overview for unverified user",
               "fullTitle": "KYC — Identity Verification P4 | KYC banner visible on overview for unverified user",
               "timedOut": null,
-              "duration": 987,
+              "duration": 979,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -109,8 +109,8 @@
               "context": null,
               "code": "cy.intercept(\"GET\", \"**/users/me\", {\n    statusCode: 200,\n    body: {\n        success: true,\n        data: { id: \"user-1\", firstName: \"Dubem\", kycVerified: false },\n    },\n}).as(\"unverifiedUser\");\ncy.visit(\"/overview\");\ncy.wait(\"@unverifiedUser\");\n// HARD: banner must prompt user to verify\ncy.softAssert(() => {\n    cy.contains(/verify|KYC|identity/i, { timeout: 8000 }).should(\"be.visible\");\n}, \"KYC prompt visible for unverified users\");\ncy.assertAll();",
               "err": {},
-              "uuid": "d8f4cf25-1689-4b36-ba3b-fbcdfb9419f2",
-              "parentUUID": "3df9c8e1-79f8-4b1a-80c7-d46b739dae00",
+              "uuid": "9b115b4d-de57-420f-889d-8db2369a60de",
+              "parentUUID": "0fd4f063-8aea-4c56-97cf-17728bf4f666",
               "isHook": false,
               "skipped": false
             },
@@ -118,7 +118,7 @@
               "title": "N1 | BVN shorter than 11 digits → validation error",
               "fullTitle": "KYC — Identity Verification N1 | BVN shorter than 11 digits → validation error",
               "timedOut": null,
-              "duration": 22406,
+              "duration": 30649,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -127,12 +127,12 @@
               "context": null,
               "code": "cy.get(\"input\").first().type(\"1234567890\"); // 10 digits\ncy.get('button[type=\"submit\"]').click();\n// HARD\ncy.contains(/11|invalid|BVN/i).should(\"be.visible\");\ncy.url().should(\"include\", \"/kyc\");",
               "err": {
-                "message": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.",
-                "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:63:0)",
+                "message": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input`, but never found it.",
+                "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:63:0)",
                 "diff": null
               },
-              "uuid": "0a61d10a-81b8-4358-8433-f4fb14d286c1",
-              "parentUUID": "3df9c8e1-79f8-4b1a-80c7-d46b739dae00",
+              "uuid": "cf000b4b-f191-4ff1-8be0-7c4a3faf4e9f",
+              "parentUUID": "0fd4f063-8aea-4c56-97cf-17728bf4f666",
               "isHook": false,
               "skipped": false
             },
@@ -140,7 +140,7 @@
               "title": "N2 | BVN with letters → validation error",
               "fullTitle": "KYC — Identity Verification N2 | BVN with letters → validation error",
               "timedOut": null,
-              "duration": 23819,
+              "duration": 30545,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -149,12 +149,12 @@
               "context": null,
               "code": "cy.get(\"input\").first().type(\"1234567890A\");\ncy.get('button[type=\"submit\"]').click();\n// HARD\ncy.contains(/invalid|digits only|numeric/i).should(\"be.visible\");",
               "err": {
-                "message": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.",
-                "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:70:0)",
+                "message": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input`, but never found it.",
+                "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:70:0)",
                 "diff": null
               },
-              "uuid": "46907e9c-b448-4849-9d8b-1ae97dc19f23",
-              "parentUUID": "3df9c8e1-79f8-4b1a-80c7-d46b739dae00",
+              "uuid": "b1b9b4c9-1cf9-4b8d-ab11-4413ad484a44",
+              "parentUUID": "0fd4f063-8aea-4c56-97cf-17728bf4f666",
               "isHook": false,
               "skipped": false
             },
@@ -162,7 +162,7 @@
               "title": "N3 | BVN already used by another account → API error shown",
               "fullTitle": "KYC — Identity Verification N3 | BVN already used by another account → API error shown",
               "timedOut": null,
-              "duration": 27608,
+              "duration": 30632,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -171,12 +171,12 @@
               "context": null,
               "code": "cy.intercept(\"POST\", \"**/kyc**\", {\n    statusCode: 409,\n    body: {\n        success: false,\n        code: \"CONFLICT\",\n        message: \"This BVN is already linked to another account\",\n    },\n}).as(\"bvnConflict\");\ncy.get(\"input\").first().type(\"12345678901\");\ncy.get('button[type=\"submit\"]').click();\ncy.wait(\"@bvnConflict\");\n// HARD\ncy.contains(/already linked|another account|conflict/i, { timeout: 8000 }).should(\"be.visible\");",
               "err": {
-                "message": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.",
-                "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:84:0)",
+                "message": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input`, but never found it.",
+                "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:84:0)",
                 "diff": null
               },
-              "uuid": "5776d27b-ff12-41fa-b4aa-c209702949f3",
-              "parentUUID": "3df9c8e1-79f8-4b1a-80c7-d46b739dae00",
+              "uuid": "6e21d3e0-9bc0-4a4b-beac-a44d48b6805d",
+              "parentUUID": "0fd4f063-8aea-4c56-97cf-17728bf4f666",
               "isHook": false,
               "skipped": false
             },
@@ -184,7 +184,7 @@
               "title": "N4 | Already verified user → form not shown, verified state shown",
               "fullTitle": "KYC — Identity Verification N4 | Already verified user → form not shown, verified state shown",
               "timedOut": null,
-              "duration": 30341,
+              "duration": 8957,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -193,12 +193,12 @@
               "context": null,
               "code": "cy.intercept(\"GET\", \"**/users/me\", {\n    body: { success: true, data: { kycVerified: true } },\n});\ncy.reload();\n// HARD: form should be replaced by a verified state\ncy.softAssert(() => {\n    cy.contains(/verified|approved|complete/i, { timeout: 8000 }).should(\"be.visible\");\n}, \"Verified state shown for already-verified user\");\ncy.assertAll();",
               "err": {
-                "message": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.",
-                "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:97:72)\n    at Context.eval (webpack:///./cypress/support/commands.ts:64:0)",
+                "message": "AssertionError: Timed out retrying after 8000ms: expected '<a.block>' to be 'visible'\n\nThis element `<a.block>` is not visible because its ancestor has `position: fixed` CSS property and it is overflowed by other elements. How about scrolling to the element with `cy.scrollIntoView()`?",
+                "estack": "AssertionError: Timed out retrying after 8000ms: expected '<a.block>' to be 'visible'\n\nThis element `<a.block>` is not visible because its ancestor has `position: fixed` CSS property and it is overflowed by other elements. How about scrolling to the element with `cy.scrollIntoView()`?\n    at eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:97:72)\n    at Context.eval (webpack:///./cypress/support/commands.ts:64:0)",
                 "diff": null
               },
-              "uuid": "13c76d1a-40ee-4bad-a66c-aae3bcc2e7f0",
-              "parentUUID": "3df9c8e1-79f8-4b1a-80c7-d46b739dae00",
+              "uuid": "34f6efe7-5656-4c05-b110-6ef26c41ee58",
+              "parentUUID": "0fd4f063-8aea-4c56-97cf-17728bf4f666",
               "isHook": false,
               "skipped": false
             },
@@ -206,7 +206,7 @@
               "title": "N5 | API error on BVN submit → error shown, form not locked",
               "fullTitle": "KYC — Identity Verification N5 | API error on BVN submit → error shown, form not locked",
               "timedOut": null,
-              "duration": 29549,
+              "duration": 30615,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -215,33 +215,33 @@
               "context": null,
               "code": "cy.intercept(\"POST\", \"**/kyc**\", {\n    statusCode: 500,\n    body: { success: false, message: \"Server error. Please try again.\" },\n}).as(\"kycError\");\ncy.get(\"input\").first().type(\"12345678901\");\ncy.get('button[type=\"submit\"]').click();\ncy.wait(\"@kycError\");\n// SOFT: error shown\ncy.softAssert(() => {\n    cy.contains(/error|failed|try again/i, { timeout: 8000 }).should(\"be.visible\");\n}, \"Error message shown on API failure\");\n// SOFT: form should still be interactive (not locked)\ncy.softAssert(() => {\n    cy.get(\"input\").first().should(\"not.be.disabled\");\n}, \"Form remains interactive after error\");\ncy.assertAll();",
               "err": {
-                "message": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.",
-                "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:106:0)",
+                "message": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input`, but never found it.",
+                "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find element: `input`, but never found it.\n    at Context.eval (webpack:///./cypress/e2e/kyc/kyc.cy.ts:106:0)",
                 "diff": null
               },
-              "uuid": "7e3dc081-43d0-4847-bdb0-dea6d199b38e",
-              "parentUUID": "3df9c8e1-79f8-4b1a-80c7-d46b739dae00",
+              "uuid": "82591382-8a50-4f79-b0a4-7d7bdb17b9e1",
+              "parentUUID": "0fd4f063-8aea-4c56-97cf-17728bf4f666",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "25f8fce9-c657-48eb-8177-440b3178eea5",
-            "d8f4cf25-1689-4b36-ba3b-fbcdfb9419f2"
+            "f3d925f3-247e-491e-af7f-d9a0ca371b06",
+            "9b115b4d-de57-420f-889d-8db2369a60de"
           ],
           "failures": [
-            "e47c4e6e-9123-46ed-ab3e-97dbc43cc750",
-            "5e2d5f9c-b2d3-454a-8ae3-b2137565d497",
-            "0a61d10a-81b8-4358-8433-f4fb14d286c1",
-            "46907e9c-b448-4849-9d8b-1ae97dc19f23",
-            "5776d27b-ff12-41fa-b4aa-c209702949f3",
-            "13c76d1a-40ee-4bad-a66c-aae3bcc2e7f0",
-            "7e3dc081-43d0-4847-bdb0-dea6d199b38e"
+            "d351b803-7915-4f57-8825-cb2e579ee6fb",
+            "2a5978d5-c8a0-412a-8760-ed9b3a164780",
+            "cf000b4b-f191-4ff1-8be0-7c4a3faf4e9f",
+            "b1b9b4c9-1cf9-4b8d-ab11-4413ad484a44",
+            "6e21d3e0-9bc0-4a4b-beac-a44d48b6805d",
+            "34f6efe7-5656-4c05-b110-6ef26c41ee58",
+            "82591382-8a50-4f79-b0a4-7d7bdb17b9e1"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 175106,
+          "duration": 172899,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
