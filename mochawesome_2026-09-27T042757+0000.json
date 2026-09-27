@@ -5,9 +5,9 @@
     "passes": 2,
     "pending": 0,
     "failures": 2,
-    "start": "2026-09-27T00:24:48.119Z",
-    "end": "2026-09-27T00:24:52.437Z",
-    "duration": 4318,
+    "start": "2026-09-27T04:27:51.550Z",
+    "end": "2026-09-27T04:27:57.308Z",
+    "duration": 5758,
     "testsRegistered": 4,
     "passPercent": 50,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "ffe8339a-d40d-4284-a4d0-b58982238e4c",
+      "uuid": "f1656521-783b-4cef-a3a9-4d3615c89198",
       "title": "",
       "fullFile": "cypress/e2e/transactions/transactions.cy.ts",
       "file": "cypress/e2e/transactions/transactions.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "05c25918-e492-4008-8a99-a8d6760d8c6b",
+          "uuid": "1ead6755-5ec2-4d67-8890-9a5f2ccddce2",
           "title": "Transactions",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | Transactions page loads with history",
               "fullTitle": "Transactions P1 | Transactions page loads with history",
               "timedOut": null,
-              "duration": 614,
+              "duration": 870,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -47,8 +47,8 @@
               "context": null,
               "code": "cy.get(\"body\").should(\"be.visible\");\ncy.softAssert(() => {\n    cy.get(\"body\").then(($body) => {\n        const text = $body.text();\n        expect(text.match(/transaction|debit|credit|₦/i) ||\n            text.match(/no transaction|empty/i)).to.be.ok;\n    });\n}, \"Transaction list or empty state\");\ncy.assertAll();",
               "err": {},
-              "uuid": "31b26e2a-2ca2-455d-933d-734141e0d72c",
-              "parentUUID": "05c25918-e492-4008-8a99-a8d6760d8c6b",
+              "uuid": "9c17fe0d-4cea-4b64-b70a-e32492a83f60",
+              "parentUUID": "1ead6755-5ec2-4d67-8890-9a5f2ccddce2",
               "isHook": false,
               "skipped": false
             },
@@ -56,7 +56,7 @@
               "title": "P2 | Filter by debit type works",
               "fullTitle": "Transactions P2 | Filter by debit type works",
               "timedOut": null,
-              "duration": 429,
+              "duration": 580,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -65,8 +65,8 @@
               "context": null,
               "code": "cy.contains(/debit|filter/i, { timeout: 8000 }).first().click();\ncy.softAssert(() => {\n    cy.contains(/debit/i).should(\"be.visible\");\n}, \"Debit filter active\");\ncy.assertAll();",
               "err": {},
-              "uuid": "9bd6eba4-8f7a-41bb-b14d-311066eafd91",
-              "parentUUID": "05c25918-e492-4008-8a99-a8d6760d8c6b",
+              "uuid": "2822d1bd-cb1a-4bcd-a33e-0419472bded8",
+              "parentUUID": "1ead6755-5ec2-4d67-8890-9a5f2ccddce2",
               "isHook": false,
               "skipped": false
             },
@@ -74,7 +74,7 @@
               "title": "N1 | Empty history → empty state message shown",
               "fullTitle": "Transactions N1 | Empty history → empty state message shown",
               "timedOut": null,
-              "duration": 555,
+              "duration": 688,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -87,8 +87,8 @@
                 "estack": "CypressError: `cy.visit()` failed trying to load:\n\nhttps://staging-nepay.vercel.app/transactions\n\nThe `content-type` of the response we received from your web server was:\n\n  > `application/json`\n\nThis was considered a failure because responses must have `content-type: 'text/html'`\n\nHowever, you can likely use `cy.request()` instead of `cy.visit()`.\n\n`cy.request()` will automatically get and set cookies and enable you to parse responses.\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142396:84)\n    at visitFailedByErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141701:12)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142376:13)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9440:18)\n    at _drainQueueStep (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6034:12)\n    at _drainQueue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6027:9)\n    at ../../node_modules/bluebird/js/release/async.js.Async._drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6043:5)\n    at Async.drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:5913:14)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transactions/transactions.cy.ts:34:0)",
                 "diff": null
               },
-              "uuid": "fc20dbce-382e-47c8-a51c-6891eea5542a",
-              "parentUUID": "05c25918-e492-4008-8a99-a8d6760d8c6b",
+              "uuid": "689e0a48-8ac4-4d34-a6ea-5caa5fbc2ad5",
+              "parentUUID": "1ead6755-5ec2-4d67-8890-9a5f2ccddce2",
               "isHook": false,
               "skipped": false
             },
@@ -96,7 +96,7 @@
               "title": "N2 | API error → graceful fallback, no crash",
               "fullTitle": "Transactions N2 | API error → graceful fallback, no crash",
               "timedOut": null,
-              "duration": 561,
+              "duration": 805,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -109,24 +109,24 @@
                 "estack": "CypressError: `cy.visit()` failed trying to load:\n\nhttps://staging-nepay.vercel.app/transactions\n\nThe response we received from your web server was:\n\n  > 500: Internal Server Error\n\nThis was considered a failure because the status code was not `2xx`.\n\nIf you do not want status codes to cause failures pass the option: `failOnStatusCode: false`\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142396:84)\n    at visitFailedByErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141701:12)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142376:13)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9440:18)\n    at _drainQueueStep (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6034:12)\n    at _drainQueue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6027:9)\n    at ../../node_modules/bluebird/js/release/async.js.Async._drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6043:5)\n    at Async.drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:5913:14)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transactions/transactions.cy.ts:48:0)",
                 "diff": null
               },
-              "uuid": "8a59616e-ee51-4084-aa1d-c33cbeaac47f",
-              "parentUUID": "05c25918-e492-4008-8a99-a8d6760d8c6b",
+              "uuid": "d6bd6355-1aed-4f1a-bbce-4f5808c0c30a",
+              "parentUUID": "1ead6755-5ec2-4d67-8890-9a5f2ccddce2",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "31b26e2a-2ca2-455d-933d-734141e0d72c",
-            "9bd6eba4-8f7a-41bb-b14d-311066eafd91"
+            "9c17fe0d-4cea-4b64-b70a-e32492a83f60",
+            "2822d1bd-cb1a-4bcd-a33e-0419472bded8"
           ],
           "failures": [
-            "fc20dbce-382e-47c8-a51c-6891eea5542a",
-            "8a59616e-ee51-4084-aa1d-c33cbeaac47f"
+            "689e0a48-8ac4-4d34-a6ea-5caa5fbc2ad5",
+            "d6bd6355-1aed-4f1a-bbce-4f5808c0c30a"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 2159,
+          "duration": 2943,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
