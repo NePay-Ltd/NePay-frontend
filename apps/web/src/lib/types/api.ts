@@ -250,9 +250,22 @@ export interface ResolveAccountResponseDto {
     resolutionToken: string;
 }
 
+/** One fee band from GET /fees: amounts up to and including `upTo` pay `fee`; the last band (`upTo: null`) covers everything above. */
+export interface FeeBand {
+    upTo: string | null;
+    fee: string;
+}
+
+export interface FeeSchedule {
+    withdrawal: FeeBand[];
+    deposit: FeeBand[];
+}
+
 export interface WithdrawalResponseDto {
     id: string;
     amount: string;
+    /** Charged on top of amount; refunded with it if the transfer fails. */
+    fee: string;
     bankCode: string;
     accountNumber: string;
     accountName: string;

@@ -4,7 +4,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
-import { ResolveAccountResponseDto, WithdrawalResponseDto, ApiResponse } from "@/lib/types/api";
+import { ResolveAccountResponseDto, WithdrawalResponseDto, ApiResponse, FeeSchedule } from "@/lib/types/api";
 
 export interface Bank {
     bankCode: string;
@@ -26,7 +26,20 @@ export const transferKeys = {
     bankList: () => [...transferKeys.all, "bankList"] as const,
     savedAccounts: () => [...transferKeys.all, "savedAccounts"] as const,
     status: (id: string) => [...transferKeys.all, "status", id] as const,
+    fees: () => ["fees"] as const,
 };
+
+/** Current withdrawal/deposit fee bands, so the fee can be shown before the customer confirms. */
+export function useFees() {
+    return useQuery<FeeSchedule>({
+        queryKey: transferKeys.fees(),
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<FeeSchedule>>("/fees");
+            return res.data.data;
+        },
+        staleTime: 5 * 60 * 1000,
+    });
+}
 
 export function useBankList() {
     return useQuery<Bank[]>({

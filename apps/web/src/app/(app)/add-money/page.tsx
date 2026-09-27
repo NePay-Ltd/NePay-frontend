@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { usePaystackCheckout } from "@/hooks/use-paystack";
 import { useSimulateDeposit, useVirtualAccount, useWalletBalance } from "@/lib/queries/wallet";
 import { useTestMode } from "@/lib/queries/config";
+import { useFees } from "@/lib/queries/transfer";
+import { describeFees } from "@/lib/fees";
 import { formatNaira, formatNairaString } from "@/lib/format";
 
 import { Button } from "@/components/shared/button";
@@ -63,6 +65,8 @@ export default function AddMoneyPage() {
     // Bank Transfer (virtual account)
     const [bankExpanded, setBankExpanded] = React.useState(false);
     const { data: virtualAccount, isLoading: vaLoading, error: vaError, refetch: refetchVa } = useVirtualAccount();
+    const { data: feeSchedule } = useFees();
+    const depositFeeNote = describeFees(feeSchedule?.deposit, "deposit", formatNairaString);
 
     // Simulate Deposit (test mode only) — the button itself doesn't exist
     // unless the backend confirms test mode, not just a client-side guess.
@@ -197,6 +201,9 @@ export default function AddMoneyPage() {
                                                 <p className="text-center text-[11px] text-muted">
                                                     Transfers usually arrive within 1-3 minutes.
                                                 </p>
+                                                {depositFeeNote && (
+                                                    <p className="text-center text-[11px] text-muted">{depositFeeNote}</p>
+                                                )}
                                             </>
                                         ) : (
                                             // No "create virtual account" button here on purpose:
