@@ -14,6 +14,7 @@ import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/format";
 import { overviewKeys, useOverviewSummary } from "@/lib/queries/overview";
 import { walletKeys } from "@/lib/queries/wallet";
+import { transactionKeys } from "@/lib/queries/transactions";
 import {
     useSavedBankAccounts,
     useBankList,
@@ -83,6 +84,16 @@ export default function TransferPage() {
         if (!txStatus) return;
         if (txStatus.status === "COMPLETED") setTxState("success");
         if (txStatus.status === "FAILED") setTxState("error");
+
+        if (txStatus.status === "COMPLETED" || txStatus.status === "FAILED") {
+            // The ledger debit's display status (WithdrawalLedgerStatusSource,
+            // backend) is resolved from this same withdrawal row, so the
+            // transaction history's "pending" row only flips to its final
+            // status once that list is refetched — nudge that along now
+            // instead of leaving it to whenever the list next happens to
+            // refetch on its own.
+            queryClient.invalidateQueries({ queryKey: transactionKeys.all });
+        }
     }, [txStatus]);
 
     // A withdrawal can legitimately sit PROCESSING for a long stretch —
@@ -193,11 +204,16 @@ export default function TransferPage() {
                     // The ledger debit already happened server-side by the
                     // time this response comes back (see
                     // WithdrawalService.initiateWithdrawal) — invalidate
-                    // now so the balance shown elsewhere in the app isn't
-                    // stale while the polling above resolves the actual
-                    // outcome.
+                    // now so the balance and transaction history shown
+                    // elsewhere in the app aren't stale while the polling
+                    // above resolves the actual outcome. Without the
+                    // transactions invalidation, the new withdrawal only
+                    // ever appeared after an unrelated manual refresh
+                    // happened to refetch that list — confirmed live
+                    // 2026-09-27.
                     queryClient.invalidateQueries({ queryKey: walletKeys.balance() });
                     queryClient.invalidateQueries({ queryKey: overviewKeys.all });
+                    queryClient.invalidateQueries({ queryKey: transactionKeys.all });
 
                     if (saveAccount) {
                         const isAlreadySaved = savedAccounts.some(a => a.accountNumber === accountNumber && a.bankCode === bankCode);
