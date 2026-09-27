@@ -5,9 +5,9 @@
     "passes": 0,
     "pending": 0,
     "failures": 8,
-    "start": "2026-09-27T17:01:35.607Z",
-    "end": "2026-09-27T17:10:13.813Z",
-    "duration": 518206,
+    "start": "2026-09-27T21:34:26.267Z",
+    "end": "2026-09-27T21:45:04.733Z",
+    "duration": 638466,
     "testsRegistered": 8,
     "passPercent": 0,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "55764d85-9d18-4ae6-9a56-d2cfbc6fc84f",
+      "uuid": "f0686afc-8a8d-4329-b4a8-0a2d029c1725",
       "title": "",
       "fullFile": "cypress/e2e/transfer/transfer.cy.ts",
       "file": "cypress/e2e/transfer/transfer.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "0386206f-531a-4a3a-82bc-3790fedba43d",
+          "uuid": "9938c411-8068-45f6-81ed-12f8013e60c9",
           "title": "Transfer",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | Transfer page loads with recipient search field",
               "fullTitle": "Transfer P1 | Transfer page loads with recipient search field",
               "timedOut": null,
-              "duration": 18571,
+              "duration": 22774,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -51,8 +51,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:12:57)",
                 "diff": null
               },
-              "uuid": "89997041-634c-4160-873e-9869e4fad5e9",
-              "parentUUID": "0386206f-531a-4a3a-82bc-3790fedba43d",
+              "uuid": "066540c6-bc43-46e7-b958-0867b401778f",
+              "parentUUID": "9938c411-8068-45f6-81ed-12f8013e60c9",
               "isHook": false,
               "skipped": false
             },
@@ -60,7 +60,7 @@
               "title": "P2 | Amount field formats correctly (no more than 2 decimal places shown)",
               "fullTitle": "Transfer P2 | Amount field formats correctly (no more than 2 decimal places shown)",
               "timedOut": null,
-              "duration": 18488,
+              "duration": 24718,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -73,8 +73,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:17:0)",
                 "diff": null
               },
-              "uuid": "cdbfd166-657d-4da2-aa36-1b15e2b103de",
-              "parentUUID": "0386206f-531a-4a3a-82bc-3790fedba43d",
+              "uuid": "a4a6e5a0-6e03-4aef-aad2-68454d546077",
+              "parentUUID": "9938c411-8068-45f6-81ed-12f8013e60c9",
               "isHook": false,
               "skipped": false
             },
@@ -82,7 +82,7 @@
               "title": "P3 | Empty amount → submit blocked",
               "fullTitle": "Transfer P3 | Empty amount → submit blocked",
               "timedOut": null,
-              "duration": 20563,
+              "duration": 25578,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -95,8 +95,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:25:0)",
                 "diff": null
               },
-              "uuid": "a36af172-6804-4f11-9fc2-199f0142cf0b",
-              "parentUUID": "0386206f-531a-4a3a-82bc-3790fedba43d",
+              "uuid": "c573d870-75ef-4604-9c54-9f2dc7b79058",
+              "parentUUID": "9938c411-8068-45f6-81ed-12f8013e60c9",
               "isHook": false,
               "skipped": false
             },
@@ -104,7 +104,7 @@
               "title": "N1 | Bank search with no results → 'No banks found' shown",
               "fullTitle": "Transfer N1 | Bank search with no results → 'No banks found' shown",
               "timedOut": null,
-              "duration": 24503,
+              "duration": 26735,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -117,8 +117,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:31:0)",
                 "diff": null
               },
-              "uuid": "e487e2aa-b3ef-4893-85f7-fc95a4c28b85",
-              "parentUUID": "0386206f-531a-4a3a-82bc-3790fedba43d",
+              "uuid": "498e0abd-4a70-4127-a88d-02d80532a949",
+              "parentUUID": "9938c411-8068-45f6-81ed-12f8013e60c9",
               "isHook": false,
               "skipped": false
             },
@@ -126,7 +126,7 @@
               "title": "N2 | Amount = 0 → Transfer Now button stays disabled",
               "fullTitle": "Transfer N2 | Amount = 0 → Transfer Now button stays disabled",
               "timedOut": null,
-              "duration": 26165,
+              "duration": 29287,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -139,8 +139,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:39:0)",
                 "diff": null
               },
-              "uuid": "a9fccac2-0b2f-4744-a751-bb19ed5fb876",
-              "parentUUID": "0386206f-531a-4a3a-82bc-3790fedba43d",
+              "uuid": "6d820695-a60e-4b23-b4d7-f7ee9c37a31c",
+              "parentUUID": "9938c411-8068-45f6-81ed-12f8013e60c9",
               "isHook": false,
               "skipped": false
             },
@@ -148,7 +148,7 @@
               "title": "N3 | Insufficient balance → inline error shown",
               "fullTitle": "Transfer N3 | Insufficient balance → inline error shown",
               "timedOut": null,
-              "duration": 27296,
+              "duration": 31440,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -161,8 +161,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:44:0)",
                 "diff": null
               },
-              "uuid": "dfb40cfb-d8f1-4ffd-b70a-610c77249d52",
-              "parentUUID": "0386206f-531a-4a3a-82bc-3790fedba43d",
+              "uuid": "8dbf0f92-985c-4b91-ada6-a746e843425b",
+              "parentUUID": "9938c411-8068-45f6-81ed-12f8013e60c9",
               "isHook": false,
               "skipped": false
             },
@@ -170,7 +170,7 @@
               "title": "N4 | API failure on confirm → error shown in modal",
               "fullTitle": "Transfer N4 | API failure on confirm → error shown in modal",
               "timedOut": null,
-              "duration": 28152,
+              "duration": 35424,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -183,8 +183,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:58:68)\n    at Context.eval (webpack:///./cypress/support/commands.ts:64:0)",
                 "diff": null
               },
-              "uuid": "c0186930-7676-4ef6-8728-e8c3d7f35a25",
-              "parentUUID": "0386206f-531a-4a3a-82bc-3790fedba43d",
+              "uuid": "6ff62090-3231-40c8-be6e-df3cecdddc5f",
+              "parentUUID": "9938c411-8068-45f6-81ed-12f8013e60c9",
               "isHook": false,
               "skipped": false
             },
@@ -192,7 +192,7 @@
               "title": "N5 | Special characters in bank search → no crash",
               "fullTitle": "Transfer N5 | Special characters in bank search → no crash",
               "timedOut": null,
-              "duration": 28812,
+              "duration": 38397,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -205,8 +205,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/transfer/transfer.cy.ts:63:0)",
                 "diff": null
               },
-              "uuid": "8445e194-e05f-4981-aa43-4788784241fc",
-              "parentUUID": "0386206f-531a-4a3a-82bc-3790fedba43d",
+              "uuid": "bf3f013e-28d9-48f5-a58a-b98deeadd28c",
+              "parentUUID": "9938c411-8068-45f6-81ed-12f8013e60c9",
               "isHook": false,
               "skipped": false
             }
@@ -214,18 +214,18 @@
           "suites": [],
           "passes": [],
           "failures": [
-            "89997041-634c-4160-873e-9869e4fad5e9",
-            "cdbfd166-657d-4da2-aa36-1b15e2b103de",
-            "a36af172-6804-4f11-9fc2-199f0142cf0b",
-            "e487e2aa-b3ef-4893-85f7-fc95a4c28b85",
-            "a9fccac2-0b2f-4744-a751-bb19ed5fb876",
-            "dfb40cfb-d8f1-4ffd-b70a-610c77249d52",
-            "c0186930-7676-4ef6-8728-e8c3d7f35a25",
-            "8445e194-e05f-4981-aa43-4788784241fc"
+            "066540c6-bc43-46e7-b958-0867b401778f",
+            "a4a6e5a0-6e03-4aef-aad2-68454d546077",
+            "c573d870-75ef-4604-9c54-9f2dc7b79058",
+            "498e0abd-4a70-4127-a88d-02d80532a949",
+            "6d820695-a60e-4b23-b4d7-f7ee9c37a31c",
+            "8dbf0f92-985c-4b91-ada6-a746e843425b",
+            "6ff62090-3231-40c8-be6e-df3cecdddc5f",
+            "bf3f013e-28d9-48f5-a58a-b98deeadd28c"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 192550,
+          "duration": 234353,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
