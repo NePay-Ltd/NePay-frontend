@@ -240,7 +240,7 @@ export default function AirtimePage() {
                     )
                 }
                 onHome={() => router.push("/overview")}
-                onReceipt={() => router.push(txResult?.id ? `/transactions/${txResult.id}` : "/transactions")}
+                onReceipt={() => router.push("/transactions")}
             />
         </>
     );

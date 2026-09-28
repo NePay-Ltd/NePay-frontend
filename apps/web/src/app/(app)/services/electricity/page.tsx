@@ -361,7 +361,7 @@ export default function ElectricityPage() {
                     </div>
                 }
                 onHome={() => router.push("/overview")}
-                onReceipt={() => router.push(txId ? `/transactions/${txId}` : "/transactions")}
+                onReceipt={() => router.push("/transactions")}
             />
         </>
     );
