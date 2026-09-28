@@ -5,9 +5,9 @@
     "passes": 0,
     "pending": 0,
     "failures": 6,
-    "start": "2026-09-28T13:00:16.841Z",
-    "end": "2026-09-28T13:00:28.089Z",
-    "duration": 11248,
+    "start": "2026-09-28T22:58:40.696Z",
+    "end": "2026-09-28T22:58:57.579Z",
+    "duration": 16883,
     "testsRegistered": 6,
     "passPercent": 0,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "06543b61-e596-42d7-8bd3-7cad454333b9",
+      "uuid": "3d7ff8d1-01d0-4030-9e42-7afbb88f63dd",
       "title": "",
       "fullFile": "cypress/e2e/auth/logout.cy.ts",
       "file": "cypress/e2e/auth/logout.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "680b5754-cb46-4f4e-a137-5b76f20ff63e",
+          "uuid": "4fd50c1a-8863-4b12-8f4e-f66bf939bdb2",
           "title": "Auth — Logout",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | Logout clears nepay_refresh cookie",
               "fullTitle": "Auth — Logout P1 | Logout clears nepay_refresh cookie",
               "timedOut": null,
-              "duration": 623,
+              "duration": 731,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -51,8 +51,8 @@
                 "estack": "CypressError: `cy.click()` can only be called on a single element. Your subject contained 2 elements. Pass `{ multiple: true }` if you want to serially click each element.\n\nhttps://on.cypress.io/click\n    at mouseAction (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135434:76)\n    at Context.click (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135612:14)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at clickLogout (webpack:///./cypress/e2e/auth/logout.cy.ts:5:56)\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:15:0)",
                 "diff": null
               },
-              "uuid": "e63deab5-2d4d-41b0-b4b5-8c5174dae212",
-              "parentUUID": "680b5754-cb46-4f4e-a137-5b76f20ff63e",
+              "uuid": "d3c416dd-0fee-418d-9eea-8e4c61ba4831",
+              "parentUUID": "4fd50c1a-8863-4b12-8f4e-f66bf939bdb2",
               "isHook": false,
               "skipped": false
             },
@@ -60,7 +60,7 @@
               "title": "P2 | Logout redirects to /login",
               "fullTitle": "Auth — Logout P2 | Logout redirects to /login",
               "timedOut": null,
-              "duration": 486,
+              "duration": 835,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -73,8 +73,8 @@
                 "estack": "CypressError: `cy.click()` can only be called on a single element. Your subject contained 2 elements. Pass `{ multiple: true }` if you want to serially click each element.\n\nhttps://on.cypress.io/click\n    at mouseAction (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135434:76)\n    at Context.click (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135612:14)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at clickLogout (webpack:///./cypress/e2e/auth/logout.cy.ts:5:56)\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:20:0)",
                 "diff": null
               },
-              "uuid": "77cb2956-0fbb-45a6-a6d0-034d3e594814",
-              "parentUUID": "680b5754-cb46-4f4e-a137-5b76f20ff63e",
+              "uuid": "89848880-dac4-4462-adfd-67c6fe799d15",
+              "parentUUID": "4fd50c1a-8863-4b12-8f4e-f66bf939bdb2",
               "isHook": false,
               "skipped": false
             },
@@ -82,7 +82,7 @@
               "title": "P3 | Signed out toast is shown",
               "fullTitle": "Auth — Logout P3 | Signed out toast is shown",
               "timedOut": null,
-              "duration": 478,
+              "duration": 1217,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -95,8 +95,8 @@
                 "estack": "CypressError: `cy.click()` can only be called on a single element. Your subject contained 2 elements. Pass `{ multiple: true }` if you want to serially click each element.\n\nhttps://on.cypress.io/click\n    at mouseAction (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135434:76)\n    at Context.click (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135612:14)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at clickLogout (webpack:///./cypress/e2e/auth/logout.cy.ts:5:56)\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:25:0)",
                 "diff": null
               },
-              "uuid": "8689d00f-a755-49f4-a9c6-a1cf4fc79fed",
-              "parentUUID": "680b5754-cb46-4f4e-a137-5b76f20ff63e",
+              "uuid": "801da61a-99bd-4404-84e6-5eab9cd30930",
+              "parentUUID": "4fd50c1a-8863-4b12-8f4e-f66bf939bdb2",
               "isHook": false,
               "skipped": false
             },
@@ -104,7 +104,7 @@
               "title": "P4 | localStorage is cleared after logout",
               "fullTitle": "Auth — Logout P4 | localStorage is cleared after logout",
               "timedOut": null,
-              "duration": 590,
+              "duration": 968,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -117,8 +117,8 @@
                 "estack": "CypressError: `cy.click()` can only be called on a single element. Your subject contained 2 elements. Pass `{ multiple: true }` if you want to serially click each element.\n\nhttps://on.cypress.io/click\n    at mouseAction (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135434:76)\n    at Context.click (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135612:14)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at clickLogout (webpack:///./cypress/e2e/auth/logout.cy.ts:5:56)\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:33:0)",
                 "diff": null
               },
-              "uuid": "dd37a7cd-8509-4527-ab10-f993afd2a79f",
-              "parentUUID": "680b5754-cb46-4f4e-a137-5b76f20ff63e",
+              "uuid": "4f1c30f7-9c2a-47d3-a5b5-74a6f2617754",
+              "parentUUID": "4fd50c1a-8863-4b12-8f4e-f66bf939bdb2",
               "isHook": false,
               "skipped": false
             },
@@ -126,7 +126,7 @@
               "title": "N1 | After logout, browser back to protected route → redirected to /login",
               "fullTitle": "Auth — Logout N1 | After logout, browser back to protected route → redirected to /login",
               "timedOut": null,
-              "duration": 553,
+              "duration": 902,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -139,8 +139,8 @@
                 "estack": "CypressError: `cy.click()` can only be called on a single element. Your subject contained 2 elements. Pass `{ multiple: true }` if you want to serially click each element.\n\nhttps://on.cypress.io/click\n    at mouseAction (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135434:76)\n    at Context.click (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135612:14)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at clickLogout (webpack:///./cypress/e2e/auth/logout.cy.ts:5:56)\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:41:0)",
                 "diff": null
               },
-              "uuid": "9f5e0fba-d805-4199-b425-a2cd054b307c",
-              "parentUUID": "680b5754-cb46-4f4e-a137-5b76f20ff63e",
+              "uuid": "97b681f4-9fe4-4768-b951-0ff560defcff",
+              "parentUUID": "4fd50c1a-8863-4b12-8f4e-f66bf939bdb2",
               "isHook": false,
               "skipped": false
             },
@@ -148,7 +148,7 @@
               "title": "N2 | Logout when API fails → still clears state and redirects",
               "fullTitle": "Auth — Logout N2 | Logout when API fails → still clears state and redirects",
               "timedOut": null,
-              "duration": 695,
+              "duration": 1099,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -161,8 +161,8 @@
                 "estack": "CypressError: `cy.click()` can only be called on a single element. Your subject contained 2 elements. Pass `{ multiple: true }` if you want to serially click each element.\n\nhttps://on.cypress.io/click\n    at mouseAction (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135434:76)\n    at Context.click (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:135612:14)\n    at wrapped (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157859:19)\nFrom Your Spec Code:\n    at clickLogout (webpack:///./cypress/e2e/auth/logout.cy.ts:5:56)\n    at Context.eval (webpack:///./cypress/e2e/auth/logout.cy.ts:49:0)",
                 "diff": null
               },
-              "uuid": "814dee03-d035-477d-a23a-0c29a54edbbb",
-              "parentUUID": "680b5754-cb46-4f4e-a137-5b76f20ff63e",
+              "uuid": "94dc0ba8-4c7f-441d-975f-9e04ba2c7aca",
+              "parentUUID": "4fd50c1a-8863-4b12-8f4e-f66bf939bdb2",
               "isHook": false,
               "skipped": false
             }
@@ -170,16 +170,16 @@
           "suites": [],
           "passes": [],
           "failures": [
-            "e63deab5-2d4d-41b0-b4b5-8c5174dae212",
-            "77cb2956-0fbb-45a6-a6d0-034d3e594814",
-            "8689d00f-a755-49f4-a9c6-a1cf4fc79fed",
-            "dd37a7cd-8509-4527-ab10-f993afd2a79f",
-            "9f5e0fba-d805-4199-b425-a2cd054b307c",
-            "814dee03-d035-477d-a23a-0c29a54edbbb"
+            "d3c416dd-0fee-418d-9eea-8e4c61ba4831",
+            "89848880-dac4-4462-adfd-67c6fe799d15",
+            "801da61a-99bd-4404-84e6-5eab9cd30930",
+            "4f1c30f7-9c2a-47d3-a5b5-74a6f2617754",
+            "97b681f4-9fe4-4768-b951-0ff560defcff",
+            "94dc0ba8-4c7f-441d-975f-9e04ba2c7aca"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 3425,
+          "duration": 5752,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
