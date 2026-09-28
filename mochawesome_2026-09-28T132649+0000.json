@@ -5,9 +5,9 @@
     "passes": 1,
     "pending": 0,
     "failures": 4,
-    "start": "2026-09-28T13:01:37.800Z",
-    "end": "2026-09-28T13:03:28.157Z",
-    "duration": 110357,
+    "start": "2026-09-28T13:25:15.398Z",
+    "end": "2026-09-28T13:26:49.614Z",
+    "duration": 94216,
     "testsRegistered": 5,
     "passPercent": 20,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "fe69b2ee-77ec-4cb8-8a6b-4920df890bde",
+      "uuid": "29287107-7011-48b9-b8e1-2c8fdeef1d7e",
       "title": "",
       "fullFile": "cypress/e2e/pods/pods.cy.ts",
       "file": "cypress/e2e/pods/pods.cy.ts",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "08488a75-917f-409e-b0ed-240181f70a75",
+          "uuid": "4a275e07-f39f-4ff5-bc96-00400d21a52d",
           "title": "Pods",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "P1 | Pods page loads",
               "fullTitle": "Pods P1 | Pods page loads",
               "timedOut": null,
-              "duration": 1016,
+              "duration": 876,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -47,8 +47,8 @@
               "context": null,
               "code": "cy.get(\"body\").should(\"be.visible\");\ncy.contains(/pod|saving|group/i, { timeout: 10000 }).should(\"be.visible\");",
               "err": {},
-              "uuid": "271442f0-b813-4633-81ff-23fef026a339",
-              "parentUUID": "08488a75-917f-409e-b0ed-240181f70a75",
+              "uuid": "6f5c2bff-028a-4d75-af27-058156267648",
+              "parentUUID": "4a275e07-f39f-4ff5-bc96-00400d21a52d",
               "isHook": false,
               "skipped": false
             },
@@ -56,7 +56,7 @@
               "title": "P2 | Empty pods → empty state shown",
               "fullTitle": "Pods P2 | Empty pods → empty state shown",
               "timedOut": null,
-              "duration": 661,
+              "duration": 541,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -69,8 +69,8 @@
                 "estack": "CypressError: `cy.visit()` failed trying to load:\n\nhttps://staging-nepay.vercel.app/pods\n\nThe `content-type` of the response we received from your web server was:\n\n  > `application/json`\n\nThis was considered a failure because responses must have `content-type: 'text/html'`\n\nHowever, you can likely use `cy.request()` instead of `cy.visit()`.\n\n`cy.request()` will automatically get and set cookies and enable you to parse responses.\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142396:84)\n    at visitFailedByErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141701:12)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142376:13)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9440:18)\n    at _drainQueueStep (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6034:12)\n    at _drainQueue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6027:9)\n    at ../../node_modules/bluebird/js/release/async.js.Async._drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6043:5)\n    at Async.drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:5913:14)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/pods/pods.cy.ts:20:0)",
                 "diff": null
               },
-              "uuid": "51ac49e4-8e91-42fe-a008-fd3ba40cacb6",
-              "parentUUID": "08488a75-917f-409e-b0ed-240181f70a75",
+              "uuid": "8ef6b6f4-65fb-4395-9358-5067ee64b521",
+              "parentUUID": "4a275e07-f39f-4ff5-bc96-00400d21a52d",
               "isHook": false,
               "skipped": false
             },
@@ -78,7 +78,7 @@
               "title": "N1 | Create pod with no name → validation error",
               "fullTitle": "Pods N1 | Create pod with no name → validation error",
               "timedOut": null,
-              "duration": 18436,
+              "duration": 16638,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -91,8 +91,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/pods/pods.cy.ts:28:0)",
                 "diff": null
               },
-              "uuid": "24c7c4f3-ed5f-4ae9-bd18-529401f5dd7b",
-              "parentUUID": "08488a75-917f-409e-b0ed-240181f70a75",
+              "uuid": "4ceb0634-f025-474d-9854-834df886afcf",
+              "parentUUID": "4a275e07-f39f-4ff5-bc96-00400d21a52d",
               "isHook": false,
               "skipped": false
             },
@@ -100,7 +100,7 @@
               "title": "N2 | Create pod with target = 0 → validation error",
               "fullTitle": "Pods N2 | Create pod with target = 0 → validation error",
               "timedOut": null,
-              "duration": 20131,
+              "duration": 16424,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -113,8 +113,8 @@
                 "estack": "CypressError: The application redirected to `https://staging-nepay.vercel.app/overview` more than 20 times. Please check if it's an intended behavior.\n\nIf so, increase `redirectionLimit` value in configuration.\n    at onWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141575:80)\n    at $Cy.onInternalWindowLoad (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141612:20)\n    at $Cy.listener (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89543:17)\n    at ../driver/node_modules/eventemitter2/lib/eventemitter2.js.EventEmitter.emit (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:89623:19)\n    at parent.<computed> [as emit] (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:161702:32)\n    at $Cypress.action (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:154285:14)\n    at HTMLIFrameElement.<anonymous> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:157735:24)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/pods/pods.cy.ts:33:0)",
                 "diff": null
               },
-              "uuid": "4f455455-2fcd-492c-9e02-a0dc6e73aeee",
-              "parentUUID": "08488a75-917f-409e-b0ed-240181f70a75",
+              "uuid": "6a00f93f-a739-4dc9-858d-c074b7fce130",
+              "parentUUID": "4a275e07-f39f-4ff5-bc96-00400d21a52d",
               "isHook": false,
               "skipped": false
             },
@@ -122,7 +122,7 @@
               "title": "N3 | API error on pod load → page doesn't crash",
               "fullTitle": "Pods N3 | API error on pod load → page doesn't crash",
               "timedOut": null,
-              "duration": 1117,
+              "duration": 977,
               "state": "failed",
               "speed": null,
               "pass": false,
@@ -135,25 +135,25 @@
                 "estack": "CypressError: `cy.visit()` failed trying to load:\n\nhttps://staging-nepay.vercel.app/pods\n\nThe response we received from your web server was:\n\n  > 500: Internal Server Error\n\nThis was considered a failure because the status code was not `2xx`.\n\nIf you do not want status codes to cause failures pass the option: `failOnStatusCode: false`\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142396:84)\n    at visitFailedByErr (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:141701:12)\n    at <unknown> (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:142376:13)\n    at tryCatcher (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:11327:23)\n    at Promise._settlePromiseFromHandler (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9262:31)\n    at Promise._settlePromise (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9319:18)\n    at Promise._settlePromise0 (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9364:10)\n    at Promise._settlePromises (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:9440:18)\n    at _drainQueueStep (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6034:12)\n    at _drainQueue (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6027:9)\n    at ../../node_modules/bluebird/js/release/async.js.Async._drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:6043:5)\n    at Async.drainQueues (https://staging-nepay.vercel.app/__cypress/runner/cypress_runner.js:5913:14)\nFrom Your Spec Code:\n    at Context.eval (webpack:///./cypress/e2e/pods/pods.cy.ts:51:0)",
                 "diff": null
               },
-              "uuid": "cc12171c-e455-41ca-9e5c-00d6b692b83c",
-              "parentUUID": "08488a75-917f-409e-b0ed-240181f70a75",
+              "uuid": "05c26435-917f-45cc-9f88-93575ed22d8e",
+              "parentUUID": "4a275e07-f39f-4ff5-bc96-00400d21a52d",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "271442f0-b813-4633-81ff-23fef026a339"
+            "6f5c2bff-028a-4d75-af27-058156267648"
           ],
           "failures": [
-            "51ac49e4-8e91-42fe-a008-fd3ba40cacb6",
-            "24c7c4f3-ed5f-4ae9-bd18-529401f5dd7b",
-            "4f455455-2fcd-492c-9e02-a0dc6e73aeee",
-            "cc12171c-e455-41ca-9e5c-00d6b692b83c"
+            "8ef6b6f4-65fb-4395-9358-5067ee64b521",
+            "4ceb0634-f025-474d-9854-834df886afcf",
+            "6a00f93f-a739-4dc9-858d-c074b7fce130",
+            "05c26435-917f-45cc-9f88-93575ed22d8e"
           ],
           "pending": [],
           "skipped": [],
-          "duration": 41361,
+          "duration": 35456,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
