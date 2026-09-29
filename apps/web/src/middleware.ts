@@ -88,10 +88,14 @@ function backendOrigins(): { http: string; ws: string } {
  * http->https upgrades and placed no restriction on script execution at
  * all. This app has a deliberately minimal external footprint that makes a
  * real policy achievable: next/font self-hosts its one Google font (no
- * external font host to allow), there are no analytics/tracking scripts or
- * third-party embeds anywhere in the codebase, and the only external image
- * host is Cloudinary (avatarUrl, plain <img> tags — not next/image, so no
- * remotePatterns concern either).
+ * external font host to allow), there are no analytics/tracking scripts
+ * anywhere in the codebase, and the only external image host is Cloudinary
+ * (avatarUrl, plain <img> tags — not next/image, so no remotePatterns
+ * concern either). The one real third-party embed is Bridge's hosted ToS
+ * page (bridge-tos-consent.tsx's iframe) — frame-src explicitly allows
+ * *.bridge.xyz for it, since Bridge's actual tosLink host varies by
+ * customer state (observed as both compliance.*.bridge.xyz and
+ * dashboard.bridge.xyz) rather than being one fixed domain to hardcode.
  *
  * 'strict-dynamic' alongside the nonce is required, not optional: without
  * it, Next.js's own dynamically-injected code-split chunk scripts (which
@@ -111,6 +115,7 @@ function contentSecurityPolicy(nonce: string): string {
         img-src 'self' data: https://res.cloudinary.com;
         font-src 'self';
         connect-src 'self' ${http} ${ws};
+        frame-src https://*.bridge.xyz;
         frame-ancestors 'self';
         base-uri 'self';
         object-src 'none';
