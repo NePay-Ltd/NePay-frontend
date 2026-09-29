@@ -32,9 +32,18 @@ const TIER_META: Record<TierNumber, {
     medalBg: string;
     ring: string;
 }> = {
+    // Matches WithdrawalService.checkTierLimits (backend, TIER_LIMITS) exactly
+    // — confirmed live 2026-09-29 that a customer-facing promise that didn't
+    // match what was actually enforced was a real, shipped bug (the account-
+    // creation "Client Account Exists" mismatch). These are VFD's own
+    // documented per-tier numbers (Wallets API docs, "New Account Creation
+    // > 1.1 Individual"), not the CBN table shown here previously: VFD's own
+    // gateway enforces its own numbers on every transfer regardless of what
+    // NePay promises, so showing anything looser would just move the
+    // mismatch from "before" to "after" the customer submits.
     1: {
         label: "Bronze",
-        daily: "₦50,000/day",
+        daily: "₦30,000/day",
         balance: "₦300,000 balance cap",
         medalText: "text-orange-700",
         medalBg: "bg-orange-100",
@@ -42,7 +51,7 @@ const TIER_META: Record<TierNumber, {
     },
     2: {
         label: "Silver",
-        daily: "₦200,000/day",
+        daily: "₦100,000/day",
         balance: "₦500,000 balance cap",
         medalText: "text-slate-500",
         medalBg: "bg-slate-200",
@@ -50,7 +59,7 @@ const TIER_META: Record<TierNumber, {
     },
     3: {
         label: "Gold",
-        daily: "₦1,000,000+/day",
+        daily: "₦10,000,000/day",
         balance: "Unlimited balance",
         medalText: "text-amber-500",
         medalBg: "bg-amber-100",
@@ -101,7 +110,7 @@ function TierSuccessBadge({ tier, onContinue }: { tier: TierNumber; onContinue: 
                 </h2>
                 <p className="text-sm text-body">
                     {tier === 3
-                        ? "No more balance cap, and your daily limit is now ₦1,000,000+."
+                        ? "No more balance cap, and your daily limit is now ₦10,000,000."
                         : `Your daily limit is now ${meta.daily}, with a ${meta.balance.toLowerCase()}.`}
                 </p>
             </div>

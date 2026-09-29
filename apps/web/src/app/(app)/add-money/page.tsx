@@ -241,7 +241,7 @@ export default function AddMoneyPage() {
                                 icon={Globe}
                                 iconTint="green"
                                 title="Foreign Currency Account"
-                                subtitle="USD / EUR / GBP / CAD, convert to Naira anytime"
+                                subtitle="USD / EUR, convert to Naira anytime"
                                 showChevron
                                 onClick={() => router.push("/foreign-accounts")}
                                 className="px-3 hover:bg-violet-050 dark:hover:bg-violet-900/10"

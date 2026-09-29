@@ -258,7 +258,7 @@ function BridgeOptionalStep({ onDone }: { onDone: () => void }) {
                 </div>
             </div>
             <div className="space-y-2">
-                <h2 className="text-xl font-bold text-ink">Want to receive USD, EUR or GBP too?</h2>
+                <h2 className="text-xl font-bold text-ink">Want to receive USD or EUR too?</h2>
                 <p className="text-sm text-body">
                     Add a few more details now to get real foreign account numbers you can share with clients or employers abroad. It lands in your Naira wallet automatically. You can always do this later from Foreign Accounts instead.
                 </p>
