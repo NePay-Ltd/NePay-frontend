@@ -420,10 +420,16 @@ export default function ProfilePage() {
                         </DialogDescription>
                     </DialogHeader>
                     <form id="edit-profile-form" onSubmit={onEditSubmit} className="space-y-4 pt-4">
+                        {profile?.kycVerified && (
+                            <p className="rounded-lg bg-violet-50 dark:bg-violet-900/20 px-3 py-2 text-xs text-violet-700 dark:text-violet-300">
+                                Your name is locked after identity verification and can no longer be edited here. Contact support if it needs correcting.
+                            </p>
+                        )}
                         <div className="space-y-2">
                             <Label htmlFor="edit-first-name">First Name</Label>
                             <Input
                                 id="edit-first-name"
+                                disabled={profile?.kycVerified}
                                 {...form.register("firstName")}
                             />
                             {form.formState.errors.firstName && (
@@ -434,6 +440,7 @@ export default function ProfilePage() {
                             <Label htmlFor="edit-last-name">Last Name</Label>
                             <Input
                                 id="edit-last-name"
+                                disabled={profile?.kycVerified}
                                 {...form.register("lastName")}
                             />
                             {form.formState.errors.lastName && (

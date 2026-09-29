@@ -155,6 +155,12 @@ export interface LedgerEntryDto {
      * it still reads as "success", as every row used to.
      */
     status?: "success" | "pending" | "failed";
+    /**
+     * This entry's own fee, bundled onto it rather than a separate FEE row
+     * — see the backend's WalletService.getEntryFees. Null/absent when
+     * nothing was charged.
+     */
+    fee?: string | null;
 }
 
 export interface VirtualAccountResponseDto {

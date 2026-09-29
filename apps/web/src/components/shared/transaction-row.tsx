@@ -28,6 +28,15 @@ export interface BaseTransaction {
     utilityProviderTransactionId?: string;
     /** Electricity-only — only ever known post-purchase, VTpass's pre-purchase verify-meter response never carries a tariff field. */
     utilityTariff?: string;
+    /**
+     * This transaction's own fee, bundled in from its separate FEE ledger
+     * entry — shown as its own breakdown line ("Amount" + "Fee" = "Total")
+     * in the in-app receipt views only. Deliberately never passed into
+     * ReceiptData (lib/receipt-utils.ts): a downloaded or shared receipt
+     * shows the clean amount only, the same way this ships to whoever the
+     * customer sends it to.
+     */
+    fee?: number;
 }
 
 export interface TransactionRowProps {

@@ -90,6 +90,7 @@ export default function OverviewPage() {
             type: tx.meta,
             direction: tx.amount > 0 ? "CREDIT" : "DEBIT",
             currency: "NGN",
+            fee: tx.fee,
         };
         setSelectedTransaction(detailData);
         setModalOpen(true);

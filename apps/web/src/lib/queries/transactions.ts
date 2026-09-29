@@ -112,6 +112,7 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
         cryptoAmount: entry.assetQuantity ?? undefined,
         cryptoAsset,
         exchangeRate: entry.rate ?? undefined,
+        fee: entry.fee ? parseFloat(entry.fee) : undefined,
     };
 }
 

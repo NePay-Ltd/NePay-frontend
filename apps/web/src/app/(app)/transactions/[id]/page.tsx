@@ -312,6 +312,29 @@ export default function TransactionDetailPage() {
                         </div>
                     </div>
 
+                    {/* Fee breakdown — bundled onto this receipt, shown here only. Never included in a downloaded/shared copy — see getReceiptData below. */}
+                    {!!transaction.fee && (
+                        <div className="border-t border-border pt-6">
+                            <p className="text-xs font-semibold text-muted uppercase mb-3">Fee Breakdown</p>
+                            <div className="space-y-2.5 rounded-xl bg-gray-50 dark:bg-white/5 p-4">
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-muted">Amount</span>
+                                    <span className="font-semibold text-ink">{formatNaira(Math.abs(transaction.amount))}</span>
+                                </div>
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-muted">Fee</span>
+                                    <span className="font-semibold text-ink">{formatNaira(transaction.fee)}</span>
+                                </div>
+                                <div className="flex items-center justify-between border-t border-border pt-2.5 text-sm">
+                                    <span className="font-semibold text-muted">{isCredit ? "Net Received" : "Total Debited"}</span>
+                                    <span className={cn("font-bold", amountClass)}>
+                                        {formatNaira(isCredit ? Math.abs(transaction.amount) - transaction.fee : Math.abs(transaction.amount) + transaction.fee)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Electricity Receipt — the full VTpass breakdown, not just the token */}
                     {transaction.category === "electricity" && (
                         <div className="space-y-5 border-t border-border pt-6">
