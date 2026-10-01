@@ -258,7 +258,7 @@ export default function UpgradeTierPage() {
                                     <div className="flex items-center gap-2">
                                         <ShieldCheck className="h-4 w-4 text-violet-600" />
                                         <p className="text-sm font-bold text-ink">
-                                            Step {nextTier - 1} of 2 &middot; Raise to Tier {nextTier} ({TIER_META[nextTier].label})
+                                            Raise to Tier {nextTier} ({TIER_META[nextTier].label})
                                         </p>
                                     </div>
 
