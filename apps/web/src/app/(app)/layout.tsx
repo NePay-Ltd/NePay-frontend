@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { AutoLogout } from "@/components/shared/auto-logout";
+import { TierCapNotice } from "@/components/shared/tier-cap-notice";
 
 /**
  * Authenticated app route group layout.
@@ -16,6 +17,7 @@ export default function AppLayout({
     return (
         <AppShell>
             <AutoLogout />
+            <TierCapNotice />
             {children}
         </AppShell>
     );

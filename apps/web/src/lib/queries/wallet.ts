@@ -40,7 +40,11 @@ export function useVirtualAccount() {
                 throw err;
             }
         },
-        staleTime: Infinity,
+        // No staleTime (matches useWalletBalance): account number/bank name
+        // never change, but tier/overBalanceCap do — a deposit landing via
+        // webhook, or a tier upgrade, both happen with no direct mutation
+        // this client awaits, so this must refetch on every mount/refocus
+        // like the balance itself, not cache the cap status forever.
     });
 }
 

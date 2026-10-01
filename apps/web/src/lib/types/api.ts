@@ -171,6 +171,10 @@ export interface VirtualAccountResponseDto {
     status: VirtualAccountStatus;
     /** CBN tier (1/2/3) this account currently sits at. */
     tier: number;
+    /** This tier's balance cap, or null for Tier 3 (no cap). */
+    balanceCap: string | null;
+    /** True once the wallet balance is over balanceCap — every outgoing-spend surface is already blocked server-side; this is what drives the proactive "upgrade to access your balance" notice. */
+    overBalanceCap: boolean;
     createdAt: string;
 }
 
