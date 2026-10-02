@@ -9,6 +9,7 @@ import { ChevronLeft } from "lucide-react";;
 import { toast } from "sonner";
 
 import { useChangePin } from "@/lib/queries/security";
+import { isTrivialPin, TRIVIAL_PIN_MESSAGE } from "@/lib/pin-strength";
 
 import { Button } from "@/components/shared/button";
 import { Panel, PanelBody } from "@/components/shared/panel";
@@ -36,6 +37,14 @@ const createPinSchema = (isSetupMode: boolean) => z.object({
                 message: "New PIN must be different from current PIN",
             });
         }
+    }
+
+    if (data.newPin.length === 4 && isTrivialPin(data.newPin)) {
+        ctx.addIssue({
+            path: ["newPin"],
+            code: z.ZodIssueCode.custom,
+            message: TRIVIAL_PIN_MESSAGE,
+        });
     }
 
     if (data.newPin !== data.confirmPin) {
@@ -136,6 +145,13 @@ export default function ChangePinPage() {
                                 {form.formState.errors.currentPin && (
                                     <p className="text-xs text-red-500">{form.formState.errors.currentPin.message}</p>
                                 )}
+                                <button
+                                    type="button"
+                                    onClick={() => router.push("/security/reset-pin")}
+                                    className="text-xs font-semibold text-violet-600 hover:underline"
+                                >
+                                    Forgot your PIN?
+                                </button>
                             </div>
                         )}
 

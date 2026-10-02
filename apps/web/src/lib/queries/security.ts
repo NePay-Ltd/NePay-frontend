@@ -115,6 +115,32 @@ export function useChangePin() {
     });
 }
 
+/** Emails a 10-minute code that starts a forgotten-PIN reset — see useResetPin. */
+export function useSendPinResetOtp() {
+    return useMutation<void, Error, void>({
+        mutationFn: async () => {
+            await apiClient.post("/security/forgot-pin/send-otp");
+        },
+    });
+}
+
+/**
+ * Resets a forgotten transaction PIN. The password plus exactly one of
+ * `otp` (emailed) or `totpCode` (authenticator app, only when 2FA is on).
+ */
+export function useResetPin() {
+    const queryClient = useQueryClient();
+
+    return useMutation<void, Error, { password: string; newPin: string; otp?: string; totpCode?: string }>({
+        mutationFn: async (payload) => {
+            await apiClient.post("/security/reset-pin", payload);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: securityKeys.settings() });
+        },
+    });
+}
+
 export function useChangePassword() {
     return useMutation<void, Error, { currentPass: string; newPass: string }>({
         mutationFn: async ({ currentPass, newPass }) => {

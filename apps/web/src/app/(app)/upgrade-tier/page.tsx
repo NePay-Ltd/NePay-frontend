@@ -7,6 +7,7 @@ import { ShieldCheck, Medal, Check, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { useVirtualAccount, useUpgradeTier } from "@/lib/queries/wallet";
+import { useProfile } from "@/lib/queries/profile";
 import { getApiErrorMessage } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
 
@@ -131,12 +132,21 @@ function TierSuccessBadge({ tier, onContinue }: { tier: TierNumber; onContinue: 
 export default function UpgradeTierPage() {
     const router = useRouter();
     const { data: account, isLoading } = useVirtualAccount();
+    const { data: profile, isLoading: isProfileLoading } = useProfile();
     const { mutate: upgrade, isPending } = useUpgradeTier();
 
     const [nin, setNin] = React.useState("");
     const [address, setAddress] = React.useState("");
     const [justReachedTier, setJustReachedTier] = React.useState<TierNumber | null>(null);
 
+    // Tier 1 is reached by verifying BVN, not granted by default — an
+    // account with no completed BVN verification has no tier at all, never
+    // "Tier 1 already". `account?.tier ?? 1` below is only a safe floor for
+    // the narrow case where BVN *is* verified but the virtual account
+    // record hasn't synced yet (BvnVerifiedListener creates it
+    // asynchronously and can lag or fail independently — see its own
+    // note); it is never read before `verified` is confirmed true.
+    const verified = profile?.kycVerified === true;
     const tier = (account?.tier ?? 1) as TierNumber;
 
     // Strictly sequential — Tier 1 can only ever request Tier 2 (NIN only),
@@ -194,8 +204,29 @@ export default function UpgradeTierPage() {
                 </div>
             </div>
 
-            {isLoading ? (
+            {isLoading || isProfileLoading ? (
                 <Skeleton className="h-72 w-full rounded-2xl" />
+            ) : !verified ? (
+                <Panel>
+                    <PanelBody>
+                        <div className="flex flex-col items-center gap-3 py-6 text-center">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 dark:bg-white/5">
+                                <Lock className="h-5 w-5 text-muted" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-bold text-ink">Verify your BVN first</p>
+                                <p className="mt-1 text-sm text-body">
+                                    Tiers start once your BVN is verified — that&apos;s Tier 1. Complete that first,
+                                    then come back here to raise your limits further.
+                                </p>
+                            </div>
+                            <Button variant="primary" size="lg" fullWidth onClick={() => router.push("/kyc")}>
+                                Verify BVN
+                                <ArrowRight className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </PanelBody>
+                </Panel>
             ) : (
                 <>
                     <Panel>

@@ -290,12 +290,23 @@ export default function ProfilePage() {
                             icon={Medal}
                             iconTint="amber"
                             title="Tier & Limits"
-                            subtitle={tier < 3 ? "Raise your daily limit and balance cap" : "You're at the highest tier"}
+                            subtitle={
+                                !profile?.kycVerified
+                                    ? "Verify your BVN to get started"
+                                    : tier < 3 ? "Raise your daily limit and balance cap" : "You're at the highest tier"
+                            }
                             trailing={
                                 <div className="flex items-center gap-3">
-                                    <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold", tierMeta.bg, tierMeta.text)}>
-                                        Tier {tier} &middot; {tierMeta.name}
-                                    </span>
+                                    {/* Tier 1 is reached by verifying BVN, not a default — an unverified account has no tier yet, never "Tier 1" by itself. */}
+                                    {profile?.kycVerified ? (
+                                        <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold", tierMeta.bg, tierMeta.text)}>
+                                            Tier {tier} &middot; {tierMeta.name}
+                                        </span>
+                                    ) : (
+                                        <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-muted dark:bg-white/10">
+                                            Not Verified
+                                        </span>
+                                    )}
                                     <ChevronRight className="h-5 w-5 text-muted" />
                                 </div>
                             }
