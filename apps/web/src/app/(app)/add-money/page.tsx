@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { usePaystackCheckout } from "@/hooks/use-paystack";
 import { useSimulateDeposit, useVirtualAccount, useWalletBalance } from "@/lib/queries/wallet";
 import { useTestMode } from "@/lib/queries/config";
+import { isProductionHost } from "@/lib/env";
 import { useFees } from "@/lib/queries/transfer";
 import { describeFees } from "@/lib/fees";
 import { formatNaira, formatNairaString } from "@/lib/format";
@@ -70,7 +71,12 @@ export default function AddMoneyPage() {
 
     // Simulate Deposit (test mode only) — the button itself doesn't exist
     // unless the backend confirms test mode, not just a client-side guess.
+    // ALSO gated on not being the real nepay.com.ng domain: before live VFD
+    // keys are configured, every backend is still in VFD test mode, prod's
+    // included, so the backend signal alone can't be trusted to hide this
+    // on the customer-facing site during that window. See isProductionHost.
     const { data: testMode } = useTestMode();
+    const simulateDepositAllowed = testMode === true && !isProductionHost();
     const [simulateExpanded, setSimulateExpanded] = React.useState(false);
     const [simulateAmount, setSimulateAmount] = React.useState<number | "">(SIMULATE_PRESETS[0] ?? "");
     const { data: walletBalance, refetch: refetchBalance } = useWalletBalance();
@@ -251,12 +257,14 @@ export default function AddMoneyPage() {
                         {/*
                             Option 4: Simulate Deposit — test mode only. The
                             button doesn't exist at all (not just disabled)
-                            unless the backend's own GET /config/test-mode
-                            confirms it: `testMode` is undefined while
-                            loading and false in a live build, so this only
-                            ever renders `=== true`.
+                            unless BOTH the backend's own GET /config/test-mode
+                            confirms it (`testMode` is undefined while loading
+                            and false in a live build) AND this isn't the real
+                            nepay.com.ng domain — see simulateDepositAllowed's
+                            own note on why the backend signal alone isn't
+                            enough yet.
                         */}
-                        {testMode === true && (
+                        {simulateDepositAllowed && (
                             <div className="rounded-lg bg-transparent overflow-hidden">
                                 <RowItem
                                     icon={FlaskConical}
