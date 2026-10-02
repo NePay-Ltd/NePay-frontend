@@ -7,6 +7,10 @@ export const apiClient = axios.create({
     baseURL: BASE_URL,
     headers: {
         "Content-Type": "application/json",
+        // Tells the backend which client this is, so staff can see whether a
+        // customer signed up from the website or the mobile app
+        // (User.signupPlatform). The backend only reads it at registration.
+        "X-NePay-Client": "web",
     },
 });
 
