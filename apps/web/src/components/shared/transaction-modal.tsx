@@ -1,4 +1,5 @@
 import * as React from "react";
+import Link from "next/link";
 import { IconClock as Clock } from "@/components/icons";
 import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";;
 
@@ -185,6 +186,12 @@ export function TransactionModal({
                                 })}
                             </div>
                         </div>
+                        <Link
+                            href="/security/reset-pin"
+                            className="text-sm font-semibold text-violet-600 hover:underline"
+                        >
+                            Forgot PIN?
+                        </Link>
                     </div>
                 )}
 

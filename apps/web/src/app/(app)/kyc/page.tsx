@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IconBuilding as Building2, IconCard as CreditCard, IconLock as Lock } from "@/components/icons";
@@ -16,6 +17,7 @@ import {
     useKycStatus,
     useSubmitBvn,
 } from "@/lib/queries/kyc";
+import { walletKeys } from "@/lib/queries/wallet";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/shared/button";
 import { Field } from "@/components/shared/field";
@@ -45,7 +47,7 @@ function stripNonDigits(value: string): string {
 
 interface BvnNumberStepProps {
     onApproved: () => void;
-    onRejected: () => void;
+    onRejected: (reason: string | null) => void;
 }
 
 function BvnNumberStep({ onApproved, onRejected }: BvnNumberStepProps) {
@@ -80,7 +82,7 @@ function BvnNumberStep({ onApproved, onRejected }: BvnNumberStepProps) {
                     }
 
                     if (record.status === "REJECTED") {
-                        onRejected();
+                        onRejected(record.failureReason);
                         return;
                     }
 
@@ -166,7 +168,7 @@ function BvnNumberStep({ onApproved, onRejected }: BvnNumberStepProps) {
 
 // ─── Rejected screen ──────────────────────────────────────────────────────────
 
-function KycRejected({ type }: { type: "BVN" }) {
+function KycRejected({ type, reason, onRetry }: { type: "BVN"; reason: string | null; onRetry: () => void }) {
     return (
         <div className="space-y-6 text-center">
             <div className="flex justify-center">
@@ -179,10 +181,12 @@ function KycRejected({ type }: { type: "BVN" }) {
                     We couldn&apos;t verify your {type}
                 </h2>
                 <p className="text-sm text-body">
-                    This verification wasn&apos;t successful and can&apos;t be resubmitted from
-                    here. Please contact support for help completing your verification.
+                    {reason ?? "This verification wasn't successful. Please try again or contact support for help."}
                 </p>
             </div>
+            <Button variant="primary" size="lg" fullWidth onClick={onRetry}>
+                I&apos;ve updated my profile — try again
+            </Button>
         </div>
     );
 }
@@ -254,7 +258,7 @@ function BridgeOptionalStep({ onDone }: { onDone: () => void }) {
                 </div>
             </div>
             <div className="space-y-2">
-                <h2 className="text-xl font-bold text-ink">Want to receive USD, EUR or GBP too?</h2>
+                <h2 className="text-xl font-bold text-ink">Want to receive USD or EUR too?</h2>
                 <p className="text-sm text-body">
                     Add a few more details now to get real foreign account numbers you can share with clients or employers abroad. It lands in your Naira wallet automatically. You can always do this later from Foreign Accounts instead.
                 </p>
@@ -324,8 +328,10 @@ type KycStep = "bvn-number" | "bvn-rejected" | "bridge-optional" | "done";
 export default function KycPage() {
     const { user, markKycVerified } = useAuth();
     const { data: kycStatus, isLoading: statusLoading } = useKycStatus();
+    const queryClient = useQueryClient();
 
     const [step, setStep] = React.useState<KycStep | null>(null);
+    const [rejectionReason, setRejectionReason] = React.useState<string | null>(null);
 
     // Once the account's real KYC status loads, jump straight to whichever
     // step applies — a returning user shouldn't be asked to resubmit a BVN
@@ -378,16 +384,39 @@ export default function KycPage() {
                         <BvnNumberStep
                             onApproved={() => {
                                 // Approval also auto-provisioned the virtual
-                                // account server-side (BvnVerifiedListener,
-                                // via publishAndWait) — nothing left to call.
+                                // account server-side (BvnVerifiedListener, via
+                                // publishAndWait) — but the client's own cached
+                                // "no virtual account yet" result from before
+                                // approval doesn't know that on its own.
+                                // Confirmed live 2026-09-26: without this
+                                // invalidation, a user could pass BVN
+                                // verification while the virtual-account query
+                                // was already cached empty/404 from an earlier
+                                // visit, and keep seeing "please verify" even
+                                // though the account now exists server-side —
+                                // with no way back in, since re-submitting BVN
+                                // just 409s on the now-APPROVED record.
+                                queryClient.invalidateQueries({ queryKey: walletKeys.virtualAccount() });
                                 markKycVerified();
                                 toast.success("BVN verified!");
                                 setStep("bridge-optional");
                             }}
-                            onRejected={() => setStep("bvn-rejected")}
+                            onRejected={(reason) => {
+                                setRejectionReason(reason);
+                                setStep("bvn-rejected");
+                            }}
                         />
                     )}
-                    {step === "bvn-rejected" && <KycRejected type="BVN" />}
+                    {step === "bvn-rejected" && (
+                        <KycRejected
+                            type="BVN"
+                            reason={rejectionReason}
+                            onRetry={() => {
+                                setRejectionReason(null);
+                                setStep("bvn-number");
+                            }}
+                        />
+                    )}
                     {step === "bridge-optional" && <BridgeOptionalStep onDone={() => setStep("done")} />}
 
                     {isDone && <KycSuccess userName={user?.firstName ?? "there"} />}

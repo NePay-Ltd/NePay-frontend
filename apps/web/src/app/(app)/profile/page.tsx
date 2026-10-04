@@ -7,12 +7,13 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IconUser as UserIcon, IconBuilding as Landmark, IconLock as Lock, IconLogOut as LogOut, IconChevronRight as ChevronRight, IconBell as Bell, IconCard as CreditCard } from "@/components/icons";
-import { ShieldCheck, LifeBuoy, Info, Mail, AlertCircle, AlertTriangle, Receipt, Camera } from "lucide-react";
+import { ShieldCheck, LifeBuoy, Info, Mail, AlertCircle, AlertTriangle, Receipt, Camera, Medal } from "lucide-react";
 import { toast } from "sonner";
 import { apiClient, getApiErrorMessage } from "@/lib/api-client";
 
 import { useAuth } from "@/lib/auth-context";
 import { useProfile, useUpdateProfile, useUpdateAvatar } from "@/lib/queries/profile";
+import { useVirtualAccount } from "@/lib/queries/wallet";
 import { cn } from "@/lib/cn";
 
 import { Panel, PanelBody } from "@/components/shared/panel";
@@ -56,6 +57,13 @@ const editProfileSchema = z.object({
 
 export type EditProfileFormValues = z.infer<typeof editProfileSchema>;
 
+// Mirrors upgrade-tier/page.tsx's TIER_META labels/colors so the badge here reads as the same system.
+const TIER_LABEL: Record<number, { name: string; text: string; bg: string }> = {
+    1: { name: "Bronze", text: "text-orange-700", bg: "bg-orange-100" },
+    2: { name: "Silver", text: "text-slate-500", bg: "bg-slate-200" },
+    3: { name: "Gold", text: "text-amber-500", bg: "bg-amber-100" },
+};
+
 // ─── Main Page ──────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
@@ -66,6 +74,9 @@ export default function ProfilePage() {
     const { data: profile, isLoading } = useProfile();
     const { mutate: updateProfile, isPending: isUpdatingProfile } = useUpdateProfile();
     const { mutate: updateAvatar, isPending: isUpdatingAvatar } = useUpdateAvatar();
+    const { data: virtualAccount } = useVirtualAccount();
+    const tier = virtualAccount?.tier ?? 1;
+    const tierMeta = TIER_LABEL[tier] ?? TIER_LABEL[1]!;
 
     // Preference state mirrors the profile response and persists through the profile API.
     const [pushEnabled, setPushEnabled] = React.useState(true);
@@ -276,6 +287,33 @@ export default function ProfilePage() {
                             className="cursor-pointer px-5 hover:bg-gray-50 dark:hover:bg-white/5"
                         />
                         <RowItem
+                            icon={Medal}
+                            iconTint="amber"
+                            title="Tier & Limits"
+                            subtitle={
+                                !profile?.kycVerified
+                                    ? "Verify your BVN to get started"
+                                    : tier < 3 ? "Raise your daily limit and balance cap" : "You're at the highest tier"
+                            }
+                            trailing={
+                                <div className="flex items-center gap-3">
+                                    {/* Tier 1 is reached by verifying BVN, not a default — an unverified account has no tier yet, never "Tier 1" by itself. */}
+                                    {profile?.kycVerified ? (
+                                        <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold", tierMeta.bg, tierMeta.text)}>
+                                            Tier {tier} &middot; {tierMeta.name}
+                                        </span>
+                                    ) : (
+                                        <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-muted dark:bg-white/10">
+                                            Not Verified
+                                        </span>
+                                    )}
+                                    <ChevronRight className="h-5 w-5 text-muted" />
+                                </div>
+                            }
+                            onClick={() => router.push("/upgrade-tier")}
+                            className="cursor-pointer px-5 hover:bg-gray-50 dark:hover:bg-white/5"
+                        />
+                        <RowItem
                             icon={Lock}
                             title="Security"
                             trailing={<ChevronRight className="h-5 w-5 text-muted" />}
@@ -393,10 +431,16 @@ export default function ProfilePage() {
                         </DialogDescription>
                     </DialogHeader>
                     <form id="edit-profile-form" onSubmit={onEditSubmit} className="space-y-4 pt-4">
+                        {profile?.kycVerified && (
+                            <p className="rounded-lg bg-violet-50 dark:bg-violet-900/20 px-3 py-2 text-xs text-violet-700 dark:text-violet-300">
+                                Your name is locked after identity verification and can no longer be edited here. Contact support if it needs correcting.
+                            </p>
+                        )}
                         <div className="space-y-2">
                             <Label htmlFor="edit-first-name">First Name</Label>
                             <Input
                                 id="edit-first-name"
+                                disabled={profile?.kycVerified}
                                 {...form.register("firstName")}
                             />
                             {form.formState.errors.firstName && (
@@ -407,6 +451,7 @@ export default function ProfilePage() {
                             <Label htmlFor="edit-last-name">Last Name</Label>
                             <Input
                                 id="edit-last-name"
+                                disabled={profile?.kycVerified}
                                 {...form.register("lastName")}
                             />
                             {form.formState.errors.lastName && (

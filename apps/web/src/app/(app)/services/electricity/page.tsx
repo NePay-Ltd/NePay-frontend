@@ -17,6 +17,7 @@ import { VerificationField } from "@/components/services/VerificationField";
 import { StickyPayBar } from "@/components/services/StickyPayBar";
 import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen";
 import { Switch } from "@/components/ui/switch";
+import { CopyTokenButton } from "@/components/shared/copy-token-button";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -353,15 +354,16 @@ export default function ElectricityPage() {
                         {purchaseToken && (
                             <div className="bg-gray-50 border border-border rounded-xl p-4 mt-4">
                                 <p className="text-xs font-bold text-muted uppercase tracking-wider mb-1">Your Token</p>
-                                <p className="font-mono text-xl font-bold tracking-widest text-ink">
+                                <p className="font-mono text-xl font-bold tracking-widest text-ink break-all">
                                     {purchaseToken}
                                 </p>
+                                <CopyTokenButton token={purchaseToken} className="mt-3" />
                             </div>
                         )}
                     </div>
                 }
                 onHome={() => router.push("/overview")}
-                onReceipt={() => router.push(txId ? `/transactions/${txId}` : "/transactions")}
+                onReceipt={() => router.push("/transactions")}
             />
         </>
     );

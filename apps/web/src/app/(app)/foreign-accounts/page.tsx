@@ -26,25 +26,20 @@ import {
 } from "@/lib/queries/bridge";
 import type { BridgeCurrency, BridgeVirtualAccountDto } from "@/lib/types/api";
 
+/**
+ * Bridge confirmed in writing (2026-09-10) that GBP third-party deposits
+ * from individuals are unavailable by policy, not a bug, and asked us to
+ * pause live GBP P2P testing. Requests are also blocked server-side
+ * (BridgeVirtualAccountService.requestAccount). GBP is left out of this
+ * list entirely — not shown as a tab, not shown as a disabled option, and
+ * not offered as an account to request — until that's resolved.
+ */
 const CURRENCIES: { code: BridgeCurrency; label: string }[] = [
     { code: "USD", label: "USD" },
     { code: "EUR", label: "EUR" },
-    { code: "GBP", label: "GBP" },
 ];
 
 /** How fast money actually arrives depends on which rail the sender's bank uses, not on anything NePay or the user controls — so this is always a range, never a promise. Minimums are Bridge's own hard floor: a smaller send is neither credited nor returned. */
-/**
- * Bridge confirmed in writing (2026-09-10) that GBP third-party deposits
- * from individuals are unavailable by policy, not a bug — and asked us to
- * pause live GBP P2P testing. New account requests are also blocked
- * server-side (BridgeVirtualAccountService.requestAccount); this is the
- * UI-side half so nobody hits that error unexplained. Only blocks NEW
- * requests — an account issued before this was known still displays
- * normally below.
- */
-const DISABLED_CURRENCIES: Partial<Record<BridgeCurrency, string>> = {
-    GBP: "GBP accounts are temporarily unavailable. Bridge's UK banking partner doesn't currently support individual-to-individual transfers into these accounts. We'll turn this back on once that's resolved.",
-};
 
 const CURRENCY_INFO: Record<BridgeCurrency, { speed: string; minimum: string }> = {
     USD: {
@@ -96,7 +91,7 @@ export default function ForeignAccountsPage() {
             <div className="mb-2">
                 <h1 className="text-3xl font-black text-ink tracking-tight">Foreign Accounts</h1>
                 <p className="mt-2 text-base font-medium text-muted">
-                    Get paid in USD, EUR or GBP, and it lands in your Naira wallet automatically.
+                    Get paid in USD or EUR, and it lands in your Naira wallet automatically.
                 </p>
             </div>
 
@@ -115,7 +110,7 @@ export default function ForeignAccountsPage() {
                     <Panel>
                         <PanelBody>
                             <Tabs value={activeCurrency} onValueChange={(v) => setActiveCurrency(v as BridgeCurrency)}>
-                                <TabsList className="w-full grid grid-cols-3">
+                                <TabsList className="w-full grid grid-cols-2">
                                     {CURRENCIES.map((c) => (
                                         <TabsTrigger key={c.code} value={c.code}>
                                             {c.label}
@@ -225,21 +220,6 @@ function StatusPanel({ customer }: { customer: NonNullable<ReturnType<typeof use
 function CurrencyPanel({ currency, account }: { currency: BridgeCurrency; account: BridgeVirtualAccountDto | null }) {
     const { mutate: requestAccount, isPending } = useRequestBridgeAccount();
     const info = CURRENCY_INFO[currency];
-    const disabledReason = DISABLED_CURRENCIES[currency];
-
-    if (!account && disabledReason) {
-        return (
-            <div className="rounded-xl border border-dashed border-border bg-gray-50/60 dark:bg-white/5 p-6 text-center space-y-4">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
-                    <Clock className="h-5 w-5 text-amber-600 dark:text-amber-500" />
-                </div>
-                <div>
-                    <p className="text-sm font-bold text-ink">{currency} accounts unavailable right now</p>
-                    <p className="mt-1 text-sm text-muted">{disabledReason}</p>
-                </div>
-            </div>
-        );
-    }
 
     if (!account) {
         return (

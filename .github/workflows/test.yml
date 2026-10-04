@@ -1,0 +1,145 @@
+name: NePay Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - '.github/workflows/**'
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+
+jobs:
+  # ── Unit Tests (runs on every PR, ~30s) ────────────────────────────────────
+  unit-tests:
+    name: Unit Tests (Vitest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test
+        working-directory: apps/web
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vitest-coverage
+          path: apps/web/coverage/
+
+
+  # ── E2E Tests (runs on merge to main + schedule) ─────────────────────────────
+  e2e-tests:
+    name: E2E Tests (Cypress)
+    runs-on: ubuntu-latest
+    # Only run on merge to main or 6-hour schedule, not on every PR
+    if: github.event_name != 'pull_request' || github.ref == 'refs/heads/main'
+
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write cypress.env.json
+        run: |
+          echo '{
+            "TEST_EMAIL": "${{ secrets.CYPRESS_TEST_EMAIL }}",
+            "TEST_PASSWORD": "${{ secrets.CYPRESS_TEST_PASSWORD }}",
+            "API_URL": "${{ secrets.CYPRESS_API_URL }}"
+          }' > apps/web/cypress.env.json
+
+      - name: Run Cypress E2E tests
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: apps/web
+          browser: chrome
+          record: false
+          install: false
+        env:
+          CYPRESS_BASE_URL: https://staging-nepay.vercel.app
+          CYPRESS_video: true
+
+      - name: Merge Mochawesome reports
+        if: always()
+        run: |
+          cd apps/web
+          npx mochawesome-merge cypress/reports/*.json -o cypress/reports/combined.json
+          npx marge cypress/reports/combined.json --reportDir cypress/reports --inline
+
+      - name: Upload Mochawesome HTML report as Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-report
+          path: |
+            apps/web/cypress/reports/
+            apps/web/cypress/screenshots/
+            apps/web/cypress/videos/
+
+
+      - name: Extract Test Stats
+        if: always()
+        run: |
+          if [ -f "apps/web/cypress/reports/combined.json" ]; then
+            PASSES=$(jq -r '.stats.passes' apps/web/cypress/reports/combined.json)
+            FAILURES=$(jq -r '.stats.failures' apps/web/cypress/reports/combined.json)
+            TESTS=$(jq -r '.stats.tests' apps/web/cypress/reports/combined.json)
+            DURATION_MS=$(jq -r '.stats.duration' apps/web/cypress/reports/combined.json)
+            DURATION_SEC=$(echo "scale=1; $DURATION_MS / 1000" | bc 2>/dev/null || echo "0")
+            echo "TEST_PASSES=$PASSES" >> $GITHUB_ENV
+            echo "TEST_FAILURES=$FAILURES" >> $GITHUB_ENV
+            echo "TEST_TOTAL=$TESTS" >> $GITHUB_ENV
+            echo "TEST_DURATION=$DURATION_SEC" >> $GITHUB_ENV
+          else
+            echo "TEST_PASSES=0" >> $GITHUB_ENV
+            echo "TEST_FAILURES=0" >> $GITHUB_ENV
+            echo "TEST_TOTAL=0" >> $GITHUB_ENV
+            echo "TEST_DURATION=0" >> $GITHUB_ENV
+          fi
+
+      - name: Send Telegram Notification
+        if: always()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            🤖 *NePay Test Automation* 🤖
+            
+            📊 *E2E Test Results:*
+            ✅ Passed: ${{ env.TEST_PASSES }}
+            ❌ Failed: ${{ env.TEST_FAILURES }}
+            📝 Total: ${{ env.TEST_TOTAL }}
+            ⏱️ Duration: ${{ env.TEST_DURATION }}s
+            
+            Status: ${{ job.status == 'success' && '🟢 ALL CLEAR' || '🔴 ATTENTION NEEDED' }}
+            
+            🌐 *View Full Report:*
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

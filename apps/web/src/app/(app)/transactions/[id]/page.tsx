@@ -1,5 +1,6 @@
 "use client";
 
+import { CopyTokenButton } from "@/components/shared/copy-token-button";
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { formatDate, formatTime } from "@/lib/date";
@@ -312,6 +313,29 @@ export default function TransactionDetailPage() {
                         </div>
                     </div>
 
+                    {/* Fee breakdown — bundled onto this receipt, shown here only. Never included in a downloaded/shared copy — see getReceiptData below. */}
+                    {!!transaction.fee && (
+                        <div className="border-t border-border pt-6">
+                            <p className="text-xs font-semibold text-muted uppercase mb-3">Fee Breakdown</p>
+                            <div className="space-y-2.5 rounded-xl bg-gray-50 dark:bg-white/5 p-4">
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-muted">Amount</span>
+                                    <span className="font-semibold text-ink">{formatNaira(Math.abs(transaction.amount))}</span>
+                                </div>
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-muted">Fee</span>
+                                    <span className="font-semibold text-ink">{formatNaira(transaction.fee)}</span>
+                                </div>
+                                <div className="flex items-center justify-between border-t border-border pt-2.5 text-sm">
+                                    <span className="font-semibold text-muted">{isCredit ? "Net Received" : "Total Debited"}</span>
+                                    <span className={cn("font-bold", amountClass)}>
+                                        {formatNaira(isCredit ? Math.abs(transaction.amount) - transaction.fee : Math.abs(transaction.amount) + transaction.fee)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Electricity Receipt — the full VTpass breakdown, not just the token */}
                     {transaction.category === "electricity" && (
                         <div className="space-y-5 border-t border-border pt-6">
@@ -386,6 +410,7 @@ export default function TransactionDetailPage() {
                                 <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-500/10 p-4">
                                     <p className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-500">Electricity Token</p>
                                     <p className="mt-2 break-all font-mono text-xl font-bold tracking-widest text-ink">{transaction.utilityToken}</p>
+                                    <CopyTokenButton token={transaction.utilityToken} className="mt-3" />
                                 </div>
                             )}
                         </div>

@@ -5,3 +5,15 @@ dist
 .env.local
 *.tsbuildinfo
 .turbo
+
+# ── Test artifacts ──────────────────────────────────────────────────────
+# NEVER commit credentials
+apps/web/cypress.env.json
+
+# Cypress generated output (screenshots, videos, reports)
+apps/web/cypress/screenshots/
+apps/web/cypress/videos/
+apps/web/cypress/reports/
+
+# Vitest coverage
+apps/web/coverage/

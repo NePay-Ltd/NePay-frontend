@@ -75,6 +75,7 @@ function TransactionsContent() {
                 cryptoAmount: tx.cryptoAmount,
                 cryptoAsset: tx.cryptoAsset,
                 exchangeRate: tx.exchangeRate,
+                fee: tx.fee,
         };
         setSelectedTransaction(detailData);
         setModalOpen(true);

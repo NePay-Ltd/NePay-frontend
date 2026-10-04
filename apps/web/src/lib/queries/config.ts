@@ -12,7 +12,7 @@ export const configKeys = {
 };
 
 /**
- * Whether the backend is running with Korapay test-mode credentials right
+ * Whether the backend is running with VFD test-mode (sandbox) credentials right
  * now — the source of truth for gating test-only UI (the "Simulate
  * Deposit" button on the add-money screen). Never inferred from a frontend
  * build flag, since that can drift from what the backend is actually

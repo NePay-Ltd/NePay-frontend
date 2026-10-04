@@ -7,6 +7,10 @@ export const apiClient = axios.create({
     baseURL: BASE_URL,
     headers: {
         "Content-Type": "application/json",
+        // Tells the backend which client this is, so staff can see whether a
+        // customer signed up from the website or the mobile app
+        // (User.signupPlatform). The backend only reads it at registration.
+        "X-NePay-Client": "web",
     },
 });
 
@@ -64,6 +68,14 @@ export function setTokens(tokens: AuthTokensDto) {
 export function clearTokens() {
     if (typeof window !== "undefined") {
         localStorage.removeItem("nepay-auth");
+        // Every clearTokens() call means the client no longer considers itself
+        // authenticated, so the nepay_refresh flag cookie middleware.ts reads
+        // must go with it. Without this, a token going bad anywhere other than
+        // an explicit logout() (e.g. a failed silent refresh, or a stale token
+        // rejected on initial load) leaves the cookie set — middleware then
+        // keeps bouncing the now-logged-out client from /login back to
+        // /overview while the client bounces itself back to /login, forever.
+        document.cookie = "nepay_refresh=; path=/; max-age=0";
     }
 }
 

@@ -1,19 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Copy, LogOut, Megaphone, Users, UserCheck, Trophy } from "lucide-react";
+import { Copy, Download, LogOut, Megaphone, QrCode, Users, UserCheck, Trophy } from "lucide-react";
+import { QRCodeCanvas } from "qrcode.react";
 import { toast } from "sonner";
 
 import { clearMarketerToken, getMarketerDashboard, getMarketerToken, type MarketerDashboard } from "@/lib/marketer-api";
 import { Button } from "@/components/shared/button";
 import { Panel, PanelBody, PanelHeader } from "@/components/shared/panel";
 import { Skeleton } from "@/components/shared/skeletons";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function MarketerDashboardPage() {
     const router = useRouter();
     const [data, setData] = useState<MarketerDashboard | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [qrOpen, setQrOpen] = useState(false);
+    const qrRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
         if (!getMarketerToken()) {
@@ -62,6 +66,28 @@ export default function MarketerDashboardPage() {
 
     const link = typeof window !== "undefined" ? `${window.location.origin}/register?mkt=${data.marketerCode}` : data.marketerCode;
     const isActive = data.status === "ACTIVE";
+
+    // The QR code's link also prefills "How did you hear about us?" as
+    // Other → "Marketer-<name>" (see the register page's ?hear=/?hearOther=
+    // read). The backend caps hearAboutUsOther at 120 chars.
+    const qrLink = (() => {
+        const params = new URLSearchParams({
+            mkt: data.marketerCode,
+            hear: "OTHER",
+            hearOther: `Marketer-${data.name}`.slice(0, 120),
+        });
+        const origin = typeof window !== "undefined" ? window.location.origin : "";
+        return `${origin}/register?${params.toString()}`;
+    })();
+
+    const downloadQr = () => {
+        const canvas = qrRef.current;
+        if (!canvas) return;
+        const a = document.createElement("a");
+        a.href = canvas.toDataURL("image/png");
+        a.download = `nepay-referral-${data.marketerCode}.png`;
+        a.click();
+    };
 
     const copyLink = async () => {
         await navigator.clipboard.writeText(link);
@@ -118,12 +144,39 @@ export default function MarketerDashboardPage() {
                             <Copy className="h-4 w-4 md:h-5 md:w-5" />
                         </button>
                     </div>
-                    <Button variant="primary" className="mt-4 h-11 w-full font-bold sm:w-auto" onClick={copyLink}>
-                        <Copy className="mr-1.5 h-4 w-4" />
-                        Copy link
-                    </Button>
+                    <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                        <Button variant="primary" className="h-11 w-full font-bold sm:w-auto" onClick={copyLink}>
+                            <Copy className="mr-1.5 h-4 w-4" />
+                            Copy link
+                        </Button>
+                        <Button variant="quiet" className="h-11 w-full font-bold sm:w-auto" onClick={() => setQrOpen(true)}>
+                            <QrCode className="mr-1.5 h-4 w-4" />
+                            Show QR code
+                        </Button>
+                    </div>
                 </PanelBody>
             </Panel>
+
+            <Dialog open={qrOpen} onOpenChange={setQrOpen}>
+                <DialogContent className="sm:max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>Your signup QR code</DialogTitle>
+                        <DialogDescription>
+                            Scanning opens NePay registration with your referral code applied.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex flex-col items-center gap-4 py-2">
+                        <div className="rounded-xl border border-border bg-white p-4">
+                            <QRCodeCanvas ref={qrRef} value={qrLink} size={220} marginSize={1} level="M" />
+                        </div>
+                        <p className="font-mono text-sm font-bold text-ink">{data.marketerCode}</p>
+                        <Button variant="primary" className="h-11 w-full font-bold" onClick={downloadQr}>
+                            <Download className="mr-1.5 h-4 w-4" />
+                            Download PNG
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             {/* Metrics */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

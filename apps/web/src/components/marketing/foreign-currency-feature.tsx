@@ -35,14 +35,13 @@ export function ForeignCurrencyFeature() {
           </h2>
           
           <p className="text-lg text-marketing-secondary leading-relaxed mb-8">
-            Get your own foreign bank accounts in USD, EUR, and GBP. Receive payments from anywhere in the world and convert directly to your Naira balance instantly with the best market rates.
+            Get your own foreign bank accounts in USD and EUR. Receive payments from anywhere in the world and convert directly to your Naira balance instantly with the best market rates.
           </p>
 
           <div className="flex items-center gap-4 text-sm font-bold text-marketing-text">
              <div className="flex -space-x-2">
                 <div className="w-8 h-8 rounded-full border-2 border-marketing-surface bg-gray-100 dark:bg-gray-800 flex items-center justify-center">🇺🇸</div>
                 <div className="w-8 h-8 rounded-full border-2 border-marketing-surface bg-gray-100 dark:bg-gray-800 flex items-center justify-center">🇪🇺</div>
-                <div className="w-8 h-8 rounded-full border-2 border-marketing-surface bg-gray-100 dark:bg-gray-800 flex items-center justify-center">🇬🇧</div>
              </div>
              <span>Multi-currency accounts supported</span>
           </div>

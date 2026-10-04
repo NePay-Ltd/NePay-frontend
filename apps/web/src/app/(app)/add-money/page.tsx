@@ -10,6 +10,9 @@ import { toast } from "sonner";
 import { usePaystackCheckout } from "@/hooks/use-paystack";
 import { useSimulateDeposit, useVirtualAccount, useWalletBalance } from "@/lib/queries/wallet";
 import { useTestMode } from "@/lib/queries/config";
+import { isProductionHost } from "@/lib/env";
+import { useFees } from "@/lib/queries/transfer";
+import { describeFees } from "@/lib/fees";
 import { formatNaira, formatNairaString } from "@/lib/format";
 
 import { Button } from "@/components/shared/button";
@@ -63,10 +66,17 @@ export default function AddMoneyPage() {
     // Bank Transfer (virtual account)
     const [bankExpanded, setBankExpanded] = React.useState(false);
     const { data: virtualAccount, isLoading: vaLoading, error: vaError, refetch: refetchVa } = useVirtualAccount();
+    const { data: feeSchedule } = useFees();
+    const depositFeeNote = describeFees(feeSchedule?.deposit, "deposit", formatNairaString);
 
     // Simulate Deposit (test mode only) — the button itself doesn't exist
     // unless the backend confirms test mode, not just a client-side guess.
+    // ALSO gated on not being the real nepay.com.ng domain: before live VFD
+    // keys are configured, every backend is still in VFD test mode, prod's
+    // included, so the backend signal alone can't be trusted to hide this
+    // on the customer-facing site during that window. See isProductionHost.
     const { data: testMode } = useTestMode();
+    const simulateDepositAllowed = testMode === true && !isProductionHost();
     const [simulateExpanded, setSimulateExpanded] = React.useState(false);
     const [simulateAmount, setSimulateAmount] = React.useState<number | "">(SIMULATE_PRESETS[0] ?? "");
     const { data: walletBalance, refetch: refetchBalance } = useWalletBalance();
@@ -197,6 +207,9 @@ export default function AddMoneyPage() {
                                                 <p className="text-center text-[11px] text-muted">
                                                     Transfers usually arrive within 1-3 minutes.
                                                 </p>
+                                                {depositFeeNote && (
+                                                    <p className="text-center text-[11px] text-muted">{depositFeeNote}</p>
+                                                )}
                                             </>
                                         ) : (
                                             // No "create virtual account" button here on purpose:
@@ -234,7 +247,7 @@ export default function AddMoneyPage() {
                                 icon={Globe}
                                 iconTint="green"
                                 title="Foreign Currency Account"
-                                subtitle="USD / EUR / GBP / CAD, convert to Naira anytime"
+                                subtitle="USD / EUR, convert to Naira anytime"
                                 showChevron
                                 onClick={() => router.push("/foreign-accounts")}
                                 className="px-3 hover:bg-violet-050 dark:hover:bg-violet-900/10"
@@ -244,12 +257,14 @@ export default function AddMoneyPage() {
                         {/*
                             Option 4: Simulate Deposit — test mode only. The
                             button doesn't exist at all (not just disabled)
-                            unless the backend's own GET /config/test-mode
-                            confirms it: `testMode` is undefined while
-                            loading and false in a live build, so this only
-                            ever renders `=== true`.
+                            unless BOTH the backend's own GET /config/test-mode
+                            confirms it (`testMode` is undefined while loading
+                            and false in a live build) AND this isn't the real
+                            nepay.com.ng domain — see simulateDepositAllowed's
+                            own note on why the backend signal alone isn't
+                            enough yet.
                         */}
-                        {process.env.NODE_ENV !== "production" && testMode === true && (
+                        {simulateDepositAllowed && (
                             <div className="rounded-lg bg-transparent overflow-hidden">
                                 <RowItem
                                     icon={FlaskConical}

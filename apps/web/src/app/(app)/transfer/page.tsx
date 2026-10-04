@@ -14,14 +14,17 @@ import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/format";
 import { overviewKeys, useOverviewSummary } from "@/lib/queries/overview";
 import { walletKeys } from "@/lib/queries/wallet";
+import { transactionKeys } from "@/lib/queries/transactions";
 import {
     useSavedBankAccounts,
     useBankList,
     useResolveBankAccount,
     useSaveBankAccount,
     useInitiateTransfer,
-    useTransferStatus
+    useTransferStatus,
+    useFees,
 } from "@/lib/queries/transfer";
+import { feeFor, maxSendable } from "@/lib/fees";
 
 import { RequireKyc } from "@/components/shared/require-kyc";
 import { Button } from "@/components/shared/button";
@@ -66,8 +69,14 @@ export default function TransferPage() {
         },
     });
 
+    // The fee is charged on top: the recipient gets the full amount and the
+    // wallet pays amount + fee. The server recomputes it; this is for display.
+    const { data: feeSchedule } = useFees();
     const watchAmount = form.watch("amount");
-    const isValidAmount = watchAmount > 0 && watchAmount <= transferable;
+    const fee = feeFor(feeSchedule?.withdrawal, watchAmount);
+    const totalDebit = (watchAmount || 0) + fee;
+    const maxAmount = maxSendable(feeSchedule?.withdrawal, transferable);
+    const isValidAmount = watchAmount > 0 && totalDebit <= transferable;
 
     // ── Modal & Transaction State ──
     const [modalOpen, setModalOpen] = React.useState(false);
@@ -83,7 +92,31 @@ export default function TransferPage() {
         if (!txStatus) return;
         if (txStatus.status === "COMPLETED") setTxState("success");
         if (txStatus.status === "FAILED") setTxState("error");
+
+        if (txStatus.status === "COMPLETED" || txStatus.status === "FAILED") {
+            // The history row's status is looked up live from this withdrawal
+            // (backend WithdrawalLedgerStatusSource), and a FAILED one has
+            // just been refunded, so both the list and the balance are stale.
+            queryClient.invalidateQueries({ queryKey: transactionKeys.all });
+            queryClient.invalidateQueries({ queryKey: walletKeys.balance() });
+            queryClient.invalidateQueries({ queryKey: overviewKeys.all });
+        }
     }, [txStatus]);
+
+    // The backend answers within a second or two now (it sends to the bank
+    // in the background), so this only matters if that request itself
+    // hangs: never leave the customer on an un-closeable spinner.
+    React.useEffect(() => {
+        if (txState !== "processing" || !initiateMutation.isPending) return;
+
+        const timer = setTimeout(() => {
+            setTxState((current) => (current === "processing" ? "review" : current));
+        }, 45_000);
+
+        return () => clearTimeout(timer);
+    }, [txState, initiateMutation.isPending]);
+
+    const failedAtBank = txStatus?.status === "FAILED";
 
     // ── Bank Account State ──
     const [bankCode, setBankCode] = React.useState("");
@@ -155,22 +188,28 @@ export default function TransferPage() {
             },
             {
                 onSuccess: (res) => {
-                    // Starts the real status polling (useTransferStatus,
-                    // 3s interval) — the useEffect above watching
-                    // txStatus.status is what actually flips txState to
-                    // "success"/"error" once the provider confirms, not
-                    // this handler. The withdrawal is only PROCESSING at
-                    // this point, not settled.
+                    // The withdrawal is recorded and the bank transfer is
+                    // being sent in the background, which can take a while.
+                    // Tell the customer straight away instead of making them
+                    // watch a spinner. Polling (useTransferStatus) keeps
+                    // running and flips this to success/error if the result
+                    // comes in while they're still here.
                     setTxId(res.id);
+                    setTxState("review");
 
                     // The ledger debit already happened server-side by the
                     // time this response comes back (see
                     // WithdrawalService.initiateWithdrawal) — invalidate
-                    // now so the balance shown elsewhere in the app isn't
-                    // stale while the polling above resolves the actual
-                    // outcome.
+                    // now so the balance and transaction history shown
+                    // elsewhere in the app aren't stale while the polling
+                    // above resolves the actual outcome. Without the
+                    // transactions invalidation, the new withdrawal only
+                    // ever appeared after an unrelated manual refresh
+                    // happened to refetch that list — confirmed live
+                    // 2026-09-27.
                     queryClient.invalidateQueries({ queryKey: walletKeys.balance() });
                     queryClient.invalidateQueries({ queryKey: overviewKeys.all });
+                    queryClient.invalidateQueries({ queryKey: transactionKeys.all });
 
                     if (saveAccount) {
                         const isAlreadySaved = savedAccounts.some(a => a.accountNumber === accountNumber && a.bankCode === bankCode);
@@ -365,10 +404,11 @@ export default function TransferPage() {
                                             </Chip>
                                         ))}
                                         <Chip
-                                            active={watchAmount === transferable && transferable > 0}
+                                            active={watchAmount === maxAmount && maxAmount > 0}
                                             onClick={() => {
-                                                if (transferable > 0) {
-                                                    form.setValue("amount", transferable, { shouldValidate: true });
+                                                // Leaves room for the fee, which is charged on top.
+                                                if (maxAmount > 0) {
+                                                    form.setValue("amount", maxAmount, { shouldValidate: true });
                                                 }
                                             }}
                                             className="font-semibold text-violet-600 dark:text-violet-400"
@@ -381,11 +421,19 @@ export default function TransferPage() {
                                         <p className="text-xs text-red-500">{form.formState.errors.amount.message}</p>
                                     )}
                                     {watchAmount > 0 && !isValidAmount && !form.formState.errors.amount && (
-                                        <p className="text-xs text-red-500">Insufficient funds for this amount.</p>
+                                        <p className="text-xs text-red-500">
+                                            {fee > 0 ? (
+                                                <>Insufficient funds for this amount plus the {formatNaira(fee)} fee.</>
+                                            ) : (
+                                                "Insufficient funds for this amount."
+                                            )}
+                                        </p>
                                     )}
-                                    <p className="text-xs text-muted">
-                                        A processing fee applies, deducted separately once the transfer completes. The exact amount depends on the destination bank.
-                                    </p>
+                                    {watchAmount > 0 && fee > 0 && (
+                                        <p className="text-xs text-muted">
+                                            Transfer fee: {formatNaira(fee)}, added on top. The recipient gets the full amount.
+                                        </p>
+                                    )}
                                 </div>
                             </PanelBody>
                         </Panel>
@@ -397,17 +445,26 @@ export default function TransferPage() {
                             <PanelHeader title="Transaction Summary" className="px-2 sm:px-0" />
                             <PanelBody className="px-2 sm:px-0">
                                 <div className="space-y-4">
-                                    <div className="flex justify-between text-base font-bold">
-                                        <span className="text-ink">You transfer</span>
-                                        <span className="font-mono text-violet-600 dark:text-violet-400">
-                                            {formatNaira(watchAmount || 0)}
-                                        </span>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-body">Recipient gets</span>
+                                        <span className="font-mono text-ink">{formatNaira(watchAmount || 0)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-body">Transfer fee</span>
+                                        <span className="font-mono text-ink">{formatNaira(fee)}</span>
                                     </div>
 
                                     <div className="my-2 border-t border-dashed border-border" />
 
+                                    <div className="flex justify-between text-base font-bold">
+                                        <span className="text-ink">Total from your wallet</span>
+                                        <span className="font-mono text-violet-600 dark:text-violet-400">
+                                            {formatNaira(totalDebit)}
+                                        </span>
+                                    </div>
+
                                     <p className="text-xs text-body">
-                                        A processing fee is charged separately once the transfer completes. The exact amount is set by the destination bank, not a fixed rate.
+                                        If the transfer fails, the amount and the fee are both returned to your wallet.
                                     </p>
                                 </div>
                             </PanelBody>
@@ -458,14 +515,43 @@ export default function TransferPage() {
                                 </span>
                             </div>
                         </div>
-                        <div className="flex justify-between font-bold text-base px-1">
-                            <span>Amount</span>
-                            <span className="font-mono">{formatNaira(watchAmount)}</span>
+                        <div className="space-y-2 px-1">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-muted">Amount</span>
+                                <span className="font-mono">{formatNaira(watchAmount)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-muted">Fee</span>
+                                <span className="font-mono">{formatNaira(fee)}</span>
+                            </div>
+                            <div className="flex justify-between font-bold text-base">
+                                <span>Total</span>
+                                <span className="font-mono">{formatNaira(totalDebit)}</span>
+                            </div>
                         </div>
                     </div>
                 }
                 // Processing UI
-                processingText="Processing your transfer..."
+                processingText="Sending your transfer..."
+                // Shown as soon as the withdrawal is accepted. The bank
+                // transfer is still in progress, so this is deliberately not
+                // the "success" state; the real outcome replaces it if it
+                // arrives while this is open, and a notification follows
+                // either way.
+                reviewTitle="Transfer on its way"
+                reviewDescription={
+                    <p>
+                        We&apos;re sending <span className="font-bold">{formatNaira(watchAmount)}</span> to{" "}
+                        <span className="font-bold">{resolvedName}</span>
+                        {selectedBank ? ` (${selectedBank.bankName})` : ""}. Most transfers arrive within a few minutes.
+                        We&apos;ll notify you when it lands, so you can safely close this.
+                    </p>
+                }
+                reviewButtonLabel="View transactions"
+                onReviewAction={() => {
+                    setModalOpen(false);
+                    router.push("/transactions");
+                }}
                 // Success UI
                 successTitle="Transfer Successful"
                 successDescription={
@@ -481,9 +567,19 @@ export default function TransferPage() {
                 // Error UI
                 errorTitle="Transfer Failed"
                 errorDescription={
-                    <p>{txStatus?.failureReason || initiateMutation.error?.message || "We encountered an unexpected error."}</p>
+                    failedAtBank ? (
+                        // The bank's own reason can be internal (e.g. about
+                        // NePay's pool account), so it isn't shown here.
+                        <p>
+                            The bank couldn&apos;t complete this transfer.{" "}
+                            <span className="font-bold">{formatNaira(totalDebit)}</span>
+                            {fee > 0 ? " (the amount and the fee)" : ""} has been returned to your wallet.
+                        </p>
+                    ) : (
+                        <p>{initiateMutation.error?.message || "We encountered an unexpected error."}</p>
+                    )
                 }
-                errorButtonLabel="Edit Amount"
+                errorButtonLabel={failedAtBank ? "Close" : "Edit Amount"}
                 onErrorAction={() => setModalOpen(false)}
                 // PIN
                 onPinSubmit={handlePinSubmit}

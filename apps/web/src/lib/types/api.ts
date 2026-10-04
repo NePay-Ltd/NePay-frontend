@@ -118,6 +118,7 @@ export interface KycStatusDto {
 export interface KycRecordDto {
     id: string;
     status: KycRecordStatus;
+    failureReason: string | null;
 }
 
 // ─── Wallet & Ledger ─────────────────────────────────────────────────────────
@@ -154,6 +155,12 @@ export interface LedgerEntryDto {
      * it still reads as "success", as every row used to.
      */
     status?: "success" | "pending" | "failed";
+    /**
+     * This entry's own fee, bundled onto it rather than a separate FEE row
+     * — see the backend's WalletService.getEntryFees. Null/absent when
+     * nothing was charged.
+     */
+    fee?: string | null;
 }
 
 export interface VirtualAccountResponseDto {
@@ -162,7 +169,19 @@ export interface VirtualAccountResponseDto {
     bankName: string;
     accountName: string;
     status: VirtualAccountStatus;
+    /** CBN tier (1/2/3) this account currently sits at. */
+    tier: number;
+    /** This tier's balance cap, or null for Tier 3 (no cap). */
+    balanceCap: string | null;
+    /** True once the wallet balance is over balanceCap — every outgoing-spend surface is already blocked server-side; this is what drives the proactive "upgrade to access your balance" notice. */
+    overBalanceCap: boolean;
     createdAt: string;
+}
+
+/** Body of POST /wallet/virtual-account/upgrade-tier — at least one of the two is required; which is enforced server-side since it depends on the account's current tier. */
+export interface UpgradeTierDto {
+    nin?: string;
+    address?: string;
 }
 
 /** Body of POST /wallet/virtual-account/simulate-deposit — test mode only, no account number (always the caller's own account). */
@@ -241,9 +260,22 @@ export interface ResolveAccountResponseDto {
     resolutionToken: string;
 }
 
+/** One fee band from GET /fees: amounts up to and including `upTo` pay `fee`; the last band (`upTo: null`) covers everything above. */
+export interface FeeBand {
+    upTo: string | null;
+    fee: string;
+}
+
+export interface FeeSchedule {
+    withdrawal: FeeBand[];
+    deposit: FeeBand[];
+}
+
 export interface WithdrawalResponseDto {
     id: string;
     amount: string;
+    /** Charged on top of amount; refunded with it if the transfer fails. */
+    fee: string;
     bankCode: string;
     accountNumber: string;
     accountName: string;

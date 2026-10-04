@@ -1,0 +1,6 @@
+{
+  "recommendations": [
+    "cypress.cypress-vscode",
+    "zixuanchen.vitest-explorer"
+  ]
+}

@@ -53,7 +53,7 @@ const PUBLIC_CONTENT_PATHS = new Set([
 ]);
 
 /** Paths that start with these prefixes are always public (static, marketing). */
-const PUBLIC_PREFIXES = ["/_next", "/favicon", "/api/auth/callback"];
+const PUBLIC_PREFIXES = ["/_next", "/favicon", "/api/auth/callback", "/sitemap.xml", "/robots.txt"];
 
 /**
  * Marketer routes run their own auth system (a bearer token in localStorage,
@@ -88,10 +88,14 @@ function backendOrigins(): { http: string; ws: string } {
  * http->https upgrades and placed no restriction on script execution at
  * all. This app has a deliberately minimal external footprint that makes a
  * real policy achievable: next/font self-hosts its one Google font (no
- * external font host to allow), there are no analytics/tracking scripts or
- * third-party embeds anywhere in the codebase, and the only external image
- * host is Cloudinary (avatarUrl, plain <img> tags — not next/image, so no
- * remotePatterns concern either).
+ * external font host to allow), there are no analytics/tracking scripts
+ * anywhere in the codebase, and the only external image host is Cloudinary
+ * (avatarUrl, plain <img> tags — not next/image, so no remotePatterns
+ * concern either). The one real third-party embed is Bridge's hosted ToS
+ * page (bridge-tos-consent.tsx's iframe) — frame-src explicitly allows
+ * *.bridge.xyz for it, since Bridge's actual tosLink host varies by
+ * customer state (observed as both compliance.*.bridge.xyz and
+ * dashboard.bridge.xyz) rather than being one fixed domain to hardcode.
  *
  * 'strict-dynamic' alongside the nonce is required, not optional: without
  * it, Next.js's own dynamically-injected code-split chunk scripts (which
@@ -111,6 +115,7 @@ function contentSecurityPolicy(nonce: string): string {
         img-src 'self' data: https://res.cloudinary.com;
         font-src 'self';
         connect-src 'self' ${http} ${ws};
+        frame-src https://*.bridge.xyz;
         frame-ancestors 'self';
         base-uri 'self';
         object-src 'none';
@@ -155,15 +160,20 @@ export function middleware(request: NextRequest) {
         return passThrough();
     }
 
-    // Pass through exact public auth pages
-    if (PUBLIC_PATHS.has(pathname)) {
-        return passThrough();
-    }
-
     // The nepay_refresh flag cookie is the only persistent, readable signal
     // available here — see this file's class-level note on why it's a
     // routing UX gate, not the real auth boundary.
     const hasSession = request.cookies.has("nepay_refresh");
+
+    // If the user is logged in and visiting an auth page, bounce to overview
+    if (hasSession && PUBLIC_PATHS.has(pathname)) {
+        return withCsp(NextResponse.redirect(new URL("/overview", request.url)));
+    }
+
+    // Pass through exact public auth pages (for non-logged in users)
+    if (PUBLIC_PATHS.has(pathname)) {
+        return passThrough();
+    }
 
     if (!hasSession) {
         // If it's a public content page, let them view it without logging in
@@ -178,11 +188,6 @@ export function middleware(request: NextRequest) {
             loginUrl.searchParams.set("returnTo", returnTo);
         }
         return withCsp(NextResponse.redirect(loginUrl));
-    }
-
-    // If the user is logged in and visiting an auth page, bounce to overview
-    if (PUBLIC_PATHS.has(pathname)) {
-        return withCsp(NextResponse.redirect(new URL("/overview", request.url)));
     }
 
     return passThrough();

@@ -24,6 +24,8 @@ export interface TransactionDetailData {
     cryptoAmount?: string;
     cryptoAsset?: string;
     exchangeRate?: string;
+    /** Bundled into this view only — never passed to ReceiptData, so a downloaded/shared receipt stays fee-free. */
+    fee?: number;
 }
 
 interface TransactionDetailModalProps {
@@ -234,6 +236,22 @@ export function TransactionDetailModal({
                         <ReceiptRow label="Currency">
                             <span className="text-sm font-semibold text-ink dark:text-trueWhite">{transaction.currency}</span>
                         </ReceiptRow>
+
+                        {!!transaction.fee && (
+                            <>
+                                <ReceiptRow label="Amount">
+                                    <span className="text-sm font-semibold text-ink dark:text-trueWhite">{formatNaira(Math.abs(transaction.amount))}</span>
+                                </ReceiptRow>
+                                <ReceiptRow label="Fee">
+                                    <span className="text-sm font-semibold text-ink dark:text-trueWhite">{formatNaira(transaction.fee)}</span>
+                                </ReceiptRow>
+                                <ReceiptRow label={isCredit ? "Net Received" : "Total Debited"}>
+                                    <span className={cn("text-sm font-bold", cfg.amountColor)}>
+                                        {formatNaira(isCredit ? Math.abs(transaction.amount) - transaction.fee : Math.abs(transaction.amount) + transaction.fee)}
+                                    </span>
+                                </ReceiptRow>
+                            </>
+                        )}
 
                         {transaction.cryptoAmount && transaction.cryptoAsset && (
                             <ReceiptRow label="Crypto received">

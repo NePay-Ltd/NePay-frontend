@@ -8,6 +8,7 @@ import {
     WalletBalanceDto,
     VirtualAccountResponseDto,
     SimulateDepositDto,
+    UpgradeTierDto,
     ApiResponse,
 } from "@/lib/types/api";
 
@@ -39,7 +40,11 @@ export function useVirtualAccount() {
                 throw err;
             }
         },
-        staleTime: Infinity,
+        // No staleTime (matches useWalletBalance): account number/bank name
+        // never change, but tier/overBalanceCap do — a deposit landing via
+        // webhook, or a tier upgrade, both happen with no direct mutation
+        // this client awaits, so this must refetch on every mount/refocus
+        // like the balance itself, not cache the cap status forever.
     });
 }
 
@@ -56,6 +61,29 @@ export function useSimulateDeposit() {
     return useMutation<void, unknown, SimulateDepositDto>({
         mutationFn: async (payload) => {
             await apiClient.post("/wallet/virtual-account/simulate-deposit", payload);
+        },
+    });
+}
+
+/**
+ * Raises the caller's virtual account to a higher CBN tier. Synchronous —
+ * VFD's own upgrade endpoint resolves immediately, no webhook/polling
+ * involved (unlike a deposit or payout). Invalidates the virtual-account
+ * query on success so the new tier/limits show up immediately.
+ */
+export function useUpgradeTier() {
+    const queryClient = useQueryClient();
+
+    return useMutation<VirtualAccountResponseDto, unknown, UpgradeTierDto>({
+        mutationFn: async (payload) => {
+            const res = await apiClient.post<ApiResponse<VirtualAccountResponseDto>>(
+                "/wallet/virtual-account/upgrade-tier",
+                payload,
+            );
+            return res.data.data;
+        },
+        onSuccess: (updated) => {
+            queryClient.setQueryData(walletKeys.virtualAccount(), updated);
         },
     });
 }
