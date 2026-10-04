@@ -98,19 +98,6 @@ export default function TvPage() {
     React.useEffect(() => {
         if (!txStatus) return;
         if (txStatus.status === "COMPLETED") {
-            if (saveBeneficiary) {
-                saveBeneficiaryMutation.mutate({
-                    category: "CABLE",
-                    provider: providerId ?? "",
-                    identifier: smartcard,
-                    label: `${activeProvider?.label ?? "TV"} ${smartcard}`,
-                    amount: selectedPlan?.variation_amount,
-                }, {
-                    onError: () => {
-                        toast.error("Payment went through, but we couldn't save this as a beneficiary for next time.");
-                    },
-                });
-            }
             setPinModalOpen(false);
             setSuccessOpen(true);
         }
@@ -171,8 +158,9 @@ export default function TvPage() {
             },
             {
                 onSuccess: (res) => {
-                    if (res.status === "COMPLETED") {
-                        if (saveBeneficiary) {
+                    // Save as soon as the purchase is accepted (not only on COMPLETED): some purchases sit in
+                    // PROCESSING for a long time, and a meter/card number the user asked to save shouldn't wait on that.
+                    if (res.status !== "FAILED" && saveBeneficiary) {
                             saveBeneficiaryMutation.mutate({
                                 category: "CABLE",
                                 provider: providerId,
@@ -185,6 +173,7 @@ export default function TvPage() {
                                 },
                             });
                         }
+                    if (res.status === "COMPLETED") {
                         setPinModalOpen(false);
                         setSuccessOpen(true);
                         return;
