@@ -111,19 +111,6 @@ export default function ElectricityPage() {
         if (txStatus.token) setPurchaseToken(txStatus.token);
         if (txStatus.units) setPurchaseUnits(txStatus.units);
         if (txStatus.status === "COMPLETED") {
-            if (saveBeneficiary) {
-                saveBeneficiaryMutation.mutate({
-                    category: "ELECTRICITY",
-                    provider: providerId,
-                    identifier: meter,
-                    label: `${activeProvider?.label ?? "Electricity"} ${meter}`,
-                    amount: amount.toString(),
-                }, {
-                    onError: () => {
-                        toast.error("Payment went through, but we couldn't save this as a beneficiary for next time.");
-                    },
-                });
-            }
             setPinModalOpen(false);
             setSuccessOpen(true);
         }
@@ -184,8 +171,9 @@ export default function ElectricityPage() {
                 onSuccess: (res) => {
                     setPurchaseToken(res.token);
                     setPurchaseUnits(res.units);
-                    if (res.status === "COMPLETED") {
-                        if (saveBeneficiary) {
+                    // Save as soon as the purchase is accepted (not only on COMPLETED): some purchases sit in
+                    // PROCESSING for a long time, and a meter/card number the user asked to save shouldn't wait on that.
+                    if (res.status !== "FAILED" && saveBeneficiary) {
                             saveBeneficiaryMutation.mutate({
                                 category: "ELECTRICITY",
                                 provider: providerId,
@@ -198,6 +186,7 @@ export default function ElectricityPage() {
                                 },
                             });
                         }
+                    if (res.status === "COMPLETED") {
                         setPinModalOpen(false);
                         setSuccessOpen(true);
                         return;
