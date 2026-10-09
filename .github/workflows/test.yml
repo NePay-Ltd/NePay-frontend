@@ -13,8 +13,8 @@ on:
       - 'apps/web/**'
       - '.github/workflows/**'
   schedule:
-    # Run every 6 hours
-    - cron: '0 */6 * * *'
+    # Run every Sunday at midnight
+    - cron: '0 0 * * 0'
 
 jobs:
   # ── Unit Tests (runs on every PR, ~30s) ────────────────────────────────────
@@ -50,7 +50,7 @@ jobs:
   e2e-tests:
     name: E2E Tests (Cypress)
     runs-on: ubuntu-latest
-    # Only run on merge to main or 6-hour schedule, not on every PR
+    # Only run on merge to main or Sunday schedule, not on every PR
     if: github.event_name != 'pull_request' || github.ref == 'refs/heads/main'
 
 
