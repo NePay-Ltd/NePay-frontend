@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import {
     ApiResponse,
+    BridgeAccountFeeDto,
     BridgeCustomerDto,
     BridgeDepositDto,
     BridgeVirtualAccountDto,
@@ -20,6 +21,7 @@ export const bridgeKeys = {
     customer: () => [...bridgeKeys.all, "customer"] as const,
     accounts: () => [...bridgeKeys.all, "accounts"] as const,
     deposits: () => [...bridgeKeys.all, "deposits"] as const,
+    fee: () => [...bridgeKeys.all, "fee"] as const,
 };
 
 /** Polled while the customer hasn't yet reached a terminal-ish state — Bridge's real onboarding resolves in seconds to minutes once documents are submitted. */
@@ -81,6 +83,31 @@ export function useRefreshBridgeCustomer() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: bridgeKeys.customer() });
+        },
+    });
+}
+
+/** The one-time fee gating foreign account requests — see BridgeAccountFeeDto's own note. */
+export function useBridgeAccountFee() {
+    return useQuery<BridgeAccountFeeDto>({
+        queryKey: bridgeKeys.fee(),
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<BridgeAccountFeeDto>>("/bridge/accounts/fee");
+            return res.data.data;
+        },
+    });
+}
+
+/** Pays the one-time fee. Idempotent server-side — calling this again once already paid is a safe no-op, not a second charge. */
+export function usePayBridgeAccountFee() {
+    const queryClient = useQueryClient();
+    return useMutation<BridgeAccountFeeDto, Error, string>({
+        mutationFn: async (pin) => {
+            const res = await apiClient.post<ApiResponse<BridgeAccountFeeDto>>("/bridge/accounts/fee/pay", { pin });
+            return res.data.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: bridgeKeys.fee() });
         },
     });
 }

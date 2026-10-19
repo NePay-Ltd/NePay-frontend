@@ -196,7 +196,7 @@ export function TransactionDetailModal({
 
                     {/* ── Details rows ── */}
                     <div className="w-full space-y-3.5 text-left">
-                        <ReceiptRow label="Transaction ID">
+                        <ReceiptRow label="Transaction Reference">
                             <div className="flex items-center gap-1.5">
                                 <code className="text-xs font-mono text-ink dark:text-trueWhite">
                                     {transaction.id.slice(0, 10)}...{transaction.id.slice(-4)}
@@ -214,7 +214,7 @@ export function TransactionDetailModal({
                             </div>
                         </ReceiptRow>
 
-                        <ReceiptRow label="Type">
+                        <ReceiptRow label="Transaction Type">
                             <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-200">
                                 {transaction.type}
                             </span>

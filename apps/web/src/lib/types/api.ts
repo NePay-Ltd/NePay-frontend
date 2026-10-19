@@ -178,10 +178,18 @@ export interface VirtualAccountResponseDto {
     createdAt: string;
 }
 
-/** Body of POST /wallet/virtual-account/upgrade-tier — at least one of the two is required; which is enforced server-side since it depends on the account's current tier. */
+/**
+ * Body of POST /wallet/virtual-account/upgrade-tier (multipart) — at least
+ * one of nin/address is required, which is enforced server-side since it
+ * depends on the account's current tier. `documentDate` and the
+ * proof-of-address image file are required together whenever `address` is
+ * present (Tier 3); the file itself is passed separately to useUpgradeTier,
+ * not part of this DTO, the same split useCreateBridgeCustomer already uses.
+ */
 export interface UpgradeTierDto {
     nin?: string;
     address?: string;
+    documentDate?: string;
 }
 
 /** Body of POST /wallet/virtual-account/simulate-deposit — test mode only, no account number (always the caller's own account). */
@@ -518,6 +526,22 @@ export interface BridgeVirtualAccountDto {
 /** Body of POST /bridge/accounts. */
 export interface RequestBridgeVirtualAccountDto {
     currency: BridgeCurrency;
+}
+
+/**
+ * GET /bridge/accounts/fee and the result of POST /bridge/accounts/fee/pay
+ * — the one-time fee that unlocks foreign accounts for every currency, not
+ * a per-currency charge. `amountNgn`/`rate` are a live quote at the
+ * site-wide USD→NGN rate; null only while no rate is configured (the admin
+ * hasn't set one yet) or once this fee shows as already settled some other
+ * way (grandfathered accounts from before this fee existed).
+ */
+export interface BridgeAccountFeeDto {
+    required: boolean;
+    amountUsd: string;
+    amountNgn: string | null;
+    rate: string | null;
+    paidAt: string | null;
 }
 
 export interface BridgeDepositDto {

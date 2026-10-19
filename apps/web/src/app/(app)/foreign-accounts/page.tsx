@@ -14,17 +14,20 @@ import { Tag, type TagVariant } from "@/components/shared/tag";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BridgeOnboardingForm } from "@/components/shared/bridge-onboarding-form";
 import { BridgeTosConsent } from "@/components/shared/bridge-tos-consent";
+import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
 
 import { formatByCurrency } from "@/lib/format";
 import { formatDate } from "@/lib/date";
 import {
+    useBridgeAccountFee,
     useBridgeAccounts,
     useBridgeCustomer,
     useBridgeDeposits,
+    usePayBridgeAccountFee,
     useRefreshBridgeCustomer,
     useRequestBridgeAccount,
 } from "@/lib/queries/bridge";
-import type { BridgeCurrency, BridgeVirtualAccountDto } from "@/lib/types/api";
+import type { BridgeAccountFeeDto, BridgeCurrency, BridgeVirtualAccountDto } from "@/lib/types/api";
 
 /**
  * Bridge confirmed in writing (2026-09-10) that GBP third-party deposits
@@ -77,6 +80,7 @@ export default function ForeignAccountsPage() {
     const { data: customer, isPending: customerLoading } = useBridgeCustomer();
     const { data: accounts, isPending: accountsLoading } = useBridgeAccounts();
     const { data: deposits } = useBridgeDeposits();
+    const { data: fee, isPending: feeLoading } = useBridgeAccountFee();
 
     const [activeCurrency, setActiveCurrency] = React.useState<BridgeCurrency>("USD");
 
@@ -98,9 +102,21 @@ export default function ForeignAccountsPage() {
             {customerLoading ? (
                 <Skeleton className="h-64 w-full rounded-2xl" />
             ) : !customer || customer.status === "rejected" ? (
-                <BridgeOnboardingForm rejectedCustomer={customer ?? undefined} />
+                <div className="space-y-4">
+                    {fee?.required && (
+                        <p className="text-xs text-muted">
+                            Heads up: a one-time ${fee.amountUsd} fee{fee.amountNgn ? ` (about ₦${Number(fee.amountNgn).toLocaleString()} today)` : ""} applies
+                            once you&apos;re verified, before your first account. It covers both USD and EUR, and is charged once from your Naira wallet.
+                        </p>
+                    )}
+                    <BridgeOnboardingForm rejectedCustomer={customer ?? undefined} />
+                </div>
             ) : customer.status !== "active" ? (
                 <StatusPanel customer={customer} />
+            ) : feeLoading ? (
+                <Skeleton className="h-48 w-full rounded-2xl" />
+            ) : fee?.required ? (
+                <FeeGatePanel fee={fee} />
             ) : (
                 <>
                     <p className="text-xs font-medium text-muted -mt-2">
@@ -212,6 +228,93 @@ function StatusPanel({ customer }: { customer: NonNullable<ReturnType<typeof use
                 Check now
             </Button>
         </div>
+    );
+}
+
+// ─── Fee gate (one-time, before the first account of any currency) ─────────
+
+/**
+ * Shown instead of the currency tabs while `fee.required` is true. Gates
+ * every NEW account request server-side too (BridgeVirtualAccountService.
+ * requestAccount) — this is the UI-side half so nobody hits that error
+ * unexplained, same convention as the old GBP-disabled panel.
+ */
+function FeeGatePanel({ fee }: { fee: BridgeAccountFeeDto }) {
+    const payFee = usePayBridgeAccountFee();
+    const [modalOpen, setModalOpen] = React.useState(false);
+    const [txState, setTxState] = React.useState<TransactionState>("confirm");
+
+    const ngnLabel = fee.amountNgn ? `₦${Number(fee.amountNgn).toLocaleString()}` : null;
+
+    const handlePinSubmit = (pin: string) => {
+        setTxState("processing");
+        payFee.mutate(pin, {
+            onSuccess: () => setTxState("success"),
+            onError: (err: any) => {
+                toast.error(err.response?.data?.message || "Could not charge the fee");
+                setTxState("error");
+            },
+        });
+    };
+
+    return (
+        <>
+            <Panel>
+                <PanelBody className="py-10 text-center space-y-4">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-900/30">
+                        <Building2 className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                    </div>
+                    <div className="mx-auto max-w-sm space-y-1">
+                        <h3 className="text-base font-bold text-ink">One more step to unlock Foreign Accounts</h3>
+                        <p className="text-sm text-muted">
+                            A one-time ${fee.amountUsd} fee{ngnLabel ? ` (${ngnLabel} at today's rate)` : ""} unlocks
+                            foreign accounts. It covers every currency and is charged once from your Naira wallet.
+                        </p>
+                    </div>
+                    <Button
+                        variant="primary"
+                        disabled={!ngnLabel}
+                        onClick={() => {
+                            setTxState("confirm");
+                            setModalOpen(true);
+                        }}
+                    >
+                        Pay ${fee.amountUsd} to Unlock
+                    </Button>
+                    {!ngnLabel && (
+                        <p className="text-xs text-muted">Pricing is temporarily unavailable. Check back shortly.</p>
+                    )}
+                </PanelBody>
+            </Panel>
+
+            <TransactionModal
+                open={modalOpen}
+                onOpenChange={setModalOpen}
+                state={txState}
+                confirmTitle="Unlock Foreign Accounts"
+                confirmContent={
+                    <div className="space-y-2 py-2 text-center">
+                        <p className="text-3xl font-black text-ink">{ngnLabel ?? "Unavailable"}</p>
+                        <p className="text-sm text-muted">
+                            ${fee.amountUsd}{fee.rate ? ` at ₦${Number(fee.rate).toLocaleString()}/$1` : ""}. Charged
+                            once from your Naira wallet, covers every currency, and is non-refundable.
+                        </p>
+                    </div>
+                }
+                onConfirm={() => setTxState("pin")}
+                onCancel={() => setModalOpen(false)}
+                confirmButtonLabel="Continue"
+                onPinSubmit={handlePinSubmit}
+                pinDescription="Enter your 4-digit transaction PIN to confirm this charge."
+                processingText="Unlocking foreign accounts..."
+                successTitle="Foreign Accounts Unlocked"
+                successDescription="You can now request a USD or EUR account below."
+                onSuccessAction={() => setModalOpen(false)}
+                errorTitle="Payment Failed"
+                errorDescription={(payFee.error as any)?.response?.data?.message || "Something went wrong. Please try again."}
+                onErrorAction={() => setModalOpen(false)}
+            />
+        </>
     );
 }
 
