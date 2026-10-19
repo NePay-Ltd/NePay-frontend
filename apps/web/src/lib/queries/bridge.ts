@@ -1,5 +1,5 @@
 /**
- * TanStack Query hooks for Foreign Accounts — Bridge.xyz-backed USD/EUR/GBP
+ * TanStack Query hooks for Foreign Accounts — Bridge.xyz-backed USD/EUR
  * virtual accounts. Replaces the old Fincra-backed lib/queries/fcy.ts
  * entirely.
  */
