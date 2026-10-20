@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { IconBuilding as Building2, IconCard as CreditCard, IconLock as Lock } from "@/components/icons";
+import { IconBuilding as Building2, IconCard as CreditCard, IconClock as Clock, IconLock as Lock } from "@/components/icons";
 import { ShieldCheck, AlertCircle, ArrowRight, BadgeCheck, XCircle } from "lucide-react";;
 import { toast } from "sonner";
 
@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/shared/spinner";
 import { BridgeOnboardingForm } from "@/components/shared/bridge-onboarding-form";
 import { BridgeTosConsent } from "@/components/shared/bridge-tos-consent";
-import { useBridgeCustomer } from "@/lib/queries/bridge";
+import { useBridgeAccountFee, useBridgeCustomer } from "@/lib/queries/bridge";
 import { cn } from "@/lib/cn";
 
 import { getApiErrorMessage } from "@/lib/api-client";
@@ -185,7 +185,7 @@ function KycRejected({ type, reason, onRetry }: { type: "BVN"; reason: string | 
                 </p>
             </div>
             <Button variant="primary" size="lg" fullWidth onClick={onRetry}>
-                I&apos;ve updated my profile — try again
+                I&apos;ve updated my profile, try again
             </Button>
         </div>
     );
@@ -207,6 +207,17 @@ function BridgeOptionalStep({ onDone }: { onDone: () => void }) {
     // its mutation invalidates this same query, so `customer` appears here
     // with no extra plumbing needed between the form and this step.
     const { data: customer } = useBridgeCustomer();
+    // Safe to call before a Bridge customer even exists — GET /bridge/accounts/fee
+    // doesn't require one. Surfaced here so the fee is disclosed up front,
+    // before the user commits to filling out Bridge's onboarding form, not
+    // just on the Foreign Accounts page afterward.
+    const { data: fee } = useBridgeAccountFee();
+    const feeNotice = fee?.required ? (
+        <p className="text-xs text-muted">
+            Heads up: a one-time ${fee.amountUsd} fee{fee.amountNgn ? ` (about ₦${Number(fee.amountNgn).toLocaleString()} today)` : ""} applies
+            once you&apos;re verified, before your first account. It covers both USD and EUR, and is charged once from your Naira wallet.
+        </p>
+    ) : null;
 
     // The form was submitted (this render or an earlier one): the Bridge
     // customer now exists, which means it may still need ToS acceptance
@@ -245,6 +256,7 @@ function BridgeOptionalStep({ onDone }: { onDone: () => void }) {
                 >
                     ← Back
                 </button>
+                {feeNotice}
                 <BridgeOnboardingForm bare />
             </div>
         );
@@ -262,6 +274,7 @@ function BridgeOptionalStep({ onDone }: { onDone: () => void }) {
                 <p className="text-sm text-body">
                     Add a few more details now to get real foreign account numbers you can share with clients or employers abroad. It lands in your Naira wallet automatically. You can always do this later from Foreign Accounts instead.
                 </p>
+                {feeNotice}
             </div>
             <div className="space-y-2">
                 <Button variant="primary" size="lg" fullWidth onClick={() => setExpanded(true)}>
@@ -277,11 +290,72 @@ function BridgeOptionalStep({ onDone }: { onDone: () => void }) {
 
 // ─── Success screen ───────────────────────────────────────────────────────────
 
+/**
+ * Surfaces the caller's Bridge (foreign account) application status on
+ * every visit to this page once BVN is done — not just the one-time
+ * post-approval offer in BridgeOptionalStep, which a returning user never
+ * sees again once BVN is verified (see KycPage's own step logic). Without
+ * this, someone who submitted Bridge details and got rejected later
+ * (rejection often lands after they've already left this page) would have
+ * no visible nudge to go fix it unless they happened to open Foreign
+ * Accounts on their own.
+ *
+ * Renders nothing once the customer is `active` — the user asked for the
+ * banner to stop bothering people once they're approved, and an active
+ * customer has nothing left to act on here.
+ */
+function BridgeStatusBanner() {
+    const router = useRouter();
+    const { data: customer } = useBridgeCustomer();
+
+    if (!customer || customer.status === "active") {
+        return null;
+    }
+
+    if (customer.status === "rejected") {
+        return (
+            <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-left dark:border-red-900/30 dark:bg-red-900/10">
+                <XCircle className="h-5 w-5 shrink-0 text-red-600 dark:text-red-500" />
+                <div className="flex-1 space-y-2">
+                    <p className="text-sm font-bold text-red-900 dark:text-red-400">
+                        Your foreign account application was declined
+                    </p>
+                    <p className="text-sm text-red-800 dark:text-red-500">
+                        {customer.rejectionReasons?.[0]?.reason ?? "Bridge could not verify the details you submitted."} You can fix this and try again.
+                    </p>
+                    <Button size="sm" variant="primary" onClick={() => router.push("/foreign-accounts")}>
+                        Retry now
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-left dark:border-amber-900/30 dark:bg-amber-900/10">
+            <Clock className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-500" />
+            <div className="flex-1 space-y-2">
+                <p className="text-sm font-bold text-amber-900 dark:text-amber-400">
+                    Your foreign account application is being reviewed
+                </p>
+                <p className="text-sm text-amber-800 dark:text-amber-500">
+                    This usually resolves within a few minutes. You can check progress anytime.
+                </p>
+                <Button size="sm" variant="quiet" onClick={() => router.push("/foreign-accounts")}>
+                    Check status
+                </Button>
+            </div>
+        </div>
+    );
+}
+
 function KycSuccess({ userName }: { userName: string }) {
     const router = useRouter();
 
     return (
         <div className="space-y-6 text-center">
+            <BridgeStatusBanner />
+
             {/* Animated success badge */}
             <div className="flex justify-center">
                 <div className="relative flex h-24 w-24 items-center justify-center">

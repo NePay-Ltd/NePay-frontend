@@ -21,29 +21,50 @@ export interface ReceiptData {
     utilityMeterType?: string;
     utilityProviderTransactionId?: string;
     utilityTariff?: string;
-    utilityPhoneNumber?: string;
-    utilityEmail?: string;
 }
+
+/** Label/value rows shown on every receipt (HTML, image, PDF, text) — one source so they never drift apart. */
+export function getReceiptRows(receipt: ReceiptData): [string, string][] {
+    const dateStr = receipt.date
+        ? new Date(receipt.date).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "medium" })
+        : "—";
+    const rows: [string, string | undefined][] = [
+        ["Description", receipt.label],
+        ["Transaction Type", receipt.type],
+        ["Direction", receipt.direction === "CREDIT" ? "Received" : "Sent"],
+        ["Date & Time", dateStr],
+        ["Name", receipt.utilityCustomerName],
+        ["Address", receipt.utilityCustomerAddress],
+        ["Meter No", receipt.utilityMeterNumber],
+        ["Meter Type", receipt.utilityMeterType ? receipt.utilityMeterType.replace(/^./, (c) => c.toUpperCase()) : undefined],
+        ["Disco", receipt.utilityDisco],
+        ["Tariff", receipt.utilityTariff],
+        ["Units", receipt.utilityUnits],
+        ["Provider Transaction ID", receipt.utilityProviderTransactionId],
+        ["Electricity Token", receipt.utilityToken],
+        ["Transaction Reference", receipt.id],
+    ];
+    return rows.filter((r): r is [string, string] => !!r[1]);
+}
+
+function formatReceiptAmount(receipt: ReceiptData): string {
+    const abs = Math.abs(receipt.amount).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const symbol = receipt.currency === "NGN" ? "₦" : "";
+    return `${symbol}${abs}${symbol ? "" : ` ${receipt.currency}`}`;
+}
+
+const STATUS_LABEL = { success: "Successful", pending: "Pending", failed: "Failed" } as const;
 
 /**
  * Generate receipt text content for sharing
  */
 export function generateReceiptText(receipt: ReceiptData): string {
-    const dateStr = receipt.date ? new Date(receipt.date).toLocaleString() : "—";
-    const amountStr = `${receipt.direction === "CREDIT" ? "+" : ""}${receipt.amount} ${receipt.currency}`;
-    
+    const lines = getReceiptRows(receipt).map(([label, value]) => `${label}: ${value}`);
     return `NePay Transaction Receipt
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Transaction ID: ${receipt.id}
-Type: ${receipt.type}
-Date: ${dateStr}
+${formatReceiptAmount(receipt)} — ${STATUS_LABEL[receipt.status]}
 
-Details:
-Description: ${receipt.label}
-Amount: ${amountStr}
-Direction: ${receipt.direction === "CREDIT" ? "Received" : "Sent"}
-Status: ${receipt.status.toUpperCase()}
-${receipt.utilityCustomerName ? `Name: ${receipt.utilityCustomerName}\n` : ""}${receipt.utilityCustomerAddress ? `Address: ${receipt.utilityCustomerAddress}\n` : ""}${receipt.utilityPhoneNumber ? `Phone No: ${receipt.utilityPhoneNumber}\n` : ""}${receipt.utilityEmail ? `Email: ${receipt.utilityEmail}\n` : ""}${receipt.utilityMeterNumber ? `Meter No: ${receipt.utilityMeterNumber}\n` : ""}${receipt.utilityMeterType ? `Type: ${receipt.utilityMeterType}\n` : ""}${receipt.utilityDisco ? `Disco: ${receipt.utilityDisco}\n` : ""}${receipt.utilityUnits ? `Units: ${receipt.utilityUnits}\n` : ""}${receipt.utilityProviderTransactionId ? `Provider Transaction ID: ${receipt.utilityProviderTransactionId}\n` : ""}${receipt.utilityTariff ? `Tariff: ${receipt.utilityTariff}\n` : ""}${receipt.utilityToken ? `Electricity Token: ${receipt.utilityToken}` : ""}
+${lines.join("\n")}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Powered by NePay
@@ -91,16 +112,27 @@ function escapeHtml(value: string): string {
 }
 
 /**
- * Generate receipt HTML for PDF download
+ * Generate receipt HTML (also screenshotted for PNG/PDF). Layout: logo left /
+ * title right, centred amount + status, then aligned label/value rows, over a
+ * tiled diagonal NePay watermark.
  */
-async function generateReceiptHTML(receipt: ReceiptData): Promise<string> {
-    const dateStr = receipt.date ? new Date(receipt.date).toLocaleString() : "—";
-    const amountStr = receipt.amount >= 0 ? `+${receipt.amount}` : receipt.amount.toString();
-    const statusColor = 
+export async function generateReceiptHTML(receipt: ReceiptData): Promise<string> {
+    const statusColor =
         receipt.status === "success" ? "#10b981" :
         receipt.status === "pending" ? "#f59e0b" :
         "#ef4444";
     const logoBase64 = await getLogoBase64();
+    const rowsHtml = getReceiptRows(receipt)
+        .map(([label, value]) => {
+            const mono = label === "Electricity Token" || label === "Transaction Reference" || label === "Provider Transaction ID" || label === "Meter No";
+            return `<div class="row"><span class="label">${escapeHtml(label)}</span><span class="value${mono ? " mono" : ""}">${escapeHtml(value)}</span></div>`;
+        })
+        .join("");
+    const mark = logoBase64 ? `<img src="${logoBase64}" alt="" />` : "";
+    // Tiled watermark: an inline SVG data-URI so html2canvas/html2pdf render it with no extra request.
+    const watermarkSvg = encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="220" height="140"><text x="110" y="80" text-anchor="middle" transform="rotate(-24 110 70)" font-family="Arial,sans-serif" font-size="28" font-weight="800" fill="#7c3aed" fill-opacity="0.06">NePay</text></svg>`,
+    );
 
     return `
 <!DOCTYPE html>
@@ -109,149 +141,38 @@ async function generateReceiptHTML(receipt: ReceiptData): Promise<string> {
     <meta charset="UTF-8">
     <title>NePay Receipt - ${escapeHtml(receipt.id)}</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #f9fafb;
-        }
-        .receipt {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            padding: 32px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 32px;
-            border-bottom: 2px solid #f3f4f6;
-            padding-bottom: 24px;
-        }
-        .logo {
-            font-size: 24px;
-            font-weight: 800;
-            color: #7c3aed;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .logo img {
-            height: 32px;
-            width: auto;
-        }
-        .title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1f2937;
-        }
-        .amount {
-            font-size: 36px;
-            font-weight: 800;
-            color: ${receipt.amount > 0 ? "#10b981" : "#ef4444"};
-            margin: 24px 0;
-            font-family: "Monaco", "Courier New", monospace;
-        }
-        .status-badge {
-            display: inline-block;
-            padding: 8px 16px;
-            background: ${statusColor}20;
-            color: ${statusColor};
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 24px;
-        }
-        .details {
-            margin-bottom: 24px;
-        }
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #f3f4f6;
-            font-size: 14px;
-        }
-        .detail-row:last-child {
-            border-bottom: none;
-        }
-        .detail-label {
-            color: #6b7280;
-            font-weight: 500;
-        }
-        .detail-value {
-            color: #1f2937;
-            font-weight: 600;
-            text-align: right;
-            word-break: break-word;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 2px solid #f3f4f6;
-            color: #9ca3af;
-            font-size: 12px;
-        }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 20px; background: #f3f4f6; }
+        .receipt { max-width: 480px; margin: 0 auto; background: #fff url("data:image/svg+xml,${watermarkSvg}") repeat; border-radius: 12px; padding: 28px 28px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .top { display: flex; align-items: center; justify-content: space-between; }
+        .brand { display: flex; align-items: center; gap: 8px; font-size: 26px; font-weight: 800; color: #1e1b4b; letter-spacing: -0.5px; }
+        .brand img { height: 34px; width: auto; display: block; }
+        .title { font-size: 15px; color: #374151; }
+        .hero { text-align: center; padding: 32px 0 24px; }
+        .amount { font-size: 34px; font-weight: 800; color: ${statusColor}; font-variant-numeric: tabular-nums; }
+        .status { font-size: 18px; font-weight: 600; color: #111827; margin-top: 10px; }
+        .date { font-size: 12px; color: #9ca3af; margin-top: 6px; }
+        .rows { border-top: 1px solid #e5e7eb; padding-top: 8px; }
+        .row { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 11px 0; font-size: 14px; }
+        .label { color: #9ca3af; flex: 0 0 auto; max-width: 42%; }
+        .value { color: #111827; font-weight: 600; text-align: right; word-break: break-word; flex: 1 1 auto; }
+        .value.mono { font-family: "SFMono-Regular", Menlo, Consolas, monospace; font-size: 13px; }
+        .footer { margin-top: 20px; padding-top: 16px; border-top: 1px dashed #d1d5db; text-align: center; color: #9ca3af; font-size: 11px; line-height: 1.6; }
     </style>
 </head>
 <body>
     <div class="receipt">
-        <div class="header">
-            <div class="logo">${logoBase64 ? `<img src="${logoBase64}" alt="NePay" />` : ''}<span>NePay</span></div>
+        <div class="top">
+            <div class="brand">${mark}<span>NePay</span></div>
             <div class="title">Transaction Receipt</div>
         </div>
-        
-        <div style="text-align: center; margin-bottom: 32px;">
-            <div class="amount">${amountStr} ${receipt.currency}</div>
-            <div class="status-badge">${receipt.status.toUpperCase()}</div>
+        <div class="hero">
+            <div class="amount">${escapeHtml(formatReceiptAmount(receipt))}</div>
+            <div class="status">${STATUS_LABEL[receipt.status]}</div>
+            ${receipt.date ? `<div class="date">${escapeHtml(new Date(receipt.date).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "medium" }))}</div>` : ""}
         </div>
-
-        <div class="details">
-            <div class="detail-row">
-                <span class="detail-label">Transaction ID</span>
-                <span class="detail-value">${escapeHtml(receipt.id)}</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Description</span>
-                <span class="detail-value">${escapeHtml(receipt.label)}</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Type</span>
-                <span class="detail-value">${escapeHtml(receipt.type)}</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Direction</span>
-                <span class="detail-value">${receipt.direction === "CREDIT" ? "Received" : "Sent"}</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Date & Time</span>
-                <span class="detail-value">${dateStr}</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Currency</span>
-                <span class="detail-value">${receipt.currency}</span>
-            </div>
-            ${receipt.utilityCustomerName ? `<div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">${escapeHtml(receipt.utilityCustomerName)}</span></div>` : ''}
-            ${receipt.utilityCustomerAddress ? `<div class="detail-row"><span class="detail-label">Address</span><span class="detail-value">${escapeHtml(receipt.utilityCustomerAddress)}</span></div>` : ''}
-            ${receipt.utilityPhoneNumber ? `<div class="detail-row"><span class="detail-label">Phone No</span><span class="detail-value">${escapeHtml(receipt.utilityPhoneNumber)}</span></div>` : ''}
-            ${receipt.utilityEmail ? `<div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${escapeHtml(receipt.utilityEmail)}</span></div>` : ''}
-            ${receipt.utilityMeterNumber ? `<div class="detail-row"><span class="detail-label">Meter No</span><span class="detail-value">${escapeHtml(receipt.utilityMeterNumber)}</span></div>` : ''}
-            ${receipt.utilityMeterType ? `<div class="detail-row"><span class="detail-label">Type</span><span class="detail-value" style="text-transform: capitalize;">${escapeHtml(receipt.utilityMeterType)}</span></div>` : ''}
-            ${receipt.utilityDisco ? `<div class="detail-row"><span class="detail-label">Disco</span><span class="detail-value">${escapeHtml(receipt.utilityDisco)}</span></div>` : ''}
-            ${receipt.utilityUnits ? `<div class="detail-row"><span class="detail-label">Units</span><span class="detail-value">${escapeHtml(receipt.utilityUnits)}</span></div>` : ''}
-            ${receipt.utilityProviderTransactionId ? `<div class="detail-row"><span class="detail-label">Provider Transaction ID</span><span class="detail-value">${escapeHtml(receipt.utilityProviderTransactionId)}</span></div>` : ''}
-            ${receipt.utilityTariff ? `<div class="detail-row"><span class="detail-label">Tariff</span><span class="detail-value">${escapeHtml(receipt.utilityTariff)}</span></div>` : ''}
-            ${receipt.utilityToken ? `<div class="detail-row"><span class="detail-label">Electricity Token</span><span class="detail-value" style="font-family: monospace; letter-spacing: 1px;">${escapeHtml(receipt.utilityToken)}</span></div>` : ''}
-        </div>
-
-        <div class="footer">
-            <p>This is an official NePay transaction receipt</p>
-            <p style="margin-top: 8px;">Powered by NePay • www.nepay.com.ng</p>
-        </div>
+        <div class="rows">${rowsHtml}</div>
+        <div class="footer">This is an official NePay transaction receipt.<br/>Powered by NePay • www.nepay.com.ng</div>
     </div>
 </body>
 </html>

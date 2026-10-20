@@ -3,7 +3,8 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { IconArrowLeft as ArrowLeft, IconLock as Lock } from "@/components/icons";
-import { ShieldCheck, Medal, Check, ArrowRight } from "lucide-react";
+import { ShieldCheck, Medal, Check, ArrowRight, CheckCircle2, Upload } from "lucide-react";
+import { subMonths } from "date-fns";
 import { toast } from "sonner";
 
 import { useVirtualAccount, useUpgradeTier } from "@/lib/queries/wallet";
@@ -16,6 +17,45 @@ import { Panel, PanelBody } from "@/components/shared/panel";
 import { Field } from "@/components/shared/field";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/shared/skeletons";
+
+/** Mirrors bridge-onboarding-form.tsx's own DocumentPicker exactly (same hidden-input + button shape, same JPEG/PNG/10MB allowlist) — kept local rather than imported since that one isn't exported, and this is the only other place that needs it. */
+function DocumentPicker({ label, file, onChange }: { label: string; file: File | null; onChange: (file: File) => void }) {
+    const inputRef = React.useRef<HTMLInputElement>(null);
+
+    return (
+        <Field label={label} hint="JPEG or PNG, max 10MB">
+            <input
+                ref={inputRef}
+                type="file"
+                accept="image/jpeg,image/png"
+                className="hidden"
+                onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) onChange(f);
+                    e.target.value = "";
+                }}
+            />
+            <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="flex h-11 w-full items-center gap-2.5 rounded-sm border border-border bg-white px-3 text-sm text-ink transition-colors hover:border-violet-400"
+            >
+                {file ? (
+                    <>
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600" />
+                        <span className="truncate font-medium text-ink">{file.name}</span>
+                        <span className="ml-auto shrink-0 text-xs font-semibold text-violet-600">Replace</span>
+                    </>
+                ) : (
+                    <>
+                        <Upload className="h-4 w-4 shrink-0 text-muted" />
+                        <span className="text-muted">Choose a file</span>
+                    </>
+                )}
+            </button>
+        </Field>
+    );
+}
 
 type TierNumber = 1 | 2 | 3;
 
@@ -130,6 +170,8 @@ export default function UpgradeTierPage() {
 
     const [nin, setNin] = React.useState("");
     const [address, setAddress] = React.useState("");
+    const [document, setDocument] = React.useState<File | null>(null);
+    const [documentDate, setDocumentDate] = React.useState("");
     const [justReachedTier, setJustReachedTier] = React.useState<TierNumber | null>(null);
 
     // Tier 1 is reached by verifying BVN, not granted by default — an
@@ -152,32 +194,57 @@ export default function UpgradeTierPage() {
     const handleSubmit = () => {
         if (!nextTier) return;
 
-        const payload: { nin?: string; address?: string } = {};
+        const dto: { nin?: string; address?: string; documentDate?: string } = {};
+        let file: File | undefined;
 
         if (nextTier === 2) {
             if (nin.length !== 11) {
                 toast.error("Enter your 11-digit NIN.");
                 return;
             }
-            payload.nin = nin;
+            dto.nin = nin;
         } else if (nextTier === 3) {
             if (!address.trim()) {
                 toast.error("Enter your address.");
                 return;
             }
-            payload.address = address.trim();
+            if (!document) {
+                toast.error("Upload a proof-of-address document (a recent utility bill or similar).");
+                return;
+            }
+            if (!documentDate) {
+                toast.error("Enter the date on your proof-of-address document.");
+                return;
+            }
+            // Fast client-side feedback only — the server re-checks this
+            // authoritatively (see VirtualAccountService.upgradeTier's
+            // isRecentEnough), since that's what actually matters.
+            const billDate = new Date(documentDate);
+            const now = new Date();
+            if (billDate > now || billDate < subMonths(now, 3)) {
+                toast.error("The document must be dated within the last 3 months.");
+                return;
+            }
+            dto.address = address.trim();
+            dto.documentDate = documentDate;
+            file = document;
         }
 
-        upgrade(payload, {
-            onSuccess: (updated) => {
-                setNin("");
-                setAddress("");
-                setJustReachedTier(updated.tier as TierNumber);
+        upgrade(
+            { dto, document: file },
+            {
+                onSuccess: (updated) => {
+                    setNin("");
+                    setAddress("");
+                    setDocument(null);
+                    setDocumentDate("");
+                    setJustReachedTier(updated.tier as TierNumber);
+                },
+                onError: (err) => {
+                    toast.error(getApiErrorMessage(err, "Could not upgrade your tier."));
+                },
             },
-            onError: (err) => {
-                toast.error(getApiErrorMessage(err, "Could not upgrade your tier."));
-            },
-        });
+        );
     };
 
     return (
@@ -273,7 +340,7 @@ export default function UpgradeTierPage() {
                                     <div>
                                         <p className="text-sm font-bold text-ink">You&apos;re at the highest tier</p>
                                         <p className="mt-1 text-sm text-body">
-                                            No further verification needed — your account has no balance cap.
+                                            No further verification needed, your account has no balance cap.
                                         </p>
                                     </div>
                                 </div>
@@ -301,14 +368,30 @@ export default function UpgradeTierPage() {
                                     )}
 
                                     {nextTier === 3 && (
-                                        <Field label="Home address">
-                                            <Input
-                                                type="text"
-                                                placeholder="Street, city, state"
-                                                value={address}
-                                                onChange={(e) => setAddress(e.target.value)}
+                                        <>
+                                            <Field label="Home address">
+                                                <Input
+                                                    type="text"
+                                                    placeholder="Street, city, state"
+                                                    value={address}
+                                                    onChange={(e) => setAddress(e.target.value)}
+                                                />
+                                            </Field>
+
+                                            <DocumentPicker
+                                                label="Proof of address"
+                                                file={document}
+                                                onChange={setDocument}
                                             />
-                                        </Field>
+
+                                            <Field label="Document date" hint="Must be dated within the last 3 months">
+                                                <Input
+                                                    type="date"
+                                                    value={documentDate}
+                                                    onChange={(e) => setDocumentDate(e.target.value)}
+                                                />
+                                            </Field>
+                                        </>
                                     )}
 
                                     <Button
@@ -326,7 +409,8 @@ export default function UpgradeTierPage() {
 
                     <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted">
                         <Lock className="h-3 w-3" />
-                        Your NIN and address are sent for verification only and are never stored.
+                        Your NIN and proof of address are encrypted and securely retained for verification and
+                        fraud-prevention purposes. Your typed address itself is never stored.
                     </p>
                 </>
             )}

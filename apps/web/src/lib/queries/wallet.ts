@@ -70,15 +70,28 @@ export function useSimulateDeposit() {
  * VFD's own upgrade endpoint resolves immediately, no webhook/polling
  * involved (unlike a deposit or payout). Invalidates the virtual-account
  * query on success so the new tier/limits show up immediately.
+ *
+ * Always posts FormData, even for a Tier 2 (NIN-only, no file) request —
+ * mirrors useCreateBridgeCustomer's exact pattern (scalar fields appended
+ * as strings, the file appended separately, Content-Type left for the
+ * browser to set) so the backend's single multipart-expecting endpoint
+ * never needs to special-case a JSON body.
  */
 export function useUpgradeTier() {
     const queryClient = useQueryClient();
 
-    return useMutation<VirtualAccountResponseDto, unknown, UpgradeTierDto>({
-        mutationFn: async (payload) => {
+    return useMutation<VirtualAccountResponseDto, unknown, { dto: UpgradeTierDto; document?: File }>({
+        mutationFn: async ({ dto, document }) => {
+            const formData = new FormData();
+            for (const [key, value] of Object.entries(dto)) {
+                if (value !== undefined) formData.append(key, String(value));
+            }
+            if (document) formData.append("document", document);
+
             const res = await apiClient.post<ApiResponse<VirtualAccountResponseDto>>(
                 "/wallet/virtual-account/upgrade-tier",
-                payload,
+                formData,
+                { headers: { "Content-Type": undefined } },
             );
             return res.data.data;
         },
