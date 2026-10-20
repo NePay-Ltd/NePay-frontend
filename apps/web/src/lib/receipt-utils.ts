@@ -141,7 +141,7 @@ export async function generateReceiptHTML(receipt: ReceiptData): Promise<string>
     <meta charset="UTF-8">
     <title>NePay Receipt - ${escapeHtml(receipt.id)}</title>
     <style>
-        * { box-sizing: border-box; }
+        .receipt, .receipt * { box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 20px; background: #f3f4f6; }
         .receipt { max-width: 480px; margin: 0 auto; background: #fff url("data:image/svg+xml,${watermarkSvg}") repeat; border-radius: 12px; padding: 28px 28px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .top { display: flex; align-items: center; justify-content: space-between; }
@@ -366,24 +366,37 @@ export async function shareReceiptImage(receipt: ReceiptData): Promise<void> {
             type: "image/png",
         });
         
-        // Check if Web Share API supports files
+        // Try, in order: native file share -> copy image to clipboard -> download the PNG.
+        // The capture above takes a moment, so a browser can reject the share/clipboard call
+        // for lost user-activation or missing permission; none of those should end in a failure toast.
         if (navigator.share && navigator.canShare?.({ files: [file] })) {
-            await navigator.share({
-                files: [file],
-                title: "NePay Transaction Receipt",
-                text: "Here is my NePay transaction receipt",
-            });
-            toast.success("Receipt shared successfully");
-        } else {
-            // Fallback: copy image to clipboard
-            const items = [
-                new ClipboardItem({
-                    "image/png": blob,
-                }),
-            ];
-            await navigator.clipboard.write(items);
-            toast.success("Receipt image copied to clipboard");
+            try {
+                await navigator.share({ files: [file], title: "NePay Transaction Receipt" });
+                toast.success("Receipt shared successfully");
+                return;
+            } catch (error: any) {
+                if (error?.name === "AbortError") return;
+                console.warn("File share rejected, falling back:", error);
+            }
         }
+        if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
+            try {
+                await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+                toast.success("Receipt image copied to clipboard");
+                return;
+            } catch (error) {
+                console.warn("Clipboard image copy rejected, falling back to download:", error);
+            }
+        }
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `NePay-Receipt-${receipt.id}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success("Sharing isn't available here, so the receipt image was downloaded");
     } catch (error: any) {
         if (error?.name !== "AbortError") {
             console.error("Image share failed:", error);
