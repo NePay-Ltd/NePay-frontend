@@ -72,13 +72,13 @@ function formatCountdown(ms: number) {
 }
 
 export function DepositDetailView({ assetCode, onBack, isMobile = false }: DepositDetailViewProps) {
-    // The QR box sizes itself in CSS (180px below `sm`, 220px at/above it —
+    // The QR box sizes itself in CSS (160px below `sm`, 220px at/above it —
     // see the box's own className), but QRCodeSVG needs its pixel size as a
     // literal prop; AddressQrCode also wraps it in its own 16px padding, so
     // this is that breakpoint's box size minus that padding minus this
     // box's own p-2, sized to actually fit rather than overflow its corners.
     const isSmUp = useMediaQuery("(min-width: 640px)");
-    const qrSize = isSmUp ? 170 : 130;
+    const qrSize = isSmUp ? 170 : 112;
 
     const { data: currencies } = useCryptoCurrencies();
     const { data: pricesData } = useCryptoPrices();
@@ -196,7 +196,7 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                 <div className={cn("flex flex-col gap-6 flex-1", !isMobile && "overflow-y-auto px-6 pb-6")}>
                     {/* QR Code and Address Section */}
                     <div className="rounded-3xl bg-white dark:bg-gray-900/50 p-3 sm:p-6 border-2 border-violet-100 dark:border-violet-900/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] flex flex-col items-center">
-                        <div className="relative flex h-[180px] w-[180px] sm:h-[220px] sm:w-[220px] items-center justify-center rounded-3xl bg-white shadow-sm border-2 border-violet-100 mb-6 p-2">
+                        <div className="relative flex h-[160px] w-[160px] sm:h-[220px] sm:w-[220px] items-center justify-center rounded-3xl bg-white shadow-sm border-2 border-violet-100 mb-4 sm:mb-6 p-2">
                             {addressPending ? (
                                 <Skeleton className="h-full w-full rounded-3xl" />
                             ) : addressError || addressExpired ? (
@@ -273,6 +273,29 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                             </div>
                         ) : null}
 
+                        {/* Stats Row — inside the card, directly under the address and countdown, so the minimum and fee terms are seen without scrolling past the whole card. */}
+                        <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full mt-4">
+                            <div className="rounded-2xl bg-gray-50 dark:bg-white/5 border border-border p-2 sm:p-4 text-center">
+                                <span className="block text-[9px] sm:text-[11px] font-bold text-muted uppercase tracking-tight sm:tracking-widest mb-1">Min Deposit</span>
+                                <span className="text-xs sm:text-sm font-black text-ink">{displayMinAmountLoading ? "..." : (minimumDisplayValue ?? "—")}</span>
+                            </div>
+                            <div className="rounded-2xl bg-gray-50 dark:bg-white/5 border border-border p-2 sm:p-4 text-center">
+                                <span className="block text-[9px] sm:text-[11px] font-bold text-muted uppercase tracking-tight sm:tracking-widest mb-1">{feesDeducted ? "Fees" : "Network Fee"}</span>
+                                {feeEstimate === undefined ? (
+                                    <span className="text-xs sm:text-sm font-black text-ink">—</span>
+                                ) : feesDeducted ? (
+                                    <span className="text-xs sm:text-sm font-black text-ink">Deducted</span>
+                                ) : (
+                                    <span className="text-xs sm:text-sm font-black text-green-600 dark:text-green-400">Free</span>
+                                )}
+                            </div>
+                            <div className="rounded-2xl bg-gray-50 dark:bg-white/5 border border-border p-2 sm:p-4 text-center">
+                                <span className="block text-[9px] sm:text-[11px] font-bold text-muted uppercase tracking-tight sm:tracking-widest mb-1">Deposit Limit</span>
+                                <span className="text-xs sm:text-sm font-black text-ink">Unlimited</span>
+                            </div>
+                        </div>
+
+
                         {status ? (
                             <div className="w-full mt-6">
                                 <StatusBanner status={status} statusData={statusData} onRetry={handleRetry} />
@@ -291,30 +314,6 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                     {feesDeducted && feeEstimate ? (
                         <FeeNotice estimate={feeEstimate} coinSymbol={selectedCurrency?.coin ?? null} />
                     ) : null}
-
-                    {/* Stats Row */}
-                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                        <div className="rounded-2xl bg-white dark:bg-white/5 border border-border p-2 sm:p-4 text-center">
-                            <span className="block text-[9px] sm:text-[11px] font-bold text-muted uppercase tracking-tight sm:tracking-widest mb-1">Min Deposit</span>
-                            <span className="text-xs sm:text-sm font-black text-ink">{displayMinAmountLoading ? "..." : (minimumDisplayValue ?? "—")}</span>
-                        </div>
-                        <div className="rounded-2xl bg-white dark:bg-white/5 border border-border p-2 sm:p-4 text-center">
-                            <span className="block text-[9px] sm:text-[11px] font-bold text-muted uppercase tracking-tight sm:tracking-widest mb-1">{feesDeducted ? "Fees" : "Network Fee"}</span>
-                            {feeEstimate === undefined ? (
-                                <span className="text-xs sm:text-sm font-black text-ink">—</span>
-                            ) : feesDeducted ? (
-                                <span className="text-xs sm:text-sm font-black text-ink">Deducted</span>
-                            ) : (
-                                <span className="text-xs sm:text-sm font-black text-green-600 dark:text-green-400">Free</span>
-                            )}
-                        </div>
-                        <div className="rounded-2xl bg-white dark:bg-white/5 border border-border p-2 sm:p-4 text-center">
-                            <span className="block text-[9px] sm:text-[11px] font-bold text-muted uppercase tracking-tight sm:tracking-widest mb-1">Deposit Limit</span>
-                            <span className="text-xs sm:text-sm font-black text-ink">Unlimited</span>
-                        </div>
-                    </div>
-
-
 
                     {/* Instructions Box */}
                     <div className="rounded-2xl bg-amber-50 dark:bg-amber-900/10 p-5 border border-amber-200 dark:border-amber-900/30 flex gap-4 items-start shadow-sm mt-4">
