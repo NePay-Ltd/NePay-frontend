@@ -21,7 +21,7 @@ import {
 } from "@/lib/queries/crypto";
 import type { CryptoDepositStatusDto, CryptoFeeEstimateDto } from "@/lib/types/api";
 import { cn } from "@/lib/cn";
-import { formatNaira, formatByCurrency } from "@/lib/format";
+import { formatNaira, formatNairaString, formatByCurrency } from "@/lib/format";
 import { CurrencyAvatar } from "./shared";
 
 interface DepositDetailViewProps {
@@ -284,6 +284,9 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                         ) : null}
                     </div>
 
+                    {/* The system-wide dollar rate whatever they send is converted to naira at. Hidden when no rate is configured. */}
+                    {pricesData?.usdNgnRate ? <ConversionRateNotice usdNgnRate={pricesData.usdNgnRate} /> : null}
+
                     {/* Before sending: what fees mean for the credited amount. Only while fees really are being deducted. */}
                     {feesDeducted && feeEstimate ? (
                         <FeeNotice estimate={feeEstimate} coinSymbol={selectedCurrency?.coin ?? null} />
@@ -415,6 +418,28 @@ function StatusBanner({
 function trimAmount(value: string | number): string {
     const n = Number(value);
     return Number.isFinite(n) ? n.toLocaleString("en-US", { maximumFractionDigits: 8 }) : String(value);
+}
+
+/**
+ * The dollar-to-naira rate a deposit is converted at. This is the platform's
+ * one admin-set USD→NGN rate — the same number the crypto→NGN credit is
+ * computed from (coin's USD price × this rate). It is the CURRENT rate, not a
+ * locked quote: the rate in force at the moment the deposit is credited is the
+ * one that applies, and the wording says so rather than implying a guarantee.
+ */
+function ConversionRateNotice({ usdNgnRate }: { usdNgnRate: number }) {
+    return (
+        <div className="rounded-2xl bg-white dark:bg-white/5 p-5 border border-border shadow-sm">
+            <div className="flex items-center justify-between gap-3">
+                <span className="text-[11px] font-bold text-muted uppercase tracking-widest">Dollar rate</span>
+                <span className="text-base font-black text-ink">$1 = {formatNairaString(usdNgnRate)}</span>
+            </div>
+            <p className="mt-2 text-sm font-medium text-muted leading-relaxed">
+                Whatever you send is valued in US dollars, then converted to naira at this rate when your deposit is
+                credited. The rate in force at that moment applies.
+            </p>
+        </div>
+    );
 }
 
 /**
