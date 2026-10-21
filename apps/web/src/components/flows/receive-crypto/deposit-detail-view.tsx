@@ -15,11 +15,13 @@ import {
     useCryptoCurrencies,
     useCryptoPrices,
     useCryptoMinAmount,
+    useCryptoFeeEstimate,
     useGenerateDepositAddress,
     useCryptoDepositStatus,
 } from "@/lib/queries/crypto";
+import type { CryptoDepositStatusDto, CryptoFeeEstimateDto } from "@/lib/types/api";
 import { cn } from "@/lib/cn";
-import { formatNaira, formatByCurrency } from "@/lib/format";
+import { formatNaira, formatNairaString, formatByCurrency } from "@/lib/format";
 import { CurrencyAvatar } from "./shared";
 
 interface DepositDetailViewProps {
@@ -95,6 +97,9 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
     }, [networkCurrencies, selectedCurrency]);
 
     const { data: minAmountData, isPending: minAmountLoading } = useCryptoMinAmount(assetCode ?? "");
+    // An estimate only — a failed lookup is just "no estimate" (the query never retries or throws into the screen).
+    const { data: feeEstimate } = useCryptoFeeEstimate(assetCode);
+    const feesDeducted = feeEstimate?.creditsNetOfFees === true;
 
     const {
         mutate: generateAddress,
@@ -273,7 +278,19 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                                 <StatusBanner status={status} statusData={statusData} onRetry={handleRetry} />
                             </div>
                         ) : null}
+
+                        {status === "finished" && statusData ? (
+                            <DepositBreakdown statusData={statusData} coinSymbol={selectedCurrency?.coin ?? null} assetCode={assetCode} />
+                        ) : null}
                     </div>
+
+                    {/* The system-wide dollar rate whatever they send is converted to naira at. Hidden when no rate is configured. */}
+                    {pricesData?.usdNgnRate ? <ConversionRateNotice usdNgnRate={pricesData.usdNgnRate} /> : null}
+
+                    {/* Before sending: what fees mean for the credited amount. Only while fees really are being deducted. */}
+                    {feesDeducted && feeEstimate ? (
+                        <FeeNotice estimate={feeEstimate} coinSymbol={selectedCurrency?.coin ?? null} />
+                    ) : null}
 
                     {/* Stats Row */}
                     <div className="grid grid-cols-3 gap-2 sm:gap-3">
@@ -282,8 +299,14 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                             <span className="text-xs sm:text-sm font-black text-ink">{displayMinAmountLoading ? "..." : (minimumDisplayValue ?? "—")}</span>
                         </div>
                         <div className="rounded-2xl bg-white dark:bg-white/5 border border-border p-2 sm:p-4 text-center">
-                            <span className="block text-[9px] sm:text-[11px] font-bold text-muted uppercase tracking-tight sm:tracking-widest mb-1">Network Fee</span>
-                            <span className="text-xs sm:text-sm font-black text-green-600 dark:text-green-400">Free</span>
+                            <span className="block text-[9px] sm:text-[11px] font-bold text-muted uppercase tracking-tight sm:tracking-widest mb-1">{feesDeducted ? "Fees" : "Network Fee"}</span>
+                            {feeEstimate === undefined ? (
+                                <span className="text-xs sm:text-sm font-black text-ink">—</span>
+                            ) : feesDeducted ? (
+                                <span className="text-xs sm:text-sm font-black text-ink">Deducted</span>
+                            ) : (
+                                <span className="text-xs sm:text-sm font-black text-green-600 dark:text-green-400">Free</span>
+                            )}
                         </div>
                         <div className="rounded-2xl bg-white dark:bg-white/5 border border-border p-2 sm:p-4 text-center">
                             <span className="block text-[9px] sm:text-[11px] font-bold text-muted uppercase tracking-tight sm:tracking-widest mb-1">Deposit Limit</span>
@@ -327,7 +350,7 @@ function StatusBanner({
     onRetry,
 }: {
     status: string;
-    statusData: { expectedAmount: number; actuallyPaid: number | null; creditedAmount: number | null; creditedCurrency: string | null; payCurrency: string } | undefined;
+    statusData: Pick<CryptoDepositStatusDto, "expectedAmount" | "actuallyPaid" | "creditedAmount" | "creditedCurrency" | "payCurrency" | "underReview"> | undefined;
     onRetry: () => void;
 }) {
     switch (status) {
@@ -346,9 +369,21 @@ function StatusBanner({
                 </Banner>
             );
         case "finished":
+            if (statusData?.creditedAmount == null) {
+                // Received on the network but nothing posted to the wallet yet — never print "undefined credited".
+                return statusData?.underReview ? (
+                    <Banner tone="warning" icon={<AlertCircle className="h-4 w-4 text-amber-600" />}>
+                        Deposit received. We are checking the amount before crediting your wallet — please contact support if this takes long.
+                    </Banner>
+                ) : (
+                    <Banner tone="pending" icon={<Loader2 className="h-4 w-4 animate-spin text-violet-600" />}>
+                        Deposit received. Crediting your wallet...
+                    </Banner>
+                );
+            }
             return (
                 <Banner tone="success" icon={<CheckCircle2 className="h-4 w-4 text-green-600" />}>
-                    Deposit confirmed. {statusData?.creditedAmount?.toLocaleString()} {statusData?.creditedCurrency} credited.
+                    Deposit confirmed. {statusData.creditedAmount.toLocaleString()} {statusData.creditedCurrency} credited.
                 </Banner>
             );
         case "partially_paid":
@@ -378,6 +413,118 @@ function StatusBanner({
         default:
             return null;
     }
+}
+
+function trimAmount(value: string | number): string {
+    const n = Number(value);
+    return Number.isFinite(n) ? n.toLocaleString("en-US", { maximumFractionDigits: 8 }) : String(value);
+}
+
+/**
+ * The dollar-to-naira rate a deposit is converted at. This is the platform's
+ * one admin-set USD→NGN rate — the same number the crypto→NGN credit is
+ * computed from (coin's USD price × this rate). It is the CURRENT rate, not a
+ * locked quote: the rate in force at the moment the deposit is credited is the
+ * one that applies, and the wording says so rather than implying a guarantee.
+ */
+function ConversionRateNotice({ usdNgnRate }: { usdNgnRate: number }) {
+    return (
+        <div className="rounded-2xl bg-white dark:bg-white/5 p-5 border border-border shadow-sm">
+            <div className="flex items-center justify-between gap-3">
+                <span className="text-[11px] font-bold text-muted uppercase tracking-widest">Dollar rate</span>
+                <span className="text-base font-black text-ink">$1 = {formatNairaString(usdNgnRate)}</span>
+            </div>
+            <p className="mt-2 text-sm font-medium text-muted leading-relaxed">
+                Whatever you send is valued in US dollars, then converted to naira at this rate when your deposit is
+                credited. The rate in force at that moment applies.
+            </p>
+        </div>
+    );
+}
+
+/**
+ * Shown BEFORE the customer sends, and only while fees really are being
+ * deducted (the backend says so via `creditsNetOfFees` — this component is
+ * not rendered otherwise, so it can never claim a deduction that isn't
+ * happening). Everything quantitative is an ESTIMATE and labelled as one; with
+ * no real basis for a figure it shows the generic notice and nothing else.
+ */
+function FeeNotice({ estimate, coinSymbol }: { estimate: CryptoFeeEstimateDto; coinSymbol: string | null }) {
+    const symbol = coinSymbol ?? estimate.networkFee?.currency.toUpperCase() ?? "";
+    const range = estimate.networkFee
+        ? estimate.networkFee.min === estimate.networkFee.max
+            ? `about ${trimAmount(estimate.networkFee.min)} ${symbol}`
+            : `about ${trimAmount(estimate.networkFee.min)}–${trimAmount(estimate.networkFee.max)} ${symbol}`
+        : null;
+    const percent = estimate.serviceFeePercent ? `${trimAmount(estimate.serviceFeePercent)}%` : null;
+
+    return (
+        <div className="rounded-2xl bg-violet-50 dark:bg-violet-900/10 p-5 border border-violet-200 dark:border-violet-900/30 flex gap-4 items-start shadow-sm">
+            <Info className="h-5 w-5 text-violet-600 dark:text-violet-400 shrink-0 mt-0.5" />
+            <div className="space-y-2">
+                <h4 className="text-sm font-bold text-violet-900 dark:text-violet-300">Fees are deducted from your deposit</h4>
+                <p className="text-sm font-medium text-violet-800 dark:text-violet-400 leading-relaxed">
+                    Network and processing fees are taken out of what you send, so you are credited the amount <strong>after</strong> fees.
+                </p>
+                {range || percent ? (
+                    <p className="text-sm font-medium text-violet-800 dark:text-violet-400 leading-relaxed">
+                        <strong>Estimate only:</strong> {range ? <>a network fee of {range}</> : <>a network fee</>}
+                        {percent ? <> plus a {percent} service fee</> : null}. The exact fees are shown once your deposit confirms.
+                    </p>
+                ) : null}
+                <p className="text-sm font-medium text-violet-800 dark:text-violet-400 leading-relaxed">
+                    Your own wallet will also charge its own network fee when you send.
+                </p>
+            </div>
+        </div>
+    );
+}
+
+/**
+ * Sent / Fees / Credited for a finished deposit — every figure is a stored
+ * value from the deposit record, never an estimate. Only for a 'net' deposit
+ * (a 'gross' one had no fee deducted from the customer, so there is nothing to
+ * itemise). If no fee figure was recorded, the Fees row is omitted and just
+ * Sent and Credited show.
+ */
+function DepositBreakdown({
+    statusData,
+    coinSymbol,
+    assetCode,
+}: {
+    statusData: CryptoDepositStatusDto;
+    coinSymbol: string | null;
+    assetCode: string;
+}) {
+    if (statusData.creditMode !== "net" || statusData.creditedAmount == null) return null;
+
+    const unit = (currency: string | null) =>
+        currency && currency.toLowerCase() !== assetCode.toLowerCase() ? currency.toUpperCase() : (coinSymbol ?? "");
+
+    const rows: Array<{ label: string; value: string; emphasis?: boolean }> = [];
+
+    if (statusData.actuallyPaid != null) {
+        rows.push({ label: "Sent", value: `${trimAmount(statusData.actuallyPaid)} ${unit(null)}`.trim() });
+    }
+    if (statusData.feeTotal != null) {
+        rows.push({ label: "Fees", value: `− ${trimAmount(statusData.feeTotal)} ${unit(statusData.feeCurrency)}`.trim() });
+    }
+    rows.push({
+        label: "Credited",
+        value: `${statusData.creditedAmount.toLocaleString()} ${statusData.creditedCurrency ?? ""}`.trim(),
+        emphasis: true,
+    });
+
+    return (
+        <dl className="w-full mt-3 rounded-2xl border border-border bg-gray-50 dark:bg-white/5 px-4 py-3 text-sm">
+            {rows.map((row) => (
+                <div key={row.label} className="flex items-center justify-between gap-3 py-1.5">
+                    <dt className="font-semibold text-muted">{row.label}</dt>
+                    <dd className={cn("text-right", row.emphasis ? "font-black text-ink" : "font-bold text-ink")}>{row.value}</dd>
+                </div>
+            ))}
+        </dl>
+    );
 }
 
 function Banner({

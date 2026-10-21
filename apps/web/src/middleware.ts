@@ -91,7 +91,12 @@ function backendOrigins(): { http: string; ws: string } {
  * external font host to allow), there are no analytics/tracking scripts
  * anywhere in the codebase, and the only external image host is Cloudinary
  * (avatarUrl, plain <img> tags — not next/image, so no remotePatterns
- * concern either). The one real third-party embed is Bridge's hosted ToS
+ * concern either). The one other image host is CoinCap's icon CDN
+ * (assets.coincap.io): the backend returns each crypto coin's logo as a
+ * CoinCap URL (NowPaymentsAdapter's coinIconUrl), and the browser refused
+ * every one under the previous policy — observed as "(blocked:csp)" in the
+ * Network tab, with coin avatars falling back to letters. Allowed for img-src
+ * only, nothing else. The one real third-party embed is Bridge's hosted ToS
  * page (bridge-tos-consent.tsx's iframe) — frame-src explicitly allows
  * *.bridge.xyz for it, since Bridge's actual tosLink host varies by
  * customer state (observed as both compliance.*.bridge.xyz and
@@ -112,7 +117,7 @@ function contentSecurityPolicy(nonce: string): string {
         default-src 'self';
         script-src 'self' 'nonce-${nonce}' 'strict-dynamic';
         style-src 'self' 'unsafe-inline';
-        img-src 'self' data: https://res.cloudinary.com;
+        img-src 'self' data: https://res.cloudinary.com https://assets.coincap.io;
         font-src 'self';
         connect-src 'self' ${http} ${ws};
         frame-src https://*.bridge.xyz;

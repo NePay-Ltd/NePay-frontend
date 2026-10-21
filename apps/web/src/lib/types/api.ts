@@ -253,8 +253,30 @@ export interface CryptoDepositStatusDto {
     actuallyPaid: number | null;
     creditedAmount: number | null;
     creditedCurrency: string | null;
+    /** 'net' = the provider's fees were deducted from this deposit; 'gross' = Nepay absorbed them (and every deposit from before this existed). */
+    creditMode: "gross" | "net";
+    /** The provider's outcome_amount as stored — what is left after its fees, in `outcomeCurrency` units. Null until reported. */
+    outcomeAmount: number | null;
+    outcomeCurrency: string | null;
+    /** Fees the provider actually deducted, as stored — never an estimate. Null when none was recorded: show no fee line then. */
+    feeTotal: number | null;
+    feeCurrency: string | null;
+    /** Finished at the provider but deliberately not credited yet because the amount needs a manual check. */
+    underReview: boolean;
     createdAt: string;
     updatedAt: string;
+}
+
+/** GET /crypto/fee-estimate — an ESTIMATE shown before depositing. Never present it as a quote. */
+export interface CryptoFeeEstimateDto {
+    asset: string;
+    /** False means fees are NOT being deducted from new deposits — don't tell the customer they are. */
+    creditsNetOfFees: boolean;
+    /** Service-fee percentage as configured, e.g. "0.5"; null when not configured. */
+    serviceFeePercent: string | null;
+    /** Network-side fee range in the asset's own units, from this asset's recent real deposits. Null when there is no real basis for a range. */
+    networkFee: { currency: string; min: string; max: string; sampleSize: number } | null;
+    basis: "observed" | "none";
 }
 
 // ─── Withdrawals ─────────────────────────────────────────────────────────────
