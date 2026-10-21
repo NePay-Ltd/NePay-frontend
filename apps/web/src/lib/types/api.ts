@@ -60,12 +60,10 @@ export interface UserResponseDto {
     avatarUrl?: string | null;
     /** True once this account has an APPROVED BVN verification. */
     kycVerified: boolean;
-    isActive: boolean;
     emailVerified: boolean;
     emailReceipts: boolean;
     phoneVerified: boolean;
     createdAt: string;
-    updatedAt: string;
 }
 
 export interface AuthTokensDto {
