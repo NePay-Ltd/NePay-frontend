@@ -10,6 +10,7 @@ import {
     CryptoMinAmountDto,
     CryptoDepositAddressDto,
     CryptoDepositStatusDto,
+    CryptoFeeEstimateDto,
     CryptoPricesDto,
 } from "@/lib/types/api";
 
@@ -20,6 +21,7 @@ export const cryptoKeys = {
     currencies: () => [...cryptoKeys.all, "currencies"] as const,
     prices: () => [...cryptoKeys.all, "prices"] as const,
     minAmount: (currency: string) => [...cryptoKeys.all, "min-amount", currency] as const,
+    feeEstimate: (currency: string) => [...cryptoKeys.all, "fee-estimate", currency] as const,
     depositStatus: (paymentId: string) => [...cryptoKeys.all, "deposit-status", paymentId] as const,
 };
 
@@ -56,6 +58,22 @@ export function useCryptoMinAmount(currency: string | null) {
             return res.data.data;
         },
         enabled: !!currency,
+    });
+}
+
+/** The pre-deposit fee ESTIMATE — a range at most, never a quote. A failed lookup is simply "no estimate": the screen falls back to its generic notice and nothing is blocked. */
+export function useCryptoFeeEstimate(currency: string | null) {
+    return useQuery<CryptoFeeEstimateDto>({
+        queryKey: cryptoKeys.feeEstimate(currency ?? ""),
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<CryptoFeeEstimateDto>>("/crypto/fee-estimate", {
+                params: { asset: currency },
+            });
+            return res.data.data;
+        },
+        enabled: !!currency,
+        staleTime: 60_000,
+        retry: false,
     });
 }
 
