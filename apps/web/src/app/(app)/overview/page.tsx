@@ -109,10 +109,10 @@ export default function OverviewPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                         <p className="text-sm font-bold text-violet-950 sm:text-base">
-                            Unlock ₦5M transfer limits
+                            Set up your virtual account
                         </p>
                         <p className="mt-0.5 hidden text-sm font-medium text-violet-800 sm:block">
-                            Verify your BVN to unlock full account limits. It takes under 2 minutes.
+                            Verify your NIN to create your account, then upgrade tiers for higher limits.
                         </p>
                     </div>
                     <button
@@ -124,7 +124,7 @@ export default function OverviewPage() {
                 </div>
             )}
 
-            {/* ── Tier Upgrade Banner — shown once BVN is done but the account isn't at the highest tier yet, unless dismissed for this specific tier ── */}
+            {/* ── Tier Upgrade Banner — shown once NIN verification is done but the account isn't at the highest tier yet, unless dismissed for this specific tier ── */}
             {isMounted && user?.kycVerified && virtualAccount && virtualAccount.tier < 3 && tierBannerDismissedFor !== virtualAccount.tier && (
                 <div className="relative mb-6 sm:mb-8 flex items-center gap-3 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 pr-10 shadow-sm sm:gap-4 sm:px-6 sm:py-5 sm:pr-12">
                     <button

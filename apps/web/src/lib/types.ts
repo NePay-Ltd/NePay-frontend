@@ -7,7 +7,7 @@ export interface User {
     name: string;
     email: string;
     phone: string;
-    /** True once this account has an APPROVED BVN verification. */
+    /** True once this account has an APPROVED identity verification. */
     kycVerified: boolean;
 }
 

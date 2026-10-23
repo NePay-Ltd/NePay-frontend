@@ -26,7 +26,7 @@ export interface AuthContextValue {
     /** Authenticated user. Null when logged out or loading. */
     user: UserResponseDto | null;
     /**
-     * True once this account has an APPROVED BVN verification — derived from
+     * True once this account has an APPROVED identity verification — derived from
      * user.kycVerified (the backend's single KYC flag since the tier-collapse
      * rework; there is no kycTier on any response anymore).
      */
@@ -43,7 +43,7 @@ export interface AuthContextValue {
     logout: () => Promise<void>;
     /** Exposed to finalize session after external verifications (e.g. email OTP) */
     finalizeLogin: (data: AuthTokensDto) => void;
-    /** Locally flip kycVerified to true after a successful BVN submission. */
+    /** Locally flip kycVerified to true after a successful identity submission. */
     markKycVerified: () => void;
 }
 

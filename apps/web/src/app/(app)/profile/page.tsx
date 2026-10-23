@@ -292,12 +292,12 @@ export default function ProfilePage() {
                             title="Tier & Limits"
                             subtitle={
                                 !profile?.kycVerified
-                                    ? "Verify your BVN to get started"
+                                    ? "Verify your NIN to get started"
                                     : tier < 3 ? "Raise your daily limit and balance cap" : "You're at the highest tier"
                             }
                             trailing={
                                 <div className="flex items-center gap-3">
-                                    {/* Tier 1 is reached by verifying BVN, not a default — an unverified account has no tier yet, never "Tier 1" by itself. */}
+                                    {/* Tier 1 starts after NIN verification; it is not a default for unverified accounts. */}
                                     {profile?.kycVerified ? (
                                         <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold", tierMeta.bg, tierMeta.text)}>
                                             Tier {tier} &middot; {tierMeta.name}

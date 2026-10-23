@@ -10,9 +10,8 @@ import { Spinner } from "@/components/shared/spinner";
 
 export interface RequireKycProps {
     /**
-     * Content to show when the account is BVN-verified. There is no tier
-     * ladder anymore — a single kycVerified boolean (an APPROVED BVN check)
-     * is the only gate the backend has since the tier-collapse rework.
+     * Content to show when the account is identity-verified. A single
+     * kycVerified boolean is the gate for this feature.
      */
     children: React.ReactNode;
     /** Optional custom heading for the gate UI. */
@@ -61,7 +60,7 @@ export function RequireKyc({
             heading={gateHeading ?? "Verification required"}
             description={
                 gateDescription ??
-                "You need to verify your BVN to access this feature. It takes less than 2 minutes."
+                "You need to verify your NIN to access this feature. It takes less than 2 minutes."
             }
             action={{
                 label: "Complete verification",

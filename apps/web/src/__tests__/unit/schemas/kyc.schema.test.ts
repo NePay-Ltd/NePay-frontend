@@ -2,18 +2,37 @@
 // ─── KYC Schema Unit Tests ────────────────────────────────────────────────────
 
 import { describe, it, expect } from "vitest";
-import { z } from "zod";
-
-// KYC schema (replicated from kyc.ts — adapt once the real file is confirmed)
-const bvnSchema = z
-  .string()
-  .min(1, "BVN is required")
-  .regex(/^\d{11}$/, "BVN must be exactly 11 digits");
+import { bvnSchema, verifyNinSchema } from "../../../lib/schemas/kyc";
 
 describe("BVN Schema", () => {
   // Positive
   it("P1 | Valid 11-digit BVN passes", () => {
     expect(bvnSchema.safeParse("12345678901").success).toBe(true);
+  });
+
+  describe("NIN verification schema", () => {
+    it("accepts an 11-digit NIN and a valid date of birth", () => {
+      expect(
+        verifyNinSchema.safeParse({ nin: "12345678901", dateOfBirth: "1995-03-08" }).success,
+      ).toBe(true);
+    });
+
+    it("requires a date of birth in YYYY-MM-DD format", () => {
+      expect(verifyNinSchema.safeParse({ nin: "12345678901", dateOfBirth: "" }).success).toBe(false);
+      expect(verifyNinSchema.safeParse({ nin: "12345678901", dateOfBirth: "08-03-1995" }).success).toBe(false);
+    });
+
+    it("rejects impossible and future dates of birth", () => {
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 1);
+      expect(verifyNinSchema.safeParse({ nin: "12345678901", dateOfBirth: "1995-02-30" }).success).toBe(false);
+      expect(
+        verifyNinSchema.safeParse({
+          nin: "12345678901",
+          dateOfBirth: futureDate.toISOString().slice(0, 10),
+        }).success,
+      ).toBe(false);
+    });
   });
 
   it("P2 | Another valid BVN passes", () => {

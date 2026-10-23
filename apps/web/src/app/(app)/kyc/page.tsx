@@ -10,12 +10,13 @@ import { ShieldCheck, AlertCircle, ArrowRight, BadgeCheck, XCircle } from "lucid
 import { toast } from "sonner";
 
 import {
-    verifyBvnSchema,
-    type VerifyBvnValues,
+    verifyNinSchema,
+    type VerifyNinValues,
 } from "@/lib/schemas/kyc";
 import {
     useKycStatus,
-    useSubmitBvn,
+    useSubmitNin,
+    kycKeys,
 } from "@/lib/queries/kyc";
 import { walletKeys } from "@/lib/queries/wallet";
 import { useAuth } from "@/lib/auth-context";
@@ -30,9 +31,9 @@ import { cn } from "@/lib/cn";
 
 import { getApiErrorMessage } from "@/lib/api-client";
 
-// ─── BVN digit formatter (groups: XXX XXXX XXXX) ─────────────────────────────
+// ─── NIN digit formatter (groups: XXX XXXX XXXX) ─────────────────────────────
 
-function formatBvn(raw: string): string {
+function formatNin(raw: string): string {
     const digits = raw.replace(/\D/g, "").slice(0, 11);
     if (digits.length <= 3) return digits;
     if (digits.length <= 7) return `${digits.slice(0, 3)} ${digits.slice(3)}`;
@@ -43,37 +44,38 @@ function stripNonDigits(value: string): string {
     return value.replace(/\D/g, "");
 }
 
-// ─── BVN Number Step ──────────────────────────────────────────────────────────
+// ─── NIN Number Step ──────────────────────────────────────────────────────────
 
-interface BvnNumberStepProps {
+interface NinNumberStepProps {
     onApproved: () => void;
-    onRejected: (reason: string | null) => void;
+    onRejected: (reason: string | null, requiresAdminReview: boolean) => void;
 }
 
-function BvnNumberStep({ onApproved, onRejected }: BvnNumberStepProps) {
+function NinNumberStep({ onApproved, onRejected }: NinNumberStepProps) {
     const [displayValue, setDisplayValue] = React.useState("");
-    const submitBvn = useSubmitBvn();
+    const [dateOfBirth, setDateOfBirth] = React.useState("");
+    const submitNin = useSubmitNin();
 
     const {
         register,
         handleSubmit,
         setValue,
         formState: { errors },
-    } = useForm<VerifyBvnValues>({
-        resolver: zodResolver(verifyBvnSchema),
-        defaultValues: { bvn: "" },
+    } = useForm<VerifyNinValues>({
+        resolver: zodResolver(verifyNinSchema),
+        defaultValues: { nin: "", dateOfBirth: "" },
     });
 
-    const handleBvnInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleNinInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const raw = stripNonDigits(e.target.value);
-        setValue("bvn", raw, { shouldValidate: true });
-        setDisplayValue(formatBvn(raw));
-        submitBvn.reset();
+        setValue("nin", raw, { shouldValidate: true });
+        setDisplayValue(formatNin(raw));
+        submitNin.reset();
     };
 
-    const onSubmit = (values: VerifyBvnValues) => {
-        submitBvn.mutate(
-            { bvn: values.bvn },
+    const onSubmit = (values: VerifyNinValues) => {
+        submitNin.mutate(
+            { nin: values.nin, dateOfBirth: values.dateOfBirth },
             {
                 onSuccess: (record) => {
                     if (record.status === "APPROVED") {
@@ -82,14 +84,14 @@ function BvnNumberStep({ onApproved, onRejected }: BvnNumberStepProps) {
                     }
 
                     if (record.status === "REJECTED") {
-                        onRejected(record.failureReason);
+                        onRejected(record.failureReason, record.duplicateReviewRequired);
                         return;
                     }
 
                     toast.error("Verification is still pending. Please try again shortly.");
                 },
                 onError: (err) => {
-                    toast.error(getApiErrorMessage(err, "BVN verification failed."));
+                    toast.error(getApiErrorMessage(err, "NIN verification failed."));
                 },
             },
         );
@@ -99,54 +101,74 @@ function BvnNumberStep({ onApproved, onRejected }: BvnNumberStepProps) {
         <div className="space-y-6">
             <div className="space-y-1">
                 <h2 className="text-xl font-bold text-ink">
-                    Enter your Bank Verification Number
+                    Enter your National Identification Number
                 </h2>
                 <p className="text-sm text-body">
-                    Your BVN is an 11-digit number issued by the CBN. We&apos;ll verify it
-                    against your identity records immediately.
+                    Your NIN is an 11-digit number issued by NIMC. We&apos;ll verify it
+                    with your date of birth to set up your account.
                 </p>
             </div>
 
             <div className="rounded-xl border border-violet-100 bg-violet-050 px-4 py-3">
                 <p className="text-xs text-body">
-                    <span className="font-semibold text-violet-700">How to get your BVN:</span>{" "}
-                    Dial <span className="font-mono font-semibold">*565*0#</span> on any phone linked to your bank account.
+                    <span className="font-semibold text-violet-700">Where to find your NIN:</span>{" "}
+                    Check your NIN slip or use an official NIMC retrieval channel.
                 </p>
             </div>
 
             <form
-                id="bvn-form"
+                id="nin-form"
                 onSubmit={handleSubmit(onSubmit)}
                 className="space-y-4"
                 noValidate
             >
-                {/* Hidden actual field for RHF */}
-                <input type="hidden" {...register("bvn")} />
+                <input type="hidden" {...register("nin")} />
+                <input type="hidden" {...register("dateOfBirth")} />
 
                 <Field
-                    label="BVN"
-                    htmlFor="bvn-input"
-                    error={errors.bvn?.message}
+                    label="NIN"
+                    htmlFor="nin-input"
+                    error={errors.nin?.message}
                 >
                     <Input
-                        id="bvn-input"
+                        id="nin-input"
                         type="text"
                         inputMode="numeric"
                         placeholder="000 0000 0000"
                         maxLength={13} // 11 digits + 2 spaces
                         value={displayValue}
-                        onChange={handleBvnInput}
+                        onChange={handleNinInput}
                         autoComplete="off"
                         className="font-mono tracking-widest text-base"
-                        aria-invalid={!!errors.bvn || submitBvn.isError}
+                        aria-invalid={!!errors.nin || submitNin.isError}
                     />
                 </Field>
 
-                {submitBvn.isError && (
+                <Field
+                    label="Date of birth"
+                    htmlFor="nin-date-of-birth"
+                    error={errors.dateOfBirth?.message}
+                >
+                    <Input
+                        id="nin-date-of-birth"
+                        type="date"
+                        value={dateOfBirth}
+                        onChange={(event) => {
+                            const value = event.target.value;
+                            setDateOfBirth(value);
+                            setValue("dateOfBirth", value, { shouldValidate: true });
+                            submitNin.reset();
+                        }}
+                        max={new Date().toISOString().slice(0, 10)}
+                        aria-invalid={!!errors.dateOfBirth || submitNin.isError}
+                    />
+                </Field>
+
+                {submitNin.isError && (
                     <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2.5">
                         <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
                         <p className="text-sm text-red-500">
-                            {getApiErrorMessage(submitBvn.error, "BVN verification failed.")}
+                            {getApiErrorMessage(submitNin.error, "NIN verification failed.")}
                         </p>
                     </div>
                 )}
@@ -156,10 +178,10 @@ function BvnNumberStep({ onApproved, onRejected }: BvnNumberStepProps) {
                     variant="primary"
                     size="lg"
                     fullWidth
-                    loading={submitBvn.isPending}
+                    loading={submitNin.isPending}
                 >
                     <ShieldCheck className="h-4 w-4" />
-                    Verify BVN
+                    Verify NIN
                 </Button>
             </form>
         </div>
@@ -168,7 +190,17 @@ function BvnNumberStep({ onApproved, onRejected }: BvnNumberStepProps) {
 
 // ─── Rejected screen ──────────────────────────────────────────────────────────
 
-function KycRejected({ type, reason, onRetry }: { type: "BVN"; reason: string | null; onRetry: () => void }) {
+function KycRejected({
+    type,
+    reason,
+    onRetry,
+    onContactSupport,
+}: {
+    type: "NIN";
+    reason: string | null;
+    onRetry: () => void;
+    onContactSupport: () => void;
+}) {
     return (
         <div className="space-y-6 text-center">
             <div className="flex justify-center">
@@ -181,12 +213,21 @@ function KycRejected({ type, reason, onRetry }: { type: "BVN"; reason: string | 
                     We couldn&apos;t verify your {type}
                 </h2>
                 <p className="text-sm text-body">
-                    {reason ?? "This verification wasn't successful. Please try again or contact support for help."}
+                    {reason ?? "We couldn't match these details to an identity record."}
+                </p>
+                <p className="text-sm text-body">
+                    Check that your 11-digit NIN and date of birth match your NIMC record, then try again.
+                    If your NIN is already linked to another NePay account, contact support.
                 </p>
             </div>
-            <Button variant="primary" size="lg" fullWidth onClick={onRetry}>
-                I&apos;ve updated my profile, try again
-            </Button>
+            <div className="space-y-3">
+                <Button variant="primary" size="lg" fullWidth onClick={onRetry}>
+                    Edit details and try again
+                </Button>
+                <Button variant="ghost" size="lg" fullWidth onClick={onContactSupport}>
+                    Contact support
+                </Button>
+            </div>
         </div>
     );
 }
@@ -194,10 +235,10 @@ function KycRejected({ type, reason, onRetry }: { type: "BVN"; reason: string | 
 // ─── Optional Bridge (foreign account) step ────────────────────────────────────
 
 /**
- * Offered once, right after a fresh BVN approval. Skipping is a real,
+ * Offered once, right after a fresh NIN approval. Skipping is a real,
  * equally-valid choice: Bridge KYC is reachable independently, any time,
- * from the Foreign Accounts page (no longer gated behind BVN) — see the
- * user's own explicit call on keeping BVN alone sufficient for the Naira
+ * from the Foreign Accounts page (no longer gated behind identity verification) — see the
+ * user's own explicit call on keeping identity verification sufficient for the Naira
  * wallet, with this bundled in as a convenience rather than a second
  * mandatory gate.
  */
@@ -292,9 +333,9 @@ function BridgeOptionalStep({ onDone }: { onDone: () => void }) {
 
 /**
  * Surfaces the caller's Bridge (foreign account) application status on
- * every visit to this page once BVN is done — not just the one-time
+ * every visit to this page once NIN verification is done — not just the one-time
  * post-approval offer in BridgeOptionalStep, which a returning user never
- * sees again once BVN is verified (see KycPage's own step logic). Without
+ * sees again once NIN is verified (see KycPage's own step logic). Without
  * this, someone who submitted Bridge details and got rejected later
  * (rejection often lands after they've already left this page) would have
  * no visible nudge to go fix it unless they happened to open Foreign
@@ -371,8 +412,9 @@ function KycSuccess({ userName }: { userName: string }) {
                     You&apos;re fully verified, {userName.split(" ")[0]}!
                 </h2>
                 <p className="text-sm text-body">
-                    Your BVN has been verified and your virtual account is ready.
-                    You can now send and receive higher transaction amounts.
+                    Your identity is verified. NePay sets up your virtual account
+                    automatically after approval. If it doesn&apos;t appear, contact
+                    support. You can raise your limits from Account Tiers.
                 </p>
             </div>
 
@@ -397,9 +439,10 @@ function KycSuccess({ userName }: { userName: string }) {
 
 // ─── KYC Page ─────────────────────────────────────────────────────────────────
 
-type KycStep = "bvn-number" | "bvn-rejected" | "bridge-optional" | "done";
+type KycStep = "nin-number" | "nin-rejected" | "nin-duplicate-review" | "bridge-optional" | "done";
 
 export default function KycPage() {
+    const router = useRouter();
     const { user, markKycVerified } = useAuth();
     const { data: kycStatus, isLoading: statusLoading } = useKycStatus();
     const queryClient = useQueryClient();
@@ -408,12 +451,19 @@ export default function KycPage() {
     const [rejectionReason, setRejectionReason] = React.useState<string | null>(null);
 
     // Once the account's real KYC status loads, jump straight to whichever
-    // step applies — a returning user shouldn't be asked to resubmit a BVN
+    // step applies — a returning user shouldn't be asked to resubmit a NIN
     // that's already approved server-side.
     React.useEffect(() => {
         if (step !== null || !kycStatus) return;
 
-        setStep(kycStatus.verified ? "done" : "bvn-number");
+        setStep(kycStatus.verified ? "done" : kycStatus.retryBlockedByReview ? "nin-duplicate-review" : "nin-number");
+    }, [kycStatus, step]);
+
+    React.useEffect(() => {
+        if (step === "nin-duplicate-review" && kycStatus && !kycStatus.retryBlockedByReview) {
+            setRejectionReason(null);
+            setStep("nin-number");
+        }
     }, [kycStatus, step]);
 
     const isDone = step === "done";
@@ -433,7 +483,7 @@ export default function KycPage() {
             <div className={cn("w-full", wide ? "max-w-2xl" : "max-w-lg")}>
                 {/* Card */}
                 <div className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
-                    {!isDone && step !== "bvn-rejected" && step !== "bridge-optional" && (
+                    {!isDone && step !== "nin-rejected" && step !== "nin-duplicate-review" && step !== "bridge-optional" && (
                         <>
                             {/* Header */}
                             <div className="mb-8 space-y-1">
@@ -454,42 +504,61 @@ export default function KycPage() {
                     )}
 
                     {/* Step content */}
-                    {step === "bvn-number" && (
-                        <BvnNumberStep
+                    {step === "nin-number" && (
+                        <NinNumberStep
                             onApproved={() => {
-                                // Approval also auto-provisioned the virtual
-                                // account server-side (BvnVerifiedListener, via
+                                // NIN approval also auto-provisions the virtual
+                                // account server-side (NinVerifiedListener, via
                                 // publishAndWait) — but the client's own cached
                                 // "no virtual account yet" result from before
                                 // approval doesn't know that on its own.
                                 // Confirmed live 2026-09-26: without this
-                                // invalidation, a user could pass BVN
+                                // invalidation, a user could pass NIN
                                 // verification while the virtual-account query
                                 // was already cached empty/404 from an earlier
-                                // visit, and keep seeing "please verify" even
-                                // though the account now exists server-side —
-                                // with no way back in, since re-submitting BVN
-                                // just 409s on the now-APPROVED record.
+                                // visit, and keep seeing stale account data even
+                                // though the account now exists server-side.
                                 queryClient.invalidateQueries({ queryKey: walletKeys.virtualAccount() });
                                 markKycVerified();
-                                toast.success("BVN verified!");
+                                toast.success("NIN verified!");
                                 setStep("bridge-optional");
                             }}
-                            onRejected={(reason) => {
+                            onRejected={(reason, requiresAdminReview) => {
                                 setRejectionReason(reason);
-                                setStep("bvn-rejected");
+                                if (requiresAdminReview) {
+                                    queryClient.setQueryData(kycKeys.status(), (current: typeof kycStatus) => ({
+                                        verified: current?.verified ?? false,
+                                        retryBlockedByReview: true,
+                                    }));
+                                    void queryClient.invalidateQueries({ queryKey: kycKeys.status() });
+                                    setStep("nin-duplicate-review");
+                                } else {
+                                    setStep("nin-rejected");
+                                }
                             }}
                         />
                     )}
-                    {step === "bvn-rejected" && (
+                    {step === "nin-rejected" && (
                         <KycRejected
-                            type="BVN"
+                            type="NIN"
                             reason={rejectionReason}
                             onRetry={() => {
                                 setRejectionReason(null);
-                                setStep("bvn-number");
+                                setStep("nin-number");
                             }}
+                            onContactSupport={() => router.push("/support")}
                         />
+                    )}
+                    {step === "nin-duplicate-review" && (
+                        <div className="space-y-4 text-center" role="status" aria-live="polite">
+                            <h2 className="text-xl font-bold text-ink">Your NIN needs a review</h2>
+                            <p className="text-sm text-body">
+                                {rejectionReason ?? "This NIN is already linked to another NePay account."} Our team is
+                                reviewing the account that submitted it. You can retry once the review is complete; we’ll
+                                email you when retry is available.
+                            </p>
+                            <p className="text-xs text-muted">This screen will update automatically after the review.</p>
+                        </div>
                     )}
                     {step === "bridge-optional" && <BridgeOptionalStep onDone={() => setStep("done")} />}
 
@@ -497,7 +566,7 @@ export default function KycPage() {
                 </div>
 
                 {/* Security disclaimer */}
-                {!isDone && step !== "bvn-rejected" && step !== "bridge-optional" && (
+                {!isDone && step !== "nin-rejected" && step !== "nin-duplicate-review" && step !== "bridge-optional" && (
                     <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-xs text-muted">
                         <Lock className="h-3 w-3" />
                         Your data is encrypted and processed securely in line with CBN guidelines.
