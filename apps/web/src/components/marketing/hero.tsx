@@ -7,6 +7,7 @@ import { motion, useScroll, useTransform, type Variants } from "framer-motion";
 import { IconGrid as LayoutGrid, IconAirtime as Smartphone, IconElectricity as Zap, IconGift as Gift, IconArrowUpRight as ArrowUpRight } from "@/components/icons";
 import { ArrowRight, ArrowDownRight, Activity, Globe } from "lucide-react";
 import { Section } from "./section";
+import { PlayStoreBadge } from "./play-store-badge";
 
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
@@ -102,11 +103,11 @@ export function Hero() {
 
             <motion.div
               variants={fadeUp}
-              className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-16"
+              className="flex flex-col sm:flex-row sm:flex-wrap items-center gap-4 w-full sm:w-auto mb-16"
             >
               <Link
                 href="/register"
-                className="w-full sm:w-auto px-8 py-3.5 text-base font-medium text-white bg-brand-gradient rounded-full hover:opacity-90 transition-opacity shadow-lg flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-3.5 text-base font-medium text-trueWhite bg-brand-gradient rounded-full hover:opacity-90 transition-opacity shadow-lg flex items-center justify-center gap-2"
               >
                 Get Started free <ArrowRight className="w-4 h-4" />
               </Link>
@@ -116,6 +117,7 @@ export function Hero() {
               >
                 See how it works
               </Link>
+              <PlayStoreBadge className="w-full sm:w-auto" />
             </motion.div>
 
 
@@ -123,25 +125,25 @@ export function Hero() {
 
           {/* Right Column (42%) - Dashboard Mockup */}
           <motion.div
-            className="lg:col-span-5 relative w-full h-[600px] lg:h-[680px] -mx-4 sm:mx-0 lg:ml-8 mt-12 lg:mt-0 order-first lg:order-last"
-            initial={{ opacity: 0, x: 50, rotate: 0 }}
-            animate={{ opacity: 1, x: 0, rotate: 3 }}
+            className="lg:col-span-5 relative w-full max-w-[360px] sm:max-w-[400px] lg:max-w-none mx-auto lg:mx-0 h-auto lg:h-[680px] lg:ml-8 mt-8 lg:mt-0 order-first lg:order-last"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
           >
-            <div className="absolute inset-0 right-[-20%] lg:right-[-40%] rounded-3xl bg-white dark:bg-[#09090B] border border-marketing-border shadow-2xl overflow-hidden flex flex-col">
+            <div className="relative lg:absolute lg:inset-0 lg:right-[-40%] lg:rotate-3 rounded-3xl bg-white dark:bg-[#09090B] border border-marketing-border shadow-2xl overflow-hidden flex flex-col">
               {/* Mockup Body (App Overview) */}
-              <div className="p-6 flex-1 bg-marketing-surface overflow-hidden space-y-6">
+              <div className="p-4 lg:p-6 flex-1 bg-marketing-surface overflow-hidden space-y-4 lg:space-y-6">
                 
                 {/* Hero Balance Card */}
-                <div className="relative overflow-hidden rounded-2xl bg-brand-gradient p-6 text-white shadow-lg">
+                <div className="relative overflow-hidden rounded-2xl bg-brand-gradient p-4 lg:p-6 text-white shadow-lg">
                   <div className="relative z-10">
                     <p className="text-sm font-medium text-white/70">Total Balance</p>
-                    <p className="mt-1 font-mono text-4xl font-bold">₦847,250.00</p>
-                    <div className="mt-6 flex gap-3">
-                      <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/15 text-sm font-medium backdrop-blur-sm">
+                    <p className="mt-1 font-mono text-2xl lg:text-4xl font-bold">₦847,250.00</p>
+                    <div className="mt-4 lg:mt-6 flex gap-2 lg:gap-3">
+                      <div className="flex items-center gap-2 px-3 lg:px-4 py-1.5 lg:py-2 rounded-lg bg-white/15 text-xs lg:text-sm font-medium backdrop-blur-sm">
                         Add Money
                       </div>
-                      <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/15 text-sm font-medium backdrop-blur-sm">
+                      <div className="flex items-center gap-2 px-3 lg:px-4 py-1.5 lg:py-2 rounded-lg bg-white/15 text-xs lg:text-sm font-medium backdrop-blur-sm">
                         Transfer
                       </div>
                     </div>
@@ -161,8 +163,8 @@ export function Hero() {
                         { icon: Globe, label: "Foreign FX" },
                         { icon: LayoutGrid, label: "More" },
                       ].map((action, i) => (
-                        <div key={i} className="flex flex-col items-center gap-2 p-3 rounded-2xl hover:bg-marketing-surface">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400">
+                        <div key={i} className="flex flex-col items-center gap-1.5 lg:gap-2 p-2 lg:p-3 rounded-2xl hover:bg-marketing-surface">
+                          <div className="flex h-10 w-10 lg:h-12 lg:w-12 items-center justify-center rounded-2xl bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400">
                             <action.icon className="h-5 w-5" />
                           </div>
                           <span className="text-[11px] font-bold text-marketing-text text-center">{action.label}</span>
@@ -173,7 +175,7 @@ export function Hero() {
                 </div>
 
                 {/* Rate Watch */}
-                <div className="rounded-[24px] border border-marketing-border bg-marketing-bg shadow-sm p-6">
+                <div className="rounded-[24px] border border-marketing-border bg-marketing-bg shadow-sm p-4 lg:p-6">
                   <div className="mb-4">
                     <h2 className="text-[15px] font-extrabold text-marketing-text">Rate watch</h2>
                     <p className="text-[13px] font-medium text-marketing-secondary mt-0.5">USDT → NGN, updated hourly</p>
@@ -189,7 +191,7 @@ export function Hero() {
                     </div>
                   </div>
                   
-                  <div className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-50 dark:bg-violet-900/20 py-3 text-sm font-bold text-violet-700 dark:text-violet-400">
+                  <div className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-50 dark:bg-violet-900/20 py-2.5 lg:py-3 text-sm font-bold text-violet-700 dark:text-violet-400">
                     <Activity className="h-4 w-4" />
                     Convert Crypto
                   </div>

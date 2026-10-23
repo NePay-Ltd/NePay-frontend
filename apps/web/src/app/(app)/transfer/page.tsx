@@ -464,7 +464,7 @@ export default function TransferPage() {
                                     </div>
 
                                     <p className="text-xs text-body">
-                                        If the transfer fails, the amount and the fee are both returned to your wallet.
+                                        If the transfer fails, the amount is returned to your wallet. The fee is not refunded.
                                     </p>
                                 </div>
                             </PanelBody>
@@ -573,7 +573,7 @@ export default function TransferPage() {
                         <p>
                             The bank couldn&apos;t complete this transfer.{" "}
                             <span className="font-bold">{formatNaira(totalDebit)}</span>
-                            {fee > 0 ? " (the amount and the fee)" : ""} has been returned to your wallet.
+                            has been returned to your wallet.{fee > 0 ? " The fee is not refunded." : ""}
                         </p>
                     ) : (
                         <p>{initiateMutation.error?.message || "We encountered an unexpected error."}</p>
