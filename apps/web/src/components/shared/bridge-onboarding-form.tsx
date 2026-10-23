@@ -3,7 +3,7 @@
 /**
  * The Bridge (foreign account) KYC form — shared between the standalone
  * Foreign Accounts page (a returning user who skipped this during signup)
- * and the main KYC page (offered as an optional step right after BVN
+ * and the main KYC page (offered as an optional step right after NIN
  * approval, so a new user can do everything in one visit). Extracted here
  * specifically so neither page duplicates the field list/validation.
  */

@@ -43,8 +43,8 @@ export interface ApiError {
 
 /**
  * Matches the backend's real response shape since the tier-collapse rework:
- * users.kycTier was replaced by a single users.kycVerified boolean (BVN
- * approval alone is sufficient KYC now — NIN verification no longer exists),
+ * users.kycTier was replaced by a single users.kycVerified boolean (identity
+ * approval alone is sufficient KYC),
  * so there is no tier field on any auth/KYC response anymore.
  */
 export interface UserResponseDto {
@@ -58,7 +58,7 @@ export interface UserResponseDto {
     preferredCurrency: Currency;
     referralCode: string;
     avatarUrl?: string | null;
-    /** True once this account has an APPROVED BVN verification. */
+    /** True once this account has an APPROVED identity verification. */
     kycVerified: boolean;
     emailVerified: boolean;
     emailReceipts: boolean;
@@ -99,24 +99,26 @@ export interface LoginEventResponseDto {
 
 // ─── KYC ─────────────────────────────────────────────────────────────────────
 
-/** BVN is the only identity check — matches the backend's VerificationType enum. */
-export type VerificationType = "BVN";
+/** Identity checks supported by the backend. */
+export type VerificationType = "BVN" | "NIN";
 export type KycRecordStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 /**
- * Response of GET /kyc/status — a single derived boolean, computed fresh from
- * kyc_records on every call (see backend KycService.getStatus). The old
+ * Response of GET /kyc/status — derived from kyc_records on every call
+ * (see backend KycService.getStatus). The old
  * { tier, bvnVerified, ninVerified } shape no longer exists.
  */
 export interface KycStatusDto {
     verified: boolean;
+    retryBlockedByReview: boolean;
 }
 
-/** Response of POST /kyc/verify-bvn — synchronous APPROVED/REJECTED decision. */
+/** Response of POST /kyc/verify-nin — synchronous decision; duplicate NINs can be held for admin review. */
 export interface KycRecordDto {
     id: string;
     status: KycRecordStatus;
     failureReason: string | null;
+    duplicateReviewRequired: boolean;
 }
 
 // ─── Wallet & Ledger ─────────────────────────────────────────────────────────
@@ -178,13 +180,14 @@ export interface VirtualAccountResponseDto {
 
 /**
  * Body of POST /wallet/virtual-account/upgrade-tier (multipart) — at least
- * one of nin/address is required, which is enforced server-side since it
+ * one of bvn/nin/address is required, which is enforced server-side since it
  * depends on the account's current tier. `documentDate` and the
  * proof-of-address image file are required together whenever `address` is
  * present (Tier 3); the file itself is passed separately to useUpgradeTier,
  * not part of this DTO, the same split useCreateBridgeCustomer already uses.
  */
 export interface UpgradeTierDto {
+    bvn?: string;
     nin?: string;
     address?: string;
     documentDate?: string;

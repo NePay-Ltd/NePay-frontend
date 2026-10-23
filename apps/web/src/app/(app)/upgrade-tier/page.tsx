@@ -123,7 +123,7 @@ function TierMedal({ tier, state }: { tier: TierNumber; state: "current" | "unlo
     );
 }
 
-/** Mirrors kyc/page.tsx's KycSuccess badge exactly — same pulse-ring, same icon-in-circle, same pill — so a tier upgrade feels like the same class of milestone as finishing BVN verification, not a lesser one. */
+/** Mirrors kyc/page.tsx's KycSuccess badge so a tier upgrade feels like the same class of milestone as completing identity verification. */
 function TierSuccessBadge({ tier, onContinue }: { tier: TierNumber; onContinue: () => void }) {
     const meta = TIER_META[tier];
 
@@ -168,23 +168,23 @@ export default function UpgradeTierPage() {
     const { data: profile, isLoading: isProfileLoading } = useProfile();
     const { mutate: upgrade, isPending } = useUpgradeTier();
 
-    const [nin, setNin] = React.useState("");
+    const [tier2Identity, setTier2Identity] = React.useState("");
     const [address, setAddress] = React.useState("");
     const [document, setDocument] = React.useState<File | null>(null);
     const [documentDate, setDocumentDate] = React.useState("");
     const [justReachedTier, setJustReachedTier] = React.useState<TierNumber | null>(null);
+    const [upgradeError, setUpgradeError] = React.useState<string | null>(null);
 
-    // Tier 1 is reached by verifying BVN, not granted by default — an
-    // account with no completed BVN verification has no tier at all, never
-    // "Tier 1 already". `account?.tier ?? 1` below is only a safe floor for
-    // the narrow case where BVN *is* verified but the virtual account
-    // record hasn't synced yet (BvnVerifiedListener creates it
-    // asynchronously and can lag or fail independently — see its own
-    // note); it is never read before `verified` is confirmed true.
+    // NIN approval creates Tier 1 and the virtual account. `account?.tier ?? 1`
+    // is a safe floor while that account is still syncing.
     const verified = profile?.kycVerified === true;
     const tier = (account?.tier ?? 1) as TierNumber;
+    const usesLegacyNinForTier2 = account
+        ? new Date(account.createdAt).getTime() < Date.UTC(2026, 9, 22)
+        : false;
 
-    // Strictly sequential — Tier 1 can only ever request Tier 2 (NIN only),
+    // Strictly sequential — Tier 1 can only ever request Tier 2 (BVN for
+    // NIN-created accounts; NIN for legacy BVN-created accounts),
     // never skip straight to Tier 3, even though VFD's own API would allow
     // it given both NIN and address at once. One step at a time, on
     // purpose: it keeps the form, the copy, and the success badge always
@@ -194,15 +194,16 @@ export default function UpgradeTierPage() {
     const handleSubmit = () => {
         if (!nextTier) return;
 
-        const dto: { nin?: string; address?: string; documentDate?: string } = {};
+        const dto: { bvn?: string; nin?: string; address?: string; documentDate?: string } = {};
         let file: File | undefined;
 
         if (nextTier === 2) {
-            if (nin.length !== 11) {
-                toast.error("Enter your 11-digit NIN.");
+            if (tier2Identity.length !== 11) {
+                toast.error(`Enter your 11-digit ${usesLegacyNinForTier2 ? "NIN" : "BVN"}.`);
                 return;
             }
-            dto.nin = nin;
+            if (usesLegacyNinForTier2) dto.nin = tier2Identity;
+            else dto.bvn = tier2Identity;
         } else if (nextTier === 3) {
             if (!address.trim()) {
                 toast.error("Enter your address.");
@@ -234,14 +235,15 @@ export default function UpgradeTierPage() {
             { dto, document: file },
             {
                 onSuccess: (updated) => {
-                    setNin("");
+                    setUpgradeError(null);
+                    setTier2Identity("");
                     setAddress("");
                     setDocument(null);
                     setDocumentDate("");
                     setJustReachedTier(updated.tier as TierNumber);
                 },
                 onError: (err) => {
-                    toast.error(getApiErrorMessage(err, "Could not upgrade your tier."));
+                    setUpgradeError(getApiErrorMessage(err, "Could not upgrade your tier."));
                 },
             },
         );
@@ -274,14 +276,14 @@ export default function UpgradeTierPage() {
                                 <Lock className="h-5 w-5 text-muted" />
                             </div>
                             <div>
-                                <p className="text-sm font-bold text-ink">Verify your BVN first</p>
+                                <p className="text-sm font-bold text-ink">Verify your NIN first</p>
                                 <p className="mt-1 text-sm text-body">
-                                    Tiers start once your BVN is verified — that&apos;s Tier 1. Complete that first,
+                                    Your virtual account is created when your NIN is verified. Complete that first,
                                     then come back here to raise your limits further.
                                 </p>
                             </div>
                             <Button variant="primary" size="lg" fullWidth onClick={() => router.push("/kyc")}>
-                                Verify BVN
+                                Verify NIN
                                 <ArrowRight className="h-4 w-4" />
                             </Button>
                         </div>
@@ -354,14 +356,17 @@ export default function UpgradeTierPage() {
                                     </div>
 
                                     {nextTier === 2 && (
-                                        <Field label="National Identification Number (NIN)">
+                                        <Field label={usesLegacyNinForTier2 ? "National Identification Number (NIN)" : "Bank Verification Number (BVN)"}>
                                             <Input
                                                 type="text"
                                                 inputMode="numeric"
-                                                placeholder="11-digit NIN"
+                                                placeholder={`11-digit ${usesLegacyNinForTier2 ? "NIN" : "BVN"}`}
                                                 maxLength={11}
-                                                value={nin}
-                                                onChange={(e) => setNin(e.target.value.replace(/\D/g, "").slice(0, 11))}
+                                                value={tier2Identity}
+                                                onChange={(e) => {
+                                                    setTier2Identity(e.target.value.replace(/\D/g, "").slice(0, 11));
+                                                    setUpgradeError(null);
+                                                }}
                                                 className="font-mono tracking-widest"
                                             />
                                         </Field>
@@ -374,24 +379,46 @@ export default function UpgradeTierPage() {
                                                     type="text"
                                                     placeholder="Street, city, state"
                                                     value={address}
-                                                    onChange={(e) => setAddress(e.target.value)}
+                                                    onChange={(e) => {
+                                                        setAddress(e.target.value);
+                                                        setUpgradeError(null);
+                                                    }}
                                                 />
                                             </Field>
 
                                             <DocumentPicker
                                                 label="Proof of address"
                                                 file={document}
-                                                onChange={setDocument}
+                                                onChange={(file) => {
+                                                    setDocument(file);
+                                                    setUpgradeError(null);
+                                                }}
                                             />
 
                                             <Field label="Document date" hint="Must be dated within the last 3 months">
                                                 <Input
                                                     type="date"
                                                     value={documentDate}
-                                                    onChange={(e) => setDocumentDate(e.target.value)}
+                                                    onChange={(e) => {
+                                                        setDocumentDate(e.target.value);
+                                                        setUpgradeError(null);
+                                                    }}
                                                 />
                                             </Field>
                                         </>
+                                    )}
+
+                                    {upgradeError && (
+                                        <div
+                                            role="alert"
+                                            className="rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2.5 text-sm text-red-600"
+                                        >
+                                            <p>{upgradeError}</p>
+                                            <p className="mt-1">
+                                                Check the identity details or proof-of-address information, update them above, and try again.
+                                                Your entries are still here.
+                                            </p>
+                                        </div>
                                     )}
 
                                     <Button
@@ -400,7 +427,7 @@ export default function UpgradeTierPage() {
                                         loading={isPending}
                                         onClick={handleSubmit}
                                     >
-                                        Continue to Tier {nextTier}
+                                        {upgradeError ? `Try Tier ${nextTier} again` : `Continue to Tier ${nextTier}`}
                                     </Button>
                                 </div>
                             )}
@@ -409,7 +436,7 @@ export default function UpgradeTierPage() {
 
                     <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted">
                         <Lock className="h-3 w-3" />
-                        Your NIN and proof of address are encrypted and securely retained for verification and
+                        Your identity number and proof of address are encrypted and securely retained for verification and
                         fraud-prevention purposes. Your typed address itself is never stored.
                     </p>
                 </>

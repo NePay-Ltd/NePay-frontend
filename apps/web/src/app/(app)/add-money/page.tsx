@@ -213,8 +213,8 @@ export default function AddMoneyPage() {
                                             </>
                                         ) : (
                                             // No "create virtual account" button here on purpose:
-                                            // BVN approval auto-provisions it server-side — the
-                                            // backend never stores the raw BVN, so there's no
+                                            // NIN approval auto-provisions it server-side — the
+                                            // backend never stores the raw NIN, so there's no
                                             // manual-create path to call from this screen.
                                             // Matches mobile exactly.
                                             <div className="space-y-3">
@@ -223,7 +223,7 @@ export default function AddMoneyPage() {
                                                 </p>
                                                 <div className="rounded-xl border border-violet-200 bg-violet-100 dark:border-violet-900/30 dark:bg-violet-900/10 p-3.5">
                                                     <p className="text-sm text-violet-800 dark:text-violet-300">
-                                                        Your account is created automatically once your BVN verification is approved. No separate setup needed.
+                                                        Your account is created automatically once your NIN verification is approved. No separate setup needed.
                                                     </p>
                                                     <Button
                                                         fullWidth
@@ -231,7 +231,7 @@ export default function AddMoneyPage() {
                                                         className="mt-3"
                                                         onClick={() => router.push("/kyc")}
                                                     >
-                                                        Complete BVN verification
+                                                        Complete NIN verification
                                                     </Button>
                                                 </div>
                                             </div>
