@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Apple, Play } from "lucide-react";;
+import { PlayStoreBadge } from "./play-store-badge";
 import { Section } from "./section";
 
 export function CtaSection() {
@@ -26,12 +26,15 @@ export function CtaSection() {
           Join thousands of Nigerians receiving money, paying bills instantly, and exchanging crypto with total transparency.
         </p>
         
-        <Link
-          href="/register"
-          className="px-10 py-5 text-lg font-bold text-trueWhite bg-violet-600 hover:bg-violet-500 transition-colors shadow-2xl hover:shadow-xl mb-12 transform hover:scale-105 transition-all duration-150 rounded-full"
-        >
-          Create free account
-        </Link>
+        <div className="flex flex-col sm:flex-row items-center gap-4 mb-12">
+          <Link
+            href="/register"
+            className="px-10 py-5 text-lg font-bold text-trueWhite bg-violet-600 hover:bg-violet-500 transition-colors shadow-2xl hover:shadow-xl transform hover:scale-105 transition-all duration-150 rounded-full"
+          >
+            Create free account
+          </Link>
+          <PlayStoreBadge />
+        </div>
       </motion.div>
     </Section>
   );

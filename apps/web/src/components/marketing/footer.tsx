@@ -1,6 +1,8 @@
 import React from "react";
 import Link from "next/link";
-import { Twitter, Instagram, Linkedin } from "lucide-react";;
+import { Twitter, Instagram, Linkedin } from "lucide-react";
+import { SOCIAL_LINKS } from "./links";
+import { PlayStoreBadge } from "./play-store-badge";
 
 export function Footer() {
   return (
@@ -19,19 +21,20 @@ export function Footer() {
               The universal wallet for groups, bills, and transparent crypto conversions. Built for Nigeria.
             </p>
             <div className="flex items-center gap-4">
-              <Link href="#" className="w-10 h-10 rounded-full bg-marketing-surface border border-marketing-border flex items-center justify-center text-marketing-secondary hover:text-marketing-text hover:border-marketing-text transition-colors">
+              <a href={SOCIAL_LINKS.x} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-marketing-surface border border-marketing-border flex items-center justify-center text-marketing-secondary hover:text-marketing-text hover:border-marketing-text transition-colors">
                 <Twitter className="w-4 h-4 fill-current" />
-                <span className="sr-only">Twitter / X</span>
-              </Link>
-              <Link href="#" className="w-10 h-10 rounded-full bg-marketing-surface border border-marketing-border flex items-center justify-center text-marketing-secondary hover:text-marketing-text hover:border-marketing-text transition-colors">
+                <span className="sr-only">NePay on X</span>
+              </a>
+              <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-marketing-surface border border-marketing-border flex items-center justify-center text-marketing-secondary hover:text-marketing-text hover:border-marketing-text transition-colors">
                 <Instagram className="w-4 h-4" />
-                <span className="sr-only">Instagram</span>
-              </Link>
+                <span className="sr-only">NePay on Instagram</span>
+              </a>
               <Link href="#" className="w-10 h-10 rounded-full bg-marketing-surface border border-marketing-border flex items-center justify-center text-marketing-secondary hover:text-marketing-text hover:border-marketing-text transition-colors">
                 <Linkedin className="w-4 h-4 fill-current" />
                 <span className="sr-only">LinkedIn</span>
               </Link>
             </div>
+            <PlayStoreBadge className="mt-6" />
           </div>
 
           {/* Links Columns */}

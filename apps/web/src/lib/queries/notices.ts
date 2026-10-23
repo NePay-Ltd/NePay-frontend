@@ -35,6 +35,9 @@ export const noticeKeys = {
 export function useActiveNotices() {
     return useQuery<ActiveNoticesResponse>({
         queryKey: noticeKeys.active(),
+        // Safety net behind the live socket: a missed push corrects itself within a minute.
+        refetchInterval: 60_000,
+        refetchOnReconnect: true,
         queryFn: async () => {
             const response = await apiClient.get<ApiResponse<ActiveNoticesResponse>>("/notices/active");
             return response.data.data;
