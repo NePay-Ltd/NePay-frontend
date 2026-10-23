@@ -15,7 +15,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { apiClient, setTokens, clearTokens, getTokens } from "./api-client";
+import { apiClient, setTokens, clearTokens, getTokens, bootstrapSession, SESSION_FLAG_MAX_AGE_SECONDS } from "./api-client";
 import { getOrCreateDeviceId } from "./device-id";
 import type { LoginValues, RegisterValues } from "./schemas/auth";
 import type { UserResponseDto, LoginResponse, AuthTokensDto, ApiResponse } from "./types/api";
@@ -80,6 +80,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         let cancelled = false;
         (async () => {
             try {
+                // Cookie mode: trade the HttpOnly cookie for an in-memory access token first (no-op otherwise).
+                await bootstrapSession();
                 const tokens = getTokens();
                 if (tokens?.accessToken) {
                     const res = await apiClient.get<ApiResponse<UserResponseDto>>("/users/me");
@@ -104,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setTokens(data);
         setUser(data.user);
 
-        document.cookie = "nepay_refresh=true; path=/; max-age=86400";
+        document.cookie = `nepay_refresh=true; path=/; max-age=${SESSION_FLAG_MAX_AGE_SECONDS}`;
         toast.success(`Welcome back, ${data.user.firstName}!`);
 
         const searchParams = new URLSearchParams(window.location.search);
