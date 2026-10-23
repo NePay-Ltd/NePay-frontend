@@ -3,7 +3,7 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
+import { apiClient, hasSession } from "@/lib/api-client";
 import { LedgerEntryDto, ApiPaginated, ApiResponse } from "@/lib/types/api";
 import { BaseTransaction } from "@/components/shared/transaction-row";
 import { TxCategory } from "@/components/shared/tx-icon";
@@ -14,7 +14,7 @@ import { UtilityPurchaseResponseDto } from "@/lib/types/api";
  * specific, customer-facing purchase name. Every UTILITY_PURCHASE ledger
  * entry uses this one shared type regardless of which utility it actually
  * was, so "Utility Purchase" alone would never say whether it was airtime,
- * data, electricity or an exam PIN — mirrors the backend's
+ * data, electricity or an exam PIN â€” mirrors the backend's
  * getTransactionTypeLabel in email-templates.ts exactly, same source data.
  */
 const UTILITY_CATEGORY_LABELS: Record<string, string> = {
@@ -26,7 +26,7 @@ const UTILITY_CATEGORY_LABELS: Record<string, string> = {
     BETTING: "Betting Wallet Funding",
 };
 
-/** Recovers the specific utility category from `description`, the only place UtilitiesService records it — "<CATEGORY> purchase: ..." or, for a reversal, "Refund: <CATEGORY> purchase ...". */
+/** Recovers the specific utility category from `description`, the only place UtilitiesService records it â€” "<CATEGORY> purchase: ..." or, for a reversal, "Refund: <CATEGORY> purchase ...". */
 function utilityPurchaseLabel(description: string | null | undefined): string {
     const isRefund = /^Refund:/i.test(description ?? "");
     const category = description?.match(/([A-Z]+)\s+purchase/)?.[1];
@@ -34,7 +34,7 @@ function utilityPurchaseLabel(description: string | null | undefined): string {
     return isRefund ? `${base} Refund` : base;
 }
 
-/** The specific, customer-facing name for a ledger entry's type — never the literal LedgerEntryType enum value. Shown as the "Type" field on every transaction row, detail view and downloadable receipt. */
+/** The specific, customer-facing name for a ledger entry's type â€” never the literal LedgerEntryType enum value. Shown as the "Type" field on every transaction row, detail view and downloadable receipt. */
 function getTransactionTypeLabel(entry: LedgerEntryDto): string {
     switch (entry.type) {
         case "DEPOSIT": return "Crypto Deposit";
@@ -51,7 +51,7 @@ function getTransactionTypeLabel(entry: LedgerEntryDto): string {
         case "GOODWILL_CREDIT": return "Goodwill Credit";
         case "ERROR_CORRECTION": return "Error Correction";
         // ADMIN_ADJUSTMENT is the true catch-all (AdminService's OTHER
-        // category) — every named category above already has an honest
+        // category) â€” every named category above already has an honest
         // type of its own, so this is the only case left where showing the
         // literal type would read as "Admin Adjustment" to a customer.
         case "ADMIN_ADJUSTMENT": return entry.direction === "DEBIT" ? "Account Debit" : "Account Credit";
@@ -64,7 +64,7 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
     switch (entry.type) {
         case "DEPOSIT":
         case "BANK_DEPOSIT":
-        // The NGN credit from a completed FCY conversion — same category as
+        // The NGN credit from a completed FCY conversion â€” same category as
         // any other deposit into the wallet, just a different source.
         case "FCY_CONVERSION_CREDIT": category = "deposit"; break;
         case "WITHDRAWAL": category = "transfer"; break;
@@ -79,7 +79,7 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
         case "GIFT_CARD_SALE": category = "gift-card"; break;
         case "FLIGHT_BOOKING": category = "flight"; break;
         // ADMIN_ADJUSTMENT is the true catch-all (AdminService's OTHER
-        // category) — everything with an actual name gets its own type and
+        // category) â€” everything with an actual name gets its own type and
         // its own icon below, precisely so a customer can never tell a
         // manual credit apart from an automated one just by looking at
         // their own transaction list.
@@ -103,7 +103,7 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
             ? `Crypto deposit${entry.description?.includes("partial payment") ? " (partial payment)" : ""}`
             : entry.description || meta,
         meta: entry.assetQuantity && cryptoAsset
-            ? `${entry.assetQuantity} ${cryptoAsset} · Crypto deposit`
+            ? `${entry.assetQuantity} ${cryptoAsset} Â· Crypto deposit`
             : meta,
         amount: entry.direction === "DEBIT" ? -parseFloat(entry.amount) : parseFloat(entry.amount),
         category,
@@ -123,11 +123,11 @@ export const transactionKeys = {
 };
 
 /**
- * A single transaction by id, straight from GET /wallet/transactions/:id —
+ * A single transaction by id, straight from GET /wallet/transactions/:id â€”
  * not a search through whatever page of the list happens to be cached.
  * Receipt views (the /transactions/[id] page, "View Full Receipt" from the
  * summary modal) must use this, not useInfiniteTransactions + .find(), which
- * only ever finds a transaction if it's within the pages already fetched —
+ * only ever finds a transaction if it's within the pages already fetched â€”
  * silently "not found" for anything older than that.
  */
 export function useTransaction(id: string | null) {
@@ -172,7 +172,7 @@ export function useTransactions(page: number = 1, limit: number = 20) {
         },
         // Keep previous data while fetching new pages so the UI doesn't flash empty
         placeholderData: (previousData) => previousData,
-        enabled: typeof window !== "undefined" && !!localStorage.getItem("nepay-auth"),
+        enabled: hasSession(),
     });
 }
 
@@ -196,6 +196,6 @@ export function useInfiniteTransactions(limit: number = 20) {
             }
             return undefined;
         },
-        enabled: typeof window !== "undefined" && !!localStorage.getItem("nepay-auth"),
+        enabled: hasSession(),
     });
 }

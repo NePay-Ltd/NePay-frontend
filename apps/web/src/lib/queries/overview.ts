@@ -3,7 +3,7 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
+import { apiClient, hasSession } from "@/lib/api-client";
 import { WalletBalanceDto, ApiPaginated, LedgerEntryDto, ApiResponse } from "@/lib/types/api";
 import { type TxCategory } from "@/components/shared/tx-icon";
 import { mapLedgerToTransaction } from "./transactions";
@@ -49,10 +49,10 @@ export function useOverviewSummary() {
 
             const balance = parseFloat(balanceRes.data.data.availableBalance);
 
-            // From the backend's own usdEquivalent (WalletService.getUsdEquivalent) —
-            // converted using the admin's real, current USD→NGN rate, not a
+            // From the backend's own usdEquivalent (WalletService.getUsdEquivalent) â€”
+            // converted using the admin's real, current USDâ†’NGN rate, not a
             // hardcoded/stale one. null when the backend has no real rate to
-            // convert with (e.g. no manual rate configured) — never guessed here.
+            // convert with (e.g. no manual rate configured) â€” never guessed here.
             const usdEquivalent = balanceRes.data.data.usdEquivalent;
             const balanceUsd = usdEquivalent !== null ? parseFloat(usdEquivalent) : null;
 
@@ -62,12 +62,12 @@ export function useOverviewSummary() {
                 balance,
                 balanceUsd,
                 // `?? "NGN"` guards against an older backend response that
-                // predates this field entirely (undefined, not null) — the
+                // predates this field entirely (undefined, not null) â€” the
                 // exact gap that produced a literal "undefined" in the
                 // headline before this fix, since `undefined !== "NGN"` and
                 // `undefined !== null` both read as "yes, use it" downstream.
                 preferredCurrency: balanceRes.data.data.preferredCurrency ?? "NGN",
-                // `!= null` (loose) catches both null and undefined — same reasoning.
+                // `!= null` (loose) catches both null and undefined â€” same reasoning.
                 preferredCurrencyEquivalent:
                     preferredCurrencyEquivalent != null ? parseFloat(preferredCurrencyEquivalent) : null,
                 // Backend currently lacks analytics for sparkline and these specific KPIs
@@ -82,6 +82,6 @@ export function useOverviewSummary() {
             };
         },
         staleTime: 60_000,
-        enabled: typeof window !== "undefined" && !!localStorage.getItem("nepay-auth"),
+        enabled: hasSession(),
     });
 }

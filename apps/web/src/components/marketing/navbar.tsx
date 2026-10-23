@@ -29,7 +29,7 @@ export function Navbar() {
           : "bg-transparent py-5"
       )}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2">
         {/* Logo */}
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2 group">
@@ -68,19 +68,20 @@ export function Navbar() {
         </nav>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-[clamp(0.25rem,1.5vw,1rem)]">
+          <div className="flex items-center gap-[clamp(0.25rem,1.5vw,0.75rem)]">
             <Link
               href="/login"
-              className="px-4 py-2 text-sm font-medium text-marketing-text hover:bg-marketing-surface rounded-full transition-colors"
+              className="px-[clamp(0.6rem,2.5vw,1rem)] py-[clamp(0.4rem,1.5vw,0.5rem)] text-[clamp(0.8rem,3.4vw,0.875rem)] font-medium text-marketing-text hover:bg-marketing-surface rounded-full transition-colors whitespace-nowrap"
             >
               Log in
             </Link>
             <Link
               href="/register"
-              className="px-5 py-2 text-sm font-medium text-white bg-brand-gradient rounded-full hover:opacity-90 transition-opacity shadow-sm"
+              className="px-[clamp(0.8rem,3vw,1.25rem)] py-[clamp(0.4rem,1.5vw,0.5rem)] text-[clamp(0.8rem,3.4vw,0.875rem)] font-medium text-white bg-brand-gradient rounded-full hover:opacity-90 transition-opacity shadow-sm whitespace-nowrap"
             >
-              Get Started
+              <span className="sm:hidden">Sign up</span>
+              <span className="hidden sm:inline">Get Started</span>
             </Link>
           </div>
         </div>

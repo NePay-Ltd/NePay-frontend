@@ -1,6 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
+    // Don't advertise the framework in an "X-Powered-By: Next.js" header.
+    poweredByHeader: false,
+    // Browser source maps are never published (the default, stated explicitly so a future edit doesn't flip it).
+    productionBrowserSourceMaps: false,
+    compiler: {
+        // Production bundles keep console.error only — no debug output for someone watching DevTools.
+        removeConsole: { exclude: ["error"] },
+    },
     eslint: {
         ignoreDuringBuilds: true,
     },
@@ -25,6 +33,11 @@ const nextConfig = {
                         // Prevent MIME-type sniffing attacks
                         key: "X-Content-Type-Options",
                         value: "nosniff",
+                    },
+                    {
+                        // Switch off powerful browser features this app never uses.
+                        key: "Permissions-Policy",
+                        value: "camera=(self), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()",
                     },
                     {
                         // Only send the origin (not the full URL path) as referrer
