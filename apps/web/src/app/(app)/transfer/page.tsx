@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { IconCheck as Check, IconPlus as Plus, IconBuilding as Landmark, IconBuilding as Building2 } from "@/components/icons";
-import { ChevronsUpDown, Loader2, Search } from "lucide-react";;
+import { ChevronsUpDown, Loader2, Search, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";
@@ -16,7 +16,9 @@ import { overviewKeys, useOverviewSummary } from "@/lib/queries/overview";
 import { walletKeys } from "@/lib/queries/wallet";
 import { transactionKeys } from "@/lib/queries/transactions";
 import {
-    useSavedBankAccounts,
+        useSavedBankAccounts,
+    useDeleteBankAccount,
+
     useBankList,
     useResolveBankAccount,
     useSaveBankAccount,
@@ -35,6 +37,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
 import { Switch } from "@/components/ui/switch";
+import { ConfirmRemoveDialog } from "@/components/shared/confirm-remove-dialog";
 
 const PRESET_AMOUNTS = [10000, 50000, 100000];
 
@@ -55,7 +58,10 @@ export default function TransferPage() {
     const transferable = summary?.balance ?? 0;
 
     const { data: savedAccounts = [], isLoading: accountsLoading } = useSavedBankAccounts();
-    const { data: bankList = [] } = useBankList();
+        const { data: bankList = [] } = useBankList();
+    const deleteSavedAccount = useDeleteBankAccount();
+    const [accountToRemove, setAccountToRemove] = React.useState<(typeof savedAccounts)[0] | null>(null);
+
     
     const resolveMutation = useResolveBankAccount();
     const saveBankMutation = useSaveBankAccount();
@@ -151,6 +157,17 @@ export default function TransferPage() {
             setResolvedName("");
         }
     }, [bankCode, accountNumber]); // eslint-disable-line react-hooks/exhaustive-deps
+
+        const confirmRemoveSavedAccount = () => {
+        if (!accountToRemove) return;
+        deleteSavedAccount.mutate(accountToRemove.id, {
+            onSuccess: () => {
+                toast.success("Saved account removed");
+                setAccountToRemove(null);
+            },
+            onError: () => toast.error("Couldn't remove it. Please try again."),
+        });
+    };
 
     const handleSelectSavedAccount = (acc: any) => {
         setBankCode(acc.bankCode);
@@ -350,10 +367,10 @@ export default function TransferPage() {
                                     {savedAccounts.length > 0 && (
                                         <div className="pt-4 border-t border-border">
                                             <p className="text-xs font-semibold text-muted mb-3 uppercase tracking-wider">Saved Accounts</p>
-                                            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                                                                                        <div className="flex gap-2 overflow-x-auto pb-2 pt-2 pr-2 scrollbar-hide">
                                                 {savedAccounts.map(acc => (
+                                                    <div key={acc.id} className="relative flex-shrink-0">
                                                     <button
-                                                        key={acc.id}
                                                         onClick={() => handleSelectSavedAccount(acc)}
                                                         className={cn(
                                                             "flex-shrink-0 flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors",
@@ -369,8 +386,17 @@ export default function TransferPage() {
                                                                 <Landmark className="h-3 w-3 text-gray-500" />
                                                             </div>
                                                         )}
-                                                        <span className="font-medium">{acc.accountName.split(' ')[0]}</span>
+                                                                                                                <span className="font-medium">{acc.accountName.split(' ')[0]}</span>
                                                     </button>
+                                                    <button
+                                                        type="button"
+                                                        aria-label={`Remove saved account ${acc.accountName}`}
+                                                        onClick={() => setAccountToRemove(acc)}
+                                                        className="absolute -right-1.5 -top-2 flex h-5 w-5 items-center justify-center rounded-full border border-border bg-white text-muted shadow-sm transition-colors hover:bg-red-50 hover:text-red-600"
+                                                    >
+                                                        <X className="h-3 w-3" strokeWidth={3} />
+                                                    </button>
+                                                    </div>
                                                 ))}
                                             </div>
                                         </div>
@@ -487,6 +513,19 @@ export default function TransferPage() {
                     </div>
                 </div>
             </div>
+
+            <ConfirmRemoveDialog
+                open={!!accountToRemove}
+                title="Remove saved account?"
+                description={
+                    <>
+                        {accountToRemove?.accountName} ({accountToRemove?.bankName} {accountToRemove?.accountNumber}) will be removed from your saved accounts. You can save it again the next time you transfer.
+                    </>
+                }
+                loading={deleteSavedAccount.isPending}
+                onConfirm={confirmRemoveSavedAccount}
+                onCancel={() => setAccountToRemove(null)}
+            />
 
             {/* ── Confirmation Modal ── */}
             <TransactionModal

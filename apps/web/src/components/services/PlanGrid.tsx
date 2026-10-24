@@ -4,7 +4,8 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import { IconCheck as Check } from "@/components/icons";;
 import { formatNaira } from "@/lib/format";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PLAN_BUCKETS, parsePlanLabel, planBucket, type PlanBucket } from "@/lib/plan-label";
 
 export interface Plan {
     id: string;
@@ -21,51 +22,38 @@ interface PlanGridProps {
     isLoading?: boolean;
 }
 
-function parsePlanInfo(name: string) {
-    // Extract format: "N100 100MB - 24 hrs"
-    // Handle optional "N100" at the start
-    const match = name.match(/(?:N\d+\s+)?([0-9.]+[MG]B)\s*-\s*(.*)/i);
-    if (match) {
-        return { dataAmount: match[1]!, validity: match[2] || '' };
-    }
-    const parts = name.split('-');
-    if (parts.length > 1) {
-        // Strip out "N100 " from the first part if it exists
-        const cleanData = parts[0]!.replace(/N\d+\s+/, '').trim();
-        return { dataAmount: cleanData, validity: parts[1]!.trim() };
-    }
-    return { dataAmount: name.replace(/N\d+\s+/, '').trim(), validity: '' };
-}
-
-function getPlanCategory(validity: string) {
-    const v = validity.toLowerCase();
-    if (!v) return 'Other';
-    if (v.includes('hr') || v.includes('1 day') || v.includes('2 day') || v.includes('3 day')) return 'Daily';
-    if (v.includes('7 day') || v.includes('14 day') || v.includes('week')) return 'Weekly';
-    if (v.includes('30 day') || v.includes('month')) return 'Monthly';
-    return 'Other';
-}
-
 export function PlanGrid({ plans, selectedId, onChange, isLoading }: PlanGridProps) {
     const [activeTab, setActiveTab] = React.useState("All");
 
     const parsedPlans = React.useMemo(() => {
-        return plans.map(p => {
-            const parsed = parsePlanInfo(p.name);
-            const validity = p.validity || parsed.validity;
+        return plans.map((p) => {
+            const label = parsePlanLabel(p.name);
             return {
                 ...p,
-                parsedData: parsed.dataAmount,
-                parsedValidity: validity,
-                category: getPlanCategory(validity || '')
+                parsedData: label.title,
+                parsedValidity: p.validity || label.validity,
+                note: label.note,
+                category: planBucket(p.name, p.id) as PlanBucket,
             };
         });
     }, [plans]);
 
+    // Only offer a tab that has plans — and no tab bar at all when everything lands in one group
+    // (e.g. TV bouquets carry no validity text), since a lone "Other" tab is just noise.
+    const tabsWithPlans = React.useMemo(
+        () => PLAN_BUCKETS.filter((bucket) => parsedPlans.some((p) => p.category === bucket)),
+        [parsedPlans],
+    );
+
     const filteredPlans = React.useMemo(() => {
         if (activeTab === "All") return parsedPlans;
-        return parsedPlans.filter(p => p.category === activeTab);
+        return parsedPlans.filter((p) => p.category === activeTab);
     }, [parsedPlans, activeTab]);
+
+    // A tab can disappear when the network (and so the plan list) changes — never stay on one that no longer exists.
+    React.useEffect(() => {
+        if (activeTab !== "All" && !tabsWithPlans.includes(activeTab as PlanBucket)) setActiveTab("All");
+    }, [activeTab, tabsWithPlans]);
 
     if (isLoading) {
         return (
@@ -79,35 +67,36 @@ export function PlanGrid({ plans, selectedId, onChange, isLoading }: PlanGridPro
 
     if (plans.length === 0) return null;
 
-    // Check which tabs actually have plans
-    const hasDaily = parsedPlans.some(p => p.category === 'Daily');
-    const hasWeekly = parsedPlans.some(p => p.category === 'Weekly');
-    const hasMonthly = parsedPlans.some(p => p.category === 'Monthly');
-    const hasOther = parsedPlans.some(p => p.category === 'Other');
-
     return (
         <div className="pt-2">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
                 <h4 className="text-sm font-bold text-ink">Data Bundles</h4>
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
-                    <TabsList className="flex w-full overflow-x-auto no-scrollbar sm:grid sm:grid-flow-col sm:auto-cols-fr bg-gray-100 dark:bg-[#1C1C1E] rounded-xl p-1 h-10 shrink-0">
-                        <TabsTrigger value="All" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:bg-white dark:data-[state=active]:bg-white/10 data-[state=active]:text-ink data-[state=active]:shadow-sm">All</TabsTrigger>
-                        {hasDaily && <TabsTrigger value="Daily" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:bg-white dark:data-[state=active]:bg-white/10 data-[state=active]:text-ink data-[state=active]:shadow-sm">Daily</TabsTrigger>}
-                        {hasWeekly && <TabsTrigger value="Weekly" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:bg-white dark:data-[state=active]:bg-white/10 data-[state=active]:text-ink data-[state=active]:shadow-sm">Weekly</TabsTrigger>}
-                        {hasMonthly && <TabsTrigger value="Monthly" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:bg-white dark:data-[state=active]:bg-white/10 data-[state=active]:text-ink data-[state=active]:shadow-sm">Monthly</TabsTrigger>}
-                        {hasOther && <TabsTrigger value="Other" className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:bg-white dark:data-[state=active]:bg-white/10 data-[state=active]:text-ink data-[state=active]:shadow-sm">Other</TabsTrigger>}
-                    </TabsList>
-                </Tabs>
+                {tabsWithPlans.length > 1 && (
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
+                        <TabsList className="flex w-full overflow-x-auto no-scrollbar sm:grid sm:grid-flow-col sm:auto-cols-fr bg-gray-100 dark:bg-[#1C1C1E] rounded-xl p-1 h-10 shrink-0">
+                            {["All", ...tabsWithPlans].map((tab) => (
+                                <TabsTrigger
+                                    key={tab}
+                                    value={tab}
+                                    className="shrink-0 rounded-lg text-xs font-bold data-[state=active]:bg-white dark:data-[state=active]:bg-white/10 data-[state=active]:text-ink data-[state=active]:shadow-sm"
+                                >
+                                    {tab}
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
+                    </Tabs>
+                )}
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-                {filteredPlans.map((plan) => {
+                {filteredPlans.map((plan, index) => {
                     const isSelected = selectedId === plan.id;
 
                     return (
                         <motion.button
-                            key={plan.id}
+                            key={`${plan.id}-${index}`}
                             type="button"
+                            title={plan.name}
                             onClick={() => onChange(plan.id)}
                             whileTap={{ scale: 0.96 }}
                             className={`relative flex flex-col items-start justify-between text-left p-3 min-h-[85px] w-full rounded-2xl border-2 transition-all ${
@@ -132,9 +121,9 @@ export function PlanGrid({ plans, selectedId, onChange, isLoading }: PlanGridPro
                                 <span className={`text-base sm:text-lg font-black tracking-tight w-full break-words ${isSelected ? 'text-violet-700 dark:text-violet-300' : 'text-ink'}`}>
                                     {plan.parsedData}
                                 </span>
-                                {plan.parsedValidity && (
-                                    <p className="text-[11px] font-medium text-muted mt-0.5 line-clamp-1">
-                                        {plan.parsedValidity}
+                                {(plan.parsedValidity || plan.note) && (
+                                    <p className="text-[11px] font-medium text-muted mt-0.5 line-clamp-2">
+                                        {[plan.parsedValidity, plan.note].filter(Boolean).join(" · ")}
                                     </p>
                                 )}
                             </div>

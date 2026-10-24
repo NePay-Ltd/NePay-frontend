@@ -65,7 +65,7 @@ export default function AirtimePage() {
     const { data: savedBillers = [] } = useSavedBillers();
     const recentContacts = savedBillers
         .filter((b) => b.serviceType === "airtime")
-        .map((b) => ({ name: b.billerName, id: b.identifier }));
+        .map((b) => ({ name: b.billerName, id: b.identifier, beneficiaryId: b.id }));
 
     // ─── Transaction State ────────────────────────────────────────────────
     const [pinModalOpen, setPinModalOpen] = React.useState(false);

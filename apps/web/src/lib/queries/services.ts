@@ -103,6 +103,19 @@ export function useSaveBeneficiary() {
     });
 }
 
+export function useDeleteBeneficiary() {
+    const queryClient = useQueryClient();
+
+    return useMutation<void, Error, string>({
+        mutationFn: async (beneficiaryId) => {
+            await apiClient.delete(`/utilities/beneficiaries/${beneficiaryId}`);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: servicesKeys.savedBillers() });
+        },
+    });
+}
+
 // ─── Dynamic Catalog ──────────────────────────────────────────────────────────
 // Categories -> services (within a category) -> variations (plans/bouquets).
 // Server caches these for an hour; no need to layer extra caching on top.
