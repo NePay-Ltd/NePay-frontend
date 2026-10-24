@@ -84,10 +84,30 @@ export default function SecurityPage() {
         }
     };
 
-    const handleCopySecret = () => {
+        const handleCopySecret = async () => {
         if (!twoFactorSecret) return;
-        navigator.clipboard.writeText(twoFactorSecret.secret);
+        const secret = twoFactorSecret.secret;
+        try {
+            await navigator.clipboard.writeText(secret);
+        } catch {
+            // Clipboard API can be refused (insecure context, permissions, embedded
+            // browsers) — fall back to the old select-and-copy so the button still works.
+            const field = document.createElement("textarea");
+            field.value = secret;
+            field.setAttribute("readonly", "");
+            field.style.position = "fixed";
+            field.style.opacity = "0";
+            document.body.appendChild(field);
+            field.select();
+            const ok = document.execCommand("copy");
+            document.body.removeChild(field);
+            if (!ok) {
+                toast.error("Couldn't copy. Please select the key and copy it manually.");
+                return;
+            }
+        }
         setCopied(true);
+        toast.success("Setup key copied");
         setTimeout(() => setCopied(false), 2000);
     };
 
@@ -254,14 +274,14 @@ export default function SecurityPage() {
                                     Or enter this code manually
                                 </span>
                                 <div className="flex items-center gap-2 rounded-md bg-gray-50 px-3 py-2 border border-border w-full justify-between">
-                                    <code className="text-sm font-mono font-bold text-ink tracking-widest truncate">
+                                    <code className="min-w-0 select-all break-all text-sm font-mono font-bold text-ink tracking-widest">
                                         {twoFactorSecret.secret}
                                     </code>
                                     <button 
                                         type="button" 
                                         onClick={handleCopySecret}
-                                        className="text-muted hover:text-violet-600 p-1"
-                                        aria-label="Copy secret"
+                                        className="shrink-0 text-muted hover:text-violet-600 p-1"
+                                        aria-label="Copy setup key"
                                     >
                                         {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                                     </button>

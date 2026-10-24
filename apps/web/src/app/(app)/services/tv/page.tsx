@@ -77,7 +77,7 @@ export default function TvPage() {
     const { data: savedBillers = [] } = useSavedBillers();
     const recentContacts = savedBillers
         .filter((b) => b.serviceType === "cable-tv")
-        .map((b) => ({ name: b.billerName, id: b.identifier }));
+        .map((b) => ({ name: b.billerName, id: b.identifier, beneficiaryId: b.id }));
 
     // Reset resolution and plan if user types something new or changes provider
     React.useEffect(() => {

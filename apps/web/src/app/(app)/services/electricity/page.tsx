@@ -82,7 +82,7 @@ export default function ElectricityPage() {
     const { data: savedBillers = [] } = useSavedBillers();
     const recentContacts = savedBillers
         .filter((b) => b.serviceType === "electricity")
-        .map((b) => ({ name: b.billerName, id: b.identifier }));
+        .map((b) => ({ name: b.billerName, id: b.identifier, beneficiaryId: b.id }));
 
     // Reset resolution if user types something new or changes provider
     React.useEffect(() => {

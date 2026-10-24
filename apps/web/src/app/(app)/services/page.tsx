@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { IconAirtime as Smartphone, IconData as Wifi, IconGift as Gift, IconPlane as Plane, IconBuilding as Landmark, IconCoin as Bitcoin, IconShield as Shield, IconTv as Tv } from "@/components/icons";
-import { Lightbulb, GraduationCap, Droplet, Car, HeartHandshake, MoreHorizontal, Receipt } from "lucide-react";;
+import { Lightbulb, GraduationCap, Droplet, Car, HeartHandshake, MoreHorizontal, Receipt, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Tile } from "@/components/shared/tile";
@@ -11,11 +11,26 @@ import { Panel, PanelHeader, PanelBody } from "@/components/shared/panel";
 import { RowItem } from "@/components/shared/row-item";
 import { Button } from "@/components/shared/button";
 import { formatNaira, formatNairaString } from "@/lib/format";
-import { useSavedBillers } from "@/lib/queries/services";
+import { useDeleteBeneficiary, useSavedBillers } from "@/lib/queries/services";
+import { ConfirmRemoveDialog } from "@/components/shared/confirm-remove-dialog";
 
 export default function ServicesPage() {
     const router = useRouter();
-    const { data: savedBillers = [], isLoading } = useSavedBillers();
+        const { data: savedBillers = [], isLoading } = useSavedBillers();
+    const deleteBeneficiary = useDeleteBeneficiary();
+    const [billerToRemove, setBillerToRemove] = React.useState<(typeof savedBillers)[0] | null>(null);
+
+    const confirmRemoveBiller = () => {
+        if (!billerToRemove) return;
+        deleteBeneficiary.mutate(billerToRemove.id, {
+            onSuccess: () => {
+                toast.success("Removed from saved billers");
+                setBillerToRemove(null);
+            },
+            onError: () => toast.error("Couldn't remove it. Please try again."),
+        });
+    };
+
 
     const handleComingSoon = () => toast.info("This service is coming soon!");
 
@@ -132,15 +147,25 @@ export default function ServicesPage() {
                                             title={biller.billerName}
                                             subtitle={`${biller.identifier} • last paid ${formatNairaString(biller.lastPaidAmount)}`}
                                             className="px-5 py-4"
-                                            trailing={
-                                                <Button 
-                                                    variant="quiet" 
-                                                    size="sm"
-                                                    className="text-violet-600 font-semibold"
-                                                    onClick={() => handlePayAgain(biller)}
-                                                >
-                                                    Pay again
-                                                </Button>
+                                                                                        trailing={
+                                                <div className="flex items-center gap-1">
+                                                    <Button
+                                                        variant="quiet"
+                                                        size="sm"
+                                                        className="text-violet-600 font-semibold"
+                                                        onClick={() => handlePayAgain(biller)}
+                                                    >
+                                                        Pay again
+                                                    </Button>
+                                                    <button
+                                                        type="button"
+                                                        aria-label={`Remove ${biller.billerName} from saved billers`}
+                                                        onClick={() => setBillerToRemove(biller)}
+                                                        className="flex h-7 w-7 items-center justify-center rounded-full text-muted transition-colors hover:bg-red-50 hover:text-red-600"
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </button>
+                                                </div>
                                             }
                                         />
                                     ))}
@@ -164,6 +189,19 @@ export default function ServicesPage() {
                     </div>
                 </div>
             </div>
+
+            <ConfirmRemoveDialog
+                open={!!billerToRemove}
+                title="Remove saved biller?"
+                description={
+                    <>
+                        {billerToRemove?.billerName} ({billerToRemove?.identifier}) will be removed from your saved billers. You can save it again the next time you pay.
+                    </>
+                }
+                loading={deleteBeneficiary.isPending}
+                onConfirm={confirmRemoveBiller}
+                onCancel={() => setBillerToRemove(null)}
+            />
         </div>
     );
 }
