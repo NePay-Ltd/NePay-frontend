@@ -319,6 +319,46 @@ export interface WithdrawalResponseDto {
 
 // ─── Utilities ───────────────────────────────────────────────────────────────
 
+
+/** GET /wallet/virtual-account/receipt/:ledgerEntryId — a naira deposit's sender / recipient details. Account numbers arrive masked. */
+export interface BankDepositReceiptDto {
+    senderName: string | null;
+    senderBankName: string | null;
+    senderAccountMasked: string | null;
+    narration: string | null;
+    sessionId: string | null;
+    recipientName: string;
+    recipientBankName: string | null;
+    recipientAccountMasked: string | null;
+    reference: string;
+}
+
+/** GET /bridge/accounts/receipt/:ledgerEntryId — a foreign-account deposit's sender, amount sent and rate. */
+export interface ForeignDepositReceiptDto {
+    senderName: string | null;
+    paymentRail: string | null;
+    narration: string | null;
+    sourceCurrency: string;
+    sourceAmount: string | null;
+    usdAmount: string | null;
+    rateUsed: string | null;
+    recipientName: string;
+    reference: string;
+}
+
+/** GET /withdrawals/receipt/:ledgerEntryId — what a withdrawal receipt shows beyond the ledger entry. The account number arrives already masked. */
+export interface WithdrawalReceiptDto {
+    recipientName: string;
+    bankName: string | null;
+    accountNumberMasked: string;
+    senderName: string;
+    narration: string | null;
+    sessionId: string | null;
+    reference: string;
+    status: string;
+    isRefund: boolean;
+}
+
 export interface UtilityPurchaseResponseDto {
     id: string;
     category: UtilityCategory;
@@ -342,7 +382,11 @@ export interface UtilityPurchaseResponseDto {
     /** VTpass's own internal transaction id, for cross-referencing VTpass's own records. `providerReference` is this app's own reference. */
     providerTransactionId: string | null;
     /** Electricity-only, e.g. "R2 SINGLE PHASE RESIDENTIAL" — only ever known post-purchase, never available before payment. */
-    tariff: string | null;
+        tariff: string | null;
+    /** The provider as a customer knows it ("MTN", "Ikeja Electric") — present when the purchase is fetched for a receipt. */
+    providerName?: string | null;
+    /** The data bundle / TV bouquet / exam PIN type by name — present when fetched for a receipt. */
+    planName?: string | null;
     createdAt: string;
 }
 

@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 import { TxIcon, type TxCategory } from "./tx-icon";
 import { formatNaira } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { useTransaction } from "@/lib/queries/transactions";
 import { downloadReceipt, shareReceipt, downloadReceiptPDF, downloadReceiptImage, shareReceiptImage, type ReceiptData } from "@/lib/receipt-utils";
 
 export interface TransactionDetailData {
@@ -89,6 +90,9 @@ export function TransactionDetailModal({
     transaction,
     onViewFullDetail,
 }: TransactionDetailModalProps) {
+        // The list row only has the basics; the full receipt (recipient, sender, narration, IDs…) is
+    // fetched when the modal opens so Download/Share below print the complete receipt.
+    const { data: fullTransaction } = useTransaction(open ? transaction?.id ?? null : null);
     const [copied, setCopied] = React.useState(false);
     const [isDownloading, setIsDownloading] = React.useState(false);
     const [isSharing, setIsSharing] = React.useState(false);
@@ -112,9 +116,10 @@ export function TransactionDetailModal({
             status: transaction.status,
             date: transaction.date,
             type: transaction.type,
-            direction: transaction.direction,
+                        direction: transaction.direction,
             currency: transaction.currency,
             meta: transaction.meta,
+            rows: fullTransaction?.receiptRows,
         };
     };
 

@@ -107,8 +107,10 @@ export function useInitiateTransfer() {
             resolutionToken: string;
             pin: string;
             bankCode: string;
-            accountNumber: string;
+                        accountNumber: string;
             accountName: string;
+            /** Optional note from the sender — omitted entirely when empty, so nothing is recorded or shown on the receipt. */
+            narration?: string;
         }
     >({
         mutationFn: async (payload) => {
