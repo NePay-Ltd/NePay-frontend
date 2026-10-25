@@ -38,6 +38,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
 import { Switch } from "@/components/ui/switch";
 import { ConfirmRemoveDialog } from "@/components/shared/confirm-remove-dialog";
+import { maskAccount } from "@/lib/receipt-model";
 
 const PRESET_AMOUNTS = [10000, 50000, 100000];
 
@@ -48,6 +49,13 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+const NARRATION_MAX = 60;
+
+/** Keeps only what banks accept in a transfer remark — mirrors the server's rule, so the customer never hits a rejection for a stray emoji. */
+function cleanNarrationInput(value: string): string {
+    return value.replace(/[^\p{L}\p{M}\p{N} .,'’\-_/&()#@:+!?]/gu, "").slice(0, NARRATION_MAX);
+}
 
 export default function TransferPage() {
     const router = useRouter();
@@ -65,7 +73,8 @@ export default function TransferPage() {
     
     const resolveMutation = useResolveBankAccount();
     const saveBankMutation = useSaveBankAccount();
-    const initiateMutation = useInitiateTransfer();
+        const initiateMutation = useInitiateTransfer();
+    const [narration, setNarration] = React.useState("");
 
     // ── Form State ──
     const form = useForm<FormValues>({
@@ -200,8 +209,9 @@ export default function TransferPage() {
                 resolutionToken,
                 pin,
                 bankCode,
-                accountNumber,
+                                accountNumber,
                 accountName: resolvedName,
+                ...(narration.trim() ? { narration: narration.trim() } : {}),
             },
             {
                 onSuccess: (res) => {
@@ -455,11 +465,28 @@ export default function TransferPage() {
                                             )}
                                         </p>
                                     )}
-                                    {watchAmount > 0 && fee > 0 && (
+                                                                        {watchAmount > 0 && fee > 0 && (
                                         <p className="text-xs text-muted">
                                             Transfer fee: {formatNaira(fee)}, added on top. The recipient gets the full amount.
                                         </p>
                                     )}
+                                </div>
+
+                                {/* Narration — optional; when left empty nothing is sent or printed on the receipt */}
+                                <div className="space-y-2 pt-4 border-t border-border">
+                                    <div className="flex items-baseline justify-between">
+                                        <Label htmlFor="narration">Narration <span className="font-normal text-muted">(optional)</span></Label>
+                                        <span className="text-xs text-muted tabular-nums">{narration.length}/{NARRATION_MAX}</span>
+                                    </div>
+                                    <Input
+                                        id="narration"
+                                        type="text"
+                                        value={narration}
+                                        onChange={(e) => setNarration(cleanNarrationInput(e.target.value))}
+                                        maxLength={NARRATION_MAX}
+                                        placeholder="What's this for? e.g. October rent"
+                                        autoComplete="off"
+                                    />
                                 </div>
                             </PanelBody>
                         </Panel>
@@ -544,15 +571,23 @@ export default function TransferPage() {
                                 <span className="text-muted">To</span>
                                 <span className="font-medium text-ink text-right">
                                     {selectedBank?.bankName}<br/>
-                                    <span className="text-xs text-body font-mono">•••{accountNumber.slice(-4)}</span>
+                                    <span className="text-xs text-body font-mono">{maskAccount(accountNumber)}</span>
                                 </span>
                             </div>
-                            <div className="flex justify-between text-sm">
+                                                        <div className="flex justify-between text-sm">
                                 <span className="text-muted">Account Name</span>
                                 <span className="font-medium text-ink truncate max-w-[150px]">
                                     {resolvedName}
                                 </span>
                             </div>
+                            {narration.trim() && (
+                                <div className="flex justify-between gap-4 text-sm">
+                                    <span className="text-muted">Narration</span>
+                                    <span className="font-medium text-ink text-right break-words max-w-[180px]">
+                                        {narration.trim()}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                         <div className="space-y-2 px-1">
                             <div className="flex justify-between text-sm">

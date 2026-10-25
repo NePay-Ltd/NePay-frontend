@@ -7,7 +7,8 @@ import { apiClient, hasSession } from "@/lib/api-client";
 import { LedgerEntryDto, ApiPaginated, ApiResponse } from "@/lib/types/api";
 import { BaseTransaction } from "@/components/shared/transaction-row";
 import { TxCategory } from "@/components/shared/tx-icon";
-import { UtilityPurchaseResponseDto } from "@/lib/types/api";
+import { BankDepositReceiptDto, ForeignDepositReceiptDto, UtilityPurchaseResponseDto, WithdrawalReceiptDto } from "@/lib/types/api";
+import { bankDepositRows, foreignDepositRows, genericRows, utilityRows, withdrawalRows, type UtilityKind } from "@/lib/receipt-model";
 
 /**
  * UtilityCategory (AIRTIME/DATA/ELECTRICITY/CABLE/EDUCATION/BETTING) -> the
@@ -112,7 +113,15 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
         cryptoAmount: entry.assetQuantity ?? undefined,
         cryptoAsset,
         exchangeRate: entry.rate ?? undefined,
-        fee: entry.fee ? parseFloat(entry.fee) : undefined,
+                fee: entry.fee ? parseFloat(entry.fee) : undefined,
+        receiptRows: genericRows({
+            typeLabel: meta,
+            description: entry.description,
+            transactionId: entry.id,
+            cryptoAmount: entry.assetQuantity,
+            cryptoAsset,
+            exchangeRate: entry.rate,
+        }),
     };
 }
 
@@ -135,20 +144,101 @@ export function useTransaction(id: string | null) {
         queryKey: transactionKeys.detail(id ?? ""),
         queryFn: async () => {
             const res = await apiClient.get<ApiResponse<LedgerEntryDto>>(`/wallet/transactions/${id}`);
-            const transaction = mapLedgerToTransaction(res.data.data);
-            if (transaction.category === "electricity") {
+            const entry = res.data.data;
+            const transaction = mapLedgerToTransaction(entry);
+
+            // Per-type receipt details. Each is best-effort: if one can't be loaded (an older
+            // transaction that predates the link, a provider hiccup) the receipt still prints
+            // from the generic rows above — never an error page.
+            if (entry.type === "WITHDRAWAL") {
                 try {
-                    const utility = await apiClient.get<ApiResponse<UtilityPurchaseResponseDto>>(`/utilities/purchases/by-ledger/${id}`);
-                    const data = utility.data.data;
-                    transaction.utilityToken = data.token ?? undefined;
-                    transaction.utilityCustomerName = data.customerName ?? undefined;
-                    transaction.utilityCustomerAddress = data.customerAddress ?? undefined;
-                    transaction.utilityUnits = data.units ?? undefined;
-                    transaction.utilityDisco = data.productName ?? undefined;
-                    transaction.utilityMeterNumber = data.identifier;
-                    transaction.utilityMeterType = data.variationCode ?? undefined;
-                    transaction.utilityProviderTransactionId = data.providerTransactionId ?? undefined;
-                    transaction.utilityTariff = data.tariff ?? undefined;
+                    const r = (await apiClient.get<ApiResponse<WithdrawalReceiptDto>>(`/withdrawals/receipt/${id}`)).data.data;
+                    transaction.receiptRows = withdrawalRows({
+                        recipientName: r.recipientName,
+                        bankName: r.bankName,
+                        accountNumberMasked: r.accountNumberMasked,
+                        senderName: r.senderName,
+                        narration: r.narration,
+                        sessionId: r.sessionId,
+                        transactionId: entry.id,
+                        reference: r.reference,
+                        isRefund: r.isRefund,
+                    });
+                } catch {
+                    // keep the generic rows
+                }
+            } else if (entry.type === "BANK_DEPOSIT") {
+                try {
+                    const r = (await apiClient.get<ApiResponse<BankDepositReceiptDto>>(`/wallet/virtual-account/receipt/${id}`)).data.data;
+                    transaction.receiptRows = bankDepositRows({
+                        senderName: r.senderName,
+                        senderBankName: r.senderBankName,
+                        senderAccountMasked: r.senderAccountMasked,
+                        narration: r.narration,
+                        sessionId: r.sessionId,
+                        recipientName: r.recipientName,
+                        recipientBankName: r.recipientBankName,
+                        recipientAccountMasked: r.recipientAccountMasked,
+                        transactionId: entry.id,
+                        reference: r.reference,
+                    });
+                } catch {
+                    // keep the generic rows
+                }
+            } else if (entry.type === "FCY_CONVERSION_CREDIT") {
+                try {
+                    const r = (await apiClient.get<ApiResponse<ForeignDepositReceiptDto>>(`/bridge/accounts/receipt/${id}`)).data.data;
+                    transaction.receiptRows = foreignDepositRows({
+                        senderName: r.senderName,
+                        paymentRail: r.paymentRail,
+                        narration: r.narration,
+                        sourceCurrency: r.sourceCurrency,
+                        sourceAmount: r.sourceAmount,
+                        usdAmount: r.usdAmount,
+                        rateUsed: r.rateUsed,
+                        recipientName: r.recipientName,
+                        transactionId: entry.id,
+                        reference: r.reference,
+                    });
+                } catch {
+                    // keep the generic rows
+                }
+            } else if (entry.type === "UTILITY_PURCHASE") {
+                try {
+                    const data = (await apiClient.get<ApiResponse<UtilityPurchaseResponseDto>>(`/utilities/purchases/by-ledger/${id}`)).data.data;
+
+                    if (transaction.category === "electricity") {
+                        transaction.utilityToken = data.token ?? undefined;
+                        transaction.utilityCustomerName = data.customerName ?? undefined;
+                        transaction.utilityCustomerAddress = data.customerAddress ?? undefined;
+                        transaction.utilityUnits = data.units ?? undefined;
+                        transaction.utilityDisco = data.productName ?? undefined;
+                        transaction.utilityMeterNumber = data.identifier;
+                        transaction.utilityMeterType = data.variationCode ?? undefined;
+                        transaction.utilityProviderTransactionId = data.providerTransactionId ?? undefined;
+                        transaction.utilityTariff = data.tariff ?? undefined;
+                    }
+
+                    const kind = data.category as string;
+                    if (["AIRTIME", "DATA", "ELECTRICITY", "CABLE", "EDUCATION"].includes(kind)) {
+                        transaction.receiptRows = utilityRows({
+                                                        kind: kind as UtilityKind,
+                            // The purchase's own id — the same one shown on the receipt right after buying.
+                            transactionId: data.id,
+                            reference: data.providerReference,
+                            identifier: data.identifier,
+                            providerName: data.providerName ?? data.productName,
+                            customerName: data.customerName,
+                            customerAddress: data.customerAddress,
+                            planName: data.planName,
+                            meterType: data.variationCode,
+                            tariff: data.tariff,
+                            units: data.units,
+                            providerTransactionId: data.providerTransactionId,
+                            // The token has its own copyable block on screen; it stays in the rows for text/PDF shares.
+                            token: data.token,
+                        });
+                    }
                 } catch {
                     // Older transactions may predate the utility-purchase link.
                 }

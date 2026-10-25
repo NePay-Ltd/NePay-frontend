@@ -1,6 +1,9 @@
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
 
+import { buildReceiptMarkup, escapeHtml, formatReceiptAmount, formatReceiptDate } from "@/lib/receipt-markup";
+import { genericRows, RECEIPT_STATUS_LABEL, type ReceiptRow } from "@/lib/receipt-model";
+
 export interface ReceiptData {
     id: string;
     label: string;
@@ -11,63 +14,36 @@ export interface ReceiptData {
     direction: string;
     currency: string;
     meta: string;
-    utilityToken?: string;
-    /** Electricity-only receipt fields — see BaseTransaction's own note on where these come from. */
-    utilityCustomerName?: string;
-    utilityCustomerAddress?: string;
-    utilityUnits?: string;
-    utilityDisco?: string;
-    utilityMeterNumber?: string;
-    utilityMeterType?: string;
-    utilityProviderTransactionId?: string;
-    utilityTariff?: string;
+    /**
+     * The ordered lines this receipt shows — built per transaction type in
+     * lib/receipt-model.ts. When absent (older call sites), a generic set is
+     * derived from the fields above so a receipt is never empty.
+     */
+    rows?: ReceiptRow[];
 }
 
-/** Label/value rows shown on every receipt (HTML, image, PDF, text) — one source so they never drift apart. */
-export function getReceiptRows(receipt: ReceiptData): [string, string][] {
-    const dateStr = receipt.date
-        ? new Date(receipt.date).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "medium" })
-        : "—";
-    const rows: [string, string | undefined][] = [
-        ["Description", receipt.label],
-        ["Transaction Type", receipt.type],
-        ["Direction", receipt.direction === "CREDIT" ? "Received" : "Sent"],
-        ["Date & Time", dateStr],
-        ["Name", receipt.utilityCustomerName],
-        ["Address", receipt.utilityCustomerAddress],
-        ["Meter No", receipt.utilityMeterNumber],
-        ["Meter Type", receipt.utilityMeterType ? receipt.utilityMeterType.replace(/^./, (c) => c.toUpperCase()) : undefined],
-        ["Disco", receipt.utilityDisco],
-        ["Tariff", receipt.utilityTariff],
-        ["Units", receipt.utilityUnits],
-        ["Provider Transaction ID", receipt.utilityProviderTransactionId],
-        ["Electricity Token", receipt.utilityToken],
-        ["Transaction Reference", receipt.id],
-    ];
-    return rows.filter((r): r is [string, string] => !!r[1]);
-}
+/** The lines every receipt format (screen, HTML, PNG, PDF, text) prints — one source so they can't drift apart. */
+export function getReceiptRows(receipt: ReceiptData): ReceiptRow[] {
+    if (receipt.rows && receipt.rows.length > 0) return receipt.rows;
 
-function formatReceiptAmount(receipt: ReceiptData): string {
-    const abs = Math.abs(receipt.amount).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const symbol = receipt.currency === "NGN" ? "₦" : "";
-    return `${symbol}${abs}${symbol ? "" : ` ${receipt.currency}`}`;
+    return genericRows({ typeLabel: receipt.type, description: receipt.label, transactionId: receipt.id });
 }
-
-const STATUS_LABEL = { success: "Successful", pending: "Pending", failed: "Failed" } as const;
 
 /**
  * Generate receipt text content for sharing
  */
 export function generateReceiptText(receipt: ReceiptData): string {
-    const lines = getReceiptRows(receipt).map(([label, value]) => `${label}: ${value}`);
+    const lines = getReceiptRows(receipt).map((r) => `${r.label}: ${r.value}${r.sub ? ` (${r.sub})` : ""}`);
+    const date = formatReceiptDate(receipt.date);
+
     return `NePay Transaction Receipt
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${formatReceiptAmount(receipt)} — ${STATUS_LABEL[receipt.status]}
+${formatReceiptAmount(receipt.amount, receipt.currency)} — ${RECEIPT_STATUS_LABEL[receipt.status]}${date ? `\n${date}` : ""}
 
 ${lines.join("\n")}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Powered by NePay
+Verified by NePay
 www.nepay.com.ng`;
 }
 
@@ -92,46 +68,27 @@ async function getLogoBase64(): Promise<string> {
 }
 
 /**
- * Escapes text before it's interpolated into `generateReceiptHTML`'s output.
- * That HTML is `innerHTML`'d into a live, authenticated DOM node in
- * `downloadReceiptImage`/`shareReceiptImage` (to screenshot it via
- * html2canvas) before being torn down — an unescaped externally-sourced
- * string (VTpass's `customerName`/`customerAddress`, or anything else on
- * `ReceiptData`) could carry an `onerror`/`onload`-style payload that
- * executes in that real session, not just in a downloaded offline file.
- * `innerHTML` blocks `<script>` execution on its own but does not block
- * inline event handlers, so escaping is still required here.
- */
-function escapeHtml(value: string): string {
-    return value
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-}
-
-/**
- * Generate receipt HTML (also screenshotted for PNG/PDF). Layout: logo left /
- * title right, centred amount + status, then aligned label/value rows, over a
- * tiled diagonal NePay watermark.
+ * The receipt as a full HTML document (also screenshotted for PNG/PDF). The markup comes
+ * from lib/receipt-markup.ts — the same generator the on-screen receipt uses — with the
+ * logo embedded as a data URI so a downloaded file still works offline.
+ *
+ * That markup is `innerHTML`'d into a live, authenticated DOM node in
+ * `downloadReceiptImage`/`shareReceiptImage` before being torn down, so every value is
+ * escaped inside the generator (an unescaped provider string could carry an
+ * `onerror`-style payload that runs in that real session).
  */
 export async function generateReceiptHTML(receipt: ReceiptData): Promise<string> {
-    const statusColor =
-        receipt.status === "success" ? "#10b981" :
-        receipt.status === "pending" ? "#f59e0b" :
-        "#ef4444";
     const logoBase64 = await getLogoBase64();
-    const rowsHtml = getReceiptRows(receipt)
-        .map(([label, value]) => {
-            const mono = label === "Electricity Token" || label === "Transaction Reference" || label === "Provider Transaction ID" || label === "Meter No";
-            return `<div class="row"><span class="label">${escapeHtml(label)}</span><span class="value${mono ? " mono" : ""}">${escapeHtml(value)}</span></div>`;
-        })
-        .join("");
-    const mark = logoBase64 ? `<img src="${logoBase64}" alt="" />` : "";
-    // Tiled watermark: an inline SVG data-URI so html2canvas/html2pdf render it with no extra request.
-    const watermarkSvg = encodeURIComponent(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="220" height="140"><text x="110" y="80" text-anchor="middle" transform="rotate(-24 110 70)" font-family="Arial,sans-serif" font-size="28" font-weight="800" fill="#7c3aed" fill-opacity="0.06">NePay</text></svg>`,
+    const { css, html } = buildReceiptMarkup(
+        {
+            id: receipt.id,
+            amount: receipt.amount,
+            currency: receipt.currency,
+            status: receipt.status,
+            date: receipt.date,
+            rows: getReceiptRows(receipt),
+        },
+        logoBase64,
     );
 
     return `
@@ -140,40 +97,12 @@ export async function generateReceiptHTML(receipt: ReceiptData): Promise<string>
 <head>
     <meta charset="UTF-8">
     <title>NePay Receipt - ${escapeHtml(receipt.id)}</title>
-    <style>
-        .receipt, .receipt * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 20px; background: #f3f4f6; }
-        .receipt { max-width: 480px; margin: 0 auto; background: #fff url("data:image/svg+xml,${watermarkSvg}") repeat; border-radius: 12px; padding: 28px 28px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .top { display: flex; align-items: center; justify-content: space-between; }
-        .brand { display: flex; align-items: center; gap: 8px; font-size: 26px; font-weight: 800; color: #1e1b4b; letter-spacing: -0.5px; }
-        .brand img { height: 34px; width: auto; display: block; }
-        .title { font-size: 15px; color: #374151; }
-        .hero { text-align: center; padding: 32px 0 24px; }
-        .amount { font-size: 34px; font-weight: 800; color: ${statusColor}; font-variant-numeric: tabular-nums; }
-        .status { font-size: 18px; font-weight: 600; color: #111827; margin-top: 10px; }
-        .date { font-size: 12px; color: #9ca3af; margin-top: 6px; }
-        .rows { border-top: 1px solid #e5e7eb; padding-top: 8px; }
-        .row { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 11px 0; font-size: 14px; }
-        .label { color: #9ca3af; flex: 0 0 auto; max-width: 42%; }
-        .value { color: #111827; font-weight: 600; text-align: right; word-break: break-word; flex: 1 1 auto; }
-        .value.mono { font-family: "SFMono-Regular", Menlo, Consolas, monospace; font-size: 13px; }
-        .footer { margin-top: 20px; padding-top: 16px; border-top: 1px dashed #d1d5db; text-align: center; color: #9ca3af; font-size: 11px; line-height: 1.6; }
+        <style>
+        ${css}
     </style>
 </head>
-<body>
-    <div class="receipt">
-        <div class="top">
-            <div class="brand">${mark}<span>NePay</span></div>
-            <div class="title">Transaction Receipt</div>
-        </div>
-        <div class="hero">
-            <div class="amount">${escapeHtml(formatReceiptAmount(receipt))}</div>
-            <div class="status">${STATUS_LABEL[receipt.status]}</div>
-            ${receipt.date ? `<div class="date">${escapeHtml(new Date(receipt.date).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "medium" }))}</div>` : ""}
-        </div>
-        <div class="rows">${rowsHtml}</div>
-        <div class="footer">This is an official NePay transaction receipt.<br/>Powered by NePay • www.nepay.com.ng</div>
-    </div>
+<body style="margin:0;padding:20px;background:#EDE9FE">
+    ${html}
 </body>
 </html>
     `;
