@@ -6,7 +6,7 @@ import { IconArrowLeft as ArrowLeft, IconAirtime as Smartphone } from "@/compone
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { usePayAirtime, useSaveBeneficiary, useSavedBillers, useUtilityCategories, useUtilityServices } from "@/lib/queries/services";
+import { usePayAirtime, useSaveBeneficiary, useSavedBillers, useUtilityCategories, useUtilityQuote, useUtilityServices } from "@/lib/queries/services";
 import { UtilityPurchaseResponseDto } from "@/lib/types/api";
 
 // New Shared UI Components
@@ -61,6 +61,10 @@ export default function AirtimePage() {
 
     // Queries & Mutations
     const payAirtime = usePayAirtime();
+    // The server's own price: the discount is taken off what the customer pays.
+    const { data: quote } = useUtilityQuote("AIRTIME", amount);
+    const payAmount = quote ? Number(quote.payAmount) : amount;
+    const saving = quote ? Number(quote.discountAmount) : 0;
     const saveBeneficiaryMutation = useSaveBeneficiary();
     const { data: savedBillers = [] } = useSavedBillers();
     const recentContacts = savedBillers
@@ -109,7 +113,7 @@ export default function AirtimePage() {
         setTxState("processing");
 
         payAirtime.mutate(
-            { phone, amountNgn: amount, network: selectedNetwork.serviceID, pin },
+            { phone, amountNgn: amount, network: selectedNetwork.serviceID, pin, expectedPay: quote?.payAmount },
             {
                 onSuccess: (res) => {
                     setTxResult(res);
@@ -211,7 +215,8 @@ export default function AirtimePage() {
 
             <StickyPayBar
                 visible={!successOpen} // Hide bar if success screen is up
-                amount={amount}
+                amount={payAmount}
+                saving={saving}
                 summaryText={`${selectedNetwork?.name ?? "Select network"} Airtime - ${phone || "..."}`}
                 onPay={handlePayClick}
                 disabled={!isValid}
@@ -230,7 +235,7 @@ export default function AirtimePage() {
 
             <PaymentSuccessScreen
                 open={successOpen}
-                amount={amount}
+                amount={payAmount}
                 title={txResult?.status === "PROCESSING" ? "Airtime Processing" : "Airtime Sent!"}
                 description={
                     txResult?.status === "PROCESSING" ? (

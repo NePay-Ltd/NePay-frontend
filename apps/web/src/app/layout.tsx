@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Instrument_Serif, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { headers } from "next/headers";
 
 import "./globals.css";
@@ -9,6 +9,22 @@ const jakarta = Plus_Jakarta_Sans({
     subsets: ["latin", "latin-ext"],
     fallback: ["font-sans", "Arial", "Helvetica", "sans-serif"],
     variable: "--font-sans",
+    display: "swap",
+});
+
+// Receipt-only faces: the italic accent word and the monospaced references/numbers.
+const receiptSerif = Instrument_Serif({
+    subsets: ["latin"],
+    weight: "400",
+    style: "italic",
+    variable: "--font-receipt-serif",
+    display: "swap",
+});
+
+const receiptMono = JetBrains_Mono({
+    subsets: ["latin"],
+    weight: "500",
+    variable: "--font-receipt-mono",
     display: "swap",
 });
 
@@ -33,7 +49,7 @@ export default async function RootLayout({
             lang="en"
             suppressHydrationWarning
         >
-            <body className={`${jakarta.variable} font-sans text-ink bg-bg antialiased selection:bg-violet-200 selection:text-violet-900 min-h-screen flex flex-col overflow-x-hidden`}>
+            <body className={`${jakarta.variable} ${receiptSerif.variable} ${receiptMono.variable} font-sans text-ink bg-bg antialiased selection:bg-violet-200 selection:text-violet-900 min-h-screen flex flex-col overflow-x-hidden`}>
                 <Providers nonce={nonce}>{children}</Providers>
             </body>
         </html>

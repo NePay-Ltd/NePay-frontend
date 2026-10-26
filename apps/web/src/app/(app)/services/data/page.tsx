@@ -6,7 +6,7 @@ import { IconArrowLeft as ArrowLeft, IconData as Wifi } from "@/components/icons
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { usePayData, useSaveBeneficiary, useSavedBillers, useUtilityCategories, useUtilityServices, useUtilityVariations } from "@/lib/queries/services";
+import { usePayData, useSaveBeneficiary, useSavedBillers, useUtilityCategories, useUtilityQuote, useUtilityServices, useUtilityVariations } from "@/lib/queries/services";
 import { UtilityPurchaseResponseDto } from "@/lib/types/api";
 
 // New Shared UI Components
@@ -112,6 +112,7 @@ export default function DataPage() {
                 amountNgn: Number(selectedPlan.variation_amount),
                 network: selectedNetwork.serviceID,
                 pin,
+                expectedPay: quote?.payAmount,
             },
             {
                 onSuccess: (res) => {
@@ -146,6 +147,10 @@ export default function DataPage() {
 
     const isValid = phone.length >= 10 && !!selectedPlan;
     const selectedAmount = selectedPlan ? Number(selectedPlan.variation_amount) : 0;
+    // The server's own price: the discount is taken off what the customer pays.
+    const { data: quote } = useUtilityQuote("DATA", selectedAmount);
+    const payAmount = quote ? Number(quote.payAmount) : selectedAmount;
+    const saving = quote ? Number(quote.discountAmount) : 0;
 
     return (
         <>
@@ -231,7 +236,8 @@ export default function DataPage() {
 
             <StickyPayBar
                 visible={!successOpen}
-                amount={selectedAmount}
+                amount={payAmount}
+                saving={saving}
                 summaryText={selectedPlan ? `${selectedPlan.name} · ${selectedNetwork?.name} Data` : "Select a plan"}
                 onPay={handlePayClick}
                 disabled={!isValid}

@@ -38,7 +38,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
 import { Switch } from "@/components/ui/switch";
 import { ConfirmRemoveDialog } from "@/components/shared/confirm-remove-dialog";
-import { maskAccount } from "@/lib/receipt-model";
+import { maskAccount } from "@/lib/receipt-config";
 
 const PRESET_AMOUNTS = [10000, 50000, 100000];
 

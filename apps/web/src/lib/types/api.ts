@@ -357,6 +357,27 @@ export interface WithdrawalReceiptDto {
     reference: string;
     status: string;
     isRefund: boolean;
+    /** The transfer fee charged on top of the amount, as a decimal string. */
+    fee: string;
+}
+
+/** GET /crypto/receipt/:ledgerEntryId - what a crypto-deposit receipt shows beyond the ledger entry. */
+export interface CryptoDepositReceiptDto {
+    coin: string;
+    network: string | null;
+    coinAmount: string | null;
+    rate: string | null;
+    reference: string;
+}
+
+/** GET /giftcards/receipt/:ledgerEntryId - what a gift-card receipt shows beyond the ledger entry. */
+export interface GiftCardReceiptDto {
+    brand: string;
+    faceValueUsd: string;
+    quantity: number;
+    rate: string;
+    cardType: string;
+    reference: string;
 }
 
 export interface UtilityPurchaseResponseDto {
@@ -371,6 +392,10 @@ export interface UtilityPurchaseResponseDto {
     failureReason: string | null;
     /** The provider-issued redemption code (electricity token, exam PIN, ...) when this purchase's category/response carried one — null otherwise. Always render this in the receipt when present. */
     token: string | null;
+    /** Exam-PIN purchases only - the card's serial number, when the provider returned one. */
+    serial?: string | null;
+    /** What the customer saved (airtime and data): they paid `amount` minus this. */
+    discountAmount?: string | null;
     /** Electricity-only — the meter's registered customer name, when VTpass returned one. */
     customerName: string | null;
     /** Electricity-only — the meter's registered address, when VTpass returned one. */
@@ -627,4 +652,13 @@ export interface BridgeDepositDto {
     /** Set once status is RETURNED/RETURN_FAILED — Bridge's own reason code. */
     refundReason: string | null;
     createdAt: string;
+}
+
+
+/** GET /utilities/quote - the checkout preview for an airtime or data purchase. */
+export interface UtilityQuoteDto {
+    amount: string;
+    discountAmount: string;
+    payAmount: string;
+    percentage: number;
 }
