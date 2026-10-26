@@ -1,50 +1,32 @@
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
 
-import { buildReceiptMarkup, escapeHtml, formatReceiptAmount, formatReceiptDate } from "@/lib/receipt-markup";
-import { genericRows, RECEIPT_STATUS_LABEL, type ReceiptRow } from "@/lib/receipt-model";
-
-export interface ReceiptData {
-    id: string;
-    label: string;
-    amount: number;
-    status: "success" | "pending" | "failed";
-    date?: string;
-    type: string;
-    direction: string;
-    currency: string;
-    meta: string;
-    /**
-     * The ordered lines this receipt shows — built per transaction type in
-     * lib/receipt-model.ts. When absent (older call sites), a generic set is
-     * derived from the fields above so a receipt is never empty.
-     */
-    rows?: ReceiptRow[];
-}
-
-/** The lines every receipt format (screen, HTML, PNG, PDF, text) prints — one source so they can't drift apart. */
-export function getReceiptRows(receipt: ReceiptData): ReceiptRow[] {
-    if (receipt.rows && receipt.rows.length > 0) return receipt.rows;
-
-    return genericRows({ typeLabel: receipt.type, description: receipt.label, transactionId: receipt.id });
-}
+import { buildReceiptMarkup, escapeHtml } from "@/lib/receipt-markup";
+import { buildReceiptConfig, receiptToText, shareable, type ReceiptConfig, type ReceiptInput } from "@/lib/receipt-config";
 
 /**
- * Generate receipt text content for sharing
+ * What a receipt is built from. The on-screen receipt shows everything (fee, total debited, discount);
+ * every function below that sends one out - download, share, copy - turns it into the shareable version,
+ * which carries only the exact amount that moved. See `shareable`.
  */
+export type ReceiptData = ReceiptInput;
+
+function outgoing(receipt: ReceiptData): ReceiptConfig {
+    return buildReceiptConfig(shareable(receipt));
+}
+
+/** Exported images are captured at 3x so the text stays sharp when zoomed or printed. */
+const IMAGE_SCALE = 3;
+
+/** `NePay_Receipt_[reference]` - the reference, made safe for a filename. */
+function receiptBaseName(receipt: ReceiptData): string {
+    const config = outgoing(receipt);
+    const ref = (config.references[0]?.value ?? config.id).replace(/[^A-Za-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "");
+    return `NePay_Receipt_${ref || "receipt"}`;
+}
+
 export function generateReceiptText(receipt: ReceiptData): string {
-    const lines = getReceiptRows(receipt).map((r) => `${r.label}: ${r.value}${r.sub ? ` (${r.sub})` : ""}`);
-    const date = formatReceiptDate(receipt.date);
-
-    return `NePay Transaction Receipt
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${formatReceiptAmount(receipt.amount, receipt.currency)} — ${RECEIPT_STATUS_LABEL[receipt.status]}${date ? `\n${date}` : ""}
-
-${lines.join("\n")}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Verified by NePay
-www.nepay.com.ng`;
+    return receiptToText(outgoing(receipt));
 }
 
 /**
@@ -79,33 +61,26 @@ async function getLogoBase64(): Promise<string> {
  */
 export async function generateReceiptHTML(receipt: ReceiptData): Promise<string> {
     const logoBase64 = await getLogoBase64();
-    const { css, html } = buildReceiptMarkup(
-        {
-            id: receipt.id,
-            amount: receipt.amount,
-            currency: receipt.currency,
-            status: receipt.status,
-            date: receipt.date,
-            rows: getReceiptRows(receipt),
-        },
-        logoBase64,
-    );
+    const config = outgoing(receipt);
+    const { css, html } = buildReceiptMarkup(config, logoBase64);
 
-    return `
-<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>NePay Receipt - ${escapeHtml(receipt.id)}</title>
-        <style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NePay Receipt - ${escapeHtml(config.references[0]?.value ?? config.id)}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; background: #FFFFFF; padding: 16px; }
         ${css}
     </style>
 </head>
-<body style="margin:0;padding:20px;background:#EDE9FE">
+<body>
     ${html}
 </body>
-</html>
-    `;
+</html>`;
 }
 
 /**
@@ -119,7 +94,7 @@ export async function downloadReceipt(receipt: ReceiptData): Promise<void> {
         
         const link = document.createElement("a");
         link.href = url;
-        link.download = `NePay-Receipt-${receipt.id}.html`;
+        link.download = `${receiptBaseName(receipt)}.html`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -176,7 +151,10 @@ export async function downloadReceiptPDF(receipt: ReceiptData): Promise<void> {
         // Create a temporary container
         const container = document.createElement("div");
         container.innerHTML = html;
-        container.style.display = "none";
+        container.style.position = "fixed";
+        container.style.left = "-9999px";
+        container.style.top = "-9999px";
+        container.style.width = "560px";
         document.body.appendChild(container);
         
         // Generate PDF using html2pdf
@@ -185,14 +163,15 @@ export async function downloadReceiptPDF(receipt: ReceiptData): Promise<void> {
             throw new Error("Receipt element not found");
         }
         
+        await document.fonts?.ready;
         // Dynamically import html2pdf for better Next.js compatibility
         const html2pdf = (await import("html2pdf.js")).default;
         
         const opt = {
             margin: 10,
-            filename: `NePay-Receipt-${receipt.id}.pdf`,
+            filename: `${receiptBaseName(receipt)}.pdf`,
             image: { type: "jpeg" as const, quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
+            html2canvas: { scale: IMAGE_SCALE, useCORS: true, backgroundColor: "#FFFFFF" },
             jsPDF: { unit: "mm" as const, format: "a4", orientation: "portrait" as const },
         };
         
@@ -220,7 +199,8 @@ export async function downloadReceiptImage(receipt: ReceiptData): Promise<void> 
         container.style.position = "fixed";
         container.style.left = "-9999px";
         container.style.top = "-9999px";
-        container.style.backgroundColor = "#ffffff";
+        container.style.width = "560px";
+        container.style.backgroundColor = "#FFFFFF";
         document.body.appendChild(container);
         
         // Convert to canvas
@@ -229,16 +209,17 @@ export async function downloadReceiptImage(receipt: ReceiptData): Promise<void> 
             throw new Error("Receipt element not found");
         }
         
+        await document.fonts?.ready;
         const canvas = await html2canvas(element, {
-            scale: 2,
-            backgroundColor: "#ffffff",
+            scale: IMAGE_SCALE,
+            backgroundColor: "#FFFFFF",
             logging: false,
         });
         
         // Download as image
         const link = document.createElement("a");
         link.href = canvas.toDataURL("image/png");
-        link.download = `NePay-Receipt-${receipt.id}.png`;
+        link.download = `${receiptBaseName(receipt)}.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -266,7 +247,8 @@ export async function shareReceiptImage(receipt: ReceiptData): Promise<void> {
         container.style.position = "fixed";
         container.style.left = "-9999px";
         container.style.top = "-9999px";
-        container.style.backgroundColor = "#ffffff";
+        container.style.width = "560px";
+        container.style.backgroundColor = "#FFFFFF";
         document.body.appendChild(container);
         
         // Convert to canvas
@@ -275,9 +257,10 @@ export async function shareReceiptImage(receipt: ReceiptData): Promise<void> {
             throw new Error("Receipt element not found");
         }
         
+        await document.fonts?.ready;
         const canvas = await html2canvas(element, {
-            scale: 2,
-            backgroundColor: "#ffffff",
+            scale: IMAGE_SCALE,
+            backgroundColor: "#FFFFFF",
             logging: false,
         });
         
@@ -291,7 +274,7 @@ export async function shareReceiptImage(receipt: ReceiptData): Promise<void> {
         }
         
         // Create File object
-        const file = new File([blob], `NePay-Receipt-${receipt.id}.png`, {
+        const file = new File([blob], `${receiptBaseName(receipt)}.png`, {
             type: "image/png",
         });
         
@@ -320,7 +303,7 @@ export async function shareReceiptImage(receipt: ReceiptData): Promise<void> {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `NePay-Receipt-${receipt.id}.png`;
+        link.download = `${receiptBaseName(receipt)}.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

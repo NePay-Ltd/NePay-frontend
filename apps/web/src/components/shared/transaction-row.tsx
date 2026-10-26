@@ -6,7 +6,7 @@ import { formatNaira } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { useUiStore } from "@/lib/stores/ui-store";
 
-import type { ReceiptRow } from "@/lib/receipt-model";
+import type { ReceiptInput } from "@/lib/receipt-config";
 
 export interface BaseTransaction {
     id: string;
@@ -19,8 +19,8 @@ export interface BaseTransaction {
     cryptoAmount?: string;
     cryptoAsset?: string;
     exchangeRate?: string;
-        /** The ordered lines this transaction's receipt prints (recipient, sender, type, IDs…) — see lib/receipt-model.ts. */
-    receiptRows?: ReceiptRow[];
+    /** What this transaction's receipt is built from - see lib/receipt-config.ts. */
+    receiptInput?: ReceiptInput;
     utilityToken?: string;
     /** Electricity-only receipt fields from VTpass's own response — see UtilityPurchaseResponseDto on the backend. Undefined for every non-electricity category. */
     utilityCustomerName?: string;

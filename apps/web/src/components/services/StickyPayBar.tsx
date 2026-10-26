@@ -13,6 +13,8 @@ interface StickyPayBarProps {
     onPay: () => void;
     disabled?: boolean;
     loading?: boolean;
+    /** What the customer saves on this purchase; shown under the amount when above zero. */
+    saving?: number;
 }
 
 export function StickyPayBar({ 
@@ -22,7 +24,8 @@ export function StickyPayBar({
     buttonText = "Pay", 
     onPay, 
     disabled, 
-    loading 
+    loading,
+    saving,
 }: StickyPayBarProps) {
     return (
         <AnimatePresence>
@@ -40,6 +43,9 @@ export function StickyPayBar({
                             <span className="text-xl sm:text-2xl font-black text-ink tracking-tight tabular-nums">
                                 {formatNaira(amount)}
                             </span>
+                            {!!saving && saving > 0 && (
+                                <span className="text-xs font-semibold text-violet-700">You save {formatNaira(saving)}</span>
+                            )}
                         </div>
                         <div className="flex-shrink-0 w-32 sm:w-40">
                             <Button

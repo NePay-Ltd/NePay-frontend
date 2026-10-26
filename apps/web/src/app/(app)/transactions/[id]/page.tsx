@@ -1,20 +1,19 @@
 "use client";
 
-import { CopyTokenButton } from "@/components/shared/copy-token-button";
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { formatDate, formatTime } from "@/lib/date";
-import { IconArrowLeft as ArrowLeft, IconCopy as Copy, IconCheck as Check, IconChevronDown as ChevronDown } from "@/components/icons";
+import { IconArrowLeft as ArrowLeft, IconChevronDown as ChevronDown } from "@/components/icons";
 import { Download, Share2, Image } from "lucide-react";;
 import { useTransaction } from "@/lib/queries/transactions";
 import { Button } from "@/components/shared/button";
 import { Panel, PanelBody } from "@/components/shared/panel";
 import { TxIcon } from "@/components/shared/tx-icon";
-import { formatNaira } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { Skeleton } from "@/components/shared/skeletons";
 import { downloadReceipt, downloadReceiptPDF, downloadReceiptImage, shareReceipt, shareReceiptImage, type ReceiptData } from "@/lib/receipt-utils";
 import { ReceiptCard } from "@/components/shared/receipt-card";
+import { buildReceiptConfig } from "@/lib/receipt-config";
 
 function getCategoryColor(category: string) {
     switch (category) {
@@ -52,36 +51,22 @@ export default function TransactionDetailPage() {
     // out of whatever page of the list happens to be cached, so this works
     // for any transaction the caller owns, not just the most recent ones.
     const { data: transaction, isLoading } = useTransaction(transactionId);
-    const [copied, setCopied] = React.useState(false);
     const [isDownloading, setIsDownloading] = React.useState(false);
     const [isSharing, setIsSharing] = React.useState(false);
     const [showDownloadMenu, setShowDownloadMenu] = React.useState(false);
     const [showShareMenu, setShowShareMenu] = React.useState(false);
 
-    const handleCopyId = () => {
-        navigator.clipboard.writeText(transactionId);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
+    // On screen: the whole picture (fee, total debited, discount). Anything sent out goes through
+    // receipt-utils, which reduces it to the exact amount that moved.
+    const receiptInput = transaction?.receiptInput ?? null;
+    const receipt = React.useMemo(() => (receiptInput ? buildReceiptConfig(receiptInput) : null), [receiptInput]);
     const getReceiptData = (): ReceiptData => {
-        if (!transaction) throw new Error("No transaction data");
-        return {
-            id: transaction.id,
-            label: transaction.label,
-            amount: transaction.amount,
-            status: transaction.status,
-            date: transaction.date,
-            type: transaction.meta,
-            direction: transaction.amount > 0 ? "CREDIT" : "DEBIT",
-            currency: "NGN",
-            meta: transaction.meta,
-            rows: transaction.receiptRows,
-        };
+        if (!receiptInput) throw new Error("No transaction data");
+        return receiptInput;
     };
 
     const handleDownloadHTML = async () => {
-        if (!transaction) return;
+        if (!receipt) return;
         setIsDownloading(true);
         try {
             await downloadReceipt(getReceiptData());
@@ -92,7 +77,7 @@ export default function TransactionDetailPage() {
     };
 
     const handleDownloadPDF = async () => {
-        if (!transaction) return;
+        if (!receipt) return;
         setIsDownloading(true);
         try {
             await downloadReceiptPDF(getReceiptData());
@@ -103,7 +88,7 @@ export default function TransactionDetailPage() {
     };
 
     const handleDownloadImage = async () => {
-        if (!transaction) return;
+        if (!receipt) return;
         setIsDownloading(true);
         try {
             await downloadReceiptImage(getReceiptData());
@@ -114,7 +99,7 @@ export default function TransactionDetailPage() {
     };
 
     const handleShareText = async () => {
-        if (!transaction) return;
+        if (!receipt) return;
         setIsSharing(true);
         try {
             await shareReceipt(getReceiptData());
@@ -125,7 +110,7 @@ export default function TransactionDetailPage() {
     };
 
     const handleShareImage = async () => {
-        if (!transaction) return;
+        if (!receipt) return;
         setIsSharing(true);
         try {
             await shareReceiptImage(getReceiptData());
@@ -155,7 +140,7 @@ export default function TransactionDetailPage() {
         );
     }
 
-    if (!transaction) {
+    if (!transaction || !receipt) {
         return (
             <div className="mx-auto max-w-2xl space-y-6">
                 <button
@@ -176,9 +161,6 @@ export default function TransactionDetailPage() {
         );
     }
 
-    const isCredit = transaction.amount > 0;
-    const amountClass = isCredit ? "text-green-600" : "text-red-600";
-
     return (
         <div className="mx-auto max-w-2xl space-y-6">
             {/* Header */}
@@ -192,53 +174,8 @@ export default function TransactionDetailPage() {
 
             <Panel>
                 <PanelBody className="space-y-8">
-                    {/* The receipt itself — the same markup the downloads are made from */}
-                    <ReceiptCard
-                        receipt={{
-                            ...getReceiptData(),
-                            // The token has its own copyable block just below, so it isn't printed twice on screen (downloads still include it).
-                            rows: transaction.utilityToken
-                                ? transaction.receiptRows?.filter((r) => r.label !== "Token")
-                                : transaction.receiptRows,
-                        }}
-                    />
-
-                    <button
-                        onClick={handleCopyId}
-                        className="mx-auto flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50 transition-colors"
-                        title="Copy transaction ID"
-                    >
-                        {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
-                        {copied ? "Copied" : "Copy transaction ID"}
-                    </button>
-
-                    {/* Fee breakdown — bundled onto this receipt, shown here only. Never included in a downloaded/shared copy — see getReceiptData above. */}
-                    {!!transaction.fee && (
-                        <div className="border-t border-border pt-4 space-y-2.5 text-sm">
-                            <div className="flex items-center justify-between gap-6">
-                                <span className="text-muted">Amount</span>
-                                <span className="font-semibold text-ink">{formatNaira(Math.abs(transaction.amount))}</span>
-                            </div>
-                            <div className="flex items-center justify-between gap-6">
-                                <span className="text-muted">Fee</span>
-                                <span className="font-semibold text-ink">{formatNaira(transaction.fee)}</span>
-                            </div>
-                            <div className="flex items-center justify-between gap-6 border-t border-border pt-2.5">
-                                <span className="text-muted">{isCredit ? "Net Received" : "Total Debited"}</span>
-                                <span className={cn("font-bold", amountClass)}>
-                                    {formatNaira(isCredit ? Math.abs(transaction.amount) - transaction.fee : Math.abs(transaction.amount) + transaction.fee)}
-                                </span>
-                            </div>
-                        </div>
-                    )}
-
-                    {transaction.utilityToken && (
-                        <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-500/10 p-4">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-500">Token</p>
-                            <p className="mt-2 break-all font-mono text-xl font-bold tracking-widest text-ink">{transaction.utilityToken}</p>
-                            <CopyTokenButton token={transaction.utilityToken} className="mt-3" />
-                        </div>
-                    )}
+                    {/* The receipt itself - the same markup the downloads are made from */}
+                    {receipt && <ReceiptCard receipt={receipt} />}
 
                     {/* Action Buttons */}
                     <div className="pt-4 border-t border-border">

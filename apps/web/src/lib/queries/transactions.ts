@@ -7,8 +7,37 @@ import { apiClient, hasSession } from "@/lib/api-client";
 import { LedgerEntryDto, ApiPaginated, ApiResponse } from "@/lib/types/api";
 import { BaseTransaction } from "@/components/shared/transaction-row";
 import { TxCategory } from "@/components/shared/tx-icon";
-import { BankDepositReceiptDto, ForeignDepositReceiptDto, UtilityPurchaseResponseDto, WithdrawalReceiptDto } from "@/lib/types/api";
-import { bankDepositRows, foreignDepositRows, genericRows, utilityRows, withdrawalRows, type UtilityKind } from "@/lib/receipt-model";
+import { CryptoDepositReceiptDto, GiftCardReceiptDto, BankDepositReceiptDto, ForeignDepositReceiptDto, UtilityPurchaseResponseDto, WithdrawalReceiptDto } from "@/lib/types/api";
+import type { CurrencyCode, ReceiptInput } from "@/lib/receipt-config";
+
+/** The ledger entry as a receipt input — the specific per-type fields are layered on by useTransaction once the type's detail endpoint answers. */
+function ledgerReceiptInput(entry: LedgerEntryDto, typeLabel: string, cryptoAsset?: string): ReceiptInput {
+    const base = {
+        id: entry.id,
+        reference: entry.id,
+        tone: entry.status ?? ("success" as const),
+        amount: Math.abs(parseFloat(entry.amount)),
+        date: entry.createdAt,
+        fee: entry.fee ? parseFloat(entry.fee) : null,
+    };
+
+    switch (entry.type) {
+        case "DEPOSIT":
+            return { ...base, kind: "CRYPTO", coinAmount: entry.assetQuantity, coin: cryptoAsset, rate: entry.rate ? parseFloat(entry.rate) : null };
+        case "GIFT_CARD_SALE":
+            return { ...base, kind: "GIFTCARD" };
+        case "FLIGHT_BOOKING":
+            return { ...base, kind: "FLIGHT" };
+        case "BANK_DEPOSIT":
+            return { ...base, kind: "DEPOSIT" };
+        case "WITHDRAWAL":
+            return { ...base, kind: "TRANSFER" };
+        case "FCY_CONVERSION_CREDIT":
+            return { ...base, kind: "FOREIGN_DEPOSIT", foreignCurrency: "USD" as CurrencyCode };
+        default:
+            return { ...base, kind: "GENERIC", typeLabel, description: entry.description, credit: entry.direction === "CREDIT" };
+    }
+}
 
 /**
  * UtilityCategory (AIRTIME/DATA/ELECTRICITY/CABLE/EDUCATION/BETTING) -> the
@@ -114,14 +143,7 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
         cryptoAsset,
         exchangeRate: entry.rate ?? undefined,
                 fee: entry.fee ? parseFloat(entry.fee) : undefined,
-        receiptRows: genericRows({
-            typeLabel: meta,
-            description: entry.description,
-            transactionId: entry.id,
-            cryptoAmount: entry.assetQuantity,
-            cryptoAsset,
-            exchangeRate: entry.rate,
-        }),
+        receiptInput: ledgerReceiptInput(entry, meta, cryptoAsset),
     };
 }
 
@@ -149,59 +171,100 @@ export function useTransaction(id: string | null) {
 
             // Per-type receipt details. Each is best-effort: if one can't be loaded (an older
             // transaction that predates the link, a provider hiccup) the receipt still prints
-            // from the generic rows above — never an error page.
+            // from the ledger entry above - never an error page.
+            const base = transaction.receiptInput;
+            if (!base) return transaction;
+            const fee = base.fee;
+
             if (entry.type === "WITHDRAWAL") {
                 try {
                     const r = (await apiClient.get<ApiResponse<WithdrawalReceiptDto>>(`/withdrawals/receipt/${id}`)).data.data;
-                    transaction.receiptRows = withdrawalRows({
+                    transaction.receiptInput = {
+                        ...base,
+                        kind: "TRANSFER",
+                        reference: r.reference,
                         recipientName: r.recipientName,
                         bankName: r.bankName,
-                        accountNumberMasked: r.accountNumberMasked,
+                        accountNumber: r.accountNumberMasked,
                         senderName: r.senderName,
                         narration: r.narration,
                         sessionId: r.sessionId,
-                        transactionId: entry.id,
-                        reference: r.reference,
                         isRefund: r.isRefund,
-                    });
+                        fee: r.fee !== undefined && r.fee !== null ? parseFloat(r.fee) : (fee ?? 0),
+                    };
                 } catch {
-                    // keep the generic rows
+                    transaction.receiptInput = { ...base, kind: "TRANSFER", fee: fee ?? 0 };
                 }
             } else if (entry.type === "BANK_DEPOSIT") {
                 try {
                     const r = (await apiClient.get<ApiResponse<BankDepositReceiptDto>>(`/wallet/virtual-account/receipt/${id}`)).data.data;
-                    transaction.receiptRows = bankDepositRows({
+                    transaction.receiptInput = {
+                        ...base,
+                        kind: "DEPOSIT",
+                        reference: r.reference,
                         senderName: r.senderName,
                         senderBankName: r.senderBankName,
-                        senderAccountMasked: r.senderAccountMasked,
+                        senderAccount: r.senderAccountMasked,
                         narration: r.narration,
                         sessionId: r.sessionId,
                         recipientName: r.recipientName,
                         recipientBankName: r.recipientBankName,
-                        recipientAccountMasked: r.recipientAccountMasked,
-                        transactionId: entry.id,
-                        reference: r.reference,
-                    });
+                        recipientAccount: r.recipientAccountMasked,
+                    };
                 } catch {
-                    // keep the generic rows
+                    // keep the ledger-only receipt
                 }
             } else if (entry.type === "FCY_CONVERSION_CREDIT") {
                 try {
                     const r = (await apiClient.get<ApiResponse<ForeignDepositReceiptDto>>(`/bridge/accounts/receipt/${id}`)).data.data;
-                    transaction.receiptRows = foreignDepositRows({
-                        senderName: r.senderName,
-                        paymentRail: r.paymentRail,
-                        narration: r.narration,
-                        sourceCurrency: r.sourceCurrency,
-                        sourceAmount: r.sourceAmount,
-                        usdAmount: r.usdAmount,
-                        rateUsed: r.rateUsed,
-                        recipientName: r.recipientName,
-                        transactionId: entry.id,
+                    const currency = r.sourceCurrency.toUpperCase();
+                    const sent = r.sourceAmount ? parseFloat(r.sourceAmount) : NaN;
+                    transaction.receiptInput = {
+                        ...base,
+                        kind: "FOREIGN_DEPOSIT",
                         reference: r.reference,
-                    });
+                        foreignCurrency: (["USD", "EUR", "GBP"].includes(currency) ? currency : "USD") as CurrencyCode,
+                        // The hero is what arrived in the customer's foreign account, in its own currency.
+                        amount: Number.isFinite(sent) ? sent : base.amount,
+                        senderName: r.senderName,
+                        paymentMethod: r.paymentRail,
+                        senderReference: r.narration,
+                        rate: r.rateUsed ? parseFloat(r.rateUsed) : null,
+                        creditedNgn: Math.abs(parseFloat(entry.amount)),
+                    };
                 } catch {
-                    // keep the generic rows
+                    // keep the ledger-only receipt
+                }
+            } else if (entry.type === "DEPOSIT") {
+                try {
+                    const r = (await apiClient.get<ApiResponse<CryptoDepositReceiptDto>>(`/crypto/receipt/${id}`)).data.data;
+                    transaction.receiptInput = {
+                        ...base,
+                        kind: "CRYPTO",
+                        reference: r.reference,
+                        coin: r.coin,
+                        network: r.network,
+                        coinAmount: r.coinAmount,
+                        rate: r.rate ? parseFloat(r.rate) : null,
+                    };
+                } catch {
+                    // keep the ledger-only receipt
+                }
+            } else if (entry.type === "GIFT_CARD_SALE") {
+                try {
+                    const r = (await apiClient.get<ApiResponse<GiftCardReceiptDto>>(`/giftcards/receipt/${id}`)).data.data;
+                    transaction.receiptInput = {
+                        ...base,
+                        kind: "GIFTCARD",
+                        reference: r.reference,
+                        brand: r.brand,
+                        valueUsd: parseFloat(r.faceValueUsd),
+                        quantity: r.quantity,
+                        rate: parseFloat(r.rate),
+                        cardType: r.cardType,
+                    };
+                } catch {
+                    // keep the ledger-only receipt
                 }
             } else if (entry.type === "UTILITY_PURCHASE") {
                 try {
@@ -209,35 +272,53 @@ export function useTransaction(id: string | null) {
 
                     if (transaction.category === "electricity") {
                         transaction.utilityToken = data.token ?? undefined;
-                        transaction.utilityCustomerName = data.customerName ?? undefined;
-                        transaction.utilityCustomerAddress = data.customerAddress ?? undefined;
-                        transaction.utilityUnits = data.units ?? undefined;
-                        transaction.utilityDisco = data.productName ?? undefined;
-                        transaction.utilityMeterNumber = data.identifier;
-                        transaction.utilityMeterType = data.variationCode ?? undefined;
-                        transaction.utilityProviderTransactionId = data.providerTransactionId ?? undefined;
-                        transaction.utilityTariff = data.tariff ?? undefined;
                     }
 
-                    const kind = data.category as string;
-                    if (["AIRTIME", "DATA", "ELECTRICITY", "CABLE", "EDUCATION"].includes(kind)) {
-                        transaction.receiptRows = utilityRows({
-                                                        kind: kind as UtilityKind,
-                            // The purchase's own id — the same one shown on the receipt right after buying.
-                            transactionId: data.id,
-                            reference: data.providerReference,
-                            identifier: data.identifier,
-                            providerName: data.providerName ?? data.productName,
-                            customerName: data.customerName,
-                            customerAddress: data.customerAddress,
-                            planName: data.planName,
-                            meterType: data.variationCode,
-                            tariff: data.tariff,
-                            units: data.units,
-                            providerTransactionId: data.providerTransactionId,
-                            // The token has its own copyable block on screen; it stays in the rows for text/PDF shares.
-                            token: data.token,
-                        });
+                    // The discount is part of the price: `amount` is the airtime/plan value, and the customer paid it minus the discount.
+                    const face = parseFloat(data.amount);
+                    const discount = data.discountAmount ? parseFloat(data.discountAmount) : 0;
+                    const discounted = (data.category === "AIRTIME" || data.category === "DATA") && discount > 0 && Number.isFinite(face);
+                    const common = {
+                        ...base,
+                        reference: data.providerReference ?? base.reference,
+                        ...(discounted ? { amount: face - discount, faceAmount: face, discount } : {}),
+                    };
+                    const provider = data.providerName ?? data.productName;
+                    switch (data.category as string) {
+                        case "AIRTIME":
+                            transaction.receiptInput = { ...common, kind: "AIRTIME", network: provider, phone: data.identifier };
+                            break;
+                        case "DATA":
+                            transaction.receiptInput = { ...common, kind: "DATA", network: provider, phone: data.identifier, bundle: data.planName };
+                            break;
+                        case "ELECTRICITY":
+                            transaction.receiptInput = {
+                                ...common,
+                                kind: "ELECTRICITY",
+                                disco: provider,
+                                meterNumber: data.identifier,
+                                meterType: data.variationCode,
+                                customerName: data.customerName,
+                                customerAddress: data.customerAddress,
+                                tariff: data.tariff,
+                                units: data.units,
+                                token: data.token,
+                                providerTransactionId: data.providerTransactionId,
+                            };
+                            break;
+                        case "CABLE":
+                            transaction.receiptInput = {
+                                ...common,
+                                kind: "CABLE",
+                                provider,
+                                smartcard: data.identifier,
+                                customerName: data.customerName,
+                                packageName: data.planName,
+                            };
+                            break;
+                        case "EDUCATION":
+                            transaction.receiptInput = { ...common, kind: "EDUCATION", examBody: provider, service: data.planName, pin: data.token, serial: data.serial };
+                            break;
                     }
                 } catch {
                     // Older transactions may predate the utility-purchase link.

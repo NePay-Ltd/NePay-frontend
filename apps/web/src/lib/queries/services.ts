@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import {
     UtilityPurchaseResponseDto,
+    UtilityQuoteDto,
     UtilityVerificationResponseDto,
     UtilityCategoryDto,
     UtilityServiceDto,
@@ -182,14 +183,31 @@ export function useVerifySmartcard() {
     });
 }
 
+/**
+ * What a purchase will really cost, from the backend - the discount is part of the price, so the
+ * screen must show the server's own figure rather than work it out itself.
+ */
+export function useUtilityQuote(category: "AIRTIME" | "DATA", amount: number) {
+    return useQuery<UtilityQuoteDto>({
+        queryKey: ["utilities", "quote", category, amount],
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<UtilityQuoteDto>>("/utilities/quote", { params: { category, amount: amount.toFixed(2) } });
+            return res.data.data;
+        },
+        enabled: amount > 0,
+        staleTime: 60_000,
+    });
+}
+
 export function usePayAirtime() {
-    return useMutation<UtilityPurchaseResponseDto, Error, { phone: string; amountNgn: number; network: string; pin: string }>({
-        mutationFn: async ({ phone, amountNgn, network, pin }) => {
+    return useMutation<UtilityPurchaseResponseDto, Error, { phone: string; amountNgn: number; network: string; pin: string; expectedPay?: string }>({
+        mutationFn: async ({ phone, amountNgn, network, pin, expectedPay }) => {
             const res = await apiClient.post<ApiResponse<UtilityPurchaseResponseDto>>("/utilities/airtime", {
                 network,
                 amount: amountNgn.toString(),
                 phoneNumber: phone,
                 pin,
+                ...(expectedPay ? { expectedPay } : {}),
             });
             return res.data.data;
         },
@@ -197,14 +215,15 @@ export function usePayAirtime() {
 }
 
 export function usePayData() {
-    return useMutation<UtilityPurchaseResponseDto, Error, { phone: string; variationCode: string; network: string; amountNgn: number; pin: string }>({
-        mutationFn: async ({ phone, variationCode, network, amountNgn, pin }) => {
+    return useMutation<UtilityPurchaseResponseDto, Error, { phone: string; variationCode: string; network: string; amountNgn: number; pin: string; expectedPay?: string }>({
+        mutationFn: async ({ phone, variationCode, network, amountNgn, pin, expectedPay }) => {
             const res = await apiClient.post<ApiResponse<UtilityPurchaseResponseDto>>("/utilities/data", {
                 network,
                 amount: amountNgn.toString(),
                 phoneNumber: phone,
                 variationCode,
                 pin,
+                ...(expectedPay ? { expectedPay } : {}),
             });
             return res.data.data;
         },

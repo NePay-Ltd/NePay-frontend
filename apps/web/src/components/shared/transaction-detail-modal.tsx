@@ -1,15 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { format } from "date-fns";
-import { IconClose as X, IconCopy as Copy, IconCheck as Check, IconChevronDown as ChevronDown, IconAlertTriangle as AlertTriangle, IconClock as Clock, IconArrowUpRight as ArrowUpRight } from "@/components/icons";
-import { Download, Share2, ArrowDownLeft } from "lucide-react";;
+import { toast } from "sonner";
+import { IconClose as X, IconCopy as Copy } from "@/components/icons";
+import { Share2 } from "lucide-react";
 import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
-import { TxIcon, type TxCategory } from "./tx-icon";
-import { formatNaira } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { useTransaction } from "@/lib/queries/transactions";
-import { downloadReceipt, shareReceipt, downloadReceiptPDF, downloadReceiptImage, shareReceiptImage, type ReceiptData } from "@/lib/receipt-utils";
+import { shareReceiptImage } from "@/lib/receipt-utils";
+import { buildReceiptConfig, truncateMiddle, SUPPORT_EMAIL_DEFAULT, type ReceiptConfig, type ReceiptInput } from "@/lib/receipt-config";
+import { highlightHtml, RECEIPT_CSS } from "@/lib/receipt-markup";
+import type { TxCategory } from "./tx-icon";
 
 export interface TransactionDetailData {
     id: string;
@@ -25,7 +26,6 @@ export interface TransactionDetailData {
     cryptoAmount?: string;
     cryptoAsset?: string;
     exchangeRate?: string;
-    /** Bundled into this view only — never passed to ReceiptData, so a downloaded/shared receipt stays fee-free. */
     fee?: number;
 }
 
@@ -36,130 +36,69 @@ interface TransactionDetailModalProps {
     onViewFullDetail?: (transactionId: string) => void;
 }
 
-type StatusKey = "success" | "pending" | "failed";
+const TONE = {
+    success: { bg: "#DCFCE7", fg: "#166534" },
+    pending: { bg: "#FEF3C7", fg: "#92400E" },
+    failed: { bg: "#FEE2E2", fg: "#991B1B" },
+} as const;
 
-const STATUS_CONFIG: Record<StatusKey, {
-    label: string;
-    statusLine: string;
-    icon: React.ElementType;
-    /** Outermost faint glow ring */
-    outerRing: string;
-    /** Middle semi-transparent ring */
-    midRing: string;
-    /** Inner solid filled circle */
-    innerCircle: string;
-    /** Icon color inside the circle */
-    iconColor: string;
-    amountColor: string;
-}> = {
-    success: {
-        label: "Completed",
-        statusLine: "Transaction Successful",
-        icon: Check,
-        outerRing: "bg-green-500/10",
-        midRing: "bg-green-500/20",
-        innerCircle: "bg-green-500",
-        iconColor: "text-trueWhite",
-        amountColor: "text-ink dark:text-trueWhite",
-    },
-    pending: {
-        label: "Pending",
-        statusLine: "Transaction Pending",
-        icon: Clock,
-        outerRing: "bg-amber-500/10",
-        midRing: "bg-amber-500/20",
-        innerCircle: "bg-amber-500",
-        iconColor: "text-trueWhite",
-        amountColor: "text-ink dark:text-trueWhite",
-    },
-    failed: {
-        label: "Failed",
-        statusLine: "Transaction Failed",
-        icon: AlertTriangle,
-        outerRing: "bg-red-500/10",
-        midRing: "bg-red-500/20",
-        innerCircle: "bg-red-500",
-        iconColor: "text-trueWhite",
-        amountColor: "text-ink dark:text-trueWhite",
-    },
-};
+/** What the sheet shows before the type's own detail has loaded (or if it can't): the ledger basics, in plain language. */
+function basicsInput(t: TransactionDetailData): ReceiptInput {
+    return {
+        kind: "GENERIC",
+        id: t.id,
+        reference: t.id,
+        tone: t.status,
+        amount: Math.abs(t.amount),
+        date: t.date,
+        fee: t.fee ?? null,
+        typeLabel: t.type,
+        description: t.label,
+        credit: t.amount > 0,
+    };
+}
 
-export function TransactionDetailModal({
-    open,
-    onOpenChange,
-    transaction,
-    onViewFullDetail,
-}: TransactionDetailModalProps) {
-        // The list row only has the basics; the full receipt (recipient, sender, narration, IDs…) is
-    // fetched when the modal opens so Download/Share below print the complete receipt.
+/**
+ * The condensed transaction summary: the same ReceiptConfig as the full receipt, shown as a
+ * bottom sheet - highlight block, every receipt row, and the reference (truncated in the
+ * middle, with a copy button). Plain language only; "View full receipt" opens the whole thing.
+ */
+export function TransactionDetailModal({ open, onOpenChange, transaction, onViewFullDetail }: TransactionDetailModalProps) {
+    // The list row only has the basics; the type's own detail (recipient, sender, token...) is fetched when the sheet opens.
     const { data: fullTransaction } = useTransaction(open ? transaction?.id ?? null : null);
-    const [copied, setCopied] = React.useState(false);
-    const [isDownloading, setIsDownloading] = React.useState(false);
     const [isSharing, setIsSharing] = React.useState(false);
-    const [showDownloadMenu, setShowDownloadMenu] = React.useState(false);
-    const [showShareMenu, setShowShareMenu] = React.useState(false);
 
-    const handleCopyId = () => {
-        if (transaction?.id) {
-            navigator.clipboard.writeText(transaction.id);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
+    // The sheet shows everything; "Share receipt" sends only the exact amount that moved (see receipt-utils).
+    const input = React.useMemo<ReceiptInput | null>(() => {
+        if (!transaction) return null;
+        return fullTransaction?.receiptInput ?? basicsInput(transaction);
+    }, [transaction, fullTransaction]);
+    const config = React.useMemo<ReceiptConfig | null>(() => (input ? buildReceiptConfig(input) : null), [input]);
+
+    if (!transaction || !config || !input) return null;
+
+    const tone = TONE[config.tone];
+    const reference = config.references[0]?.value ?? config.id;
+
+    const copy = async (value: string) => {
+        try {
+            await navigator.clipboard.writeText(value);
+            toast.success("Copied");
+        } catch {
+            toast.error("Couldn't copy - select the text and copy it instead");
         }
     };
 
-    const getReceiptData = (): ReceiptData => {
-        if (!transaction) throw new Error("No transaction data");
-        return {
-            id: transaction.id,
-            label: transaction.label,
-            amount: transaction.amount,
-            status: transaction.status,
-            date: transaction.date,
-            type: transaction.type,
-                        direction: transaction.direction,
-            currency: transaction.currency,
-            meta: transaction.meta,
-            rows: fullTransaction?.receiptRows,
-        };
-    };
-
-    const handleDownloadHTML = async () => {
-        if (!transaction) return;
-        setIsDownloading(true);
-        try { await downloadReceipt(getReceiptData()); }
-        finally { setIsDownloading(false); setShowDownloadMenu(false); }
-    };
-    const handleDownloadPDF = async () => {
-        if (!transaction) return;
-        setIsDownloading(true);
-        try { await downloadReceiptPDF(getReceiptData()); }
-        finally { setIsDownloading(false); setShowDownloadMenu(false); }
-    };
-    const handleDownloadImage = async () => {
-        if (!transaction) return;
-        setIsDownloading(true);
-        try { await downloadReceiptImage(getReceiptData()); }
-        finally { setIsDownloading(false); setShowDownloadMenu(false); }
-    };
-    const handleShareText = async () => {
-        if (!transaction) return;
+    const share = async () => {
         setIsSharing(true);
-        try { await shareReceipt(getReceiptData()); }
-        finally { setIsSharing(false); setShowShareMenu(false); }
-    };
-    const handleShareImage = async () => {
-        if (!transaction) return;
-        setIsSharing(true);
-        try { await shareReceiptImage(getReceiptData()); }
-        finally { setIsSharing(false); setShowShareMenu(false); }
+        try {
+            await shareReceiptImage(input);
+        } finally {
+            setIsSharing(false);
+        }
     };
 
-    if (!transaction) return null;
-
-    const isCredit = transaction.amount > 0;
-    const cfg = STATUS_CONFIG[transaction.status];
-    const StatusIcon = cfg.icon;
-    const absAmount = formatNaira(Math.abs(transaction.amount));
+    const reportHref = `mailto:${SUPPORT_EMAIL_DEFAULT}?subject=${encodeURIComponent(`Issue with transaction ${reference}`)}`;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -169,204 +108,120 @@ export function TransactionDetailModal({
                     fixed sm:top-1/2 bottom-0 sm:bottom-auto left-1/2 -translate-x-1/2 sm:-translate-y-1/2 translate-y-0 sm:translate-y-[-50%]
                     max-h-[92dvh] flex flex-col"
             >
-                {/* ── Close button ── */}
                 <DialogClose className="absolute top-4 right-4 z-10 p-1.5 rounded-full text-muted hover:bg-gray-100 dark:hover:bg-trueWhite/10 transition-colors focus:outline-none">
                     <X className="h-4 w-4" />
                     <span className="sr-only">Close</span>
                 </DialogClose>
 
-                <div className="px-5 pb-6 pt-7 sm:px-6 sm:pb-8 sm:pt-8 flex flex-col items-center text-center overflow-y-auto">
-                    {/* ── Status icon — double-ring glow ── */}
-                    <div className={cn("flex h-24 w-24 items-center justify-center rounded-full mb-5", cfg.outerRing)}>
-                        <div className={cn("flex h-[72px] w-[72px] items-center justify-center rounded-full", cfg.midRing)}>
-                            <div className={cn("flex h-14 w-14 items-center justify-center rounded-full shadow-lg", cfg.innerCircle)}>
-                                <StatusIcon className={cn("h-7 w-7", cfg.iconColor)} strokeWidth={2.5} />
-                            </div>
-                        </div>
+                {/* The summary is always the light NePay design, like the receipt it summarises. */}
+                <div className="overflow-y-auto bg-white px-5 pb-6 pt-6 text-[#14092E] sm:px-6">
+                    <style>{RECEIPT_CSS}</style>
+
+                    <div className="flex items-center gap-2.5 pr-8">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/logo.png" alt="NePay logo" className="h-[30px] w-[30px]" />
+                        <span className="text-[18px] font-extrabold tracking-[-0.5px]">NePay</span>
+                        <span className="ml-auto text-[10.5px] font-bold uppercase tracking-[1.6px] text-[#5B4F78]">{config.headerLabel}</span>
                     </div>
 
-                    {/* ── Status label ── */}
-                    <p className="text-sm font-semibold text-muted mb-1">{cfg.statusLine}</p>
+                    <div className="mt-5 flex flex-col items-center gap-2 text-center">
+                        <span
+                            className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[13px] font-bold"
+                            style={{ background: tone.bg, color: tone.fg }}
+                        >
+                            <span className="h-2 w-2 rounded-full" style={{ background: tone.fg }} />
+                            {config.statusLabel}
+                        </span>
+                        <p className="text-[34px] font-extrabold leading-[1.1] tracking-[-1.2px]">{config.amount}</p>
+                        <p className="text-[14px] font-semibold text-[#3B2470]">{config.heroLine}</p>
+                        {config.dateLine && <p className="font-mono text-[12px] text-[#5B4F78]">{config.dateLine}</p>}
+                    </div>
 
-                    {/* ── Amount ── */}
-                    <p className={cn("text-3xl font-bold tabular-nums mb-1", cfg.amountColor)}>
-                        {isCredit ? "+" : "−"}{absAmount}
-                    </p>
+                    {config.statusMessage && (
+                        <div className="mt-4 rounded-[14px] px-4 py-3 text-left" style={{ background: tone.bg, color: tone.fg }}>
+                            <p className="text-[14px] font-bold">{config.statusMessage.title}</p>
+                            <p className="mt-1 text-[13px] leading-[1.5]">{config.statusMessage.body}</p>
+                        </div>
+                    )}
 
-                    {/* ── Description ── */}
-                    <p className="text-xs text-muted truncate max-w-[240px]">{transaction.label}</p>
+                    {config.highlight && (
+                        <div
+                            className="receipt rc-flat mt-4 text-center"
+                            // Every value is escaped by the generator (lib/receipt-markup.ts).
+                            dangerouslySetInnerHTML={{ __html: highlightHtml(config.highlight, false) }}
+                        />
+                    )}
 
-                    {/* ── Divider ── */}
-                    <div className="w-full border-t border-dashed border-border my-5" />
-
-                    {/* ── Details rows ── */}
-                    <div className="w-full space-y-3.5 text-left">
-                        <ReceiptRow label="Transaction Reference">
-                            <div className="flex items-center gap-1.5">
-                                <code className="text-xs font-mono text-ink dark:text-trueWhite">
-                                    {transaction.id.slice(0, 10)}...{transaction.id.slice(-4)}
-                                </code>
-                                <button
-                                    onClick={handleCopyId}
-                                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-trueWhite/10 transition-colors"
-                                    title="Copy ID"
-                                >
-                                    {copied
-                                        ? <Check className="h-3.5 w-3.5 text-green-500" />
-                                        : <Copy className="h-3.5 w-3.5 text-muted" />
-                                    }
-                                </button>
-                            </div>
-                        </ReceiptRow>
-
-                        <ReceiptRow label="Transaction Type">
-                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-200">
-                                {transaction.type}
-                            </span>
-                        </ReceiptRow>
-
-                        <ReceiptRow label="Direction">
-                            <span className={cn(
-                                "flex items-center gap-1 text-xs font-semibold",
-                                isCredit ? "text-green-600" : "text-red-500"
-                            )}>
-                                {isCredit
-                                    ? <ArrowDownLeft className="h-3.5 w-3.5" />
-                                    : <ArrowUpRight className="h-3.5 w-3.5" />
-                                }
-                                {transaction.direction === "CREDIT" ? "Received" : "Sent"}
-                            </span>
-                        </ReceiptRow>
-
-                        <ReceiptRow label="Currency">
-                            <span className="text-sm font-semibold text-ink dark:text-trueWhite">{transaction.currency}</span>
-                        </ReceiptRow>
-
-                        {!!transaction.fee && (
-                            <>
-                                <ReceiptRow label="Amount">
-                                    <span className="text-sm font-semibold text-ink dark:text-trueWhite">{formatNaira(Math.abs(transaction.amount))}</span>
-                                </ReceiptRow>
-                                <ReceiptRow label="Fee">
-                                    <span className="text-sm font-semibold text-ink dark:text-trueWhite">{formatNaira(transaction.fee)}</span>
-                                </ReceiptRow>
-                                <ReceiptRow label={isCredit ? "Net Received" : "Total Debited"}>
-                                    <span className={cn("text-sm font-bold", cfg.amountColor)}>
-                                        {formatNaira(isCredit ? Math.abs(transaction.amount) - transaction.fee : Math.abs(transaction.amount) + transaction.fee)}
+                    {config.rows.length > 0 && (
+                        <div className="mt-4 border-t border-dashed border-[#DCD3F7] pt-3">
+                            <p className="pb-1 text-[11px] font-bold uppercase tracking-[1.6px] text-[#5B4F78]">{config.detailsTitle}</p>
+                            {config.rows.map((r) => (
+                                <div key={r.label} className="flex justify-between gap-4 border-b border-[#F0EBFA] py-2.5 text-[14px] last:border-b-0">
+                                    <span className="shrink-0 text-[#5B4F78]">{r.label}</span>
+                                    <span
+                                        className={cn(
+                                            "min-w-0 break-words text-right font-semibold",
+                                            r.mono && "font-mono text-[13px]",
+                                            r.emphasis === "royal" && "font-bold text-[#5B21B6]",
+                                            r.emphasis === "total" && "font-extrabold",
+                                        )}
+                                    >
+                                        {r.value}
                                     </span>
-                                </ReceiptRow>
-                            </>
-                        )}
-
-                        {transaction.cryptoAmount && transaction.cryptoAsset && (
-                            <ReceiptRow label="Crypto received">
-                                <span className="text-sm font-semibold text-ink dark:text-trueWhite">
-                                    {transaction.cryptoAmount} {transaction.cryptoAsset}
-                                </span>
-                            </ReceiptRow>
-                        )}
-
-                        <ReceiptRow label="Date & Time">
-                            <span className="text-sm font-semibold text-ink dark:text-trueWhite">
-                                {transaction.date
-                                    ? format(new Date(transaction.date), "d MMM yyyy, h:mm a")
-                                    : "—"}
-                            </span>
-                        </ReceiptRow>
-                    </div>
-
-                    {/* ── Divider ── */}
-                    <div className="w-full border-t border-border my-5" />
-
-                    {/* ── View Full Receipt ── */}
-                    <button
-                        onClick={() => {
-                            onViewFullDetail?.(transaction.id);
-                            onOpenChange(false);
-                        }}
-                        className="w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-700 active:scale-[0.98] text-trueWhite font-semibold text-sm transition-all mb-3"
-                    >
-                        View Full Receipt
-                    </button>
-
-                    {/* ── Download + Share side by side ── */}
-                    <div className="w-full grid grid-cols-2 gap-3">
-                        {/* Download dropdown */}
-                        <div className="relative">
-                            <button
-                                onClick={() => { setShowDownloadMenu(!showDownloadMenu); setShowShareMenu(false); }}
-                                disabled={isDownloading}
-                                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-border text-sm font-semibold text-ink dark:text-trueWhite hover:bg-gray-50 dark:hover:bg-trueWhite/10 transition-colors disabled:opacity-60"
-                            >
-                                <Download className="h-4 w-4" />
-                                {isDownloading ? "..." : "Download"}
-                            </button>
-                            {showDownloadMenu && (
-                                <div className="absolute bottom-full left-0 right-0 mb-1 bg-white dark:bg-[#2C2C2E] border border-border rounded-xl shadow-xl z-50 overflow-hidden text-left">
-                                    {[
-                                        { label: "As HTML", action: handleDownloadHTML },
-                                        { label: "As PDF", action: handleDownloadPDF },
-                                        { label: "As Image (PNG)", action: handleDownloadImage },
-                                    ].map((item, i, arr) => (
-                                        <button
-                                            key={item.label}
-                                            onClick={item.action}
-                                            disabled={isDownloading}
-                                            className={cn(
-                                                "w-full px-3 py-2.5 text-sm text-ink dark:text-trueWhite hover:bg-gray-50 dark:hover:bg-trueWhite/10 disabled:opacity-50 transition-colors",
-                                                i < arr.length - 1 && "border-b border-border"
-                                            )}
-                                        >
-                                            {item.label}
-                                        </button>
-                                    ))}
                                 </div>
-                            )}
+                            ))}
                         </div>
+                    )}
 
-                        {/* Share dropdown */}
-                        <div className="relative">
-                            <button
-                                onClick={() => { setShowShareMenu(!showShareMenu); setShowDownloadMenu(false); }}
-                                disabled={isSharing}
-                                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-border text-sm font-semibold text-ink dark:text-trueWhite hover:bg-gray-50 dark:hover:bg-trueWhite/10 transition-colors disabled:opacity-60"
-                            >
-                                <Share2 className="h-4 w-4" />
-                                {isSharing ? "..." : "Share"}
-                            </button>
-                            {showShareMenu && (
-                                <div className="absolute bottom-full left-0 right-0 mb-1 bg-white dark:bg-[#1C1C1E] border border-border rounded-xl shadow-xl z-50 overflow-hidden text-left">
-                                    {[
-                                        { label: "As Text", action: handleShareText },
-                                        { label: "As Image", action: handleShareImage },
-                                    ].map((item, i, arr) => (
-                                        <button
-                                            key={item.label}
-                                            onClick={item.action}
-                                            disabled={isSharing}
-                                            className={cn(
-                                                "w-full px-3 py-2.5 text-sm text-ink dark:text-trueWhite hover:bg-gray-50 dark:hover:bg-trueWhite/10 disabled:opacity-50 transition-colors",
-                                                i < arr.length - 1 && "border-b border-border"
-                                            )}
-                                        >
-                                            {item.label}
-                                        </button>
-                                    ))}
+                    {config.references.length > 0 && (
+                        <div className="mt-3 space-y-2.5 rounded-[14px] bg-[#F8F6FC] px-4 py-3">
+                            {config.references.map((r) => (
+                                <div key={r.label} className="flex items-center justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <p className="text-[10.5px] font-bold uppercase tracking-[1.6px] text-[#5B4F78]">{r.label}</p>
+                                        <p className="truncate font-mono text-[13px]">{truncateMiddle(r.value)}</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => copy(r.value)}
+                                        className="shrink-0 rounded-full bg-[#EEE7FF] p-2 text-[#5B21B6] transition-colors hover:bg-[#E2D6FF]"
+                                        title={`Copy ${r.label.toLowerCase()}`}
+                                    >
+                                        <Copy className="h-3.5 w-3.5" />
+                                        <span className="sr-only">Copy {r.label}</span>
+                                    </button>
                                 </div>
-                            )}
+                            ))}
                         </div>
+                    )}
+
+                    <div className="mt-5 space-y-2.5">
+                        <button
+                            onClick={() => {
+                                onViewFullDetail?.(transaction.id);
+                                onOpenChange(false);
+                            }}
+                            className="w-full rounded-xl bg-violet-600 py-3 text-sm font-semibold text-trueWhite transition-all hover:bg-violet-700 active:scale-[0.98]"
+                        >
+                            View full receipt
+                        </button>
+                        <button
+                            onClick={share}
+                            disabled={isSharing}
+                            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#DCD3F7] py-2.5 text-sm font-semibold text-[#14092E] transition-colors hover:bg-[#F8F6FC] disabled:opacity-60"
+                        >
+                            <Share2 className="h-4 w-4" />
+                            {isSharing ? "Preparing..." : "Share receipt"}
+                        </button>
+                        <a
+                            href={reportHref}
+                            className="block w-full py-2 text-center text-[13px] font-semibold text-[#5B21B6] hover:underline"
+                        >
+                            Report an issue
+                        </a>
                     </div>
                 </div>
             </DialogContent>
         </Dialog>
-    );
-}
-
-function ReceiptRow({ label, children }: { label: string; children: React.ReactNode }) {
-    return (
-        <div className="flex items-center justify-between">
-            <span className="text-sm text-muted">{label}</span>
-            <div>{children}</div>
-        </div>
     );
 }

@@ -6,13 +6,14 @@ import { IconArrowLeft as ArrowLeft, IconData as Wifi } from "@/components/icons
 import { toast } from "sonner";
 
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
-import { usePayData, useSaveBeneficiary, useSavedBillers, useUtilityCategories, useUtilityServices, useUtilityVariations } from "@/lib/queries/services";
+import { usePayData, useSaveBeneficiary, useSavedBillers, useUtilityCategories, useUtilityQuote, useUtilityServices, useUtilityVariations } from "@/lib/queries/services";
 import { UtilityPurchaseResponseDto } from "@/lib/types/api";
 
 // New Shared UI Components
 import { PhoneNetworkInput } from "@/components/services/PhoneNetworkInput";
 import { RecentNumbersRow } from "@/components/services/RecentNumbersRow";
 import { Switch } from "@/components/ui/switch";
+import { carrierLabel, pickNetworkForCarrier, type NetworkFamily } from "@/lib/network-label";
 import { PlanGrid } from "@/components/services/PlanGrid";
 import { StickyPayBar } from "@/components/services/StickyPayBar";
 import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen";
@@ -21,9 +22,9 @@ import { TransactionDetailModal } from "@/components/shared/transaction-detail-m
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 
-// Network-detection prefixes are matched against fetched service names,
-// since serviceIDs (e.g. "mtn") come from the backend and aren't hardcoded.
-const PREFIX_TO_NETWORK_NAME: { prefixes: string[]; match: string }[] = [
+// Prefix → carrier. The carrier is resolved to a loaded service by serviceID
+// (see pickNetworkForCarrier), since the catalog comes from the backend.
+const PREFIX_TO_NETWORK_NAME: { prefixes: string[]; match: NetworkFamily }[] = [
     { prefixes: ["0803", "0703", "0813", "0906", "0810", "0814", "0916"], match: "mtn" },
     { prefixes: ["0805", "0705", "0815", "0811", "0905", "0915"], match: "glo" },
     { prefixes: ["0802", "0708", "0812", "0901", "0902", "0904", "0912"], match: "airtel" },
@@ -55,6 +56,7 @@ export default function DataPage() {
         }
     }, [network, networks]);
     const selectedNetwork = networks.find((n) => n.serviceID === network);
+    const selectedNetworkLabel = selectedNetwork ? carrierLabel(selectedNetwork.serviceID) ?? selectedNetwork.name : "";
     const { data: plans = [], isLoading: plansLoading } = useUtilityVariations(selectedNetwork?.serviceID);
 
     // Queries & Mutations
@@ -83,8 +85,9 @@ export default function DataPage() {
     React.useEffect(() => {
         const rule = PREFIX_TO_NETWORK_NAME.find((r) => r.prefixes.some((p) => phone.startsWith(p)));
         if (!rule) return;
-        const matched = networks.find((n) => n.name.toLowerCase().includes(rule.match));
-        if (matched) setNetwork(matched.serviceID);
+        // Keeps the customer's pick when it is already that carrier (e.g. "GLO Best Value"),
+        // instead of snapping back to the standard service on every digit typed.
+        setNetwork((current) => pickNetworkForCarrier(networks, rule.match, current ?? null) ?? current);
     }, [phone, networks]);
 
     const handlePayClick = () => {
@@ -112,6 +115,7 @@ export default function DataPage() {
                 amountNgn: Number(selectedPlan.variation_amount),
                 network: selectedNetwork.serviceID,
                 pin,
+                expectedPay: quote?.payAmount,
             },
             {
                 onSuccess: (res) => {
@@ -121,7 +125,7 @@ export default function DataPage() {
                             category: "DATA",
                             provider: selectedNetwork.serviceID,
                             identifier: phone,
-                            label: `${selectedNetwork.name} ${phone}`,
+                            label: `${selectedNetworkLabel} ${phone}`,
                             amount: selectedPlan.variation_amount,
                         }, {
                             onError: () => {
@@ -146,6 +150,10 @@ export default function DataPage() {
 
     const isValid = phone.length >= 10 && !!selectedPlan;
     const selectedAmount = selectedPlan ? Number(selectedPlan.variation_amount) : 0;
+    // The server's own price: the discount is taken off what the customer pays.
+    const { data: quote } = useUtilityQuote("DATA", selectedAmount);
+    const payAmount = quote ? Number(quote.payAmount) : selectedAmount;
+    const saving = quote ? Number(quote.discountAmount) : 0;
 
     return (
         <>
@@ -174,17 +182,18 @@ export default function DataPage() {
                                 let logoUrl = n.image;
                                 const id = n.serviceID.toLowerCase();
                                 
+                                // GLO / 9mobile each have a standard and an SME ("Best Value") service —
+                                // the label must say which, so the plan list on screen is unambiguous.
+                                const carrier = carrierLabel(n.serviceID);
+                                if (carrier) label = carrier;
+
                                 if (id.includes('mtn')) {
-                                    label = 'MTN';
                                     logoUrl = '/images/providers/mtn.png';
                                 } else if (id.includes('glo')) {
-                                    label = 'GLO';
                                     logoUrl = '/images/providers/glo.png';
                                 } else if (id.includes('airtel')) {
-                                    label = 'Airtel';
                                     logoUrl = '/images/providers/airtel.png';
                                 } else if (id.includes('etisalat') || id.includes('9mobile')) {
-                                    label = '9mobile';
                                     logoUrl = '/images/providers/9mobile.png';
                                 } else if (id.includes('smile')) {
                                     label = 'Smile';
@@ -231,8 +240,9 @@ export default function DataPage() {
 
             <StickyPayBar
                 visible={!successOpen}
-                amount={selectedAmount}
-                summaryText={selectedPlan ? `${selectedPlan.name} · ${selectedNetwork?.name} Data` : "Select a plan"}
+                amount={payAmount}
+                saving={saving}
+                summaryText={selectedPlan ? `${selectedPlan.name} · ${selectedNetworkLabel} Data` : "Select a plan"}
                 onPay={handlePayClick}
                 disabled={!isValid}
             />
