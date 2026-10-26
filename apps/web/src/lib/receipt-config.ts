@@ -135,7 +135,8 @@ export function titleCase(name: string | null | undefined): string {
 /** Tokens and PINs in groups of four: "263612345678" -> "2636 1234 5678". */
 export function groupByFour(value: string | null | undefined): string {
     if (!present(value)) return "";
-    const compact = value.replace(/[\s\-]/g, "");
+    // VTpass sometimes sends the code with its label ("Token : 2636..."): the label is not part of the code.
+    const compact = value.replace(/^\s*(token|pin)\s*:?\s*/i, "").replace(/[\s\-]/g, "");
     return compact.replace(/(.{4})/g, "$1 ").trim();
 }
 
@@ -518,7 +519,7 @@ function buildElectricity(i: ElectricityInput): ReceiptConfig {
         headerLabel: "Bill payment receipt",
         heroLine: i.disco ? `Electricity · ${i.disco}` : "Electricity",
         highlight: present(i.token)
-            ? { kind: "token", label: "Electricity token", value: groupByFour(i.token), footnote: present(i.units) ? i.units.trim() : undefined }
+            ? { kind: "token", label: "Electricity token", value: groupByFour(i.token) }
             : null,
         rows: compact([
             row("Meter number", i.meterNumber, { mono: true }),
@@ -526,6 +527,7 @@ function buildElectricity(i: ElectricityInput): ReceiptConfig {
             row("Customer name", titleCase(i.customerName)),
             row("Address", i.customerAddress),
             row("Tariff", i.tariff),
+            row("Units", i.units),
             row("Provider reference", i.providerTransactionId, { mono: true }),
             ...(money.length > 1 ? money : []),
         ]),

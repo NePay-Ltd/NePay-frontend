@@ -402,9 +402,9 @@ export default function TransferPage() {
                                                         type="button"
                                                         aria-label={`Remove saved account ${acc.accountName}`}
                                                         onClick={() => setAccountToRemove(acc)}
-                                                        className="absolute -right-1.5 -top-2 flex h-5 w-5 items-center justify-center rounded-full border border-border bg-white text-muted shadow-sm transition-colors hover:bg-red-50 hover:text-red-600"
+                                                        className="absolute -right-0.5 -top-1 flex h-[22px] w-[22px] items-center justify-center rounded-full border border-border bg-white text-muted shadow-sm transition-colors hover:bg-red-50 hover:text-red-600"
                                                     >
-                                                        <X className="h-3 w-3" strokeWidth={3} />
+                                                        <X className="h-3.5 w-3.5" strokeWidth={3} />
                                                     </button>
                                                     </div>
                                                 ))}
