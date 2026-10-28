@@ -31,8 +31,8 @@ const TONE: Record<ReceiptTone, { bg: string; fg: string }> = {
 };
 
 const SANS = `var(--font-sans, "Plus Jakarta Sans"), "Plus Jakarta Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif`;
-const SERIF = `var(--font-receipt-serif, "Instrument Serif"), "Instrument Serif", Georgia, serif`;
-const MONO = `var(--font-receipt-mono, "JetBrains Mono"), "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace`;
+const SERIF = `NairaFix, var(--font-receipt-serif, "Instrument Serif"), "Instrument Serif", Georgia, serif`;
+const MONO = `NairaFix, var(--font-receipt-mono, "JetBrains Mono"), "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace`;
 
 /** The receipt's own stylesheet. Scoped under `.receipt` so it can sit on a live page without leaking. */
 export const RECEIPT_CSS = `
@@ -93,9 +93,9 @@ export const RECEIPT_CSS = `
 .receipt .rc-row .rc-royal { color: #5B21B6; font-weight: 700; }
 .receipt .rc-row .rc-total { font-weight: 800; }
 .receipt .rc-refs { margin: 8px 24px 0; padding: 14px 16px; border-radius: 14px; background: #F8F6FC; display: flex; flex-direction: column; gap: 10px; }
-.receipt .rc-ref { display: flex; flex-direction: column; gap: 6px; }
-.receipt .rc-ref-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.receipt .rc-ref-val { flex: 1 1 auto; min-width: 0; font-family: ${MONO}; font-size: 14px; line-height: 1.4; word-break: break-all; }
+.receipt .rc-ref { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.receipt .rc-ref-row { display: flex; width: 100%; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.receipt .rc-ref-val { width: 100%; min-width: 0; font-family: ${MONO}; font-size: 14px; line-height: 1.4; word-break: break-all; text-align: center; }
 .receipt .rc-copy { all: unset; box-sizing: border-box; flex: none; cursor: pointer; font-size: 12px; font-weight: 700; line-height: 1; color: #5B21B6; padding: 7px 14px; border-radius: 999px; background: #F0EBFA; white-space: nowrap; }
 .receipt .rc-copy:hover { background: #E2D6FF; }
 .receipt .rc-copy-block { margin-top: 2px; align-self: center; }

@@ -35,6 +35,7 @@ import { Panel, PanelHeader, PanelBody } from "@/components/shared/panel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
 import { Switch } from "@/components/ui/switch";
 import { ConfirmRemoveDialog } from "@/components/shared/confirm-remove-dialog";
@@ -141,6 +142,62 @@ export default function TransferPage() {
 
     const [bankPickerOpen, setBankPickerOpen] = React.useState(false);
     const [bankSearchQuery, setBankSearchQuery] = React.useState("");
+    const [pickerViewport, setPickerViewport] = React.useState({
+        isMobile: false,
+        height: 0,
+        offsetTop: 0,
+        bottomInset: 0,
+        keyboardOpen: false,
+    });
+
+    React.useEffect(() => {
+        const viewport = window.visualViewport;
+        const updateViewport = () => {
+            const height = viewport?.height ?? window.innerHeight;
+            const offsetTop = viewport?.offsetTop ?? 0;
+            const bottomInset = Math.max(0, window.innerHeight - offsetTop - height);
+            setPickerViewport({
+                isMobile: window.matchMedia("(max-width: 767px)").matches,
+                height,
+                offsetTop,
+                bottomInset,
+                keyboardOpen: bottomInset > 100 || height < window.innerHeight - 100,
+            });
+        };
+
+        updateViewport();
+        viewport?.addEventListener("resize", updateViewport);
+        viewport?.addEventListener("scroll", updateViewport);
+        window.addEventListener("resize", updateViewport);
+        return () => {
+            viewport?.removeEventListener("resize", updateViewport);
+            viewport?.removeEventListener("scroll", updateViewport);
+            window.removeEventListener("resize", updateViewport);
+        };
+    }, []);
+
+    const mobilePickerStyle: React.CSSProperties = pickerViewport.keyboardOpen
+        ? {
+            left: 12,
+            right: 12,
+            top: pickerViewport.offsetTop + 8,
+            bottom: pickerViewport.bottomInset + 8,
+            width: "auto",
+            maxWidth: "none",
+            maxHeight: "none",
+            transform: "none",
+        }
+        : {
+            left: "50%",
+            right: "auto",
+            top: "50%",
+            bottom: "auto",
+            width: "calc(100% - 2rem)",
+            maxWidth: "28rem",
+            height: `${Math.min(Math.round(pickerViewport.height * 0.82), 560)}px`,
+            maxHeight: "82dvh",
+            transform: "translate(-50%, -50%)",
+        };
     
     const selectedBank = bankList.find(b => b.bankCode === bankCode);
     const filteredBankList = React.useMemo(() => {
@@ -287,11 +344,11 @@ export default function TransferPage() {
                                 <div className="space-y-4">
                                     <div className="space-y-2">
                                         <Label>Select Bank</Label>
-                                        <Popover open={bankPickerOpen} onOpenChange={setBankPickerOpen}>
+                                        <Popover open={bankPickerOpen && !pickerViewport.isMobile} onOpenChange={setBankPickerOpen}>
                                             <PopoverTrigger asChild>
                                                 <button
                                                     type="button"
-                                                    className="flex h-12 w-full items-center justify-between rounded-md border border-border bg-white px-3 text-sm hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600"
+                                                    className="hidden h-12 w-full items-center justify-between rounded-md border border-border bg-white px-3 text-sm hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 md:flex"
                                                 >
                                                     <span className={selectedBank ? "text-ink" : "text-muted"}>
                                                         {selectedBank ? selectedBank.bankName : "Select a bank"}
@@ -337,6 +394,61 @@ export default function TransferPage() {
                                                 </div>
                                             </PopoverContent>
                                         </Popover>
+                                        <Dialog open={bankPickerOpen && pickerViewport.isMobile} onOpenChange={setBankPickerOpen}>
+                                            <DialogTrigger asChild>
+                                                <button
+                                                    type="button"
+                                                    className="flex h-12 w-full items-center justify-between rounded-md border border-border bg-white px-3 text-sm hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 md:hidden"
+                                                >
+                                                    <span className={selectedBank ? "text-ink" : "text-muted"}>
+                                                        {selectedBank ? selectedBank.bankName : "Select a bank"}
+                                                    </span>
+                                                    <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                                                </button>
+                                            </DialogTrigger>
+                                            <DialogContent
+                                                hideCloseButton
+                                                style={mobilePickerStyle}
+                                                className="flex flex-col gap-0 overflow-hidden rounded-2xl border-border bg-white p-0 shadow-xl"
+                                            >
+                                                <div className="shrink-0 border-b border-border px-4 pb-3 pt-5">
+                                                    <DialogTitle className="mb-3 pr-8 text-left text-base">Select a bank</DialogTitle>
+                                                    <div className="flex items-center gap-2 rounded-md border border-border px-3">
+                                                        <Search className="h-4 w-4 shrink-0 text-muted" />
+                                                        <input
+                                                            autoFocus
+                                                            className="h-11 w-full bg-transparent text-sm outline-none placeholder:text-muted"
+                                                            placeholder="Search banks..."
+                                                            value={bankSearchQuery}
+                                                            onChange={(e) => setBankSearchQuery(e.target.value)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-1">
+                                                    {filteredBankList.length === 0 ? (
+                                                        <p className="px-2 py-3 text-center text-xs text-muted">No banks found.</p>
+                                                    ) : (
+                                                        filteredBankList.map((b) => (
+                                                            <button
+                                                                key={b.bankCode}
+                                                                type="button"
+                                                                className={cn(
+                                                                    "flex w-full items-center rounded-sm px-3 py-3 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800",
+                                                                    bankCode === b.bankCode && "bg-violet-50 font-medium text-violet-700 dark:bg-violet-500/20 dark:text-violet-300"
+                                                                )}
+                                                                onClick={() => {
+                                                                    setBankCode(b.bankCode);
+                                                                    setBankPickerOpen(false);
+                                                                    setBankSearchQuery("");
+                                                                }}
+                                                            >
+                                                                {b.bankName}
+                                                            </button>
+                                                        ))
+                                                    )}
+                                                </div>
+                                            </DialogContent>
+                                        </Dialog>
                                     </div>
 
                                     <div className="space-y-2">
@@ -375,36 +487,50 @@ export default function TransferPage() {
                                     </div>
                                     
                                     {savedAccounts.length > 0 && (
-                                        <div className="pt-4 border-t border-border">
-                                            <p className="text-xs font-semibold text-muted mb-3 uppercase tracking-wider">Saved Accounts</p>
-                                                                                        <div className="flex gap-2 overflow-x-auto pb-2 pt-2 pr-2 scrollbar-hide">
+                                        <div className="border-t border-border pt-4">
+                                            <div className="mb-3">
+                                                <p className="text-xs font-semibold uppercase tracking-wider text-muted">Saved beneficiaries</p>
+                                                <p className="mt-1 text-xs text-muted">Choose one to fill in their bank details.</p>
+                                            </div>
+                                            <div className="flex gap-3 overflow-x-auto pb-2 pt-1 pr-2 scrollbar-hide">
                                                 {savedAccounts.map(acc => (
-                                                    <div key={acc.id} className="relative flex-shrink-0">
+                                                    <div key={acc.id} className="relative flex-shrink-0 pt-1 pr-1">
                                                     <button
+                                                        type="button"
+                                                        aria-label={`Use ${acc.accountName}, ${acc.bankName}, account ending ${acc.accountNumber.slice(-4)}`}
                                                         onClick={() => handleSelectSavedAccount(acc)}
                                                         className={cn(
-                                                            "flex-shrink-0 flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors",
+                                                            "flex w-[210px] items-center gap-3 rounded-2xl border p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md",
                                                             bankCode === acc.bankCode && accountNumber === acc.accountNumber 
-                                                                ? "border-violet-600 bg-violet-50 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300" 
-                                                                : "border-border bg-white text-ink hover:bg-gray-50 dark:bg-transparent dark:hover:bg-gray-900"
+                                                                ? "border-violet-500 bg-violet-50 text-violet-900 ring-2 ring-violet-500/15 dark:bg-violet-500/15 dark:text-violet-200"
+                                                                : "border-border bg-white text-ink hover:border-violet-200 hover:bg-violet-50/40 dark:bg-gray-950 dark:hover:bg-violet-950/30"
                                                         )}
                                                     >
                                                         {acc.iconUrl ? (
-                                                            <img src={acc.iconUrl} alt="" className="h-5 w-5 rounded-full object-cover bg-gray-100" />
+                                                            <img src={acc.iconUrl} alt="" className="h-10 w-10 shrink-0 rounded-xl bg-white object-contain p-1.5 shadow-sm" />
                                                         ) : (
-                                                            <div className="h-5 w-5 rounded-full bg-gray-200 flex items-center justify-center">
-                                                                <Landmark className="h-3 w-3 text-gray-500" />
+                                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">
+                                                                <Landmark className="h-5 w-5" />
                                                             </div>
                                                         )}
-                                                                                                                <span className="font-medium">{acc.accountName.split(' ')[0]}</span>
+                                                        <span className="min-w-0 flex-1">
+                                                            <span className="block truncate text-sm font-semibold">{acc.accountName}</span>
+                                                            <span className="mt-0.5 block truncate text-xs text-muted">{acc.bankName}</span>
+                                                            <span className="mt-1 block font-mono text-[11px] tracking-wide text-muted">•••• {acc.accountNumber.slice(-4)}</span>
+                                                        </span>
+                                                        {bankCode === acc.bankCode && accountNumber === acc.accountNumber && (
+                                                            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white">
+                                                                <Check className="h-3 w-3" />
+                                                            </span>
+                                                        )}
                                                     </button>
                                                     <button
                                                         type="button"
                                                         aria-label={`Remove saved account ${acc.accountName}`}
                                                         onClick={() => setAccountToRemove(acc)}
-                                                        className="absolute -right-0.5 -top-1 flex h-[22px] w-[22px] items-center justify-center rounded-full border border-border bg-white text-muted shadow-sm transition-colors hover:bg-red-50 hover:text-red-600"
+                                                        className="absolute right-0 top-0 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-white text-muted shadow-sm transition-colors hover:bg-red-50 hover:text-red-600"
                                                     >
-                                                        <X className="h-3.5 w-3.5" strokeWidth={3} />
+                                                        <X className="h-3.5 w-3.5" />
                                                     </button>
                                                     </div>
                                                 ))}

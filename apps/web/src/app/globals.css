@@ -2,6 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * The naira sign (U+20A6) with TWO bars. Plus Jakarta Sans draws it with one, which is wrong. These faces hold
+ * ONLY that one character (unicode-range), cut from Plus Jakarta Sans itself in each weight, so every other
+ * character still comes from the real font. "NairaFix" is listed first in each font stack below / in tailwind.
+ */
+@font-face {
+    font-family: "NairaFix";
+    src: url("/fonts/naira-400.woff") format("woff");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+20A6;
+}
+@font-face {
+    font-family: "NairaFix";
+    src: url("/fonts/naira-500.woff") format("woff");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+20A6;
+}
+@font-face {
+    font-family: "NairaFix";
+    src: url("/fonts/naira-600.woff") format("woff");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+20A6;
+}
+@font-face {
+    font-family: "NairaFix";
+    src: url("/fonts/naira-700.woff") format("woff");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+20A6;
+}
+@font-face {
+    font-family: "NairaFix";
+    src: url("/fonts/naira-800.woff") format("woff");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+20A6;
+}
+
 @layer base {
     :root {
         --r-sm: 8px;

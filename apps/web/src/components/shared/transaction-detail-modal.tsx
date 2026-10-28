@@ -176,15 +176,15 @@ export function TransactionDetailModal({ open, onOpenChange, transaction, onView
                     {config.references.length > 0 && (
                         <div className="mt-3 space-y-2.5 rounded-[14px] bg-[#F8F6FC] px-4 py-3">
                             {config.references.map((r) => (
-                                <div key={r.label} className="flex items-center justify-between gap-3">
+                                <div key={r.label} className="flex flex-col items-center gap-2 text-center">
                                     <div className="min-w-0">
                                         <p className="text-[10.5px] font-bold uppercase tracking-[1.6px] text-[#5B4F78]">{r.label}</p>
-                                        <p className="truncate font-mono text-[13px]">{truncateMiddle(r.value)}</p>
+                                        <p className="break-all font-mono text-[13px]">{truncateMiddle(r.value)}</p>
                                     </div>
                                     <button
                                         type="button"
                                         onClick={() => copy(r.value)}
-                                        className="shrink-0 rounded-full bg-[#EEE7FF] p-2 text-[#5B21B6] transition-colors hover:bg-[#E2D6FF]"
+                                        className="rounded-full bg-[#EEE7FF] p-2 text-[#5B21B6] transition-colors hover:bg-[#E2D6FF]"
                                         title={`Copy ${r.label.toLowerCase()}`}
                                     >
                                         <Copy className="h-3.5 w-3.5" />

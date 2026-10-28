@@ -34,6 +34,8 @@ interface RegisterStepTwoProps {
     /** Prefills from the partner link's `?hear=` / `?hearOther=` params — still editable. */
     defaultHearAboutUs?: RegisterStepTwoValues["hearAboutUs"];
     defaultHearAboutUsOther?: string;
+    /** Prefills the referral code box from a shared `?ref=` link — still editable. */
+    defaultReferralCode?: string;
 }
 
 export function RegisterStepTwo({
@@ -43,6 +45,7 @@ export function RegisterStepTwo({
     fromPartnerLink = false,
     defaultHearAboutUs,
     defaultHearAboutUsOther = "",
+    defaultReferralCode = "",
 }: RegisterStepTwoProps) {
     const [showPassword, setShowPassword] = React.useState(false);
     const [showConfirm, setShowConfirm] = React.useState(false);
@@ -67,6 +70,7 @@ export function RegisterStepTwo({
             acceptTerms: false,
             hearAboutUs: defaultHearAboutUs,
             hearAboutUsOther: defaultHearAboutUsOther,
+            referralCode: defaultReferralCode,
         },
     });
 
@@ -248,6 +252,21 @@ export function RegisterStepTwo({
                         />
                     </Field>
                 )}
+
+                <Field
+                    label="Referral code (optional)"
+                    htmlFor="reg-referral"
+                    error={errors.referralCode?.message}
+                >
+                    <Input
+                        id="reg-referral"
+                        placeholder="Got a code from a friend or partner?"
+                        autoCapitalize="characters"
+                        autoComplete="off"
+                        {...register("referralCode")}
+                        aria-invalid={!!errors.referralCode}
+                    />
+                </Field>
             </div>
 
             {fromPartnerLink && (

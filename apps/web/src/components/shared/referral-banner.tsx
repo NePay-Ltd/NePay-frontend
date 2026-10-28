@@ -16,7 +16,7 @@ interface ReferralBannerProps {
 export function ReferralBanner({ className, compact = false }: ReferralBannerProps) {
     const { data: referral, isLoading } = useReferralSummary();
     const referralLink = referral && typeof window !== "undefined"
-        ? `${window.location.origin}/register?ref=${encodeURIComponent(referral.referralCode)}`
+        ? `${window.location.origin}/r/${encodeURIComponent(referral.referralCode)}`
         : "";
 
     const handleCopyInviteLink = () => {

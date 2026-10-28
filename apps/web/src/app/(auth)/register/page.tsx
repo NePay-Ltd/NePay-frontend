@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { splitReferralCode } from "@/lib/referral-code";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -27,6 +28,8 @@ function RegisterPageContent() {
     // prefill the "How did you hear about us?" answer via `?hear=` and
     // `?hearOther=` — the customer can still change those before submitting.
     const marketerCodeFromUrl = searchParams.get("mkt")?.trim() ?? "";
+    // A customer's shared link (/register?ref=CODE) prefills the referral box; they can still change it.
+    const referralFromUrl = searchParams.get("ref")?.trim().slice(0, 20) ?? "";
     const hearParsed = hearAboutUsEnum.safeParse(searchParams.get("hear"));
     const hearFromUrl = hearParsed.success ? hearParsed.data : undefined;
     const hearOtherFromUrl = hearFromUrl === "OTHER" ? (searchParams.get("hearOther")?.trim().slice(0, 120) ?? "") : "";
@@ -52,6 +55,13 @@ function RegisterPageContent() {
                 formattedPhone = "+" + formattedPhone;
             }
 
+            // A code typed (or prefilled from ?ref=) wins; otherwise a partner link's marketer code applies.
+            const typed = splitReferralCode(stepTwoData.referralCode);
+            const attribution =
+                typed.referralCode || typed.referredByMarketerCode
+                    ? typed
+                    : { referredByMarketerCode: marketerCodeFromUrl || undefined };
+
             const user = await registerUser({
                 firstName: stepOneData.firstName,
                 lastName: stepOneData.lastName,
@@ -59,7 +69,7 @@ function RegisterPageContent() {
                 username: stepTwoData.username,
                 email: stepTwoData.email,
                 password: stepTwoData.password,
-                referredByMarketerCode: marketerCodeFromUrl || undefined,
+                ...attribution,
                 hearAboutUs: stepTwoData.hearAboutUs,
                 hearAboutUsOther: stepTwoData.hearAboutUs === "OTHER" ? stepTwoData.hearAboutUsOther : undefined,
             });
@@ -125,6 +135,7 @@ function RegisterPageContent() {
                     fromPartnerLink={!!marketerCodeFromUrl}
                     defaultHearAboutUs={hearFromUrl}
                     defaultHearAboutUsOther={hearOtherFromUrl}
+                    defaultReferralCode={referralFromUrl}
                     onBack={() => setStep(1)} 
                     onSubmitFinal={onSubmitFinal} 
                 />

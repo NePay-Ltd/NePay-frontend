@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { SHOW_TWO_FACTOR_SETTINGS } from "@/lib/feature-flags";
 import { useRouter } from "next/navigation";
 import { IconShield as Shield, IconAirtime as Smartphone, IconKey as Key, IconLock as Lock, IconChevronRight as ChevronRight, IconFingerprint as Fingerprint, IconCopy as Copy, IconCheck as Check } from "@/components/icons";
 import { Activity } from "lucide-react";;
@@ -171,18 +172,20 @@ export default function SecurityPage() {
                         </div>
                     ) : (
                         <div className="divide-y divide-border">
-                            <RowItem
-                                icon={Smartphone}
-                                title="Two-Factor Authentication"
-                                subtitle="Add an extra layer of security to your account"
-                                trailing={
-                                    <Switch
-                                        checked={settings.twoFactorEnabled}
-                                        onCheckedChange={onToggle2FA}
-                                    />
-                                }
-                                className="px-5"
-                            />
+                            {SHOW_TWO_FACTOR_SETTINGS && (
+                                <RowItem
+                                    icon={Smartphone}
+                                    title="Two-Factor Authentication"
+                                    subtitle="Add an extra layer of security to your account"
+                                    trailing={
+                                        <Switch
+                                            checked={settings.twoFactorEnabled}
+                                            onCheckedChange={onToggle2FA}
+                                        />
+                                    }
+                                    className="px-5"
+                                />
+                            )}
                             <RowItem
                                 icon={Fingerprint}
                                 title="Biometric Login"
