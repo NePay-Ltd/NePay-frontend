@@ -12,7 +12,7 @@
  */
 
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
+import { apiClient, hasSession } from "@/lib/api-client";
 import { LedgerEntryDto, ApiPaginated, ApiResponse } from "@/lib/types/api";
 import { toast } from "sonner";
 
@@ -42,7 +42,8 @@ const READ_KEY = "nepay-read-notifs";
 
 function getReadSet(): Set<string> {
     try {
-        const raw = sessionStorage.getItem(READ_KEY);
+        // localStorage, not sessionStorage: a counter that forgets what you have read every time you reopen the site is useless.
+        const raw = localStorage.getItem(READ_KEY);
         return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
     } catch {
         return new Set();
@@ -51,7 +52,7 @@ function getReadSet(): Set<string> {
 
 function saveReadSet(ids: Set<string>) {
     try {
-        sessionStorage.setItem(READ_KEY, JSON.stringify([...ids]));
+        localStorage.setItem(READ_KEY, JSON.stringify([...ids]));
     } catch { /* storage full — ignore */ }
 }
 
@@ -184,16 +185,34 @@ export function useNotifications() {
     });
 }
 
+/** How many recent entries the badge looks at. The bell shows "99+" past this, so it never claims a precise number it can't back. */
+export const UNREAD_COUNT_WINDOW = 100;
+
 export function useUnreadNotificationCount() {
     return useQuery<number>({
         queryKey: notificationKeys.unreadCount(),
+        enabled: hasSession(),
         queryFn: async () => {
-            // Fetch the first page and count entries newer than the last-seen marker
-            const readSet = getReadSet();
             const res = await apiClient.get<ApiResponse<ApiPaginated<LedgerEntryDto>>>(
-                `/wallet/transactions?page=1&limit=${LIMIT}`
+                `/wallet/transactions?page=1&limit=${UNREAD_COUNT_WINDOW}`
             );
             const items = res.data.data.items;
+
+            // First time in this browser: nothing has ever been marked read, so everything already in the account
+            // would show as "new" (a "99+" on day one). Treat what is there now as seen; count only what arrives later.
+            let stored: string | null = null;
+            try {
+                stored = localStorage.getItem(READ_KEY);
+            } catch {
+                /* storage blocked: fall through and count nothing rather than a misleading number */
+                return 0;
+            }
+            if (stored === null) {
+                saveReadSet(new Set(items.map((entry) => entry.id)));
+                return 0;
+            }
+
+            const readSet = getReadSet();
             // Any entry not in the local read set is "unread"
             return items.filter((entry) => !readSet.has(entry.id)).length;
         },

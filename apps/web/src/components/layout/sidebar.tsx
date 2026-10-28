@@ -77,7 +77,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname();
     const { data: referral } = useReferralSummary();
     const referralLink = referral && typeof window !== "undefined"
-        ? `${window.location.origin}/register?ref=${encodeURIComponent(referral.referralCode)}`
+        ? `${window.location.origin}/r/${encodeURIComponent(referral.referralCode)}`
         : "";
 
     const copyReferralLink = async () => {

@@ -39,23 +39,35 @@ export function RecentNumbersRow({ contacts, onSelect }: RecentNumbersRowProps) 
 
     return (
         <div className="pt-2">
-            <h4 className="text-xs font-bold text-muted mb-3 px-1 uppercase tracking-wider">Recent</h4>
-            {/* pt/pr leave room for the ✕ badge that overhangs each chip's top-right corner */}
-            <div className="flex gap-2 overflow-x-auto pb-4 pt-2 pr-2 no-scrollbar snap-x">
+            <h4 className="mb-3 px-1 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Recent</h4>
+            <div className="flex gap-3 overflow-x-auto pb-4 pt-1 pr-2 no-scrollbar snap-x">
                 {contacts.map((contact, i) => (
                     <div key={`${contact.id}-${i}`} className="relative flex-none snap-start">
                         <motion.button
                             type="button"
                             onClick={() => onSelect(contact.id)}
-                            whileTap={{ scale: 0.96 }}
-                            className="flex items-center gap-3 rounded-full border border-border bg-white p-2 pr-4 transition-colors hover:bg-gray-50 active:bg-gray-100"
+                            whileTap={{ scale: 0.98 }}
+                            className={`flex min-w-[190px] items-center gap-3 rounded-2xl border p-3 pr-9 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 ${
+                                contact.beneficiaryId
+                                    ? "border-violet-200 bg-gradient-to-br from-violet-50 via-white to-white hover:border-violet-300 dark:border-violet-900/70 dark:from-violet-950/40 dark:via-gray-950 dark:to-gray-950"
+                                    : "border-border bg-white hover:bg-gray-50 dark:bg-gray-950 dark:hover:bg-gray-900"
+                            }`}
                         >
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-700">
+                            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                                contact.beneficiaryId
+                                    ? "bg-violet-600 text-white shadow-sm shadow-violet-900/20"
+                                    : "bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300"
+                            }`}>
                                 <User2 className="h-4 w-4" />
                             </div>
-                            <div className="flex flex-col items-start text-left">
-                                <span className="text-[13px] font-bold text-ink leading-tight">{contact.name}</span>
-                                <span className="text-[11px] font-medium text-muted">{contact.id}</span>
+                            <div className="flex min-w-0 flex-col items-start">
+                                <span className="max-w-[145px] truncate text-[13px] font-bold leading-tight text-ink">{contact.name}</span>
+                                <span className="max-w-[145px] truncate text-[11px] font-medium text-muted">{contact.id}</span>
+                                {contact.beneficiaryId && (
+                                    <span className="mt-1 text-[9px] font-extrabold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-300">
+                                        Saved beneficiary
+                                    </span>
+                                )}
                             </div>
                         </motion.button>
                         {contact.beneficiaryId && (
@@ -63,7 +75,7 @@ export function RecentNumbersRow({ contacts, onSelect }: RecentNumbersRowProps) 
                                 type="button"
                                 aria-label={`Remove ${contact.name} from saved`}
                                 onClick={() => setToRemove(contact)}
-                                className="absolute -right-0.5 -top-1 flex h-[22px] w-[22px] items-center justify-center rounded-full border border-border bg-white text-muted shadow-sm transition-colors hover:bg-red-50 hover:text-red-600"
+                                className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full border border-violet-100 bg-white/90 text-muted shadow-sm transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 dark:border-violet-900 dark:bg-gray-900"
                             >
                                 <X className="h-3.5 w-3.5" strokeWidth={3} />
                             </button>

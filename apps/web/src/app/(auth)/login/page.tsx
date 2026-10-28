@@ -74,7 +74,7 @@ export default function LoginPage() {
                     Sign in to NePay
                 </h1>
                 <p className="text-base font-medium text-body">
-                    Please type in the email address linked to your NePay account.
+                    Sign in with the email address or phone number linked to your NePay account.
                 </p>
             </div>
 
@@ -107,9 +107,9 @@ export default function LoginPage() {
                         <Input
                             id="login-identifier"
                             type="text"
-                            placeholder="name@example.com"
+                            placeholder="Email or phone number"
                             autoComplete="username"
-                            inputMode="email"
+                            inputMode="text"
                             {...register("identifier")}
                             aria-invalid={!!errors.identifier}
                             className="bg-white border-border text-ink h-14 text-base shadow-sm focus-visible:ring-violet-600 focus-visible:border-violet-600 transition-shadow"

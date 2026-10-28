@@ -11,6 +11,7 @@ import { cn } from "@/lib/cn";
 import { useUiStore } from "@/lib/stores/ui-store";
 import { Button } from "@/components/shared/button";
 import { useAuth } from "@/lib/auth-context";
+import { useUnreadNotificationCount } from "@/lib/queries/notifications";
 
 function Logo() {
     return (
@@ -59,6 +60,7 @@ export function TopBar() {
     const toggleMobileSidebar = useUiStore((s) => s.toggleMobileSidebar);
     const setCommandOpen = useUiStore((s) => s.setCommandOpen);
     const router = useRouter();
+    const { data: unreadCount = 0 } = useUnreadNotificationCount();
     const { user } = useAuth();
 
     const { title, subtitle } = usePageHeaders();
@@ -144,6 +146,14 @@ export function TopBar() {
                     aria-label="Notifications"
                 >
                     <Bell className="h-[18px] w-[18px]" />
+                    {unreadCount > 0 && (
+                        <span
+                            className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white"
+                            aria-label={`${unreadCount} unread notifications`}
+                        >
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                        </span>
+                    )}
                 </button>
                 
 

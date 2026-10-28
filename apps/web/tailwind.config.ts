@@ -55,9 +55,9 @@ const config: Config = {
                 },
             },
             fontFamily: {
-                sans: ["var(--font-sans)", "system-ui", "sans-serif"],
-                heading: ["var(--font-heading)", "system-ui", "sans-serif"],
-                mono: ["ui-monospace", "monospace"],
+                sans: ["NairaFix", "var(--font-sans)", "system-ui", "sans-serif"],
+                heading: ["NairaFix", "var(--font-heading)", "system-ui", "sans-serif"],
+                mono: ["NairaFix", "ui-monospace", "monospace"],
             },
             borderRadius: {
                 sm: "var(--r-sm)",

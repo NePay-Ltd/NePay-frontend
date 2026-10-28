@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { SHOW_TWO_FACTOR_SETTINGS } from "@/lib/feature-flags";
 import { IconUser as User, IconShield as Shield, IconSliders as Sliders, IconAirtime as Smartphone, IconLogOut as LogOut, IconLock as Lock } from "@/components/icons";
 import { ShieldCheck, Mail } from "lucide-react";;
 import { toast } from "sonner";
@@ -141,18 +142,20 @@ export default function SettingsPage() {
                                 <PanelHeader className="px-6 pt-6" title="Account Security" description="Manage your password and authentication methods." />
                                 <PanelBody className="p-6">
                                     <div className="space-y-6">
-                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-gray-50 p-4">
-                                            <div className="flex items-start gap-3">
-                                                <div className="mt-1 rounded-full bg-white p-2 shadow-sm text-green-600">
-                                                    <ShieldCheck className="h-5 w-5" />
+                                        {SHOW_TWO_FACTOR_SETTINGS && (
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-gray-50 p-4">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="mt-1 rounded-full bg-white p-2 shadow-sm text-green-600">
+                                                        <ShieldCheck className="h-5 w-5" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-ink">Two-Factor Authentication</p>
+                                                        <p className="text-xs font-medium text-body mt-0.5">Protect your account with an extra layer of security.</p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="text-sm font-bold text-ink">Two-Factor Authentication</p>
-                                                    <p className="text-xs font-medium text-body mt-0.5">Protect your account with an extra layer of security.</p>
-                                                </div>
+                                                <Button variant="quiet" className="shrink-0 bg-white shadow-sm border border-border font-bold">Manage 2FA</Button>
                                             </div>
-                                            <Button variant="quiet" className="shrink-0 bg-white shadow-sm border border-border font-bold">Manage 2FA</Button>
-                                        </div>
+                                        )}
 
                                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-gray-50 p-4">
                                             <div className="flex items-start gap-3">

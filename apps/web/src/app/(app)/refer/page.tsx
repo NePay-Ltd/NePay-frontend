@@ -17,7 +17,7 @@ export default function ReferAndEarnPage() {
     React.useEffect(() => { setMounted(true); }, []);
 
     const link = mounted && referral
-        ? `${window.location.origin}/register?ref=${encodeURIComponent(referral.referralCode)}`
+        ? `${window.location.origin}/r/${encodeURIComponent(referral.referralCode)}`
         : "";
 
     const share = (url: string) => {
