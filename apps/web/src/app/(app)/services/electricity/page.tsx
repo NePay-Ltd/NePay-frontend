@@ -18,6 +18,7 @@ import { StickyPayBar } from "@/components/services/StickyPayBar";
 import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen";
 import { Switch } from "@/components/ui/switch";
 import { CopyTokenButton } from "@/components/shared/copy-token-button";
+import { groupByFour, titleCase } from "@/lib/receipt-config";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -330,25 +331,31 @@ export default function ElectricityPage() {
                 amount={amount}
                 title="Token Purchased!"
                 description={
-                    <div className="space-y-2">
-                        <p>You successfully purchased electricity for <span className="font-bold">{resolvedName}</span>.</p>
-                        {purchaseUnits && (
-                            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mt-4">
-                                <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">Units Purchased</p>
-                                <p className="text-xl font-bold text-ink">
-                                    {purchaseUnits}
-                                </p>
-                            </div>
-                        )}
+                    // Just what the customer needs here - the token, who it is for, and the units. The rest is on the receipt.
+                    <div className="space-y-3 text-left">
                         {purchaseToken && (
-                            <div className="bg-gray-50 border border-border rounded-xl p-4 mt-4">
+                            <div className="bg-gray-50 border border-border rounded-xl p-4 text-center">
                                 <p className="text-xs font-bold text-muted uppercase tracking-wider mb-1">Your Token</p>
                                 <p className="font-mono text-xl font-bold tracking-widest text-ink break-all">
-                                    {purchaseToken}
+                                    {groupByFour(purchaseToken)}
                                 </p>
                                 <CopyTokenButton token={purchaseToken} className="mt-3" />
                             </div>
                         )}
+                        <div className="rounded-xl border border-border px-4">
+                            {resolvedName && (
+                                <div className="flex justify-between gap-4 py-3 text-sm border-b border-border last:border-b-0">
+                                    <span className="text-muted">Customer name</span>
+                                    <span className="font-semibold text-ink text-right">{titleCase(resolvedName)}</span>
+                                </div>
+                            )}
+                            {purchaseUnits && (
+                                <div className="flex justify-between gap-4 py-3 text-sm">
+                                    <span className="text-muted">Units</span>
+                                    <span className="font-semibold text-ink text-right">{purchaseUnits}</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 }
                 onHome={() => router.push("/overview")}

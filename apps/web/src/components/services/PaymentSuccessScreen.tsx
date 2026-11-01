@@ -45,9 +45,11 @@ export function PaymentSuccessScreen({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 h-[100dvh] w-full z-[200] bg-white flex flex-col items-center justify-center p-6 text-center"
+                    className="fixed inset-0 h-[100dvh] w-full z-[200] bg-white flex flex-col items-center p-6 text-center"
                 >
-                    <div className="flex-1 flex flex-col items-center justify-center max-w-sm mx-auto w-full">
+                    {/* Scrolls when there is a lot to show, so nothing slips behind the buttons below. */}
+                    <div className="flex-1 min-h-0 w-full overflow-y-auto">
+                    <div className="flex min-h-full flex-col items-center justify-center max-w-sm mx-auto w-full">
                         <motion.div
                             initial={{ scale: 0.5, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
@@ -88,6 +90,7 @@ export function PaymentSuccessScreen({
                         >
                             {description}
                         </motion.div>
+                    </div>
                     </div>
 
                     <motion.div
