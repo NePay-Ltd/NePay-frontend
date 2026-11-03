@@ -21,6 +21,7 @@ import { TransactionRow } from "@/components/shared/transaction-row";
 import { Tag } from "@/components/shared/tag";
 import { EmptyState } from "@/components/shared/empty-state";
 import { HeroCard } from "@/components/shared/hero-card";
+import { HomeBanners } from "@/components/home/home-banners";
 import { TransactionDetailModal, type TransactionDetailData } from "@/components/shared/transaction-detail-modal";
 import { BaseTransaction } from "@/components/shared/transaction-row";
 import {
@@ -202,6 +203,9 @@ export default function OverviewPage() {
                         </div>
                     </div>
 
+
+                    {/* ── Banners (staff-managed in the admin panel; draws nothing when there are none) ── */}
+                    <HomeBanners />
 
                     {/* ── Recent Transactions ─────────────────────────────── */}
                     <Panel className="rounded-3xl" flush>

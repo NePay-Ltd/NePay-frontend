@@ -302,7 +302,7 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                             </div>
                         ) : null}
 
-                        {status === "finished" && statusData ? (
+                        {(status === "finished" || status === "partially_paid") && statusData ? (
                             <DepositBreakdown statusData={statusData} coinSymbol={selectedCurrency?.coin ?? null} assetCode={assetCode} />
                         ) : null}
                     </div>
@@ -386,9 +386,24 @@ function StatusBanner({
                 </Banner>
             );
         case "partially_paid":
+            if (statusData?.creditedAmount != null) {
+                return (
+                    <Banner tone="warning" icon={<AlertCircle className="h-4 w-4 text-amber-600" />}>
+                        Partial payment received — you sent less than the {statusData.expectedAmount} {statusData.payCurrency} requested.{" "}
+                        {statusData.creditedAmount.toLocaleString()} {statusData.creditedCurrency} credited after fees.
+                    </Banner>
+                );
+            }
+            if (statusData?.underReview) {
+                return (
+                    <Banner tone="warning" icon={<AlertCircle className="h-4 w-4 text-amber-600" />}>
+                        Partial payment received. We are checking the amount before crediting your wallet — please contact support if this takes long.
+                    </Banner>
+                );
+            }
             return (
-                <Banner tone="warning" icon={<AlertCircle className="h-4 w-4 text-amber-600" />}>
-                    Partial payment. Expected {statusData?.expectedAmount} {statusData?.payCurrency}.
+                <Banner tone="pending" icon={<Loader2 className="h-4 w-4 animate-spin text-violet-600" />}>
+                    Partial payment received ({statusData?.expectedAmount} {statusData?.payCurrency} was requested). Crediting your wallet...
                 </Banner>
             );
         case "failed":
