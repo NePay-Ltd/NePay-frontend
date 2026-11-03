@@ -110,7 +110,8 @@ export function useCryptoDepositStatus(paymentId: string | null) {
             const data = q.state.data;
             if (!data?.status) return false;
 
-            if (data.status === "finished") {
+            if (data.status === "finished" || data.status === "partially_paid") {
+                // (A partial payment is credited too — net of fees — so it follows the same rule.)
                 // Terminal at the provider, but done for us only once the credit has posted
                 // (or we know it is being held for a check) — stopping earlier left the screen
                 // stuck on "crediting" with no way to notice the credit landing.

@@ -52,6 +52,8 @@ export function NoticeSocketListener() {
         let attempt = 0;
 
         const invalidate = () => queryClient.invalidateQueries({ queryKey: noticeKeys.active() });
+        // The home banner strip rides the same live connection.
+        const invalidateBanners = () => queryClient.invalidateQueries({ queryKey: ["home-banners"] });
         const visible = () => document.visibilityState === "visible";
 
         const teardown = () => {
@@ -92,9 +94,11 @@ export function NoticeSocketListener() {
             next.on("connect", () => {
                 attempt = 0;
                 void invalidate();
+                void invalidateBanners();
             });
             next.on("notice:published", () => void invalidate());
             next.on("notice:unpublished", () => void invalidate());
+            next.on("home-banners:changed", () => void invalidateBanners());
             next.on("disconnect", scheduleReconnect);
             next.on("connect_error", scheduleReconnect);
         };
