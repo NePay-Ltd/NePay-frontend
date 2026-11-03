@@ -16,6 +16,7 @@ import { PlanGrid } from "@/components/services/PlanGrid";
 import { VerificationField } from "@/components/services/VerificationField";
 import { StickyPayBar } from "@/components/services/StickyPayBar";
 import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen";
+import { tvProviderLabel } from "@/lib/service-labels";
 import { Switch } from "@/components/ui/switch";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
@@ -54,7 +55,7 @@ export default function TvPage() {
     const { data: services = [], isLoading: providersLoading } = useUtilityServices(tvCategory?.identifier);
     const providers = services.map((s, i) => ({
         id: s.serviceID,
-        label: s.name,
+        label: tvProviderLabel(s.serviceID, s.name),
         color: FALLBACK_COLORS[i % FALLBACK_COLORS.length] ?? FALLBACK_COLORS[0]!,
         logoUrl: s.image,
     }));

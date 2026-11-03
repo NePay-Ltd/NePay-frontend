@@ -19,6 +19,7 @@ import { PaymentSuccessScreen } from "@/components/services/PaymentSuccessScreen
 import { Switch } from "@/components/ui/switch";
 import { CopyTokenButton } from "@/components/shared/copy-token-button";
 import { groupByFour, titleCase } from "@/lib/receipt-config";
+import { electricityProviderLabel } from "@/lib/service-labels";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -59,7 +60,7 @@ export default function ElectricityPage() {
     const { data: services = [], isLoading: providersLoading } = useUtilityServices(electricityCategory?.identifier);
     const providers = services.map((s, i) => ({
         id: s.serviceID,
-        label: s.name,
+        label: electricityProviderLabel(s.name),
         color: FALLBACK_COLORS[i % FALLBACK_COLORS.length] ?? FALLBACK_COLORS[0]!,
         logoUrl: s.image,
     }));

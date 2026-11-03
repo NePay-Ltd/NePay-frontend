@@ -96,7 +96,8 @@ function backendOrigins(): { http: string; ws: string } {
  * CoinCap URL (NowPaymentsAdapter's coinIconUrl), and the browser refused
  * every one under the previous policy — observed as "(blocked:csp)" in the
  * Network tab, with coin avatars falling back to letters. Allowed for img-src
- * only, nothing else. The one real third-party embed is Bridge's hosted ToS
+ * only, nothing else. The same went for the TV / electricity / education provider logos, which the catalog returns
+ * as VTpass-hosted URLs (sandbox.vtpass.com, vtpass.com), so *.vtpass.com is allowed for img-src too. The one real third-party embed is Bridge's hosted ToS
  * page (bridge-tos-consent.tsx's iframe) — frame-src explicitly allows
  * *.bridge.xyz for it, since Bridge's actual tosLink host varies by
  * customer state (observed as both compliance.*.bridge.xyz and
@@ -117,7 +118,7 @@ function contentSecurityPolicy(nonce: string): string {
         default-src 'self';
         script-src 'self' 'nonce-${nonce}' 'strict-dynamic';
         style-src 'self' 'unsafe-inline';
-        img-src 'self' data: https://res.cloudinary.com https://assets.coincap.io;
+        img-src 'self' data: https://res.cloudinary.com https://assets.coincap.io https://vtpass.com https://*.vtpass.com;
         font-src 'self';
         connect-src 'self' ${http} ${ws};
         frame-src https://*.bridge.xyz;
