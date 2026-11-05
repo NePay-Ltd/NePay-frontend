@@ -44,10 +44,14 @@ const config: Config = {
                 // (overlays on gradients and dark surfaces). As a bare var() colour Tailwind silently generated NOTHING for
                 // any of the faded forms, so ~120 of them across the app never rendered. Tailwind passes a
                 // `var(--tw-*-opacity)` for the solid class and a number for /NN, which is how the two are told apart.
-                white: (({ opacityValue }: { opacityValue?: string }) =>
-                    opacityValue === undefined || opacityValue.startsWith("var(")
+                // opacityValue can arrive as a string OR a number (some utilities pass numbers), so it is
+                // normalised to a string before being inspected - a bare .startsWith() crashed `next build`.
+                white: (({ opacityValue }: { opacityValue?: string | number }) => {
+                    const value = opacityValue === undefined || opacityValue === null ? undefined : String(opacityValue);
+                    return value === undefined || value.startsWith("var(")
                         ? "var(--color-white)"
-                        : `rgb(255 255 255 / ${opacityValue})`) as unknown as string,
+                        : `rgb(255 255 255 / ${value})`;
+                }) as unknown as string,
                 trueWhite: "#ffffff",
                 ink: "var(--color-ink)",
                 body: "var(--color-body)",
