@@ -134,7 +134,7 @@ export function HomeBanners() {
                         type="button"
                         disabled={!tappable}
                         onClick={() => go(banner.targetUrl)}
-                        className="flex w-[300px] flex-none snap-start items-center gap-2 rounded-[20px] py-3.5 pl-[18px] pr-3 text-left text-white sm:w-[340px]"
+                        className="flex w-[300px] flex-none snap-start items-center gap-2 rounded-[20px] py-3.5 pl-[18px] pr-3 text-left text-trueWhite sm:w-[340px]"
                         style={{
                             // At least 128 tall; grows for longer text instead of pushing it outside the card.
                             minHeight: CARD_HEIGHT,
@@ -144,11 +144,13 @@ export function HomeBanners() {
                     >
                         <span className="flex min-w-0 flex-1 flex-col gap-[5px] break-words">
                             <span className="line-clamp-2 text-base font-extrabold leading-5 tracking-tight">{banner.title}</span>
-                            {banner.subtitle && <span className="line-clamp-2 text-[12.5px] font-medium leading-[17px] text-white/85">{banner.subtitle}</span>}
+                            {banner.subtitle && <span className="line-clamp-2 text-[12.5px] font-medium leading-[17px]" style={{ color: "rgba(255,255,255,0.86)" }}>{banner.subtitle}</span>}
                             {banner.buttonLabel && (
                                 <span
-                                    className="mt-1 self-start rounded-full bg-white/95 px-[18px] py-1.5 text-[13px] font-bold"
-                                    style={{ color: buttonText }}
+                                    className="mt-1 self-start rounded-full px-[18px] py-1.5 text-[13px] font-bold shadow-sm"
+                                    // Set directly, not as bg-white/95: "white" is a CSS-variable colour in this app's
+                                    // Tailwind theme, which the /95 opacity modifier can't apply to - so no pill was drawn.
+                                    style={{ color: buttonText, backgroundColor: "rgba(255,255,255,0.96)" }}
                                 >
                                     {banner.buttonLabel}
                                 </span>
