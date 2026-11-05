@@ -39,7 +39,15 @@ const config: Config = {
                 amber: {
                     "500": "#F59E0B",
                 },
-                white: "var(--color-white)",
+                // Solid `white` stays the theme token (#ffffff light, #121212 dark). A faded one - bg-white/10,
+                // border-white/20, text-white/70 - is translucent REAL white, which is what it is always written to mean
+                // (overlays on gradients and dark surfaces). As a bare var() colour Tailwind silently generated NOTHING for
+                // any of the faded forms, so ~120 of them across the app never rendered. Tailwind passes a
+                // `var(--tw-*-opacity)` for the solid class and a number for /NN, which is how the two are told apart.
+                white: (({ opacityValue }: { opacityValue?: string }) =>
+                    opacityValue === undefined || opacityValue.startsWith("var(")
+                        ? "var(--color-white)"
+                        : `rgb(255 255 255 / ${opacityValue})`) as unknown as string,
                 trueWhite: "#ffffff",
                 ink: "var(--color-ink)",
                 body: "var(--color-body)",
