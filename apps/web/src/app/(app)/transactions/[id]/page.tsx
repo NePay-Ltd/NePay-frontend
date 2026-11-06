@@ -4,7 +4,7 @@ import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { formatDate, formatTime } from "@/lib/date";
 import { IconArrowLeft as ArrowLeft, IconChevronDown as ChevronDown } from "@/components/icons";
-import { Download, Share2, Image } from "lucide-react";;
+import { Download, Share2, Image, Repeat } from "lucide-react";
 import { useTransaction } from "@/lib/queries/transactions";
 import { Button } from "@/components/shared/button";
 import { Panel, PanelBody } from "@/components/shared/panel";
@@ -178,7 +178,20 @@ export default function TransactionDetailPage() {
                     {receipt && <ReceiptCard receipt={receipt} />}
 
                     {/* Action Buttons */}
-                    <div className="pt-4 border-t border-border">
+                    <div className="pt-4 border-t border-border space-y-3">
+                        {/* Repeat transfer: opens the transfer page with this recipient and exact amount filled in. Not while
+                            the transfer is still processing, so a slow one is not sent twice by mistake. */}
+                        {receiptInput?.kind === "TRANSFER" && receiptInput.tone !== "pending" && (
+                            <Button
+                                variant="ghost"
+                                fullWidth
+                                className="border border-violet-500/30 bg-violet-500/10 text-violet-700 hover:bg-violet-500/15 dark:text-violet-300"
+                                onClick={() => router.push(`/transfer?repeat=${encodeURIComponent(transactionId)}`)}
+                            >
+                                <Repeat className="h-4 w-4 mr-2" />
+                                Repeat transfer
+                            </Button>
+                        )}
                         <div className="grid grid-cols-2 gap-3 sm:grid-cols-1 sm:space-y-3">
                         {/* Download Dropdown */}
                         <div className="relative sm:col-span-1">

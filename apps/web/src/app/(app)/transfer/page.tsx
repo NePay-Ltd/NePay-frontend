@@ -25,6 +25,7 @@ import {
     useInitiateTransfer,
     useTransferStatus,
     useFees,
+    fetchRepeatTransfer,
 } from "@/lib/queries/transfer";
 import { feeFor, maxSendable } from "@/lib/fees";
 
@@ -224,6 +225,30 @@ export default function TransferPage() {
         }
     }, [bankCode, accountNumber]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    // "Repeat transfer" from a receipt (/transfer?repeat=<ledger entry id>): fill in the same bank, account and exact
+    // amount. The account is still looked up afresh by the effect above, and the amount stays an ordinary field.
+    const [repeatNote, setRepeatNote] = React.useState(false);
+    React.useEffect(() => {
+        const repeatId = new URLSearchParams(window.location.search).get("repeat");
+        if (!repeatId) return;
+        let cancelled = false;
+        fetchRepeatTransfer(repeatId)
+            .then((r) => {
+                if (cancelled) return;
+                setBankCode(r.bankCode);
+                setAccountNumber(r.accountNumber);
+                const amount = Number(r.amount);
+                if (Number.isFinite(amount) && amount > 0) form.setValue("amount", amount, { shouldValidate: true });
+                setRepeatNote(true);
+            })
+            .catch(() => {
+                if (!cancelled) toast.error("Couldn't load that transfer. Please fill in the details.");
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
         const confirmRemoveSavedAccount = () => {
         if (!accountToRemove) return;
         deleteSavedAccount.mutate(accountToRemove.id, {
@@ -330,6 +355,11 @@ export default function TransferPage() {
                     <div className="space-y-6 md:col-span-7">
                         <Panel flush className="border-none bg-transparent shadow-none sm:border-solid sm:bg-white sm:shadow-sm -mx-4 sm:mx-0 px-4 sm:px-6 py-2 sm:py-6">
                             <PanelBody className="space-y-6 sm:space-y-8">
+                                {repeatNote && (
+                                    <p className="rounded-xl border border-violet-500/20 bg-violet-500/5 px-4 py-3 text-sm font-medium text-violet-700 dark:text-violet-300">
+                                        Filled in from your past transfer. You can change the amount before you send.
+                                    </p>
+                                )}
                                 {/* Available Balance Display */}
                                 <div className="rounded-xl bg-violet-500/10 p-5 sm:p-6 border border-violet-500/20">
                                     <p className="text-xs font-semibold uppercase tracking-wider text-violet-400">

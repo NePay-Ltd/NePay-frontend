@@ -361,6 +361,17 @@ export interface WithdrawalReceiptDto {
     fee: string;
 }
 
+/** GET /withdrawals/repeat/:ledgerEntryId - a past transfer's recipient and amount, to send it again. */
+export interface WithdrawalRepeatDto {
+    bankCode: string;
+    bankName: string | null;
+    /** In full: the transfer page looks the account up again with it. */
+    accountNumber: string;
+    accountName: string;
+    /** What the recipient was sent, as a decimal string ("5000.0000"). The fee is not included. */
+    amount: string;
+}
+
 /** GET /crypto/receipt/:ledgerEntryId - what a crypto-deposit receipt shows beyond the ledger entry. */
 export interface CryptoDepositReceiptDto {
     coin: string;
