@@ -161,6 +161,17 @@ export interface LedgerEntryDto {
      * nothing was charged.
      */
     fee?: string | null;
+    /**
+     * The other side of the movement: who sent a deposit, or who a transfer went to. Null/absent when the backend
+     * has no name on record (older entries, fees, bills) or is older than this field. `account` is always masked.
+     */
+    counterparty?: LedgerCounterpartyDto | null;
+}
+
+export interface LedgerCounterpartyDto {
+    name: string | null;
+    bank: string | null;
+    account: string | null;
 }
 
 export interface VirtualAccountResponseDto {
