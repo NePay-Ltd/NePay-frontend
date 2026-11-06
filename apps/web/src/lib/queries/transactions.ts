@@ -8,7 +8,7 @@ import { LedgerEntryDto, ApiPaginated, ApiResponse } from "@/lib/types/api";
 import { BaseTransaction } from "@/components/shared/transaction-row";
 import { TxCategory } from "@/components/shared/tx-icon";
 import { CryptoDepositReceiptDto, GiftCardReceiptDto, BankDepositReceiptDto, ForeignDepositReceiptDto, UtilityPurchaseResponseDto, WithdrawalReceiptDto } from "@/lib/types/api";
-import type { CurrencyCode, ReceiptInput } from "@/lib/receipt-config";
+import { maskAccount, type CurrencyCode, type ReceiptInput } from "@/lib/receipt-config";
 
 /** The ledger entry as a receipt input — the specific per-type fields are layered on by useTransaction once the type's detail endpoint answers. */
 function ledgerReceiptInput(entry: LedgerEntryDto, typeLabel: string, cryptoAsset?: string): ReceiptInput {
@@ -70,7 +70,8 @@ function getTransactionTypeLabel(entry: LedgerEntryDto): string {
         case "DEPOSIT": return "Crypto Deposit";
         case "BANK_DEPOSIT": return "Bank Deposit";
         case "FCY_CONVERSION_CREDIT": return "Foreign Currency Deposit";
-        case "WITHDRAWAL": return "Withdrawal";
+        // A customer sends money to a bank account - to them it is a transfer. The CREDIT is the refund of one that failed.
+        case "WITHDRAWAL": return entry.direction === "CREDIT" ? "Transfer Refund" : "Transfer";
         case "UTILITY_PURCHASE": return utilityPurchaseLabel(entry.description);
         case "UTILITY_DISCOUNT": return "Utility Cashback";
         case "GIFT_CARD_SALE": return "Gift Card Sale";
@@ -86,6 +87,38 @@ function getTransactionTypeLabel(entry: LedgerEntryDto): string {
         // literal type would read as "Admin Adjustment" to a customer.
         case "ADMIN_ADJUSTMENT": return entry.direction === "DEBIT" ? "Account Debit" : "Account Credit";
         default: return entry.type.replace(/_/g, " ").replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+    }
+}
+
+/** "Withdrawal to 0123456789 (058)" -> "Transfer to 012****789"; "Refund: withdrawal to 0123456789 failed" -> "Refund: transfer to 012****789 failed". */
+function transferDescription(description: string): string {
+    return description
+        .replace(/withdrawal( retry)?/i, (m) => (m[0] === "W" ? "Transfer" : "transfer"))
+        .replace(/\b\d{10}\b/g, (n) => maskAccount(n))
+        .replace(/\s*\(\d{3,6}\)\s*$/, "");
+}
+
+/**
+ * The row's title, from the customer's side of the movement. A ledger description only knows our own side
+ * ("Bank transfer to <your account>", "Withdrawal to <number>"), so deposits and transfers are named from the
+ * counterparty the backend attaches: "Deposit from Tunde Bakare", "Transfer to Chioma Eze". Without a name
+ * they fall back to plain words - never the customer's own account number as if they were the recipient.
+ */
+function rowTitle(entry: LedgerEntryDto, meta: string): string | null {
+    const name = entry.counterparty?.name?.trim();
+    const description = (entry.description ?? "").trim();
+
+    switch (entry.type) {
+        case "BANK_DEPOSIT":
+            return name ? `Deposit from ${name}` : "Bank deposit";
+        case "FCY_CONVERSION_CREDIT":
+            return name ? `Deposit from ${name}` : "Foreign payment received";
+        case "WITHDRAWAL":
+            if (entry.direction === "CREDIT") return description ? transferDescription(description) : meta;
+            if (name) return `Transfer to ${name}`;
+            return description ? transferDescription(description) : "Bank transfer";
+        default:
+            return null;
     }
 }
 
@@ -131,7 +164,7 @@ export function mapLedgerToTransaction(entry: LedgerEntryDto): BaseTransaction {
         id: entry.id,
         label: entry.assetQuantity && cryptoAsset
             ? `Crypto deposit${entry.description?.includes("partial payment") ? " (partial payment)" : ""}`
-            : entry.description || meta,
+            : rowTitle(entry, meta) ?? (entry.description || meta),
         meta: entry.assetQuantity && cryptoAsset
             ? `${entry.assetQuantity} ${cryptoAsset} Â· Crypto deposit`
             : meta,

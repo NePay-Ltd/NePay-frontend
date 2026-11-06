@@ -60,6 +60,8 @@ function saveReadSet(ids: Set<string>) {
 
 function ledgerToNotification(entry: LedgerEntryDto, readSet: Set<string>): Notification {
     const desc = entry.description ?? "";
+    /** Who sent a deposit / who a transfer went to, when the backend knows. */
+    const sender = entry.counterparty?.name?.trim() || null;
     const amount = parseFloat(entry.amount).toLocaleString("en-NG", { style: "currency", currency: "NGN", minimumFractionDigits: 2 });
 
     let type: NotificationType;
@@ -69,16 +71,32 @@ function ledgerToNotification(entry: LedgerEntryDto, readSet: Set<string>): Noti
     switch (entry.type) {
         case "DEPOSIT":
         case "BANK_DEPOSIT":
+        case "FCY_CONVERSION_CREDIT":
             type = "deposit";
-            title = "Money received";
-            body = `${amount} has been credited to your wallet.`;
+            title = entry.type === "FCY_CONVERSION_CREDIT" ? "Foreign payment received" : "Money received";
+            body = sender
+                ? `${amount} received from ${sender} has been added to your wallet.`
+                : `${amount} has been credited to your wallet.`;
             break;
 
-        case "WITHDRAWAL":
+        case "WITHDRAWAL": {
             type = "transfer";
-            title = "Transfer successful";
-            body = `${amount} sent to your bank account.${desc ? ` ${desc}` : ""}`;
+            const status = entry.status ?? "success";
+            if (entry.direction === "CREDIT") {
+                title = "Transfer refunded";
+                body = `${amount} from a transfer that did not go through was returned to your wallet.`;
+            } else if (status === "failed") {
+                title = "Transfer failed";
+                body = `${amount} did not go through. The amount has been returned to your wallet.`;
+            } else {
+                title = status === "pending" ? "Transfer processing" : "Transfer successful";
+                const to = sender
+                    ? `${sender}${entry.counterparty?.bank ? ` at ${entry.counterparty.bank}` : ""}`
+                    : "the bank account you chose";
+                body = status === "pending" ? `${amount} is on its way to ${to}.` : `${amount} sent to ${to}.`;
+            }
             break;
+        }
 
         case "REFERRAL_REWARD":
             type = "referral";
