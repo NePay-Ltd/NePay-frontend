@@ -4,7 +4,17 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
-import { ResolveAccountResponseDto, WithdrawalResponseDto, ApiResponse, FeeSchedule } from "@/lib/types/api";
+import { ResolveAccountResponseDto, WithdrawalResponseDto, WithdrawalRepeatDto, ApiResponse, FeeSchedule } from "@/lib/types/api";
+
+/**
+ * "Repeat transfer" on a receipt: a past transfer's bank, account and amount, from its ledger entry id (the transfer
+ * itself or its refund). The receipt only puts the id in the URL (/transfer?repeat=<id>), never the account number;
+ * the transfer page fetches this, fills the form, and the customer still confirms with their PIN.
+ */
+export async function fetchRepeatTransfer(ledgerEntryId: string): Promise<WithdrawalRepeatDto> {
+    const res = await apiClient.get<ApiResponse<WithdrawalRepeatDto>>(`/withdrawals/repeat/${encodeURIComponent(ledgerEntryId)}`);
+    return res.data.data;
+}
 
 export interface Bank {
     bankCode: string;
