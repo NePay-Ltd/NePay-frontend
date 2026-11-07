@@ -13,6 +13,17 @@ export interface SupportMessage { id: string; body: string; attachmentUrl: strin
 export interface AssignedAgent { id: string; name: string; avatarUrl: string | null; }
 export interface SupportConversation { id: string; status: SupportStatus; referenceNumber: string; category: SupportCategory; priority: "normal" | "urgent"; intakeName: string | null; intakeEmail: string | null; purpose: string | null; messages: SupportMessage[]; assignedAgent: AssignedAgent | null; queuePosition: number | null; }
 
+/**
+ * Older conversations opened with "…Please share your name and email below…". The server now opens with a neutral
+ * greeting (and a migration rewrites the old one), but until that has run, show the new wording so the transcript
+ * never reads as if details are still missing after they were given.
+ */
+const LEGACY_GREETING = "Tell us how we can help. Please share your name and email below so an agent can reach you, then let us know what's going on.";
+const GREETING = "Thanks for reaching out. Tell us what's going on and we'll get you to the right person.";
+function withCurrentGreeting<T extends { senderType: string; body: string }>(message: T): T {
+  return message.senderType === "system" && message.body === LEGACY_GREETING ? { ...message, body: GREETING } : message;
+}
+
 export function isEndedStatus(status: SupportStatus): boolean { return status === "closed" || status === "resolved"; }
 export function isAssignedStatus(status: SupportStatus): boolean { return status === "active" || status === "pending_agent" || status === "pending_customer"; }
 
@@ -91,10 +102,12 @@ export function useSupportConversation() {
         if (lastMessage) setLastSeenMessageId(data.id, lastMessage.id);
     }, []);
 
-    const applyConversation = React.useCallback((data: SupportConversation, opts?: { markSeenIfOpen?: boolean }) => {
+    const applyConversation = React.useCallback((raw: SupportConversation, opts?: { markSeenIfOpen?: boolean }) => {
+        const data = { ...raw, messages: raw.messages.map(withCurrentGreeting) };
         setConversation(data);
         setForm({ name: data.intakeName ?? "", email: data.intakeEmail ?? "", category: data.category ?? "", urgent: data.priority === "urgent" });
-        setStage(data.status !== "waiting" || (data.intakeName && data.intakeEmail) ? "done" : 0);
+        // Open the chat only once the server has a name and email - it refuses messages without them, whatever the status.
+        setStage(data.intakeName && data.intakeEmail ? "done" : 0);
         if (opts?.markSeenIfOpen && isActivelyViewing()) {
             markConversationSeen(data);
         } else {
@@ -164,7 +177,8 @@ export function useSupportConversation() {
         const socket = io(`${socketOrigin()}/support`, { auth: { token }, transports: ["websocket"] });
         socketRef.current = socket;
         socket.on("connect", () => socket.emit("join_conversation", { conversationId: conversation.id }));
-        socket.on("message", (incoming: SupportMessage) => {
+        socket.on("message", (raw: SupportMessage) => {
+            const incoming = withCurrentGreeting(raw);
             setConversation((current) => current ? { ...current, messages: current.messages.some((item) => item.id === incoming.id) ? current.messages : [...current.messages, incoming] } : current);
             if (incoming.senderType !== "agent") return;
             if (isActivelyViewing()) {
