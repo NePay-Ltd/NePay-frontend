@@ -9,9 +9,10 @@ import { Dialog, DialogContent, DialogOverlay, DialogPortal } from "@/components
 import { AssetSelectionList } from "@/components/flows/receive-crypto/asset-selection-list";
 import { NetworkSelectionList } from "@/components/flows/receive-crypto/network-selection-list";
 import { DepositDetailView } from "@/components/flows/receive-crypto/deposit-detail-view";
+import { RateCalculatorView } from "@/components/flows/receive-crypto/rate-calculator-view";
 import { CoinGroup } from "@/components/flows/receive-crypto/shared";
 
-type Step = "asset" | "network" | "detail";
+type Step = "asset" | "network" | "calc" | "detail";
 
 export default function ReceiveCryptoFlow() {
     return (
@@ -28,6 +29,12 @@ function ReceiveCryptoInner() {
     const [step, setStep] = React.useState<Step>("asset");
     const [selectedGroup, setSelectedGroup] = React.useState<CoinGroup | null>(null);
     const [selectedAssetCode, setSelectedAssetCode] = React.useState<string | null>(null);
+    // Desktop right pane: the calculator first ("What you'll get"), then the address. Picking another coin starts at the calculator again.
+    const [paneView, setPaneView] = React.useState<"calc" | "detail">("calc");
+    const pickAsset = (code: string | null) => {
+        setSelectedAssetCode(code);
+        setPaneView("calc");
+    };
     
     // Derived state for the left pane in desktop
     const leftPaneMode = step === "network" ? "network" : "asset";
@@ -38,17 +45,17 @@ function ReceiveCryptoInner() {
             setStep("network");
             if (isDesktop) {
                 // Pre-select first variant on desktop to show in detail pane immediately
-                setSelectedAssetCode(group.variants[0]?.code ?? null);
+                pickAsset(group.variants[0]?.code ?? null);
             }
         } else {
-            setSelectedAssetCode(group.representative.code);
-            setStep("detail");
+            pickAsset(group.representative.code);
+            setStep("calc");
         }
     };
 
     const handleSelectNetwork = (code: string) => {
-        setSelectedAssetCode(code);
-        setStep("detail");
+        pickAsset(code);
+        setStep("calc");
     };
 
     const handleClose = () => {
@@ -56,9 +63,11 @@ function ReceiveCryptoInner() {
     };
 
     const handleBack = () => {
-        if (step === "detail" && selectedGroup && selectedGroup.variants.length > 1) {
+        if (step === "detail") {
+            setStep("calc");
+        } else if (step === "calc" && selectedGroup && selectedGroup.variants.length > 1) {
             setStep("network");
-        } else if (step === "network" || step === "detail") {
+        } else if (step === "network" || step === "calc") {
             setStep("asset");
             setSelectedGroup(null);
             setSelectedAssetCode(null);
@@ -94,7 +103,7 @@ function ReceiveCryptoInner() {
                             <div className={`absolute inset-0 transition-transform duration-300 ease-in-out ${leftPaneMode === 'network' ? 'translate-x-0' : 'translate-x-full'}`}>
                                 <NetworkSelectionList 
                                     coinGroup={selectedGroup} 
-                                    onSelectNetwork={(code) => setSelectedAssetCode(code)} 
+                                    onSelectNetwork={(code) => pickAsset(code)} 
                                     onBack={handleBack} 
                                 />
                             </div>
@@ -102,10 +111,19 @@ function ReceiveCryptoInner() {
 
                         {/* Right Pane (Detail/Preview) */}
                         <div className="flex-1 bg-white/50 dark:bg-gray-900/50 h-full overflow-hidden relative">
-                            <DepositDetailView 
-                                assetCode={selectedAssetCode} 
-                                onBack={handleBack} 
-                            />
+                            {paneView === "calc" && selectedAssetCode ? (
+                                <RateCalculatorView
+                                    assetCode={selectedAssetCode}
+                                    onContinue={() => setPaneView("detail")}
+                                    onBack={handleBack}
+                                />
+                            ) : (
+                                <DepositDetailView 
+                                    assetCode={selectedAssetCode} 
+                                    onBack={handleBack} 
+                                    onOpenCalculator={() => setPaneView("calc")}
+                                />
+                            )}
                             {/* Close button for desktop modal */}
                             <button 
                                 onClick={handleClose}
@@ -139,10 +157,19 @@ function ReceiveCryptoInner() {
                     isMobile={true} 
                 />
             )}
+            {step === "calc" && (
+                <RateCalculatorView
+                    assetCode={selectedAssetCode}
+                    onContinue={() => setStep("detail")}
+                    onBack={handleBack}
+                    isMobile={true}
+                />
+            )}
             {step === "detail" && (
                 <DepositDetailView 
                     assetCode={selectedAssetCode} 
                     onBack={handleBack}
+                    onOpenCalculator={() => setStep("calc")}
                     isMobile={true} 
                 />
             )}
