@@ -94,6 +94,14 @@ export function useSupportConversation() {
     /** True only when the panel is actually the thing being looked at right now — mounted AND the tab is in front. Anything else (including "panel mounted but tab hidden") counts as away for notification purposes. */
     const isActivelyViewing = React.useCallback(() => panelOpenRef.current && tabVisibleRef.current, []);
 
+    /** Tells the server whether the chat is really being looked at, so it pushes an agent's reply to the customer's phone when it is not (being connected alone no longer counts as looking). */
+    const conversationIdRef = React.useRef<string | null>(null);
+    const reportViewing = React.useCallback(() => {
+        const socket = socketRef.current;
+        if (!socket?.connected || !conversationIdRef.current) return;
+        socket.emit("viewing", { conversationId: conversationIdRef.current, viewing: isActivelyViewing() });
+    }, [isActivelyViewing]);
+
     const markConversationSeen = React.useCallback((data: SupportConversation) => {
         setUnreadCount(0);
         setReplyToast(false);
@@ -122,13 +130,14 @@ export function useSupportConversation() {
         tabVisibleRef.current = document.visibilityState === "visible";
         const handleVisibilityChange = () => {
             tabVisibleRef.current = document.visibilityState === "visible";
+            reportViewing();
             if (tabVisibleRef.current && panelOpenRef.current) {
                 setConversation((current) => { if (current) markConversationSeen(current); return current; });
             }
         };
         document.addEventListener("visibilitychange", handleVisibilityChange);
         return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-    }, [markConversationSeen]);
+    }, [markConversationSeen, reportViewing]);
 
     // Fetched once on mount, independent of whether a conversation exists — the landing
     // screen needs to know this before the customer has even started a chat.
@@ -176,7 +185,8 @@ export function useSupportConversation() {
         if (!token) return;
         const socket = io(`${socketOrigin()}/support`, { auth: { token }, transports: ["websocket"] });
         socketRef.current = socket;
-        socket.on("connect", () => socket.emit("join_conversation", { conversationId: conversation.id }));
+        conversationIdRef.current = conversation.id;
+        socket.on("connect", () => socket.emit("join_conversation", { conversationId: conversation.id }, () => reportViewing()));
         socket.on("message", (raw: SupportMessage) => {
             const incoming = withCurrentGreeting(raw);
             setConversation((current) => current ? { ...current, messages: current.messages.some((item) => item.id === incoming.id) ? current.messages : [...current.messages, incoming] } : current);
@@ -204,6 +214,7 @@ export function useSupportConversation() {
 
     function markPanelOpen(open: boolean) {
         panelOpenRef.current = open;
+        reportViewing();
         if (open && conversation && tabVisibleRef.current) markConversationSeen(conversation);
     }
 
