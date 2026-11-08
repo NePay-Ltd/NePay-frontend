@@ -45,7 +45,7 @@ export function RegisterStepOne({ defaultValues, onSuccess }: RegisterStepOnePro
                     <Input
                         id="reg-first-name"
                         type="text"
-                        placeholder="Chinedu"
+                        placeholder="First name"
                         {...register("firstName")}
                         aria-invalid={!!errors.firstName}
                     />
@@ -54,7 +54,7 @@ export function RegisterStepOne({ defaultValues, onSuccess }: RegisterStepOnePro
                     <Input
                         id="reg-last-name"
                         type="text"
-                        placeholder="Okafor"
+                        placeholder="Last name"
                         {...register("lastName")}
                         aria-invalid={!!errors.lastName}
                     />

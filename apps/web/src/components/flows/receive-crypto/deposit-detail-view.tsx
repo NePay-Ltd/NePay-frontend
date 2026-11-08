@@ -27,6 +27,8 @@ import { CurrencyAvatar } from "./shared";
 interface DepositDetailViewProps {
     assetCode: string | null;
     onBack: () => void;
+    /** Opens "What you'll get" for this coin. */
+    onOpenCalculator?: () => void;
     isMobile?: boolean;
 }
 
@@ -71,7 +73,7 @@ function formatCountdown(ms: number) {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-export function DepositDetailView({ assetCode, onBack, isMobile = false }: DepositDetailViewProps) {
+export function DepositDetailView({ assetCode, onBack, onOpenCalculator, isMobile = false }: DepositDetailViewProps) {
     // The QR box sizes itself in CSS (160px below `sm`, 220px at/above it —
     // see the box's own className), but QRCodeSVG needs its pixel size as a
     // literal prop; AddressQrCode also wraps it in its own 16px padding, so
@@ -189,6 +191,15 @@ export function DepositDetailView({ assetCode, onBack, isMobile = false }: Depos
                                 Deposit {selectedCurrency?.name ?? selectedCurrency?.coin ?? ""}
                             </h1>
                             <p className="text-sm font-medium text-muted mt-0.5">Scan or copy address below</p>
+                            {onOpenCalculator && (
+                                <button
+                                    type="button"
+                                    onClick={onOpenCalculator}
+                                    className="mt-1 text-sm font-semibold text-violet-600 hover:text-violet-700 focus-visible:outline-none focus-visible:underline dark:text-violet-400"
+                                >
+                                    Check what you&apos;ll get in naira
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
