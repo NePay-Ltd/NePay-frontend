@@ -249,14 +249,15 @@ function BridgeOptionalStep({ onDone }: { onDone: () => void }) {
     // with no extra plumbing needed between the form and this step.
     const { data: customer } = useBridgeCustomer();
     // Safe to call before a Bridge customer even exists — GET /bridge/accounts/fee
-    // doesn't require one. Surfaced here so the fee is disclosed up front,
-    // before the user commits to filling out Bridge's onboarding form, not
-    // just on the Foreign Accounts page afterward.
-    const { data: fee } = useBridgeAccountFee();
+    // doesn't require one. Queried for USD purely as a representative
+    // currency to show a live NGN figure here — the fee is charged
+    // separately per currency (see BridgeAccountFeeService's own note),
+    // so this is a preview, not an enforcement check for a specific one.
+    const { data: fee } = useBridgeAccountFee("USD");
     const feeNotice = fee?.required ? (
         <p className="text-xs text-muted">
             Heads up: a one-time ${fee.amountUsd} fee{fee.amountNgn ? ` (about ₦${Number(fee.amountNgn).toLocaleString()} today)` : ""} applies
-            once you&apos;re verified, before your first account. It covers both USD and EUR, and is charged once from your Naira wallet.
+            once you&apos;re verified, before your first account — and again for a second currency, since each is charged separately from your Naira wallet.
         </p>
     ) : null;
 

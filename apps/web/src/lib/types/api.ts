@@ -277,8 +277,45 @@ export interface CryptoDepositStatusDto {
     feeCurrency: string | null;
     /** Finished at the provider but deliberately not credited yet because the amount needs a manual check. */
     underReview: boolean;
+    /** Where the deposit is for the customer, derived server-side from what Nepay has recorded. "detected" means money was actually seen. */
+    stage: CryptoDepositStage;
+    /** True when the current in-flight stage has sat unchanged longer than its limit — offer help. */
+    delayed: boolean;
+    /** Each stage reached, once, in order, with the time Nepay learned of it (not necessarily when it happened on the blockchain). */
+    timeline: Array<{ stage: CryptoDepositStage; at: string }>;
+    /** Reference (e.g. NP-1042) of the support chat opened for this deposit, if any. */
+    supportReference: string | null;
     createdAt: string;
     updatedAt: string;
+}
+
+export type CryptoDepositStage =
+    | "awaiting_payment"
+    | "detected"
+    | "confirming"
+    | "processing"
+    | "credited"
+    | "partial_credited"
+    | "under_review"
+    | "failed"
+    | "expired"
+    | "refunded";
+
+/** One crypto deposit still worth watching — money seen but not credited, or one the customer said they sent. */
+export interface ActiveCryptoDepositDto {
+    paymentId: string;
+    asset: string;
+    stage: CryptoDepositStage;
+    actuallyPaid: number | null;
+    delayed: boolean;
+    updatedAt: string;
+}
+
+/** POST /crypto/deposits/:paymentId/support — the urgent chat opened for a deposit. */
+export interface DepositSupportChatDto {
+    conversationId: string;
+    referenceNumber: string;
+    created: boolean;
 }
 
 /** GET /crypto/fee-estimate — an ESTIMATE shown before depositing. Never present it as a quote. */
@@ -643,12 +680,13 @@ export interface RequestBridgeVirtualAccountDto {
 }
 
 /**
- * GET /bridge/accounts/fee and the result of POST /bridge/accounts/fee/pay
- * — the one-time fee that unlocks foreign accounts for every currency, not
- * a per-currency charge. `amountNgn`/`rate` are a live quote at the
- * site-wide USD→NGN rate; null only while no rate is configured (the admin
- * hasn't set one yet) or once this fee shows as already settled some other
- * way (grandfathered accounts from before this fee existed).
+ * GET /bridge/accounts/fee (per-currency — pass `currency`) and the result
+ * of POST /bridge/accounts/fee/pay — the fee that unlocks a foreign account
+ * for ONE currency. USD and EUR are two separate charges, not one payment
+ * covering both. `amountNgn`/`rate` are a live quote at the site-wide
+ * USD→NGN rate; null only while no rate is configured (the admin hasn't set
+ * one yet) or once this fee shows as already settled some other way
+ * (grandfathered accounts from before this was per-currency).
  */
 export interface BridgeAccountFeeDto {
     required: boolean;
@@ -676,6 +714,98 @@ export interface BridgeDepositDto {
     createdAt: string;
 }
 
+// ─── Foreign Payouts — sending money OUT to a foreign bank account ─────────
+// The reverse of the Foreign Accounts flow above: USDC pulled from NePay's
+// own treasury Bridge wallet, delivered to a recipient's external bank
+// account. Priced USD-flat (never a destination-currency figure) since this
+// codebase has no EUR/GBP/etc rate — see the backend's CreateTransferParams
+// class-level note. Behind its own feature flag server-side
+// (bridge.payoutsEnabled); requests 404/503 until Bridge's own payout_fiat
+// capability is confirmed active.
+
+/**
+ * Every currency Bridge approves for payouts — deliberately wider than
+ * BridgeCurrency (USD/EUR/GBP, what NePay receives in). User-decided
+ * 2026-11-13: sending is offered in every currency Bridge itself supports,
+ * since sending never touches the customer's own receiving account anyway
+ * (see BridgePayoutService's own note on why the two are fully decoupled).
+ * BRL deliberately excluded (same day) — Bridge's own Pix endorsement
+ * requires a Brazilian tax id no Nigerian customer can provide.
+ */
+export type BridgePayoutCurrency = "USD" | "EUR" | "GBP" | "MXN" | "COP";
+
+/** Body of POST /bridge/external-accounts. Exactly one of the per-currency field groups is required, matching `currency`. */
+export interface CreateBridgeExternalAccountDto {
+    currency: BridgePayoutCurrency;
+    accountOwnerName: string;
+    accountOwnerType: "individual" | "business";
+    /** Whether the caller is sending to their own account abroad, rather than a third party. */
+    isSelf: boolean;
+    // USD (ACH/Wire)
+    usAccountNumber?: string;
+    usRoutingNumber?: string;
+    usStreetLine1?: string;
+    usCity?: string;
+    usState?: string;
+    usPostalCode?: string;
+    /** Only needed if Bridge can't auto-detect the bank from the routing number. */
+    usBankName?: string;
+    // EUR (SEPA)
+    iban?: string;
+    /** ISO 3166-1 alpha-3 — the IBAN issuing country. */
+    ibanCountry?: string;
+    bic?: string;
+    // GBP (Faster Payments)
+    gbAccountNumber?: string;
+    gbSortCode?: string;
+    // MXN (SPEI) — CLABE, 18 digits.
+    mxnClabe?: string;
+    // COP (Bre-B)
+    copBreBKey?: string;
+}
+
+/** A registered recipient — never the full account number/IBAN, only `last4` for display. */
+export interface BridgeExternalAccountDto {
+    id: string;
+    currency: BridgePayoutCurrency;
+    accountOwnerName: string;
+    accountOwnerType: "individual" | "business";
+    isSelf: boolean;
+    last4: string;
+    createdAt: string;
+}
+
+/** GET /bridge/payouts/quote?currency=&amountUsd= — a live NGN cost preview, no side effects. */
+export interface BridgePayoutQuoteDto {
+    amountUsd: string;
+    ngnAmount: string | null;
+    fee: string | null;
+    totalNgn: string | null;
+    rate: string | null;
+}
+
+/** Body of POST /bridge/payouts. */
+export interface InitiateBridgePayoutDto {
+    externalAccountId: string;
+    /** USD-equivalent amount to send — the recipient's actual destinationCurrency amount depends on Bridge's own FX. */
+    amountUsd: string;
+    pin: string;
+}
+
+export type BridgePayoutStatus = "PROCESSING" | "COMPLETED" | "FAILED";
+
+export interface BridgePayoutDto {
+    id: string;
+    status: BridgePayoutStatus;
+    destinationCurrency: BridgePayoutCurrency;
+    amountUsd: string;
+    /** What the NGN wallet was debited, excluding the fee. */
+    ngnAmount: string;
+    fee: string;
+    failureReason: string | null;
+    createdAt: string;
+    completedAt: string | null;
+}
 
 /** GET /utilities/quote - the checkout preview for an airtime or data purchase. */
 export interface UtilityQuoteDto {

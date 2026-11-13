@@ -11,8 +11,10 @@ import {
     CryptoCurrencyDto,
     CryptoMinAmountDto,
     CryptoDepositAddressDto,
+    ActiveCryptoDepositDto,
     CryptoDepositStatusDto,
     CryptoFeeEstimateDto,
+    DepositSupportChatDto,
     CryptoPricesDto,
 } from "@/lib/types/api";
 
@@ -24,6 +26,7 @@ export const cryptoKeys = {
     prices: () => [...cryptoKeys.all, "prices"] as const,
     minAmount: (currency: string) => [...cryptoKeys.all, "min-amount", currency] as const,
     feeEstimate: (currency: string) => [...cryptoKeys.all, "fee-estimate", currency] as const,
+    activeDeposits: () => [...cryptoKeys.all, "active-deposits"] as const,
     depositStatus: (paymentId: string) => [...cryptoKeys.all, "deposit-status", paymentId] as const,
 };
 
@@ -106,7 +109,7 @@ export function useCryptoDepositStatus(paymentId: string | null) {
             return res.data.data;
         },
         enabled: !!paymentId,
-        refetchInterval: process.env.NODE_ENV === 'development' ? false : (q) => {
+        refetchInterval: (q) => {
             const data = q.state.data;
             if (!data?.status) return false;
 
@@ -132,4 +135,51 @@ export function useCryptoDepositStatus(paymentId: string | null) {
     }, [credited, paymentId, queryClient]);
 
     return query;
+}
+
+/** "I have made the deposit": records it, and (when enabled server-side) checks this one payment right away. Seeds the status cache with the answer so the progress screen has data at once. */
+export function useMarkDepositSent() {
+    const queryClient = useQueryClient();
+
+    return useMutation<CryptoDepositStatusDto, Error, { paymentId: string }>({
+        mutationFn: async ({ paymentId }) => {
+            const res = await apiClient.post<ApiResponse<CryptoDepositStatusDto>>(`/crypto/deposits/${paymentId}/sent`);
+            return res.data.data;
+        },
+        onSuccess: (data, { paymentId }) => {
+            queryClient.setQueryData(cryptoKeys.depositStatus(paymentId), data);
+            queryClient.invalidateQueries({ queryKey: cryptoKeys.activeDeposits() });
+        },
+    });
+}
+
+/** Opens (or escalates) the customer's support chat as an URGENT deposit issue, pre-filled with the deposit's references. */
+export function useOpenDepositSupport() {
+    const queryClient = useQueryClient();
+
+    return useMutation<DepositSupportChatDto, Error, { paymentId: string; transactionHash?: string; note?: string }>({
+        mutationFn: async ({ paymentId, transactionHash, note }) => {
+            const res = await apiClient.post<ApiResponse<DepositSupportChatDto>>(`/crypto/deposits/${paymentId}/support`, {
+                ...(transactionHash?.trim() ? { transactionHash: transactionHash.trim() } : {}),
+                ...(note?.trim() ? { note: note.trim() } : {}),
+            });
+            return res.data.data;
+        },
+        onSuccess: (_data, { paymentId }) => {
+            queryClient.invalidateQueries({ queryKey: cryptoKeys.depositStatus(paymentId) });
+        },
+    });
+}
+
+/** The deposits the customer should still be watching — drives the "Deposit in progress" card. Polled gently; empty almost always. */
+export function useActiveCryptoDeposits() {
+    return useQuery<ActiveCryptoDepositDto[]>({
+        queryKey: cryptoKeys.activeDeposits(),
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<ActiveCryptoDepositDto[]>>("/crypto/deposits/active");
+            return res.data.data;
+        },
+        refetchInterval: 10_000,
+        staleTime: 5_000,
+    });
 }
