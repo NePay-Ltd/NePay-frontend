@@ -18,8 +18,11 @@ import {
     useCryptoFeeEstimate,
     useGenerateDepositAddress,
     useCryptoDepositStatus,
+    useMarkDepositSent,
 } from "@/lib/queries/crypto";
 import type { CryptoDepositStatusDto, CryptoFeeEstimateDto } from "@/lib/types/api";
+import { DepositBreakdown, trimAmount } from "./deposit-breakdown";
+import { DepositProgressView } from "./deposit-progress-view";
 import { cn } from "@/lib/cn";
 import { formatNaira, formatNairaString, formatByCurrency } from "@/lib/format";
 import { CurrencyAvatar } from "./shared";
@@ -150,6 +153,17 @@ export function DepositDetailView({ assetCode, onBack, onOpenCalculator, isMobil
         toast.success(`${label} copied to clipboard`);
     };
 
+    // The progress screen replaces the address screen once the customer says they have sent the payment.
+    const [showProgress, setShowProgress] = React.useState(false);
+    const { mutate: markSent, isPending: markingSent } = useMarkDepositSent();
+
+    const handleIHaveDeposited = () => {
+        if (!depositData?.paymentId) return;
+        // Record it, then show progress. A failed record must not strand the customer on this screen.
+        markSent({ paymentId: depositData.paymentId });
+        setShowProgress(true);
+    };
+
     const handleRetry = () => {
         if (!assetCode) return;
         resetAddress();
@@ -166,6 +180,20 @@ export function DepositDetailView({ assetCode, onBack, onOpenCalculator, isMobil
                 <h3 className="text-xl font-black text-ink">Select an Asset</h3>
                 <p className="text-[15px] font-medium text-muted mt-2 text-center max-w-[280px]">Choose a cryptocurrency and network from the list to view deposit details.</p>
             </div>
+        );
+    }
+
+    if (showProgress && depositData?.paymentId) {
+        return (
+            <RequireKyc>
+                <DepositProgressView
+                    paymentId={depositData.paymentId}
+                    assetCode={assetCode}
+                    coinSymbol={selectedCurrency?.coin ?? null}
+                    onBackToAddress={() => setShowProgress(false)}
+                    isMobile={isMobile}
+                />
+            </RequireKyc>
         );
     }
 
@@ -340,7 +368,8 @@ export function DepositDetailView({ assetCode, onBack, onOpenCalculator, isMobil
 
                     <Button
                         className="w-full h-14 rounded-[20px] text-[15px] font-black text-white shadow-[0_8px_20px_-6px_rgba(124,58,237,0.5)] hover:shadow-[0_14px_28px_-8px_rgba(124,58,237,0.6)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-300 bg-gradient-to-b from-violet-500 to-violet-700 border border-violet-400/30 mt-4 relative overflow-hidden group"
-                        onClick={() => toast.success("We are monitoring the network for your deposit.")}
+                        onClick={handleIHaveDeposited}
+                        disabled={!depositData?.paymentId || addressExpired || markingSent}
                     >
                         <div className="absolute inset-0 bg-gradient-to-r from-violet-400/0 via-white/20 to-violet-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         <span className="relative z-10 flex items-center justify-center gap-2 drop-shadow-sm">
@@ -440,11 +469,6 @@ function StatusBanner({
     }
 }
 
-function trimAmount(value: string | number): string {
-    const n = Number(value);
-    return Number.isFinite(n) ? n.toLocaleString("en-US", { maximumFractionDigits: 8 }) : String(value);
-}
-
 /**
  * The dollar-to-naira rate a deposit is converted at. This is the platform's
  * one admin-set USD→NGN rate — the same number the crypto→NGN credit is
@@ -502,53 +526,6 @@ function FeeNotice({ estimate, coinSymbol }: { estimate: CryptoFeeEstimateDto; c
                 </p>
             </div>
         </div>
-    );
-}
-
-/**
- * Sent / Fees / Credited for a finished deposit — every figure is a stored
- * value from the deposit record, never an estimate. Only for a 'net' deposit
- * (a 'gross' one had no fee deducted from the customer, so there is nothing to
- * itemise). If no fee figure was recorded, the Fees row is omitted and just
- * Sent and Credited show.
- */
-function DepositBreakdown({
-    statusData,
-    coinSymbol,
-    assetCode,
-}: {
-    statusData: CryptoDepositStatusDto;
-    coinSymbol: string | null;
-    assetCode: string;
-}) {
-    if (statusData.creditMode !== "net" || statusData.creditedAmount == null) return null;
-
-    const unit = (currency: string | null) =>
-        currency && currency.toLowerCase() !== assetCode.toLowerCase() ? currency.toUpperCase() : (coinSymbol ?? "");
-
-    const rows: Array<{ label: string; value: string; emphasis?: boolean }> = [];
-
-    if (statusData.actuallyPaid != null) {
-        rows.push({ label: "Sent", value: `${trimAmount(statusData.actuallyPaid)} ${unit(null)}`.trim() });
-    }
-    if (statusData.feeTotal != null) {
-        rows.push({ label: "Fees", value: `− ${trimAmount(statusData.feeTotal)} ${unit(statusData.feeCurrency)}`.trim() });
-    }
-    rows.push({
-        label: "Credited",
-        value: `${statusData.creditedAmount.toLocaleString()} ${statusData.creditedCurrency ?? ""}`.trim(),
-        emphasis: true,
-    });
-
-    return (
-        <dl className="w-full mt-3 rounded-2xl border border-border bg-gray-50 dark:bg-white/5 px-4 py-3 text-sm">
-            {rows.map((row) => (
-                <div key={row.label} className="flex items-center justify-between gap-3 py-1.5">
-                    <dt className="font-semibold text-muted">{row.label}</dt>
-                    <dd className={cn("text-right", row.emphasis ? "font-black text-ink" : "font-bold text-ink")}>{row.value}</dd>
-                </div>
-            ))}
-        </dl>
     );
 }
 

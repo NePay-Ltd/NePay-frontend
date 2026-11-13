@@ -9,10 +9,16 @@ import { apiClient } from "@/lib/api-client";
 import {
     ApiResponse,
     BridgeAccountFeeDto,
+    BridgeCurrency,
     BridgeCustomerDto,
     BridgeDepositDto,
+    BridgeExternalAccountDto,
+    BridgePayoutDto,
+    BridgePayoutQuoteDto,
     BridgeVirtualAccountDto,
     CreateBridgeCustomerDto,
+    CreateBridgeExternalAccountDto,
+    InitiateBridgePayoutDto,
     RequestBridgeVirtualAccountDto,
 } from "@/lib/types/api";
 
@@ -21,7 +27,10 @@ export const bridgeKeys = {
     customer: () => [...bridgeKeys.all, "customer"] as const,
     accounts: () => [...bridgeKeys.all, "accounts"] as const,
     deposits: () => [...bridgeKeys.all, "deposits"] as const,
-    fee: () => [...bridgeKeys.all, "fee"] as const,
+    fee: (currency: BridgeCurrency) => [...bridgeKeys.all, "fee", currency] as const,
+    externalAccounts: () => [...bridgeKeys.all, "externalAccounts"] as const,
+    payoutQuote: (amountUsd: string) => [...bridgeKeys.all, "payoutQuote", amountUsd] as const,
+    payouts: () => [...bridgeKeys.all, "payouts"] as const,
 };
 
 /** Polled while the customer hasn't yet reached a terminal-ish state — Bridge's real onboarding resolves in seconds to minutes once documents are submitted. */
@@ -87,27 +96,27 @@ export function useRefreshBridgeCustomer() {
     });
 }
 
-/** The one-time fee gating foreign account requests — see BridgeAccountFeeDto's own note. */
-export function useBridgeAccountFee() {
+/** The fee gating account requests for ONE currency — charged separately per currency, see BridgeAccountFeeDto's own note. */
+export function useBridgeAccountFee(currency: BridgeCurrency) {
     return useQuery<BridgeAccountFeeDto>({
-        queryKey: bridgeKeys.fee(),
+        queryKey: bridgeKeys.fee(currency),
         queryFn: async () => {
-            const res = await apiClient.get<ApiResponse<BridgeAccountFeeDto>>("/bridge/accounts/fee");
+            const res = await apiClient.get<ApiResponse<BridgeAccountFeeDto>>("/bridge/accounts/fee", { params: { currency } });
             return res.data.data;
         },
     });
 }
 
-/** Pays the one-time fee. Idempotent server-side — calling this again once already paid is a safe no-op, not a second charge. */
+/** Pays the fee for ONE currency. Idempotent server-side — calling this again once already paid for that currency is a safe no-op, not a second charge. */
 export function usePayBridgeAccountFee() {
     const queryClient = useQueryClient();
-    return useMutation<BridgeAccountFeeDto, Error, string>({
-        mutationFn: async (pin) => {
-            const res = await apiClient.post<ApiResponse<BridgeAccountFeeDto>>("/bridge/accounts/fee/pay", { pin });
+    return useMutation<BridgeAccountFeeDto, Error, { pin: string; currency: BridgeCurrency }>({
+        mutationFn: async ({ pin, currency }) => {
+            const res = await apiClient.post<ApiResponse<BridgeAccountFeeDto>>("/bridge/accounts/fee/pay", { pin, currency });
             return res.data.data;
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: bridgeKeys.fee() });
+        onSuccess: (_data, { currency }) => {
+            queryClient.invalidateQueries({ queryKey: bridgeKeys.fee(currency) });
         },
     });
 }
@@ -148,6 +157,69 @@ export function useBridgeDeposits() {
             const items = query.state.data ?? [];
             const stillSettling = items.some((d) => d.status === "RECEIVED");
             return stillSettling ? 5000 : false;
+        },
+    });
+}
+
+// ─── Foreign Payouts — sending money OUT ───────────────────────────────────
+
+export function useBridgeExternalAccounts() {
+    return useQuery<BridgeExternalAccountDto[]>({
+        queryKey: bridgeKeys.externalAccounts(),
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<BridgeExternalAccountDto[]>>("/bridge/external-accounts");
+            return res.data.data;
+        },
+    });
+}
+
+export function useCreateBridgeExternalAccount() {
+    const queryClient = useQueryClient();
+    return useMutation<BridgeExternalAccountDto, Error, CreateBridgeExternalAccountDto>({
+        mutationFn: async (dto) => {
+            const res = await apiClient.post<ApiResponse<BridgeExternalAccountDto>>("/bridge/external-accounts", dto);
+            return res.data.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: bridgeKeys.externalAccounts() });
+        },
+    });
+}
+
+/** A live quote — no side effects, so this is safe to fire on every keystroke (debounced by the caller). Disabled while `amountUsd` is empty. */
+export function useBridgePayoutQuote(amountUsd: string) {
+    return useQuery<BridgePayoutQuoteDto>({
+        queryKey: bridgeKeys.payoutQuote(amountUsd),
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<BridgePayoutQuoteDto>>("/bridge/payouts/quote", {
+                params: { amountUsd },
+            });
+            return res.data.data;
+        },
+        enabled: Number(amountUsd) > 0,
+    });
+}
+
+/** Calls Bridge BEFORE debiting the wallet — see the backend's BridgePayoutService class-level note. A rejection here means nothing was ever charged. */
+export function useInitiateBridgePayout() {
+    const queryClient = useQueryClient();
+    return useMutation<BridgePayoutDto, Error, InitiateBridgePayoutDto>({
+        mutationFn: async (dto) => {
+            const res = await apiClient.post<ApiResponse<BridgePayoutDto>>("/bridge/payouts", dto);
+            return res.data.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: bridgeKeys.payouts() });
+        },
+    });
+}
+
+export function useBridgePayouts() {
+    return useQuery<BridgePayoutDto[]>({
+        queryKey: bridgeKeys.payouts(),
+        queryFn: async () => {
+            const res = await apiClient.get<ApiResponse<BridgePayoutDto[]>>("/bridge/payouts");
+            return res.data.data;
         },
     });
 }

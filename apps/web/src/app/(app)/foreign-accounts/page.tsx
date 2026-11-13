@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/shared/skeletons";
 import { Tag, type TagVariant } from "@/components/shared/tag";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BridgeOnboardingForm } from "@/components/shared/bridge-onboarding-form";
+import { SendAbroadContent } from "@/components/shared/bridge-send-abroad";
 import { BridgeTosConsent } from "@/components/shared/bridge-tos-consent";
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
 
@@ -80,9 +81,9 @@ export default function ForeignAccountsPage() {
     const { data: customer, isPending: customerLoading } = useBridgeCustomer();
     const { data: accounts, isPending: accountsLoading } = useBridgeAccounts();
     const { data: deposits } = useBridgeDeposits();
-    const { data: fee, isPending: feeLoading } = useBridgeAccountFee();
 
     const [activeCurrency, setActiveCurrency] = React.useState<BridgeCurrency>("USD");
+    const [mode, setMode] = React.useState<"receive" | "send">("receive");
 
     const accountsByCurrency = React.useMemo(() => {
         const map = new Map<BridgeCurrency, BridgeVirtualAccountDto>();
@@ -95,32 +96,53 @@ export default function ForeignAccountsPage() {
             <div className="mb-2">
                 <h1 className="text-3xl font-black text-ink tracking-tight">Foreign Accounts</h1>
                 <p className="mt-2 text-base font-medium text-muted">
-                    Get paid in USD or EUR, and it lands in your Naira wallet automatically.
+                    {mode === "receive"
+                        ? "Get paid in USD or EUR, and it lands in your Naira wallet automatically."
+                        : "Send money from your Naira wallet to a foreign bank account."}
                 </p>
             </div>
 
-            {customerLoading ? (
+            {/* Receiving and sending are two different Bridge flows sharing one page — same reasoning the currency tabs below already use for USD/EUR. */}
+            <div className="flex gap-2 rounded-xl bg-gray-100 dark:bg-white/5 p-1 w-fit">
+                {(["receive", "send"] as const).map((m) => (
+                    <button
+                        key={m}
+                        type="button"
+                        onClick={() => setMode(m)}
+                        className={`rounded-lg px-4 py-1.5 text-sm font-bold capitalize transition-colors ${
+                            mode === m ? "bg-white dark:bg-gray-900 text-ink shadow-sm" : "text-muted"
+                        }`}
+                    >
+                        {m}
+                    </button>
+                ))}
+            </div>
+
+            {mode === "send" ? (
+                customerLoading ? (
+                    <Skeleton className="h-64 w-full rounded-2xl" />
+                ) : !customer || customer.status !== "active" ? (
+                    <div className="rounded-xl border border-border bg-gray-50 dark:bg-white/5 p-6 text-center text-sm text-muted">
+                        Complete foreign account verification under &quot;Receive&quot; first — sending uses the same verification.
+                    </div>
+                ) : (
+                    <SendAbroadContent />
+                )
+            ) : customerLoading ? (
                 <Skeleton className="h-64 w-full rounded-2xl" />
             ) : !customer || customer.status === "rejected" ? (
                 <div className="space-y-4">
-                    {fee?.required && (
-                        <p className="text-xs text-muted">
-                            Heads up: a one-time ${fee.amountUsd} fee{fee.amountNgn ? ` (about ₦${Number(fee.amountNgn).toLocaleString()} today)` : ""} applies
-                            once you&apos;re verified, before your first account. It covers both USD and EUR, and is charged once from your Naira wallet.
-                        </p>
-                    )}
+                    <p className="text-xs text-muted">
+                        Heads up: once you&apos;re verified, each foreign account you request (USD, EUR) has its own one-time unlock fee, charged from your Naira wallet.
+                    </p>
                     <BridgeOnboardingForm rejectedCustomer={customer ?? undefined} />
                 </div>
             ) : customer.status !== "active" ? (
                 <StatusPanel customer={customer} />
-            ) : feeLoading ? (
-                <Skeleton className="h-48 w-full rounded-2xl" />
-            ) : fee?.required ? (
-                <FeeGatePanel fee={fee} />
             ) : (
                 <>
                     <p className="text-xs font-medium text-muted -mt-2">
-                        A 1% fee applies to each converted deposit, plus a flat $2/month maintenance fee while you hold a foreign account.
+                        A 1% fee applies to each converted deposit, plus a flat $2/month maintenance fee per foreign account you hold.
                     </p>
 
                     <Panel>
@@ -231,15 +253,17 @@ function StatusPanel({ customer }: { customer: NonNullable<ReturnType<typeof use
     );
 }
 
-// ─── Fee gate (one-time, before the first account of any currency) ─────────
+// ─── Fee gate (per currency, before THAT currency's first account) ────────
 
 /**
- * Shown instead of the currency tabs while `fee.required` is true. Gates
+ * Shown instead of a currency's request UI while that currency's own
+ * `fee.required` is true. Each currency is gated independently — paying
+ * for USD never unlocks EUR, see BridgeAccountFeeService's own note. Gates
  * every NEW account request server-side too (BridgeVirtualAccountService.
  * requestAccount) — this is the UI-side half so nobody hits that error
  * unexplained, same convention as the old GBP-disabled panel.
  */
-function FeeGatePanel({ fee }: { fee: BridgeAccountFeeDto }) {
+function FeeGatePanel({ currency, fee }: { currency: BridgeCurrency; fee: BridgeAccountFeeDto }) {
     const payFee = usePayBridgeAccountFee();
     const [modalOpen, setModalOpen] = React.useState(false);
     const [txState, setTxState] = React.useState<TransactionState>("confirm");
@@ -248,13 +272,16 @@ function FeeGatePanel({ fee }: { fee: BridgeAccountFeeDto }) {
 
     const handlePinSubmit = (pin: string) => {
         setTxState("processing");
-        payFee.mutate(pin, {
-            onSuccess: () => setTxState("success"),
-            onError: (err: any) => {
-                toast.error(err.response?.data?.message || "Could not charge the fee");
-                setTxState("error");
+        payFee.mutate(
+            { pin, currency },
+            {
+                onSuccess: () => setTxState("success"),
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || "Could not charge the fee");
+                    setTxState("error");
+                },
             },
-        });
+        );
     };
 
     return (
@@ -265,10 +292,10 @@ function FeeGatePanel({ fee }: { fee: BridgeAccountFeeDto }) {
                         <Building2 className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                     </div>
                     <div className="mx-auto max-w-sm space-y-1">
-                        <h3 className="text-base font-bold text-ink">One more step to unlock Foreign Accounts</h3>
+                        <h3 className="text-base font-bold text-ink">One more step to unlock your {currency} account</h3>
                         <p className="text-sm text-muted">
                             A one-time ${fee.amountUsd} fee{ngnLabel ? ` (${ngnLabel} at today's rate)` : ""} unlocks
-                            foreign accounts. It covers every currency and is charged once from your Naira wallet.
+                            a {currency} account. Charged from your Naira wallet — a different currency has its own separate fee.
                         </p>
                     </div>
                     <Button
@@ -279,7 +306,7 @@ function FeeGatePanel({ fee }: { fee: BridgeAccountFeeDto }) {
                             setModalOpen(true);
                         }}
                     >
-                        Pay ${fee.amountUsd} to Unlock
+                        Pay ${fee.amountUsd} to Unlock {currency}
                     </Button>
                     {!ngnLabel && (
                         <p className="text-xs text-muted">Pricing is temporarily unavailable. Check back shortly.</p>
@@ -291,13 +318,13 @@ function FeeGatePanel({ fee }: { fee: BridgeAccountFeeDto }) {
                 open={modalOpen}
                 onOpenChange={setModalOpen}
                 state={txState}
-                confirmTitle="Unlock Foreign Accounts"
+                confirmTitle={`Unlock ${currency} Account`}
                 confirmContent={
                     <div className="space-y-2 py-2 text-center">
                         <p className="text-3xl font-black text-ink">{ngnLabel ?? "Unavailable"}</p>
                         <p className="text-sm text-muted">
                             ${fee.amountUsd}{fee.rate ? ` at ₦${Number(fee.rate).toLocaleString()}/$1` : ""}. Charged
-                            once from your Naira wallet, covers every currency, and is non-refundable.
+                            once from your Naira wallet for this {currency} account only, and is non-refundable.
                         </p>
                     </div>
                 }
@@ -306,9 +333,9 @@ function FeeGatePanel({ fee }: { fee: BridgeAccountFeeDto }) {
                 confirmButtonLabel="Continue"
                 onPinSubmit={handlePinSubmit}
                 pinDescription="Enter your 4-digit transaction PIN to confirm this charge."
-                processingText="Unlocking foreign accounts..."
-                successTitle="Foreign Accounts Unlocked"
-                successDescription="You can now request a USD or EUR account below."
+                processingText={`Unlocking your ${currency} account...`}
+                successTitle={`${currency} Account Unlocked`}
+                successDescription={`You can now request your ${currency} account below.`}
                 onSuccessAction={() => setModalOpen(false)}
                 errorTitle="Payment Failed"
                 errorDescription={(payFee.error as any)?.response?.data?.message || "Something went wrong. Please try again."}
@@ -322,7 +349,19 @@ function FeeGatePanel({ fee }: { fee: BridgeAccountFeeDto }) {
 
 function CurrencyPanel({ currency, account }: { currency: BridgeCurrency; account: BridgeVirtualAccountDto | null }) {
     const { mutate: requestAccount, isPending } = useRequestBridgeAccount();
+    const { data: fee, isPending: feeLoading } = useBridgeAccountFee(currency);
     const info = CURRENCY_INFO[currency];
+
+    // An account already issued was necessarily paid for already — never
+    // re-show the fee gate for a currency the user already holds, even if
+    // the fee query is still loading or momentarily stale.
+    if (!account && feeLoading) {
+        return <Skeleton className="h-40 w-full rounded-xl" />;
+    }
+
+    if (!account && fee?.required) {
+        return <FeeGatePanel currency={currency} fee={fee} />;
+    }
 
     if (!account) {
         return (

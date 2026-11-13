@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { IconArrowLeft as ArrowLeft, IconCoin as Bitcoin, IconBuilding as Landmark, IconCard as CreditCard, IconCopy as Copy } from "@/components/icons";
-import { Globe } from "lucide-react";
+import { Globe, Calculator } from "lucide-react";
 import { AlertCircle, Loader2, FlaskConical } from "lucide-react";;
 import { toast } from "sonner";
 
@@ -21,6 +21,7 @@ import { Panel, PanelBody } from "@/components/shared/panel";
 import { Field } from "@/components/shared/field";
 import { Chip } from "@/components/shared/chip";
 import { Input } from "@/components/ui/input";
+import { AccountDetailsCard, groupAccountNumber } from "@/components/shared/account-details-card";
 
 const SIMULATE_PRESETS = [5000, 20000, 100000];
 
@@ -66,6 +67,9 @@ export default function AddMoneyPage() {
     // Bank Transfer (virtual account)
     const [bankExpanded, setBankExpanded] = React.useState(false);
     const { data: virtualAccount, isLoading: vaLoading, error: vaError, refetch: refetchVa } = useVirtualAccount();
+    // Once the account exists it is the first thing on the page, ready to copy or share; the expandable
+    // "Bank transfer" row is only for getting one (verify NIN). Same as the mobile app.
+    const showAccountCard = Boolean(virtualAccount);
     const { data: feeSchedule } = useFees();
     const depositFeeNote = describeFees(feeSchedule?.deposit, "deposit", formatNairaString);
 
@@ -113,12 +117,25 @@ export default function AddMoneyPage() {
                     <ArrowLeft className="h-4 w-4" />
                 </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-ink">Add Money</h1>
-                    <p className="mt-0.5 text-sm text-body">
-                        Choose how you want to fund your account.
-                    </p>
+                    <h1 className="text-2xl font-bold text-ink">Add money</h1>
                 </div>
             </div>
+
+            {/* ── Your account, first: the way most people add money ───────── */}
+            {showAccountCard && virtualAccount && (
+                <div className="space-y-3">
+                    <AccountDetailsCard
+                        bankName={virtualAccount.bankName}
+                        accountNumber={virtualAccount.accountNumber}
+                        accountName={virtualAccount.accountName}
+                    />
+                    <p className="px-1.5 text-[13px] font-medium text-muted">
+                        Bank transfers usually arrive in 1 to 3 minutes.
+                        {depositFeeNote ? ` ${depositFeeNote}` : ""}
+                    </p>
+                    <p className="px-1 pt-2 text-[13.5px] font-semibold text-muted">Other ways</p>
+                </div>
+            )}
 
             {/* ── Options Panel ──────────────────────────────────────────── */}
             <Panel className="relative overflow-hidden">
@@ -129,21 +146,35 @@ export default function AddMoneyPage() {
                             <RowItem
                                 icon={Bitcoin}
                                 iconTint="amber"
-                                title="Crypto Deposit"
-                                subtitle="USDT / USDC, instant conversion"
+                                title="Crypto deposit"
+                                subtitle="USDT, USDC and more, converted to naira"
                                 showChevron
                                 onClick={() => router.push("/receive-crypto")}
                                 className="px-3 hover:bg-violet-050 dark:hover:bg-violet-900/10"
                             />
                         </div>
 
-                        {/* Option 2: Bank Transfer */}
+                        {/* Option 1b: the rate calculator - what a crypto deposit is worth before sending it */}
+                        <div className="rounded-lg overflow-hidden">
+                            <RowItem
+                                icon={Calculator}
+                                iconTint="violet"
+                                title="What you'll get"
+                                subtitle="Work out a crypto deposit in naira before you send"
+                                showChevron
+                                onClick={() => router.push("/receive-crypto")}
+                                className="px-3 hover:bg-violet-050 dark:hover:bg-violet-900/10"
+                            />
+                        </div>
+
+                        {/* Option 2: Bank Transfer - only while there is no account yet (then it's the card above) */}
+                        {!showAccountCard && (
                         <div className="rounded-lg overflow-hidden">
                             <RowItem
                                 icon={Landmark}
                                 iconTint="blue"
-                                title="Bank Transfer"
-                                subtitle="Use your dedicated virtual account"
+                                title="Bank transfer"
+                                subtitle="Get your own account number to receive transfers"
                                 showChevron={!bankExpanded}
                                 onClick={() => setBankExpanded(!bankExpanded)}
                                 className={`px-3 transition-colors hover:bg-violet-050 dark:hover:bg-violet-900/10 ${bankExpanded ? "bg-violet-050 dark:bg-violet-900/10" : ""}`}
@@ -155,36 +186,36 @@ export default function AddMoneyPage() {
                                         {vaLoading ? (
                                             <div className="flex items-center gap-2 text-sm text-muted">
                                                 <Loader2 className="h-4 w-4 animate-spin" />
-                                                Fetching account details...
+                                                Getting your account details…
                                             </div>
                                         ) : vaError ? (
                                             <div className="space-y-2">
                                                 <div className="flex items-center gap-2 text-sm text-red-600">
                                                     <AlertCircle className="h-4 w-4" />
-                                                    Failed to load virtual account.
+                                                    Couldn&apos;t load your account details.
                                                 </div>
                                                 <Button size="sm" variant="quiet" onClick={() => refetchVa()}>
-                                                    Retry
+                                                    Try again
                                                 </Button>
                                             </div>
                                         ) : virtualAccount ? (
                                             <>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
-                                                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">Bank Name</p>
+                                                        <p className="text-xs font-medium text-muted">Bank</p>
                                                         <p className="text-sm font-bold text-ink">{virtualAccount.bankName}</p>
                                                     </div>
                                                     <div>
-                                                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">Account Name</p>
+                                                        <p className="text-xs font-medium text-muted">Account name</p>
                                                         <p className="text-sm font-bold text-ink">{virtualAccount.accountName}</p>
                                                     </div>
                                                 </div>
 
                                                 <div>
-                                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-muted mb-1">Account Number</p>
+                                                    <p className="text-xs font-medium text-muted mb-1">Account number</p>
                                                     <div className="flex items-center justify-between rounded-lg border border-border bg-white dark:bg-gray-900 px-3 py-2.5">
                                                         <span className="font-mono text-lg font-bold tracking-wide text-ink">
-                                                            {virtualAccount.accountNumber}
+                                                            {groupAccountNumber(virtualAccount.accountNumber)}
                                                         </span>
                                                         <Button
                                                             size="sm"
@@ -219,7 +250,7 @@ export default function AddMoneyPage() {
                                             // Matches mobile exactly.
                                             <div className="space-y-3">
                                                 <p className="text-sm text-body">
-                                                    You don&apos;t have a dedicated virtual account yet.
+                                                    You don&apos;t have a NePay account number yet.
                                                 </p>
                                                 <div className="rounded-xl border border-violet-200 bg-violet-100 dark:border-violet-900/30 dark:bg-violet-900/10 p-3.5">
                                                     <p className="text-sm text-violet-800 dark:text-violet-300">
@@ -240,13 +271,14 @@ export default function AddMoneyPage() {
                                 </div>
                             )}
                         </div>
+                        )}
 
                         {/* Option 2b: Foreign Currency Account */}
                         <div className="rounded-lg overflow-hidden">
                             <RowItem
                                 icon={Globe}
                                 iconTint="green"
-                                title="Foreign Currency Account"
+                                title="Foreign currency account"
                                 subtitle="USD / EUR, convert to Naira anytime"
                                 showChevron
                                 onClick={() => router.push("/foreign-accounts")}
@@ -269,7 +301,7 @@ export default function AddMoneyPage() {
                                 <RowItem
                                     icon={FlaskConical}
                                     iconTint="amber"
-                                    title="Simulate Deposit"
+                                    title="Simulate deposit"
                                     subtitle="Test mode, credits your wallet via a real sandbox transfer"
                                     showChevron={!simulateExpanded}
                                     onClick={() => setSimulateExpanded(!simulateExpanded)}
