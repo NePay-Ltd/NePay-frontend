@@ -193,7 +193,6 @@ function AddRecipientModal({
             EUR: ["iban", "ibanCountry"],
             GBP: ["gbAccountNumber", "gbSortCode"],
             MXN: ["mxnClabe"],
-            BRL: ["brlPixKey"],
             COP: ["copBreBKey"],
         };
         const required = requiredByCurrency[form.currency];
@@ -329,18 +328,6 @@ function AddRecipientModal({
                         <p className="text-xs font-bold uppercase tracking-widest text-muted">Bank details (MXN)</p>
                         <Field label="CLABE" hint="18 digits">
                             <Input value={form.mxnClabe ?? ""} onChange={(e) => update("mxnClabe", e.target.value)} maxLength={18} />
-                        </Field>
-                    </div>
-                )}
-
-                {form.currency === "BRL" && (
-                    <div className="space-y-3">
-                        <p className="text-xs font-bold uppercase tracking-widest text-muted">Bank details (BRL)</p>
-                        <Field label="Pix key" hint="Email, phone, CPF/CNPJ, or a random key">
-                            <Input value={form.brlPixKey ?? ""} onChange={(e) => update("brlPixKey", e.target.value)} />
-                        </Field>
-                        <Field label="Document number" hint="Optional">
-                            <Input value={form.brlDocumentNumber ?? ""} onChange={(e) => update("brlDocumentNumber", e.target.value)} />
                         </Field>
                     </div>
                 )}
