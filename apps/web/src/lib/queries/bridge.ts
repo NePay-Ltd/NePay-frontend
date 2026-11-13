@@ -20,6 +20,7 @@ import {
     CreateBridgeExternalAccountDto,
     InitiateBridgePayoutDto,
     RequestBridgeVirtualAccountDto,
+    UpdateBridgeExternalAccountAddressDto,
 } from "@/lib/types/api";
 
 export const bridgeKeys = {
@@ -179,6 +180,19 @@ export function useCreateBridgeExternalAccount() {
         mutationFn: async (dto) => {
             const res = await apiClient.post<ApiResponse<BridgeExternalAccountDto>>("/bridge/external-accounts", dto);
             return res.data.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: bridgeKeys.externalAccounts() });
+        },
+    });
+}
+
+/** Fixes a USD recipient's address in place — see the backend's UpdateExternalAccountAddressParams note on why this exists instead of re-registering. */
+export function useUpdateBridgeExternalAccountAddress() {
+    const queryClient = useQueryClient();
+    return useMutation<void, Error, { id: string; dto: UpdateBridgeExternalAccountAddressDto }>({
+        mutationFn: async ({ id, dto }) => {
+            await apiClient.put(`/bridge/external-accounts/${id}/address`, dto);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: bridgeKeys.externalAccounts() });

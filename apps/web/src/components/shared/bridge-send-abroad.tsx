@@ -37,8 +37,15 @@ import {
     useBridgePayouts,
     useCreateBridgeExternalAccount,
     useInitiateBridgePayout,
+    useUpdateBridgeExternalAccountAddress,
 } from "@/lib/queries/bridge";
-import type { BridgeExternalAccountDto, BridgePayoutCurrency, BridgePayoutStatus, CreateBridgeExternalAccountDto } from "@/lib/types/api";
+import type {
+    BridgeExternalAccountDto,
+    BridgePayoutCurrency,
+    BridgePayoutStatus,
+    CreateBridgeExternalAccountDto,
+    UpdateBridgeExternalAccountAddressDto,
+} from "@/lib/types/api";
 
 /** Every currency Bridge approves for payouts — wider than what NePay receives in (USD/EUR only). See BridgePayoutCurrency's own note. */
 const SEND_CURRENCIES: { code: BridgePayoutCurrency; label: string }[] = [
@@ -71,8 +78,10 @@ export function SendAbroadContent() {
     const { data: payouts } = useBridgePayouts();
     const [addOpen, setAddOpen] = React.useState(false);
     const [selectedRecipientId, setSelectedRecipientId] = React.useState<string | null>(null);
+    const [editAddressId, setEditAddressId] = React.useState<string | null>(null);
 
     const recipient = recipients?.find((r) => r.id === selectedRecipientId) ?? null;
+    const editingRecipient = recipients?.find((r) => r.id === editAddressId) ?? null;
 
     return (
         <div className="space-y-6">
@@ -100,25 +109,34 @@ export function SendAbroadContent() {
                     ) : (
                         <div className="space-y-2">
                             {recipients.map((r) => (
-                                <button
+                                <div
                                     key={r.id}
-                                    type="button"
-                                    onClick={() => setSelectedRecipientId(r.id)}
-                                    className={`flex w-full items-center justify-between rounded-lg border px-3 py-2.5 text-left transition-colors ${
+                                    className={`flex w-full items-center justify-between rounded-lg border px-3 py-2.5 transition-colors ${
                                         selectedRecipientId === r.id
                                             ? "border-violet-400 bg-violet-50 dark:bg-violet-900/10"
                                             : "border-border bg-white dark:bg-gray-900 hover:border-violet-300"
                                     }`}
                                 >
-                                    <div>
+                                    <button type="button" onClick={() => setSelectedRecipientId(r.id)} className="flex-1 text-left">
                                         <p className="text-sm font-bold text-ink">{r.accountOwnerName}</p>
                                         <p className="text-xs text-muted">
                                             {r.currency} account ending •••• {r.last4}
                                             {r.isSelf ? " · Your own account" : ""}
                                         </p>
-                                    </div>
-                                    {selectedRecipientId === r.id ? <ArrowRight className="h-4 w-4 text-violet-600" /> : null}
-                                </button>
+                                    </button>
+                                    {r.currency === "USD" ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => setEditAddressId(r.id)}
+                                            className="shrink-0 px-2 text-xs font-semibold text-violet-600 hover:underline"
+                                        >
+                                            Edit address
+                                        </button>
+                                    ) : null}
+                                    {selectedRecipientId === r.id ? (
+                                        <ArrowRight className="h-4 w-4 shrink-0 text-violet-600" onClick={() => setSelectedRecipientId(r.id)} />
+                                    ) : null}
+                                </div>
                             ))}
                         </div>
                     )}
@@ -162,7 +180,93 @@ export function SendAbroadContent() {
             </Panel>
 
             <AddRecipientModal open={addOpen} onOpenChange={setAddOpen} onCreated={(id) => setSelectedRecipientId(id)} />
+            <EditAddressModal
+                recipient={editingRecipient}
+                onOpenChange={(open) => !open && setEditAddressId(null)}
+            />
         </div>
+    );
+}
+
+// ─── Edit a USD recipient's address ──────────────────────────────────────────
+
+/** Fixes a too-long (over 35 characters) or otherwise wrong address on an already-registered USD recipient, instead of trying to re-register it — Bridge dedupes a second create against the same account/routing number. */
+function EditAddressModal({
+    recipient,
+    onOpenChange,
+}: {
+    recipient: BridgeExternalAccountDto | null;
+    onOpenChange: (open: boolean) => void;
+}) {
+    const [form, setForm] = React.useState<UpdateBridgeExternalAccountAddressDto>({
+        streetLine1: "",
+        streetLine2: "",
+        city: "",
+        state: "",
+        postalCode: "",
+    });
+    const { mutate: updateAddress, isPending } = useUpdateBridgeExternalAccountAddress();
+
+    React.useEffect(() => {
+        if (recipient) {
+            setForm({ streetLine1: "", streetLine2: "", city: "", state: "", postalCode: "" });
+        }
+    }, [recipient?.id]);
+
+    const update = <K extends keyof UpdateBridgeExternalAccountAddressDto>(key: K, value: UpdateBridgeExternalAccountAddressDto[K]) =>
+        setForm((f) => ({ ...f, [key]: value }));
+
+    const handleSubmit = () => {
+        if (!form.streetLine1.trim() || !form.city.trim() || !form.state.trim() || !form.postalCode.trim()) {
+            toast.error("Fill in street address, city, state, and ZIP code.");
+            return;
+        }
+        if (!recipient) return;
+
+        updateAddress(
+            { id: recipient.id, dto: form },
+            {
+                onSuccess: () => {
+                    toast.success("Address updated.");
+                    onOpenChange(false);
+                },
+                onError: (err: any) => toast.error(err.response?.data?.message || err.message || "Could not update this address."),
+            },
+        );
+    };
+
+    return (
+        <Modal
+            open={!!recipient}
+            onOpenChange={onOpenChange}
+            title={`Edit ${recipient?.accountOwnerName ?? ""}'s address`}
+            description="Fixes a rejected or too-long address without needing to re-add this recipient"
+            footer={
+                <Button fullWidth variant="primary" loading={isPending} onClick={handleSubmit}>
+                    Save address
+                </Button>
+            }
+        >
+            <div className="space-y-3">
+                <Field label="Street address" hint="35 characters max">
+                    <Input value={form.streetLine1} onChange={(e) => update("streetLine1", e.target.value)} maxLength={35} />
+                </Field>
+                <Field label="Street address line 2" hint="Optional — apartment/suite, 35 characters max">
+                    <Input value={form.streetLine2 ?? ""} onChange={(e) => update("streetLine2", e.target.value)} maxLength={35} />
+                </Field>
+                <div className="grid grid-cols-3 gap-3">
+                    <Field label="City">
+                        <Input value={form.city} onChange={(e) => update("city", e.target.value)} />
+                    </Field>
+                    <Field label="State">
+                        <Input value={form.state} onChange={(e) => update("state", e.target.value)} placeholder="e.g. NY" />
+                    </Field>
+                    <Field label="ZIP code">
+                        <Input value={form.postalCode} onChange={(e) => update("postalCode", e.target.value)} />
+                    </Field>
+                </div>
+            </div>
+        </Modal>
     );
 }
 
@@ -276,8 +380,11 @@ function AddRecipientModal({
                         <Field label="Routing number" hint="9 digits">
                             <Input value={form.usRoutingNumber ?? ""} onChange={(e) => update("usRoutingNumber", e.target.value)} maxLength={9} />
                         </Field>
-                        <Field label="Street address">
-                            <Input value={form.usStreetLine1 ?? ""} onChange={(e) => update("usStreetLine1", e.target.value)} />
+                        <Field label="Street address" hint="35 characters max">
+                            <Input value={form.usStreetLine1 ?? ""} onChange={(e) => update("usStreetLine1", e.target.value)} maxLength={35} />
+                        </Field>
+                        <Field label="Street address line 2" hint="Optional — apartment/suite, 35 characters max">
+                            <Input value={form.usStreetLine2 ?? ""} onChange={(e) => update("usStreetLine2", e.target.value)} maxLength={35} />
                         </Field>
                         <div className="grid grid-cols-3 gap-3">
                             <Field label="City">

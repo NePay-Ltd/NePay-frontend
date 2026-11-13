@@ -745,6 +745,7 @@ export interface CreateBridgeExternalAccountDto {
     usAccountNumber?: string;
     usRoutingNumber?: string;
     usStreetLine1?: string;
+    usStreetLine2?: string;
     usCity?: string;
     usState?: string;
     usPostalCode?: string;
@@ -762,6 +763,15 @@ export interface CreateBridgeExternalAccountDto {
     mxnClabe?: string;
     // COP (Bre-B)
     copBreBKey?: string;
+}
+
+/** Body of PUT /bridge/external-accounts/:id/address — fixes a USD recipient's address without re-registering it. */
+export interface UpdateBridgeExternalAccountAddressDto {
+    streetLine1: string;
+    streetLine2?: string;
+    city: string;
+    state: string;
+    postalCode: string;
 }
 
 /** A registered recipient — never the full account number/IBAN, only `last4` for display. */
