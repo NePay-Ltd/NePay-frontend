@@ -30,7 +30,7 @@ const TONE: Record<ReceiptTone, { bg: string; fg: string }> = {
     failed: { bg: "#FEE2E2", fg: "#991B1B" },
 };
 
-const SANS = `var(--font-sans, "Plus Jakarta Sans"), "Plus Jakarta Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif`;
+const SANS = `NairaFix, var(--font-sans, "Plus Jakarta Sans"), "Plus Jakarta Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif`;
 const SERIF = `NairaFix, var(--font-receipt-serif, "Instrument Serif"), "Instrument Serif", Georgia, serif`;
 const MONO = `NairaFix, var(--font-receipt-mono, "JetBrains Mono"), "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace`;
 

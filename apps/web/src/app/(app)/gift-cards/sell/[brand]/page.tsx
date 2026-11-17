@@ -294,7 +294,7 @@ export default function SellGiftCardPage({ params }: { params: { brand: string }
                                                     <div className="flex gap-3"><Button type="button" variant="primary" onClick={capturePhoto} className="flex-1"><Camera className="mr-2 h-4 w-4" />Capture photo</Button><Button type="button" variant="ghost" onClick={stopCamera}>Cancel</Button></div>
                                                 </div>
                                             ) : (
-                                                <button type="button" onClick={() => void openCamera()} className="flex w-full items-center justify-center rounded-xl border-2 border-dashed border-violet-300 bg-violet-50/50 px-4 py-6 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-100/60"><Camera className="mr-2 h-5 w-5" />Take a photo with camera</button>
+                                                <button type="button" onClick={() => void openCamera()} className="flex w-full items-center justify-center rounded-xl border-2 border-dashed border-violet-300 dark:border-violet-500/40 bg-violet-50/50 dark:bg-violet-500/5 px-4 py-6 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-100/60 dark:hover:bg-violet-500/10"><Camera className="mr-2 h-5 w-5" />Take a photo with camera</button>
                                             )
                                         )}
                                         {cameraError && <p className="text-xs text-red-600">{cameraError}</p>}

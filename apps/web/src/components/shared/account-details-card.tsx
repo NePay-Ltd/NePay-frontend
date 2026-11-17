@@ -74,7 +74,7 @@ export function AccountDetailsCard({
                 <button
                     type="button"
                     onClick={copy}
-                    className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-white text-sm font-bold text-[#3A00A8] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#3A00A8]"
+                    className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-trueWhite text-sm font-bold text-[#3A00A8] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#3A00A8]"
                 >
                     <Copy className="h-4 w-4" strokeWidth={2} />
                     Copy number

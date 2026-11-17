@@ -84,7 +84,7 @@ export function SupportTicketHistory({ support, onBack, onOpenLive }: {
                     <p className="truncate text-[11px] text-white/70">{CATEGORY_LABELS[selected.category]} · {STATUS_LABELS[selected.status]}</p>
                 </div>
             </header>
-            <div className="flex-1 space-y-3.5 overflow-y-auto bg-[#fbfaff] p-4">
+            <div className="flex-1 space-y-3.5 overflow-y-auto bg-[#fbfaff] dark:bg-bg p-4">
                 {messages === null && <div className="flex h-full items-center justify-center text-sm text-muted">Loading transcript...</div>}
                 {messages?.map((item) => <div key={item.id} className={`flex flex-col ${item.senderType === "customer" ? "items-end" : item.senderType === "system" ? "items-center" : "items-start"}`}>
                     {item.attachmentUrl

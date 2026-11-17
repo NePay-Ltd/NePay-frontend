@@ -303,7 +303,7 @@ export default function BankAccountsPage() {
                                 Resolving account name...
                             </div>
                         ) : resolvedName ? (
-                            <div className="rounded-md bg-green-50/50 p-3 text-sm font-medium text-green-700 border border-green-200">
+                            <div className="rounded-md bg-green-50/50 dark:bg-green-500/10 p-3 text-sm font-medium text-green-700 border border-green-200">
                                 {resolvedName}
                             </div>
                         ) : null}

@@ -26,6 +26,7 @@ import { DepositProgressView } from "./deposit-progress-view";
 import { cn } from "@/lib/cn";
 import { formatNaira, formatNairaString, formatByCurrency } from "@/lib/format";
 import { CurrencyAvatar } from "./shared";
+import { HighFeeNetworkNotice, isHighFeeNetwork, recommendedAlternative } from "./high-fee-notice";
 
 interface DepositDetailViewProps {
     assetCode: string | null;
@@ -105,6 +106,8 @@ export function DepositDetailView({ assetCode, onBack, onOpenCalculator, isMobil
     // An estimate only — a failed lookup is just "no estimate" (the query never retries or throws into the screen).
     const { data: feeEstimate } = useCryptoFeeEstimate(assetCode);
     const feesDeducted = feeEstimate?.creditsNetOfFees === true;
+    const highFee = isHighFeeNetwork(selectedCurrency?.network);
+    const alternative = recommendedAlternative((currencies ?? []).filter((c) => c.coin === selectedCurrency?.coin));
 
     const {
         mutate: generateAddress,
@@ -350,6 +353,9 @@ export function DepositDetailView({ assetCode, onBack, onOpenCalculator, isMobil
                     {pricesData?.usdNgnRate ? <ConversionRateNotice usdNgnRate={pricesData.usdNgnRate} /> : null}
 
                     {/* Before sending: what fees mean for the credited amount. Only while fees really are being deducted. */}
+                    {highFee && selectedCurrency?.network ? (
+                        <HighFeeNetworkNotice network={selectedCurrency.network} alternative={alternative} />
+                    ) : null}
                     {feesDeducted && feeEstimate ? (
                         <FeeNotice estimate={feeEstimate} coinSymbol={selectedCurrency?.coin ?? null} />
                     ) : null}

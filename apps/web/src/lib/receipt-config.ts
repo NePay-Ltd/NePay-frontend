@@ -684,7 +684,8 @@ function buildForeignDeposit(i: ForeignDepositInput): ReceiptConfig {
     const sender = titleCase(i.senderName);
     const to = `NePay ${cur} account`;
 
-    return shell(i, {
+    // `amount` is in the foreign currency ($1.00 sent), so the big figure is printed in it too, not in naira.
+    return shell({ ...i, currency: cur }, {
         kind: "FOREIGN_DEPOSIT",
         headerLabel: "Deposit receipt",
         heroLine: `Received into your ${cur} account`,

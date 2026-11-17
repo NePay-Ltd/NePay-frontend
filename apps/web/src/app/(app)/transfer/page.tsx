@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { IconCheck as Check, IconPlus as Plus, IconBuilding as Landmark, IconBuilding as Building2 } from "@/components/icons";
-import { ChevronsUpDown, Loader2, Search, X } from "lucide-react";
+import { ChevronRight, ChevronsUpDown, Loader2, Search, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";
@@ -33,14 +33,19 @@ import { RequireKyc } from "@/components/shared/require-kyc";
 import { Button } from "@/components/shared/button";
 import { Chip } from "@/components/shared/chip";
 import { Panel, PanelHeader, PanelBody } from "@/components/shared/panel";
+import { EmptyState } from "@/components/shared/empty-state";
+import { Skeleton } from "@/components/shared/skeletons";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TransactionModal, type TransactionState } from "@/components/shared/transaction-modal";
 import { Switch } from "@/components/ui/switch";
 import { ConfirmRemoveDialog } from "@/components/shared/confirm-remove-dialog";
 import { maskAccount } from "@/lib/receipt-config";
+import { AddRecipientModal, SendForm } from "@/components/shared/bridge-send-abroad";
+import { useBridgeExternalAccounts } from "@/lib/queries/bridge";
 
 const PRESET_AMOUNTS = [10000, 50000, 100000];
 
@@ -61,6 +66,18 @@ function cleanNarrationInput(value: string): string {
 
 export default function TransferPage() {
     const router = useRouter();
+
+    // Naira vs Abroad — an orthogonal tab, not a replacement for anything
+    // below. Can arrive pre-set from Foreign Accounts' "Send money abroad"
+    // button / a specific recipient's row (?tab=abroad&external=<id>).
+    const [tab, setTab] = React.useState<"naira" | "abroad">("naira");
+    const [externalAccountId, setExternalAccountId] = React.useState<string | null>(null);
+    React.useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("tab") === "abroad") setTab("abroad");
+        const external = params.get("external");
+        if (external) setExternalAccountId(external);
+    }, []);
 
     // ── Queries ──
     const queryClient = useQueryClient();
@@ -350,6 +367,17 @@ export default function TransferPage() {
                     </p>
                 </div>
 
+                <Tabs value={tab} onValueChange={(v) => setTab(v as "naira" | "abroad")}>
+                    <TabsList className="w-full max-w-xs grid grid-cols-2">
+                        <TabsTrigger value="naira">Naira</TabsTrigger>
+                        <TabsTrigger value="abroad">Abroad</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="abroad" className="pt-6">
+                        <AbroadTab initialExternalAccountId={externalAccountId} />
+                    </TabsContent>
+
+                    <TabsContent value="naira" className="pt-6">
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-10">
                     {/* ── Left Column (Form) ── */}
                     <div className="space-y-6 md:col-span-7">
@@ -695,6 +723,8 @@ export default function TransferPage() {
                         </Button>
                     </div>
                 </div>
+                    </TabsContent>
+                </Tabs>
             </div>
 
             <ConfirmRemoveDialog
@@ -815,5 +845,68 @@ export default function TransferPage() {
                 onPinSubmit={handlePinSubmit}
             />
         </RequireKyc>
+    );
+}
+
+/** Transfer's Abroad tab — pick a saved Bridge recipient (or add a new one), then the same SendForm bridge-send-abroad.tsx already uses. */
+function AbroadTab({ initialExternalAccountId }: { initialExternalAccountId: string | null }) {
+    const { data: recipients, isPending: recipientsLoading } = useBridgeExternalAccounts();
+    const [selectedId, setSelectedId] = React.useState<string | null>(initialExternalAccountId);
+    const [addOpen, setAddOpen] = React.useState(false);
+
+    const recipient = recipients?.find((r) => r.id === selectedId) ?? null;
+
+    if (recipient) {
+        return <SendForm key={recipient.id} recipient={recipient} onSent={() => setSelectedId(null)} />;
+    }
+
+    return (
+        <>
+            <Panel>
+                <PanelHeader
+                    title="Who are you sending to?"
+                    description="Pick a recipient, or add a new one"
+                    action={
+                        <Button size="sm" variant="primary" onClick={() => setAddOpen(true)}>
+                            <Plus className="mr-1.5 h-3.5 w-3.5" />
+                            Add recipient
+                        </Button>
+                    }
+                />
+                <PanelBody>
+                    {recipientsLoading ? (
+                        <Skeleton className="h-16 w-full rounded-xl" />
+                    ) : !recipients || recipients.length === 0 ? (
+                        <EmptyState
+                            icon={Building2}
+                            heading="No recipients yet"
+                            description="Add a bank account abroad to send money to."
+                            className="py-8"
+                        />
+                    ) : (
+                        <div className="space-y-2">
+                            {recipients.map((r) => (
+                                <button
+                                    key={r.id}
+                                    type="button"
+                                    onClick={() => setSelectedId(r.id)}
+                                    className="flex w-full items-center justify-between rounded-lg border border-border bg-white px-3 py-2.5 text-left transition-colors hover:border-violet-300 dark:bg-gray-900"
+                                >
+                                    <span>
+                                        <span className="block text-sm font-bold text-ink">{r.accountOwnerName}</span>
+                                        <span className="block text-xs text-muted">
+                                            {r.currency} account ending •••• {r.last4}
+                                        </span>
+                                    </span>
+                                    <ChevronRight className="h-4 w-4 shrink-0 text-violet-600" />
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </PanelBody>
+            </Panel>
+
+            <AddRecipientModal open={addOpen} onOpenChange={setAddOpen} onCreated={(id) => setSelectedId(id)} />
+        </>
     );
 }

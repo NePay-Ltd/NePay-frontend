@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { IconArrowLeft as ArrowLeft, IconCoin as Bitcoin, IconBuilding as Landmark, IconCard as CreditCard, IconCopy as Copy } from "@/components/icons";
-import { Globe, Calculator } from "lucide-react";
+import { Globe } from "lucide-react";
 import { AlertCircle, Loader2, FlaskConical } from "lucide-react";;
 import { toast } from "sonner";
 
@@ -148,19 +148,6 @@ export default function AddMoneyPage() {
                                 iconTint="amber"
                                 title="Crypto deposit"
                                 subtitle="USDT, USDC and more, converted to naira"
-                                showChevron
-                                onClick={() => router.push("/receive-crypto")}
-                                className="px-3 hover:bg-violet-050 dark:hover:bg-violet-900/10"
-                            />
-                        </div>
-
-                        {/* Option 1b: the rate calculator - what a crypto deposit is worth before sending it */}
-                        <div className="rounded-lg overflow-hidden">
-                            <RowItem
-                                icon={Calculator}
-                                iconTint="violet"
-                                title="What you'll get"
-                                subtitle="Work out a crypto deposit in naira before you send"
                                 showChevron
                                 onClick={() => router.push("/receive-crypto")}
                                 className="px-3 hover:bg-violet-050 dark:hover:bg-violet-900/10"

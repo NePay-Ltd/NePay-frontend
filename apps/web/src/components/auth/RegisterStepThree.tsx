@@ -59,7 +59,7 @@ export function RegisterStepThree({ email, isSubmitting, onVerifySuccess }: Regi
     return (
         <form onSubmit={handleVerify} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="flex flex-col items-center text-center space-y-4 mb-6">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-violet-100/50">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-violet-100/50 dark:bg-violet-500/15">
                     <Mail className="h-8 w-8 text-violet-600" />
                 </div>
                 <div>
