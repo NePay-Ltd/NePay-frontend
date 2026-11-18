@@ -75,17 +75,17 @@
     }
 
     .dark {
-        /* Dark Mode Colors (Black Matte Theme) */
-        --color-white: #121212;
-        --color-ink: #F7F7F9;
-        --color-body: #D1D5DB; /* Lighter body text for contrast */
-        --color-muted: #9CA3AF; /* Lighter muted text for contrast */
-        --color-border: #2A2A2A;
-        --color-bg: #000000;
+        /* Dark surfaces stay charcoal-plum, with enough separation to read as layers. */
+        --color-white: #1B1822;
+        --color-ink: #F6F2FC;
+        --color-body: #D7D1DF;
+        --color-muted: #B4ADBF;
+        --color-border: #393342;
+        --color-bg: #100E14;
         
-        --color-gray-50: #1C1C1C; /* Replaces gray-50 on hovers/table-headers */
-        --color-gray-100: #262626; /* Replaces gray-100 */
-        --color-violet-950: #0A0A0A; /* Replaces the purple sidebar with black */
+        --color-gray-50: #211E28;
+        --color-gray-100: #292631;
+        --color-violet-950: #17121F;
 
         /* Marketing Dark Mode Colors */
         --marketing-bg: #09090B;
@@ -286,6 +286,9 @@
     :where(.dark) .hover\:text-blue-700:hover { color: #93C5FD; }
     :where(.dark) .text-blue-800,
     :where(.dark) .hover\:text-blue-800:hover { color: #93C5FD; }
+
+    /* White is also used for copy on branded gradients, not only surfaces. */
+    :where(.dark) .text-white { color: #FFFFFF; }
     :where(.dark) .border-violet-100,
     :where(.dark) .hover\:border-violet-100:hover { border-color: #2A2140; }
     :where(.dark) .border-violet-200,
