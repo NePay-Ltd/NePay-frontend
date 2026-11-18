@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/shared/button";
 import { Field } from "@/components/shared/field";
 import { Modal } from "@/components/shared/modal";
+import { StepProgress } from "@/components/shared/step-progress";
 import { Panel, PanelBody, PanelHeader } from "@/components/shared/panel";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/shared/skeletons";
@@ -339,16 +340,27 @@ export function AddRecipientModal({
     onCreated: (externalAccountId: string) => void;
 }) {
     const [form, setForm] = React.useState<RecipientForm>(emptyRecipientForm());
+    const [step, setStep] = React.useState<"recipient" | "bank">("recipient");
     const { mutate: create, isPending } = useCreateBridgeExternalAccount();
+
+    React.useEffect(() => {
+        if (open) {
+            setForm(emptyRecipientForm());
+            setStep("recipient");
+        }
+    }, [open]);
 
     const update = <K extends keyof RecipientForm>(key: K, value: RecipientForm[K]) => setForm((f) => ({ ...f, [key]: value }));
 
-    const handleSubmit = () => {
+    const goNext = () => {
         if (!form.accountOwnerName.trim()) {
             toast.error("Enter the account owner's name.");
             return;
         }
+        setStep("bank");
+    };
 
+    const handleSubmit = () => {
         const requiredByCurrency: Record<Exclude<BridgePayoutCurrency, "COP">, (keyof RecipientForm)[]> = {
             USD: ["usAccountNumber", "usRoutingNumber", "usStreetLine1", "usCity", "usState", "usPostalCode"],
             EUR: ["iban", "ibanCountry"],
@@ -375,6 +387,7 @@ export function AddRecipientModal({
                 onSuccess: (account) => {
                     toast.success("Recipient added.");
                     setForm(emptyRecipientForm());
+                    setStep("recipient");
                     onOpenChange(false);
                     onCreated(account.id);
                 },
@@ -388,14 +401,27 @@ export function AddRecipientModal({
             open={open}
             onOpenChange={onOpenChange}
             title="Add a recipient"
-            description="Their bank details — used only to send them money, never shown to anyone else"
-            footer={
-                <Button fullWidth variant="primary" loading={isPending} onClick={handleSubmit}>
-                    Add recipient
+            description="Bank details are only used to send money to this recipient."
+            footer={step === "recipient" ? (
+                <Button fullWidth variant="primary" onClick={goNext} disabled={!form.accountOwnerName.trim()}>
+                    Continue
                 </Button>
-            }
+            ) : (
+                <>
+                    <Button variant="quiet" onClick={() => setStep("recipient")} disabled={isPending}>
+                        Back
+                    </Button>
+                    <Button className="flex-1" variant="primary" loading={isPending} onClick={handleSubmit}>
+                        Add recipient
+                    </Button>
+                </>
+            )}
         >
-            <div className="space-y-4">
+            <StepProgress current={step === "recipient" ? 1 : 2} total={2} label={step === "recipient" ? "Recipient details" : "Bank details"} />
+            <div className="max-h-[45vh] overflow-y-auto pr-1">
+                <div className="space-y-4">
+                {step === "recipient" ? (
+                    <>
                 <Field label="Currency">
                     <Select value={form.currency} onValueChange={(v) => update("currency", v as BridgePayoutCurrency)}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
@@ -411,7 +437,7 @@ export function AddRecipientModal({
                     <Input value={form.accountOwnerName} onChange={(e) => update("accountOwnerName", e.target.value)} />
                 </Field>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-4">
                     <Field label="Account type">
                         <Select value={form.accountOwnerType} onValueChange={(v) => update("accountOwnerType", v as RecipientForm["accountOwnerType"])}>
                             <SelectTrigger><SelectValue /></SelectTrigger>
@@ -431,7 +457,9 @@ export function AddRecipientModal({
                         </Select>
                     </Field>
                 </div>
-
+                    </>
+                ) : (
+                    <>
                 {form.currency === "USD" && (
                     <div className="space-y-3">
                         <p className="text-xs font-bold uppercase tracking-widest text-muted">Bank details (USD)</p>
@@ -458,7 +486,7 @@ export function AddRecipientModal({
                                 <Input value={form.usPostalCode ?? ""} onChange={(e) => update("usPostalCode", e.target.value)} />
                             </Field>
                         </div>
-                        <Field label="Bank name" hint="Optional — only needed if we can't detect it automatically from the routing number">
+                        <Field label="Bank name (optional)" hint="Only needed if we can't detect it automatically from the routing number">
                             <Input value={form.usBankName ?? ""} onChange={(e) => update("usBankName", e.target.value)} />
                         </Field>
                     </div>
@@ -473,7 +501,7 @@ export function AddRecipientModal({
                         <Field label="IBAN country" hint="ISO 3-letter code, e.g. IRL, DEU, FRA">
                             <Input value={form.ibanCountry ?? ""} onChange={(e) => update("ibanCountry", e.target.value.toUpperCase())} maxLength={3} />
                         </Field>
-                        <Field label="BIC / SWIFT" hint="Optional — may improve delivery">
+                        <Field label="BIC / SWIFT (optional)">
                             <Input value={form.bic ?? ""} onChange={(e) => update("bic", e.target.value.toUpperCase())} />
                         </Field>
                     </div>
@@ -555,6 +583,9 @@ export function AddRecipientModal({
                         )}
                     </div>
                 )}
+                    </>
+                )}
+                </div>
             </div>
         </Modal>
     );
