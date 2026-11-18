@@ -13,6 +13,7 @@ import { Calendar as CalendarIcon } from "lucide-react";
 
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 const MIN_DATE = new Date(1900, 0, 1);
 
@@ -44,35 +45,67 @@ export function DatePickerField({
     placeholder?: string;
 }) {
     const [open, setOpen] = React.useState(false);
+    // A small popover bubble is a poor fit for an interactive picker on a
+    // narrow phone screen — same reasoning /transfer's own bank picker
+    // already applies (Popover on desktop, a full Dialog on mobile).
+    const [isMobile, setIsMobile] = React.useState(false);
+    React.useEffect(() => {
+        const update = () => setIsMobile(window.matchMedia("(max-width: 767px)").matches);
+        update();
+        window.addEventListener("resize", update);
+        return () => window.removeEventListener("resize", update);
+    }, []);
+
     const selected = parseKey(value);
     const today = new Date();
 
+    const trigger = (
+        <button
+            type="button"
+            onClick={isMobile ? () => setOpen(true) : undefined}
+            className="flex h-12 w-full items-center justify-between rounded-md border border-border bg-white px-3 text-sm hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600"
+        >
+            <span className={selected ? "text-ink" : "text-muted"}>
+                {selected ? formatDisplay(selected) : placeholder}
+            </span>
+            <CalendarIcon className="h-4 w-4 shrink-0 text-muted" />
+        </button>
+    );
+
+    const calendar = (
+        <Calendar
+            mode="single"
+            captionLayout="dropdown"
+            selected={selected}
+            defaultMonth={selected ?? new Date(today.getFullYear() - 25, today.getMonth())}
+            disabled={[{ after: today }, { before: MIN_DATE }]}
+            onSelect={(date) => {
+                if (!date) return;
+                onChange(toKey(date));
+                setOpen(false);
+            }}
+        />
+    );
+
+    if (isMobile) {
+        return (
+            <>
+                {trigger}
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogContent className="w-[calc(100%-2rem)] max-w-xs rounded-2xl p-4">
+                        <DialogTitle className="mb-1 text-base">{placeholder}</DialogTitle>
+                        {calendar}
+                    </DialogContent>
+                </Dialog>
+            </>
+        );
+    }
+
     return (
         <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <button
-                    type="button"
-                    className="flex h-12 w-full items-center justify-between rounded-md border border-border bg-white px-3 text-sm hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600"
-                >
-                    <span className={selected ? "text-ink" : "text-muted"}>
-                        {selected ? formatDisplay(selected) : placeholder}
-                    </span>
-                    <CalendarIcon className="h-4 w-4 shrink-0 text-muted" />
-                </button>
-            </PopoverTrigger>
+            <PopoverTrigger asChild>{trigger}</PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                    mode="single"
-                    captionLayout="dropdown"
-                    selected={selected}
-                    defaultMonth={selected ?? new Date(today.getFullYear() - 25, today.getMonth())}
-                    disabled={[{ after: today }, { before: MIN_DATE }]}
-                    onSelect={(date) => {
-                        if (!date) return;
-                        onChange(toKey(date));
-                        setOpen(false);
-                    }}
-                />
+                {calendar}
             </PopoverContent>
         </Popover>
     );

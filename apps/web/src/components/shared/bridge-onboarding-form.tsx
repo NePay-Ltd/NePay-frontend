@@ -209,7 +209,7 @@ function ReviewRow({ label, value, onEdit }: { label: string; value: string; onE
         <div className="flex items-start justify-between gap-3 border-b border-border py-3">
             <div>
                 <p className="text-xs text-muted">{label}</p>
-                <p className="mt-0.5 text-sm font-semibold text-ink">{value || "—"}</p>
+                <p className="mt-0.5 text-sm font-semibold text-ink">{value || "Not set"}</p>
             </div>
             <button type="button" onClick={onEdit} className="shrink-0 text-xs font-bold text-violet-600 hover:underline">
                 Edit
@@ -369,7 +369,7 @@ export function BridgeOnboardingForm({
                     <>
                         <p className="text-lg font-bold text-ink">How you&apos;ll use this account</p>
                         <p className="text-sm text-muted">
-                            These answers need to line up with each other — picking your employment status narrowed the options below down automatically, so whatever you pick here will always make sense together.
+                            These answers need to line up with each other. Picking your employment status narrowed the options below down automatically, so whatever you pick here will always make sense together.
                         </p>
                         <Field label="Expected monthly payments (USD)">
                             <Select value={form.expectedMonthlyPaymentsUsd} onValueChange={(v) => update("expectedMonthlyPaymentsUsd", v as FormState["expectedMonthlyPaymentsUsd"])}>
@@ -453,13 +453,7 @@ export function BridgeOnboardingForm({
                 )}
             </div>
 
-            <div className="flex items-center gap-3 pt-1">
-                {stepIndex > 0 ? (
-                    <Button variant="ghost" onClick={goBack}>
-                        Back
-                    </Button>
-                ) : null}
-
+            <div className="flex w-full flex-col gap-2 pt-1 sm:flex-row-reverse sm:gap-3">
                 {step === "review" ? (
                     <Button fullWidth variant="primary" loading={isPending} onClick={handleSubmit}>
                         {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Building2 className="mr-2 h-4 w-4" />}
@@ -470,6 +464,12 @@ export function BridgeOnboardingForm({
                         Continue
                     </Button>
                 )}
+
+                {stepIndex > 0 ? (
+                    <Button fullWidth variant="ghost" onClick={goBack}>
+                        Back
+                    </Button>
+                ) : null}
             </div>
         </div>
     );

@@ -137,6 +137,16 @@ export function SupportChatPanel({ onBack, support }: SupportChatPanelProps) {
                     : <span className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-200 text-[10px] font-semibold text-violet-700 ring-2 ring-white">{conversation.assignedAgent.name.charAt(0)}</span>}
                 <span>You are chatting with {conversation.assignedAgent.name}</span>
             </div>}
+            {!isEndedStatus(conversation.status) && support.stage === "done" && <div
+                role="status"
+                className={`border-b px-4 py-2.5 text-xs leading-relaxed ${support.isOnline
+                    ? "border-border bg-violet-50/80 text-violet-900 dark:bg-violet-500/10 dark:text-violet-200"
+                    : "border-amber-200 bg-amber-50 text-amber-800"}`}
+            >
+                {support.isOnline
+                    ? <>Ticket <strong>{conversation.referenceNumber}</strong> is open and stays open until it&apos;s resolved, so you can leave and come back. We&apos;ll reply here{(conversation.intakeEmail || support.form.email) ? <> and by email to {conversation.intakeEmail || support.form.email}</> : null}.</>
+                    : <>We&apos;re offline right now, but ticket <strong>{conversation.referenceNumber}</strong> is open and your messages are saved. It stays open until it&apos;s resolved, and we&apos;ll reply by email{(conversation.intakeEmail || support.form.email) ? <> to {conversation.intakeEmail || support.form.email}</> : null} as soon as we&apos;re back.</>}
+            </div>}
             <div className="flex-1 space-y-3.5 overflow-y-auto bg-[#fbfaff] dark:bg-bg p-4">
                 {conversation.messages
                     .filter((item) => !(item.senderType === "system" && item.body.startsWith(QUEUE_GREETING_PREFIX) && conversation.messages.some((other) => other.senderType !== "system")))

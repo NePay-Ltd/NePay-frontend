@@ -15,7 +15,7 @@ export function StepProgress({ current, total, label }: { current: number; total
                 />
             </div>
             <p className="mt-2 text-xs font-medium text-muted">
-                Step {current} of {total} — {label}
+                Step {current} of {total} · {label}
             </p>
         </div>
     );

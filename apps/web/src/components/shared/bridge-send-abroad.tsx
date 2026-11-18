@@ -16,8 +16,9 @@
  *
  * Every payout is queued for an admin to approve (treasury-liquidity check)
  * before Bridge is ever called — see PAYOUT_STATUS_TAG's PENDING_APPROVAL
- * entry and SendForm's success copy, which deliberately says "submitted",
- * never "sent".
+ * entry. Deliberately invisible to the customer: SendForm's copy only ever
+ * says the payout is "on its way", never that anyone is reviewing it, and
+ * never that it has actually reached the recipient's bank yet.
  *
  * Gated behind the server's own `bridge.payoutsEnabled` flag — every call
  * here 404s/503s until that's flipped on, which only happens once Bridge
@@ -706,7 +707,7 @@ export function SendForm({ recipient, onSent }: { recipient: BridgeExternalAccou
                         <p className="text-3xl font-black text-ink">{ngnLabel ?? "Unavailable"}</p>
                         <p className="text-sm text-muted">
                             Sending {symbol}{amount} to {recipient.accountOwnerName}&apos;s {recipient.currency} account
-                            {isUsd ? <> via {USD_RAIL_INFO[rail].label} ({USD_RAIL_INFO[rail].timing.toLowerCase()})</> : null}. An admin reviews it before it's sent — this cannot be reversed once approved.
+                            {isUsd ? <> via {USD_RAIL_INFO[rail].label} ({USD_RAIL_INFO[rail].timing.toLowerCase()})</> : null}. This cannot be reversed once sent.
                         </p>
                     </div>
                 }
@@ -716,8 +717,8 @@ export function SendForm({ recipient, onSent }: { recipient: BridgeExternalAccou
                 onPinSubmit={handlePinSubmit}
                 pinDescription="Enter your 4-digit transaction PIN to confirm this payout."
                 processingText="Sending your payout..."
-                successTitle="Payout Submitted"
-                successDescription="We're reviewing it now — you'll be notified once it's sent."
+                successTitle="Payout on its way"
+                successDescription={`We're sending it to ${recipient.accountOwnerName}'s account. We'll notify you once it's confirmed.`}
                 onSuccessAction={() => {
                     setModalOpen(false);
                     setAmount("");
