@@ -83,7 +83,6 @@ export default function ForeignAccountsPage() {
     const { data: deposits } = useBridgeDeposits();
 
     const [activeCurrency, setActiveCurrency] = React.useState<BridgeCurrency>("USD");
-    const [mode, setMode] = React.useState<"receive" | "send">("receive");
 
     const accountsByCurrency = React.useMemo(() => {
         const map = new Map<BridgeCurrency, BridgeVirtualAccountDto>();
@@ -96,39 +95,11 @@ export default function ForeignAccountsPage() {
             <div className="mb-2">
                 <h1 className="text-3xl font-black text-ink tracking-tight">Foreign Accounts</h1>
                 <p className="mt-2 text-base font-medium text-muted">
-                    {mode === "receive"
-                        ? "Get paid in USD or EUR, and it lands in your Naira wallet automatically."
-                        : "Send money from your Naira wallet to a foreign bank account."}
+                    Get paid in USD or EUR, and it lands in your Naira wallet automatically.
                 </p>
             </div>
 
-            {/* Receiving and sending are two different Bridge flows sharing one page — same reasoning the currency tabs below already use for USD/EUR. */}
-            <div className="flex gap-2 rounded-xl bg-gray-100 dark:bg-white/5 p-1 w-fit">
-                {(["receive", "send"] as const).map((m) => (
-                    <button
-                        key={m}
-                        type="button"
-                        onClick={() => setMode(m)}
-                        className={`rounded-lg px-4 py-1.5 text-sm font-bold capitalize transition-colors ${
-                            mode === m ? "bg-white dark:bg-gray-900 text-ink shadow-sm" : "text-muted"
-                        }`}
-                    >
-                        {m}
-                    </button>
-                ))}
-            </div>
-
-            {mode === "send" ? (
-                customerLoading ? (
-                    <Skeleton className="h-64 w-full rounded-2xl" />
-                ) : !customer || customer.status !== "active" ? (
-                    <div className="rounded-xl border border-border bg-gray-50 dark:bg-white/5 p-6 text-center text-sm text-muted">
-                        Complete foreign account verification under &quot;Receive&quot; first — sending uses the same verification.
-                    </div>
-                ) : (
-                    <SendAbroadContent />
-                )
-            ) : customerLoading ? (
+            {customerLoading ? (
                 <Skeleton className="h-64 w-full rounded-2xl" />
             ) : !customer || customer.status === "rejected" ? (
                 <div className="space-y-4">
@@ -221,6 +192,15 @@ export default function ForeignAccountsPage() {
                     >
                         View Full Transaction History
                     </Button>
+
+                    {/* Sending abroad itself now happens on /transfer, alongside Naira sends — this is reference/management: recipients, and payout history. */}
+                    <div className="pt-2">
+                        <h2 className="text-lg font-bold text-ink">Sending abroad</h2>
+                        <p className="mt-1 text-sm text-muted">Manage who you send to, and track what you've sent.</p>
+                        <div className="mt-4">
+                            <SendAbroadContent />
+                        </div>
+                    </div>
                 </>
             )}
         </div>

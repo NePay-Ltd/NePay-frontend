@@ -114,7 +114,7 @@ export function TransactionDetailModal({ open, onOpenChange, transaction, onView
                 </DialogClose>
 
                 {/* The summary is always the light NePay design, like the receipt it summarises. */}
-                <div className="overflow-y-auto bg-white px-5 pb-6 pt-6 text-[#14092E] sm:px-6">
+                <div className="overflow-y-auto bg-trueWhite px-5 pb-6 pt-6 text-[#14092E] sm:px-6">
                     <style>{RECEIPT_CSS}</style>
 
                     <div className="flex items-center gap-2.5 pr-8">

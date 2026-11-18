@@ -41,6 +41,17 @@ function countUnread(messages: SupportMessage[], lastSeenId: string | null): num
     return afterWatermark.filter((item) => item.senderType === "agent").length;
 }
 
+/** Adds what the server has to what is on screen, by id, oldest first - never replaces, so nothing already shown can disappear. */
+function mergeMessages(current: SupportMessage[], incoming: SupportMessage[]): SupportMessage[] {
+    const byId = new Map(current.map((item) => [item.id, item]));
+    for (const item of incoming) byId.set(item.id, item);
+    return [...byId.values()].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+}
+
+function httpStatus(err: unknown): number | undefined {
+    return (err as { response?: { status?: number } } | null)?.response?.status;
+}
+
 function socketOrigin() {
     const configured = process.env.NEXT_PUBLIC_API_URL;
     return configured ? new URL(configured).origin : window.location.origin;
@@ -123,6 +134,28 @@ export function useSupportConversation() {
         }
     }, [isActivelyViewing, markConversationSeen]);
 
+    /**
+     * Catches up with the server: loads this conversation again (read-only - it can never start a new one) and ADDS any
+     * messages we are missing, plus its current status and agent. Called when the live connection comes back and when
+     * the tab returns to the front, because anything an agent wrote while the connection was down would otherwise
+     * never appear until a manual reload.
+     */
+    const resyncConversation = React.useCallback(async () => {
+        const id = conversationIdRef.current;
+        if (!id) return;
+        try {
+            const result = await apiClient.get<ApiResponse<SupportConversation>>(`/support/conversation/${id}`);
+            const fresh = { ...result.data.data, messages: result.data.data.messages.map(withCurrentGreeting) };
+            setConversation((current) => current && current.id === id
+                ? { ...current, status: fresh.status, assignedAgent: fresh.assignedAgent ?? current.assignedAgent, queuePosition: fresh.queuePosition, messages: mergeMessages(current.messages, fresh.messages) }
+                : current);
+            if (isActivelyViewing()) markConversationSeen(fresh);
+            else setUnreadCount(countUnread(fresh.messages, getLastSeenMessageId(id)));
+        } catch {
+            // Best-effort: the next reconnect or return to the tab tries again.
+        }
+    }, [isActivelyViewing, markConversationSeen]);
+
     // Tracks tab/window visibility for isActivelyViewing above, and re-checks "have they now
     // seen it" the moment the tab comes back into view while the panel is still open — e.g.
     // they alt-tabbed away mid-conversation and a reply arrived while they were gone.
@@ -131,13 +164,14 @@ export function useSupportConversation() {
         const handleVisibilityChange = () => {
             tabVisibleRef.current = document.visibilityState === "visible";
             reportViewing();
+            if (tabVisibleRef.current) void resyncConversation();
             if (tabVisibleRef.current && panelOpenRef.current) {
                 setConversation((current) => { if (current) markConversationSeen(current); return current; });
             }
         };
         document.addEventListener("visibilitychange", handleVisibilityChange);
         return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-    }, [markConversationSeen, reportViewing]);
+    }, [markConversationSeen, reportViewing, resyncConversation]);
 
     // Fetched once on mount, independent of whether a conversation exists — the landing
     // screen needs to know this before the customer has even started a chat.
@@ -186,10 +220,16 @@ export function useSupportConversation() {
         const socket = io(`${socketOrigin()}/support`, { auth: { token }, transports: ["websocket"] });
         socketRef.current = socket;
         conversationIdRef.current = conversation.id;
-        socket.on("connect", () => socket.emit("join_conversation", { conversationId: conversation.id }, () => reportViewing()));
+        let connectedBefore = false;
+        socket.on("connect", () => {
+            socket.emit("join_conversation", { conversationId: conversation.id }, () => reportViewing());
+            // Coming back after a drop (sleep, wifi change): fetch what was said in the meantime.
+            if (connectedBefore) void resyncConversation();
+            connectedBefore = true;
+        });
         socket.on("message", (raw: SupportMessage) => {
             const incoming = withCurrentGreeting(raw);
-            setConversation((current) => current ? { ...current, messages: current.messages.some((item) => item.id === incoming.id) ? current.messages : [...current.messages, incoming] } : current);
+            setConversation((current) => current ? { ...current, messages: mergeMessages(current.messages, [incoming]) } : current);
             if (incoming.senderType !== "agent") return;
             if (isActivelyViewing()) {
                 setLastSeenMessageId(conversation.id, incoming.id);
@@ -227,23 +267,28 @@ export function useSupportConversation() {
         typingTimeoutRef.current = window.setTimeout(() => socket.emit("typing", { conversationId: conversation.id, isTyping: false }), 1500);
     }
 
-    async function sendViaRest(conversationId: string, body: string) {
+    /** `isRetry`: the live connection was tried first and gave no confirmation - the server then hands back the copy it may already have saved instead of saving a second one. */
+    async function sendViaRest(conversationId: string, body: string, isRetry = false) {
         try {
             // systemMessage carries the "we're offline" autoresponder, if this was the
             // conversation's first customer message and support is off — the socket path
             // gets it via the room broadcast instead, but a REST send (used when the socket
             // isn't connected) has no broadcast to fall back on, so it rides along here.
-            const result = await apiClient.post<ApiResponse<SupportMessage> & { systemMessage?: SupportMessage }>(`/support/conversation/${conversationId}/messages`, { body });
+            const result = await apiClient.post<ApiResponse<SupportMessage> & { systemMessage?: SupportMessage }>(`/support/conversation/${conversationId}/messages`, { body, ...(isRetry ? { retry: true } : {}) });
             const { data: sent, systemMessage } = result.data;
             setConversation((current) => {
                 if (!current) return current;
-                const next = [...current.messages];
-                if (!next.some((item) => item.id === sent.id)) next.push(sent);
-                if (systemMessage && !next.some((item) => item.id === systemMessage.id)) next.push(systemMessage);
-                return { ...current, messages: next };
+                return { ...current, messages: mergeMessages(current.messages, systemMessage ? [sent, systemMessage] : [sent]) };
             });
         } catch (err) {
-            setMessage(body);
+            // Whatever went wrong, the words go back in the box (ahead of anything typed since): a failed send never costs the customer their message.
+            setMessage((current) => current.trim() ? `${body} ${current}` : body);
+            if (httpStatus(err) === 403 && /closed|not active/i.test(getApiErrorMessage(err, ""))) {
+                // The conversation was ended while this screen was not looking (an agent resolved it, or it was ended on another device).
+                setConversation((current) => current && current.id === conversationId ? { ...current, status: "closed" } : current);
+                toast.error("This conversation has ended, so that message wasn't sent. It is still in the box: start a new conversation and send it there.");
+                return;
+            }
             toast.error(getApiErrorMessage(err, "We couldn't send that message. Please try again."));
         }
     }
@@ -260,7 +305,7 @@ export function useSupportConversation() {
             // this backend's remote (Supabase-pooler) DB actually takes per message, so a
             // slow-but-successful ack doesn't get raced by the REST fallback and double-create.
             socketRef.current.timeout(10000).emit("send_message", { conversationId, text: body }, (err: unknown, response?: { ok: boolean }) => {
-                if (err || !response?.ok) void sendViaRest(conversationId, body);
+                if (err || !response?.ok) void sendViaRest(conversationId, body, true);
             });
             return;
         }
@@ -277,15 +322,14 @@ export function useSupportConversation() {
                 headers: { "Content-Type": "multipart/form-data" },
             });
             const { data: sent, systemMessage } = result.data;
-            setConversation((current) => {
-                if (!current) return current;
-                const next = [...current.messages];
-                if (!next.some((item) => item.id === sent.id)) next.push(sent);
-                if (systemMessage && !next.some((item) => item.id === systemMessage.id)) next.push(systemMessage);
-                return { ...current, messages: next };
-            });
+            setConversation((current) => current ? { ...current, messages: mergeMessages(current.messages, systemMessage ? [sent, systemMessage] : [sent]) } : current);
         } catch (err) {
-            toast.error(getApiErrorMessage(err, "We couldn't send that attachment. Please try again."));
+            if (httpStatus(err) === 403 && /closed|not active/i.test(getApiErrorMessage(err, ""))) {
+                setConversation((current) => current && current.id === conversation.id ? { ...current, status: "closed" } : current);
+                toast.error("This conversation has ended, so that image wasn't sent. Start a new conversation and send it there.");
+            } else {
+                toast.error(getApiErrorMessage(err, "We couldn't send that attachment. Please try again."));
+            }
         } finally {
             setUploadingAttachment(false);
         }
@@ -317,7 +361,13 @@ export function useSupportConversation() {
     async function closeConversation() {
         if (!conversation) return;
         try {
-            await apiClient.post(`/support/conversation/${conversation.id}/close`);
+            const result = await apiClient.post<{ keptOpen?: boolean }>(`/support/conversation/${conversation.id}/close`);
+            if (result.data?.keptOpen) {
+                // Nobody has answered the customer's last message yet, so the ticket is not closed - it stays in support's queue.
+                const email = conversation.intakeEmail || form.email;
+                toast.success(`Ticket ${conversation.referenceNumber} stays open. We haven't replied to your last message yet, so we'll answer here${email ? ` and by email at ${email}` : ""}.`);
+                return;
+            }
             setConversation({ ...conversation, status: "closed" });
         } catch (err) {
             toast.error(getApiErrorMessage(err, "We couldn't end this conversation. Please try again."));
@@ -325,7 +375,7 @@ export function useSupportConversation() {
     }
 
     async function startNewConversation() {
-        setMessage("");
+        // The draft is kept on purpose: it may be a message that could not be sent to the conversation that just ended.
         setAgentTyping(false);
         await loadOrStartConversation();
     }

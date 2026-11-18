@@ -13,6 +13,7 @@ import {
     BridgeCustomerDto,
     BridgeDepositDto,
     BridgeExternalAccountDto,
+    BridgePayoutCurrency,
     BridgePayoutDto,
     BridgePayoutQuoteDto,
     BridgeVirtualAccountDto,
@@ -20,6 +21,7 @@ import {
     CreateBridgeExternalAccountDto,
     InitiateBridgePayoutDto,
     RequestBridgeVirtualAccountDto,
+    UpdateBridgeExternalAccountAddressDto,
 } from "@/lib/types/api";
 
 export const bridgeKeys = {
@@ -29,7 +31,7 @@ export const bridgeKeys = {
     deposits: () => [...bridgeKeys.all, "deposits"] as const,
     fee: (currency: BridgeCurrency) => [...bridgeKeys.all, "fee", currency] as const,
     externalAccounts: () => [...bridgeKeys.all, "externalAccounts"] as const,
-    payoutQuote: (amountUsd: string) => [...bridgeKeys.all, "payoutQuote", amountUsd] as const,
+    payoutQuote: (currency: BridgePayoutCurrency, amount: string) => [...bridgeKeys.all, "payoutQuote", currency, amount] as const,
     payouts: () => [...bridgeKeys.all, "payouts"] as const,
 };
 
@@ -186,17 +188,30 @@ export function useCreateBridgeExternalAccount() {
     });
 }
 
-/** A live quote — no side effects, so this is safe to fire on every keystroke (debounced by the caller). Disabled while `amountUsd` is empty. */
-export function useBridgePayoutQuote(amountUsd: string) {
+/** Fixes a USD recipient's address in place — see the backend's UpdateExternalAccountAddressParams note on why this exists instead of re-registering. */
+export function useUpdateBridgeExternalAccountAddress() {
+    const queryClient = useQueryClient();
+    return useMutation<void, Error, { id: string; dto: UpdateBridgeExternalAccountAddressDto }>({
+        mutationFn: async ({ id, dto }) => {
+            await apiClient.put(`/bridge/external-accounts/${id}/address`, dto);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: bridgeKeys.externalAccounts() });
+        },
+    });
+}
+
+/** A live quote — no side effects, so this is safe to fire on every keystroke (debounced by the caller). `amount` is native entry — in `currency`, the recipient's own currency, not a USD-equivalent. Disabled while `amount` is empty. */
+export function useBridgePayoutQuote(currency: BridgePayoutCurrency, amount: string) {
     return useQuery<BridgePayoutQuoteDto>({
-        queryKey: bridgeKeys.payoutQuote(amountUsd),
+        queryKey: bridgeKeys.payoutQuote(currency, amount),
         queryFn: async () => {
             const res = await apiClient.get<ApiResponse<BridgePayoutQuoteDto>>("/bridge/payouts/quote", {
-                params: { amountUsd },
+                params: { currency, amount },
             });
             return res.data.data;
         },
-        enabled: Number(amountUsd) > 0,
+        enabled: Number(amount) > 0,
     });
 }
 

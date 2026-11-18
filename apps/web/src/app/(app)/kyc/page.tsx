@@ -276,8 +276,8 @@ function BridgeOptionalStep({ onDone }: { onDone: () => void }) {
                     </h2>
                     <p className="text-sm text-body">
                         {needsTos
-                            ? "Accept Bridge's terms to finish setting up your foreign accounts."
-                            : "Bridge is reviewing your details. This can take a few minutes. You can check progress anytime from Foreign Accounts."}
+                            ? "Accept the terms to finish setting up your foreign accounts."
+                            : "We're reviewing your details. This can take a few minutes. You can check progress anytime from Foreign Accounts."}
                     </p>
                 </div>
                 {needsTos ? <BridgeTosConsent customer={customer} /> : null}
@@ -363,7 +363,7 @@ function BridgeStatusBanner() {
                         Your foreign account application was declined
                     </p>
                     <p className="text-sm text-red-800 dark:text-red-500">
-                        {customer.rejectionReasons?.[0]?.reason ?? "Bridge could not verify the details you submitted."} You can fix this and try again.
+                        {customer.rejectionReasons?.[0]?.reason ?? "We could not verify the details you submitted."} You can fix this and try again.
                     </p>
                     <Button size="sm" variant="primary" onClick={() => router.push("/foreign-accounts")}>
                         Retry now

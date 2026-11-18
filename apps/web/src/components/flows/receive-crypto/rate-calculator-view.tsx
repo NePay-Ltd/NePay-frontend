@@ -22,6 +22,7 @@ import { Button } from "@/components/shared/button";
 import { useCryptoCurrencies, useCryptoPrices, useCryptoFeeEstimate } from "@/lib/queries/crypto";
 import { cn } from "@/lib/cn";
 import { CurrencyAvatar } from "./shared";
+import { HighFeeNetworkNotice, isHighFeeNetwork, recommendedAlternative } from "./high-fee-notice";
 
 const STABLE = new Set(["USDT", "USDC", "DAI", "BUSD", "TUSD", "FDUSD", "PYUSD"]);
 const NAIRA_PRESETS = [20_000, 50_000, 100_000, 500_000];
@@ -74,6 +75,8 @@ export function RateCalculatorView({ assetCode, onContinue, onBack, isMobile = f
     const { data: feeEstimate } = useCryptoFeeEstimate(assetCode ?? null);
 
     const currency = currencies?.find((c) => c.code === assetCode) ?? null;
+    const highFee = isHighFeeNetwork(currency?.network);
+    const alternative = recommendedAlternative((currencies ?? []).filter((c) => c.coin === currency?.coin));
     const symbol = currency?.coin ?? (assetCode ?? "").toUpperCase();
     const priceStr = pricesQuery.data?.prices?.[symbol] ?? null;
     const price = priceStr ? Number(priceStr) : null;
@@ -220,6 +223,12 @@ export function RateCalculatorView({ assetCode, onContinue, onBack, isMobile = f
                     <p className="mt-1 text-[13px] font-medium text-muted">
                         Send a little more to be safe: network fees vary from deposit to deposit
                     </p>
+                )}
+
+                {highFee && currency?.network && (
+                    <div className="mt-4">
+                        <HighFeeNetworkNotice network={currency.network} alternative={alternative} />
+                    </div>
                 )}
 
                 {eatenByFees && (

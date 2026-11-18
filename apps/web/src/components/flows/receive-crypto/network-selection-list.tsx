@@ -5,6 +5,7 @@ import { IconArrowLeft as ArrowLeft, IconChevronRight as ChevronRight } from "@/
 import { Loader2 } from "lucide-react";;
 import { cn } from "@/lib/cn";
 import { CoinGroup, CurrencyAvatar } from "./shared";
+import { isHighFeeNetwork } from "./high-fee-notice";
 
 interface NetworkSelectionListProps {
     coinGroup: CoinGroup | null;
@@ -69,6 +70,11 @@ export function NetworkSelectionList({ coinGroup, onSelectNetwork, onBack, isMob
                                     <span className="text-[11px] font-bold text-muted uppercase tracking-wider block mt-1 truncate">
                                         {currency.code}
                                     </span>
+                                    {isHighFeeNetwork(currency.network) && (
+                                        <span className="block mt-1 text-xs font-bold text-amber-700 dark:text-amber-400">
+                                            High fees, paid out of your deposit
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                             <ChevronRight className="h-5 w-5 shrink-0 text-muted group-hover/item:text-violet-600 transition-colors" />

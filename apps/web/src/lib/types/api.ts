@@ -745,6 +745,7 @@ export interface CreateBridgeExternalAccountDto {
     usAccountNumber?: string;
     usRoutingNumber?: string;
     usStreetLine1?: string;
+    usStreetLine2?: string;
     usCity?: string;
     usState?: string;
     usPostalCode?: string;
@@ -760,8 +761,28 @@ export interface CreateBridgeExternalAccountDto {
     gbSortCode?: string;
     // MXN (SPEI) — CLABE, 18 digits.
     mxnClabe?: string;
-    // COP (Bre-B)
+    // COP — exactly one of two genuinely different recipient types, chosen at registration time (not a rail picked later like USD's).
+    copMethod?: "bre_b" | "bank_transfer";
     copBreBKey?: string;
+    // COP (Bank Transfer)
+    copAccountNumber?: string;
+    copBankCode?: string;
+    copAccountType?: "checking" | "savings" | "electronic_deposit";
+    /** Only cc/ce/nit/rut/pa/ppt are documented by Bridge. */
+    copDocumentType?: "cc" | "ce" | "nit" | "rut" | "pa" | "ppt" | "ti" | "rc" | "te" | "die" | "nd";
+    /** Digits only. */
+    copDocumentNumber?: string;
+    /** E.164, e.g. +573001234567. */
+    copPhoneNumber?: string;
+}
+
+/** Body of PUT /bridge/external-accounts/:id/address — fixes a USD recipient's address without re-registering it. */
+export interface UpdateBridgeExternalAccountAddressDto {
+    streetLine1: string;
+    streetLine2?: string;
+    city: string;
+    state: string;
+    postalCode: string;
 }
 
 /** A registered recipient — never the full account number/IBAN, only `last4` for display. */
@@ -773,36 +794,59 @@ export interface BridgeExternalAccountDto {
     isSelf: boolean;
     last4: string;
     createdAt: string;
+    /** True only when FedNow is actually offerable for THIS recipient right now — both Bridge's own eligibility AND our site-wide access are on. */
+    fedNowSupported: boolean;
 }
 
-/** GET /bridge/payouts/quote?currency=&amountUsd= — a live NGN cost preview, no side effects. */
+/** GET /bridge/payouts/quote?currency=&amount= — a live NGN cost preview, no side effects. Native entry: `amount` is in `currency`, the recipient's own currency, not a USD-equivalent. */
 export interface BridgePayoutQuoteDto {
-    amountUsd: string;
+    currency: BridgePayoutCurrency;
+    amount: string;
     ngnAmount: string | null;
     fee: string | null;
     totalNgn: string | null;
     rate: string | null;
+    /** This cell's own configured send limits, in currency — null when not set by the admin. */
+    minSendAmount: string | null;
+    maxSendAmount: string | null;
 }
+
+/** USD-only — which rail to send over. Omit for every other currency, and for USD this defaults to "ach" if omitted. "fednow" is only ever valid when the chosen recipient's BridgeExternalAccountDto.fedNowSupported is true. */
+export type BridgeUsdPayoutRail = "ach" | "ach_same_day" | "wire" | "fednow";
 
 /** Body of POST /bridge/payouts. */
 export interface InitiateBridgePayoutDto {
     externalAccountId: string;
-    /** USD-equivalent amount to send — the recipient's actual destinationCurrency amount depends on Bridge's own FX. */
-    amountUsd: string;
+    /** Native entry — the amount to send, in the chosen recipient's own currency (not a USD-equivalent). */
+    amount: string;
+    rail?: BridgeUsdPayoutRail;
     pin: string;
 }
 
-export type BridgePayoutStatus = "PROCESSING" | "COMPLETED" | "FAILED";
+/**
+ * PENDING_APPROVAL is the state every new payout starts in — an admin
+ * checks real treasury liquidity before Bridge is ever called. REJECTED is
+ * the other terminal branch off it, alongside PROCESSING → COMPLETED/FAILED.
+ */
+export type BridgePayoutStatus = "PENDING_APPROVAL" | "PROCESSING" | "COMPLETED" | "FAILED" | "REJECTED";
 
 export interface BridgePayoutDto {
     id: string;
     status: BridgePayoutStatus;
     destinationCurrency: BridgePayoutCurrency;
+    /** Bridge's actual rail string this payout was sent (or will be sent) over (e.g. "ach", "ach_same_day", "wire", "sepa"...). */
+    rail: string;
+    /** Same as destinationCurrency — what sourceAmount is denominated in. */
+    sourceCurrency: string;
+    /** What was actually entered/charged against, in sourceCurrency — native entry. */
+    sourceAmount: string;
     amountUsd: string;
     /** What the NGN wallet was debited, excluding the fee. */
     ngnAmount: string;
     fee: string;
     failureReason: string | null;
+    /** Set only when REJECTED — why an admin declined it. */
+    decisionNote: string | null;
     createdAt: string;
     completedAt: string | null;
 }

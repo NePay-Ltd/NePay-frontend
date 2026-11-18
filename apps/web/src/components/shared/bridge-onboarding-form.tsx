@@ -16,10 +16,13 @@ import { toast } from "sonner";
 import { Button } from "@/components/shared/button";
 import { Field } from "@/components/shared/field";
 import { Panel, PanelBody } from "@/components/shared/panel";
+import { StepProgress } from "@/components/shared/step-progress";
+import { DatePickerField } from "@/components/shared/date-picker-field";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { OccupationPicker } from "@/components/shared/occupation-picker";
 
+import { KYC_EXCLUDED_ACCOUNT_PURPOSE, KYC_EXCLUDED_SOURCE_OF_FUNDS } from "@/lib/bridge-kyc-coherence";
 import { useCreateBridgeCustomer } from "@/lib/queries/bridge";
 import type { CreateBridgeCustomerDto } from "@/lib/types/api";
 
@@ -76,8 +79,29 @@ const IDENTITY_DOCUMENT_TYPES: { value: CreateBridgeCustomerDto["identityDocumen
     { value: "drivers_license", label: "Driver's licence" },
 ];
 
-type FormState = Omit<CreateBridgeCustomerDto, "actingAsIntermediary"> & { actingAsIntermediary: "yes" | "no" };
+/**
+ * employmentStatus/sourceOfFunds/accountPurpose are widened to a bare
+ * `string` here (not CreateBridgeCustomerDto's own enums) so an empty
+ * string is a valid, distinct "not chosen yet" state — see emptyForm's own
+ * note on why none of the three now has a pre-selected default.
+ */
+type FormState = Omit<CreateBridgeCustomerDto, "actingAsIntermediary" | "employmentStatus" | "sourceOfFunds" | "accountPurpose"> & {
+    actingAsIntermediary: "yes" | "no";
+    employmentStatus: string;
+    sourceOfFunds: string;
+    accountPurpose: string;
+};
 
+/**
+ * Nothing pre-selected for employmentStatus/sourceOfFunds/accountPurpose —
+ * the fix for a real Bridge compliance request (2026-11-17): the form used
+ * to default to employed/salary/receive_payment_for_freelancing, and a user
+ * who only changed employmentStatus (to self_employed, say) left the other
+ * two sitting on a now-contradictory default they never consciously chose.
+ * Forcing an explicit choice for all three, filtered by employmentStatus
+ * (see the Select options below), is what actually closes that gap — see
+ * src/lib/bridge-kyc-coherence.ts.
+ */
 function emptyForm(): FormState {
     return {
         birthDate: "",
@@ -85,11 +109,11 @@ function emptyForm(): FormState {
         city: "",
         postalCode: "",
         country: "NGA",
-        employmentStatus: "employed",
+        employmentStatus: "",
         expectedMonthlyPaymentsUsd: "0_4999",
         mostRecentOccupation: "",
-        accountPurpose: "receive_payment_for_freelancing",
-        sourceOfFunds: "salary",
+        accountPurpose: "",
+        sourceOfFunds: "",
         actingAsIntermediary: "no",
         identityDocumentType: "national_id",
         identityDocumentIssuingCountry: "NGA",
@@ -149,6 +173,51 @@ export function rejectionMessage(customer?: { rejectionReasons: { reason: string
     return { reason: first.reason, detail: first.developerReason ?? null };
 }
 
+type Step = "about" | "address" | "usage" | "identity" | "review";
+const STEP_ORDER: Step[] = ["about", "address", "usage", "identity", "review"];
+const STEP_LABELS: Record<Step, string> = {
+    about: "About you",
+    address: "Where you live",
+    usage: "How you'll use this account",
+    identity: "Verify your identity",
+    review: "Review",
+};
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+function isAboutValid(form: FormState): boolean {
+    return !!form.employmentStatus && !!form.mostRecentOccupation.trim() && DATE_RE.test(form.birthDate);
+}
+function isAddressValid(form: FormState): boolean {
+    return !!form.streetLine1.trim() && !!form.city.trim() && !!form.postalCode.trim();
+}
+function isUsageValid(form: FormState): boolean {
+    return (
+        !!form.sourceOfFunds &&
+        !!form.accountPurpose &&
+        !KYC_EXCLUDED_SOURCE_OF_FUNDS[form.employmentStatus]?.includes(form.sourceOfFunds) &&
+        !KYC_EXCLUDED_ACCOUNT_PURPOSE[form.employmentStatus]?.includes(form.accountPurpose)
+    );
+}
+function isIdentityValid(form: FormState, front: File | null, back: File | null): boolean {
+    if (!form.identityDocumentNumber.trim() || !front) return false;
+    return form.identityDocumentType !== "passport" ? !!back : true;
+}
+
+function ReviewRow({ label, value, onEdit }: { label: string; value: string; onEdit: () => void }) {
+    return (
+        <div className="flex items-start justify-between gap-3 border-b border-border py-3">
+            <div>
+                <p className="text-xs text-muted">{label}</p>
+                <p className="mt-0.5 text-sm font-semibold text-ink">{value || "Not set"}</p>
+            </div>
+            <button type="button" onClick={onEdit} className="shrink-0 text-xs font-bold text-violet-600 hover:underline">
+                Edit
+            </button>
+        </div>
+    );
+}
+
 export function BridgeOnboardingForm({
     rejectedCustomer,
     onSubmitted,
@@ -163,37 +232,60 @@ export function BridgeOnboardingForm({
     const [form, setForm] = React.useState<FormState>(emptyForm());
     const [front, setFront] = React.useState<File | null>(null);
     const [back, setBack] = React.useState<File | null>(null);
+    const [step, setStep] = React.useState<Step>("about");
     const { mutate: createCustomer, isPending } = useCreateBridgeCustomer();
 
     const update = <K extends keyof FormState>(key: K, value: FormState[K]) => setForm((f) => ({ ...f, [key]: value }));
 
+    /**
+     * Changing employmentStatus re-filters which sourceOfFunds/accountPurpose
+     * options are even offered (see the Select options below) — if either
+     * already-selected value is no longer in that filtered list, it's
+     * cleared rather than silently left sitting on a now-contradictory
+     * choice. This is the actual fix for the real case: a form that instead
+     * left stale values in place after a status change is exactly what
+     * produced self_employed + salary.
+     */
+    const updateEmploymentStatus = (employmentStatus: string) => {
+        setForm((f) => ({
+            ...f,
+            employmentStatus,
+            sourceOfFunds: KYC_EXCLUDED_SOURCE_OF_FUNDS[employmentStatus]?.includes(f.sourceOfFunds) ? "" : f.sourceOfFunds,
+            accountPurpose: KYC_EXCLUDED_ACCOUNT_PURPOSE[employmentStatus]?.includes(f.accountPurpose) ? "" : f.accountPurpose,
+        }));
+    };
+
+    const availableSourcesOfFunds = SOURCES_OF_FUNDS.filter((s) => !KYC_EXCLUDED_SOURCE_OF_FUNDS[form.employmentStatus]?.includes(s.value));
+    const availableAccountPurposes = ACCOUNT_PURPOSES.filter((p) => !KYC_EXCLUDED_ACCOUNT_PURPOSE[form.employmentStatus]?.includes(p.value));
+
+    const stepIndex = STEP_ORDER.indexOf(step);
+    const goTo = (s: Step) => setStep(s);
+    const goNext = () => setStep(STEP_ORDER[stepIndex + 1]!);
+    const goBack = () => setStep(STEP_ORDER[stepIndex - 1]!);
+
+    const aboutValid = isAboutValid(form);
+    const addressValid = isAddressValid(form);
+    const usageValid = isUsageValid(form);
+    const identityValid = isIdentityValid(form, front, back);
+    const allValid = aboutValid && addressValid && usageValid && identityValid;
+
     const handleSubmit = () => {
-        const required: (keyof FormState)[] = [
-            "birthDate",
-            "streetLine1",
-            "city",
-            "postalCode",
-            "mostRecentOccupation",
-            "identityDocumentNumber",
-        ];
-        for (const key of required) {
-            if (!String(form[key] ?? "").trim()) {
-                toast.error("Fill in all fields.");
-                return;
-            }
-        }
-        if (!front) {
-            toast.error("Upload the front of your identity document.");
-            return;
-        }
-        if (form.identityDocumentType !== "passport" && !back) {
-            toast.error("Upload the back of your identity document.");
+        // Belt-and-suspenders only at this point — every field required to
+        // get here was already gated per-step.
+        if (!allValid || !front) {
+            toast.error("Go back and finish every step first.");
             return;
         }
 
         createCustomer(
             {
-                dto: { ...form, actingAsIntermediary: form.actingAsIntermediary === "yes" },
+                dto: {
+                    ...form,
+                    employmentStatus: form.employmentStatus as CreateBridgeCustomerDto["employmentStatus"],
+                    sourceOfFunds: form.sourceOfFunds as CreateBridgeCustomerDto["sourceOfFunds"],
+                    accountPurpose: form.accountPurpose as CreateBridgeCustomerDto["accountPurpose"],
+                    actingAsIntermediary: form.actingAsIntermediary === "yes",
+                },
                 front,
                 back: back ?? undefined,
             },
@@ -208,10 +300,22 @@ export function BridgeOnboardingForm({
     };
 
     const rejection = rejectionMessage(rejectedCustomer);
+    const employmentLabel = EMPLOYMENT_STATUSES.find((s) => s.value === form.employmentStatus)?.label ?? "";
+    const accountPurposeLabel = ACCOUNT_PURPOSES.find((p) => p.value === form.accountPurpose)?.label ?? "";
+    const sourceOfFundsLabel = SOURCES_OF_FUNDS.find((s) => s.value === form.sourceOfFunds)?.label ?? "";
+    const documentTypeLabel = IDENTITY_DOCUMENT_TYPES.find((d) => d.value === form.identityDocumentType)?.label ?? "";
+
+    const nextDisabled =
+        (step === "about" && !aboutValid) ||
+        (step === "address" && !addressValid) ||
+        (step === "usage" && !usageValid) ||
+        (step === "identity" && !identityValid);
 
     const content = (
         <div className="space-y-5">
-            {rejection ? (
+            <StepProgress current={stepIndex + 1} total={STEP_ORDER.length} label={STEP_LABELS[step]} />
+
+            {step === "about" && rejection ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 dark:border-red-900/30 dark:bg-red-900/10 p-4 flex items-start gap-3">
                     <AlertCircle className="h-4 w-4 shrink-0 text-red-600 dark:text-red-400 mt-0.5" />
                     <div>
@@ -225,109 +329,148 @@ export function BridgeOnboardingForm({
                 </div>
             ) : null}
 
-            <div className="space-y-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted">Personal details</p>
-                <Field label="Date of birth">
-                    <Input type="date" value={form.birthDate} onChange={(e) => update("birthDate", e.target.value)} />
-                </Field>
-                <Field label="Occupation">
-                    <OccupationPicker value={form.mostRecentOccupation} onChange={(code) => update("mostRecentOccupation", code)} />
-                </Field>
-                <Field label="Employment status">
-                    <Select value={form.employmentStatus} onValueChange={(v) => update("employmentStatus", v as FormState["employmentStatus"])}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                            {EMPLOYMENT_STATUSES.map((s) => (
-                                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </Field>
+            <div key={step} className="animate-in fade-in slide-in-from-right-2 duration-200 space-y-3">
+                {step === "about" ? (
+                    <>
+                        <p className="text-lg font-bold text-ink">About you</p>
+                        <Field label="Date of birth">
+                            <DatePickerField value={form.birthDate} onChange={(v) => update("birthDate", v)} placeholder="Select date of birth" />
+                        </Field>
+                        <Field label="Occupation">
+                            <OccupationPicker value={form.mostRecentOccupation} onChange={(code) => update("mostRecentOccupation", code)} />
+                        </Field>
+                        <Field label="Employment status">
+                            <Select value={form.employmentStatus} onValueChange={updateEmploymentStatus}>
+                                <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
+                                <SelectContent>
+                                    {EMPLOYMENT_STATUSES.map((s) => (
+                                        <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </Field>
+                    </>
+                ) : step === "address" ? (
+                    <>
+                        <p className="text-lg font-bold text-ink">Where you live</p>
+                        <Field label="Street address">
+                            <Input value={form.streetLine1} onChange={(e) => update("streetLine1", e.target.value)} />
+                        </Field>
+                        <div className="grid grid-cols-2 gap-3">
+                            <Field label="City">
+                                <Input value={form.city} onChange={(e) => update("city", e.target.value)} />
+                            </Field>
+                            <Field label="Postal code">
+                                <Input value={form.postalCode} onChange={(e) => update("postalCode", e.target.value)} />
+                            </Field>
+                        </div>
+                    </>
+                ) : step === "usage" ? (
+                    <>
+                        <p className="text-lg font-bold text-ink">How you&apos;ll use this account</p>
+                        <p className="text-sm text-muted">
+                            These answers need to line up with each other. Picking your employment status narrowed the options below down automatically, so whatever you pick here will always make sense together.
+                        </p>
+                        <Field label="Expected monthly payments (USD)">
+                            <Select value={form.expectedMonthlyPaymentsUsd} onValueChange={(v) => update("expectedMonthlyPaymentsUsd", v as FormState["expectedMonthlyPaymentsUsd"])}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    {EXPECTED_MONTHLY_PAYMENTS.map((s) => (
+                                        <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </Field>
+                        <Field label="Purpose of account">
+                            <Select value={form.accountPurpose} onValueChange={(v) => update("accountPurpose", v)}>
+                                <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
+                                <SelectContent>
+                                    {availableAccountPurposes.map((s) => (
+                                        <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </Field>
+                        <Field label="Source of funds">
+                            <Select value={form.sourceOfFunds} onValueChange={(v) => update("sourceOfFunds", v)}>
+                                <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
+                                <SelectContent>
+                                    {availableSourcesOfFunds.map((s) => (
+                                        <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </Field>
+                        <Field label="Are you receiving funds on behalf of someone else?">
+                            <Select value={form.actingAsIntermediary} onValueChange={(v) => update("actingAsIntermediary", v as "yes" | "no")}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="no">No</SelectItem>
+                                    <SelectItem value="yes">Yes</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </Field>
+                    </>
+                ) : step === "identity" ? (
+                    <>
+                        <p className="text-lg font-bold text-ink">Verify your identity</p>
+                        <Field label="Document type">
+                            <Select value={form.identityDocumentType} onValueChange={(v) => update("identityDocumentType", v as FormState["identityDocumentType"])}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    {IDENTITY_DOCUMENT_TYPES.map((d) => (
+                                        <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </Field>
+                        <Field label="Document number">
+                            <Input value={form.identityDocumentNumber} onChange={(e) => update("identityDocumentNumber", e.target.value)} placeholder="e.g. A1234567" />
+                        </Field>
+                        <DocumentPicker label={form.identityDocumentType === "passport" ? "Document scan" : "Document scan (front)"} file={front} onChange={setFront} />
+                        {form.identityDocumentType !== "passport" ? (
+                            <DocumentPicker label="Document scan (back)" file={back} onChange={setBack} />
+                        ) : null}
+                    </>
+                ) : (
+                    <>
+                        <p className="text-lg font-bold text-ink">Review</p>
+                        <p className="text-sm text-muted">Everything below is what gets sent for verification. Tap Edit on anything that&apos;s wrong before you submit.</p>
+                        <ReviewRow label="Date of birth" value={form.birthDate} onEdit={() => goTo("about")} />
+                        <ReviewRow label="Employment status" value={employmentLabel} onEdit={() => goTo("about")} />
+                        <ReviewRow label="Street address" value={form.streetLine1} onEdit={() => goTo("address")} />
+                        <ReviewRow label="City / postal code" value={`${form.city}, ${form.postalCode}`} onEdit={() => goTo("address")} />
+                        <ReviewRow label="Purpose of account" value={accountPurposeLabel} onEdit={() => goTo("usage")} />
+                        <ReviewRow label="Source of funds" value={sourceOfFundsLabel} onEdit={() => goTo("usage")} />
+                        <ReviewRow
+                            label="Receiving on someone else's behalf"
+                            value={form.actingAsIntermediary === "yes" ? "Yes" : "No"}
+                            onEdit={() => goTo("usage")}
+                        />
+                        <ReviewRow label="Document type" value={documentTypeLabel} onEdit={() => goTo("identity")} />
+                        <ReviewRow label="Document number" value={form.identityDocumentNumber} onEdit={() => goTo("identity")} />
+                    </>
+                )}
             </div>
 
-            <div className="space-y-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted">Residential address</p>
-                <Field label="Street address">
-                    <Input value={form.streetLine1} onChange={(e) => update("streetLine1", e.target.value)} />
-                </Field>
-                <div className="grid grid-cols-2 gap-3">
-                    <Field label="City">
-                        <Input value={form.city} onChange={(e) => update("city", e.target.value)} />
-                    </Field>
-                    <Field label="Postal code">
-                        <Input value={form.postalCode} onChange={(e) => update("postalCode", e.target.value)} />
-                    </Field>
-                </div>
-            </div>
+            <div className="flex w-full flex-col gap-2 pt-1 sm:flex-row-reverse sm:gap-3">
+                {step === "review" ? (
+                    <Button fullWidth variant="primary" loading={isPending} onClick={handleSubmit}>
+                        {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Building2 className="mr-2 h-4 w-4" />}
+                        Submit verification
+                    </Button>
+                ) : (
+                    <Button fullWidth variant="primary" disabled={nextDisabled} onClick={goNext}>
+                        Continue
+                    </Button>
+                )}
 
-            <div className="space-y-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted">Account usage</p>
-                <Field label="Expected monthly payments (USD)">
-                    <Select value={form.expectedMonthlyPaymentsUsd} onValueChange={(v) => update("expectedMonthlyPaymentsUsd", v as FormState["expectedMonthlyPaymentsUsd"])}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                            {EXPECTED_MONTHLY_PAYMENTS.map((s) => (
-                                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </Field>
-                <Field label="Purpose of account">
-                    <Select value={form.accountPurpose} onValueChange={(v) => update("accountPurpose", v as FormState["accountPurpose"])}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                            {ACCOUNT_PURPOSES.map((s) => (
-                                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </Field>
-                <Field label="Source of funds">
-                    <Select value={form.sourceOfFunds} onValueChange={(v) => update("sourceOfFunds", v as FormState["sourceOfFunds"])}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                            {SOURCES_OF_FUNDS.map((s) => (
-                                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </Field>
-                <Field label="Are you receiving funds on behalf of someone else?">
-                    <Select value={form.actingAsIntermediary} onValueChange={(v) => update("actingAsIntermediary", v as "yes" | "no")}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="no">No</SelectItem>
-                            <SelectItem value="yes">Yes</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </Field>
-            </div>
-
-            <div className="space-y-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted">Identity document</p>
-                <Field label="Document type">
-                    <Select value={form.identityDocumentType} onValueChange={(v) => update("identityDocumentType", v as FormState["identityDocumentType"])}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                            {IDENTITY_DOCUMENT_TYPES.map((d) => (
-                                <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </Field>
-                <Field label="Document number">
-                    <Input value={form.identityDocumentNumber} onChange={(e) => update("identityDocumentNumber", e.target.value)} placeholder="e.g. A1234567" />
-                </Field>
-                <DocumentPicker label={form.identityDocumentType === "passport" ? "Document scan" : "Document scan (front)"} file={front} onChange={setFront} />
-                {form.identityDocumentType !== "passport" ? (
-                    <DocumentPicker label="Document scan (back)" file={back} onChange={setBack} />
+                {stepIndex > 0 ? (
+                    <Button fullWidth variant="ghost" onClick={goBack}>
+                        Back
+                    </Button>
                 ) : null}
             </div>
-
-            <Button fullWidth variant="primary" loading={isPending} onClick={handleSubmit}>
-                {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Building2 className="mr-2 h-4 w-4" />}
-                Submit verification
-            </Button>
         </div>
     );
 

@@ -93,7 +93,7 @@ export function BridgeTosConsent({
                     <Check className="h-3.5 w-3.5 text-white" />
                 </span>
                 <p className="text-sm text-ink">
-                    <span className="font-semibold">Bridge&apos;s Terms of Service</span>, accepted
+                    <span className="font-semibold">Foreign account Terms of Service</span>, accepted
                 </p>
             </div>
         );
@@ -108,7 +108,7 @@ export function BridgeTosConsent({
             >
                 <span className={cn("mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-amber-400 bg-white dark:bg-gray-900")} />
                 <span className="text-sm text-ink">
-                    I agree to <span className="font-semibold text-violet-600 underline underline-offset-2">Bridge&apos;s Terms of Service</span>
+                    I agree to the <span className="font-semibold text-violet-600 underline underline-offset-2">Terms of Service</span> for foreign accounts
                     <span className="block text-xs text-muted mt-0.5">Tap to review and accept. Opens right here, no new tab.</span>
                 </span>
             </button>
@@ -117,12 +117,12 @@ export function BridgeTosConsent({
                 <Modal
                     open={tosOpen}
                     onOpenChange={setTosOpen}
-                    title="Bridge terms of service"
+                    title="Terms of service"
                     description="Accept the terms below. This closes automatically once it's done."
                     size="lg"
                 >
                     <div className="h-[65vh] max-h-[600px] w-full overflow-hidden rounded-lg border border-border">
-                        <iframe src={customer.tosLink} title="Bridge terms of service" className="h-full w-full" />
+                        <iframe src={customer.tosLink} title="Terms of service" className="h-full w-full" />
                     </div>
                 </Modal>
             ) : null}
