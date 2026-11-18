@@ -40,7 +40,7 @@ export function BottomNav() {
     return (
         <nav
             ref={navRef}
-            className="fixed inset-x-4 z-50 flex items-center justify-between rounded-[32px] border border-border/50 bg-white/80 p-1.5 backdrop-blur-[20px] shadow-[0_8px_24px_rgba(0,0,0,0.12)] lg:hidden"
+            className="fixed inset-x-4 z-50 flex items-center justify-between rounded-[32px] border border-border/50 bg-white/80 dark:bg-[#1B1822]/80 p-1.5 backdrop-blur-[20px] shadow-[0_8px_24px_rgba(0,0,0,0.12)] lg:hidden"
             style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}
         >
             {BOTTOM_NAV.map((item) => {
