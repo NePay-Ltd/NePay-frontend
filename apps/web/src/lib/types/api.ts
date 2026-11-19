@@ -753,8 +753,7 @@ export interface CreateBridgeExternalAccountDto {
     usBankName?: string;
     // EUR (SEPA)
     iban?: string;
-    /** ISO 3166-1 alpha-3 — the IBAN issuing country. */
-    ibanCountry?: string;
+    // No ibanCountry — derived server-side from the IBAN itself, never sent.
     bic?: string;
     // GBP (Faster Payments)
     gbAccountNumber?: string;
