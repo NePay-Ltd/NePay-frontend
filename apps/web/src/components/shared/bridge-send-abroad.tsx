@@ -363,7 +363,7 @@ export function AddRecipientModal({
     const handleSubmit = () => {
         const requiredByCurrency: Record<Exclude<BridgePayoutCurrency, "COP">, (keyof RecipientForm)[]> = {
             USD: ["usAccountNumber", "usRoutingNumber", "usStreetLine1", "usCity", "usState", "usPostalCode"],
-            EUR: ["iban", "ibanCountry"],
+            EUR: ["iban"],
             GBP: ["gbAccountNumber", "gbSortCode"],
             MXN: ["mxnClabe"],
         };
@@ -497,9 +497,6 @@ export function AddRecipientModal({
                         <p className="text-xs font-bold uppercase tracking-widest text-muted">Bank details (EUR)</p>
                         <Field label="IBAN">
                             <Input value={form.iban ?? ""} onChange={(e) => update("iban", e.target.value.toUpperCase())} />
-                        </Field>
-                        <Field label="IBAN country" hint="ISO 3-letter code, e.g. IRL, DEU, FRA">
-                            <Input value={form.ibanCountry ?? ""} onChange={(e) => update("ibanCountry", e.target.value.toUpperCase())} maxLength={3} />
                         </Field>
                         <Field label="BIC / SWIFT (optional)">
                             <Input value={form.bic ?? ""} onChange={(e) => update("bic", e.target.value.toUpperCase())} />
