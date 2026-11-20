@@ -154,6 +154,14 @@ export default function TransferPage() {
 
     // ── Bank Account State ──
     const [bankCode, setBankCode] = React.useState("");
+    // Set directly wherever a bank is chosen (saved account, repeat transfer,
+    // or the live picker) — never derived by re-matching bankCode against
+    // bankList. That re-match used to gate the whole confirm flow, and
+    // silently broke it for a saved beneficiary whose bank wasn't in
+    // whatever bank list happened to be loaded (e.g. Nomba's list has 37
+    // fewer entries than VFD's — confirmed live 2026-11-20), since the
+    // backend's own resolveAccount call never depended on that list at all.
+    const [bankName, setBankName] = React.useState("");
     const [accountNumber, setAccountNumber] = React.useState("");
     const [resolvedName, setResolvedName] = React.useState("");
     const [saveAccount, setSaveAccount] = React.useState(true);
@@ -217,7 +225,6 @@ export default function TransferPage() {
             transform: "translate(-50%, -50%)",
         };
     
-    const selectedBank = bankList.find(b => b.bankCode === bankCode);
     const filteredBankList = React.useMemo(() => {
         const q = bankSearchQuery.trim().toLowerCase();
         if (!q) return bankList;
@@ -253,6 +260,7 @@ export default function TransferPage() {
             .then((r) => {
                 if (cancelled) return;
                 setBankCode(r.bankCode);
+                setBankName(r.bankName ?? "");
                 setAccountNumber(r.accountNumber);
                 const amount = Number(r.amount);
                 if (Number.isFinite(amount) && amount > 0) form.setValue("amount", amount, { shouldValidate: true });
@@ -279,6 +287,7 @@ export default function TransferPage() {
 
     const handleSelectSavedAccount = (acc: any) => {
         setBankCode(acc.bankCode);
+        setBankName(acc.bankName);
         setAccountNumber(acc.accountNumber);
         setResolvedName(acc.accountName);
     };
@@ -300,7 +309,15 @@ export default function TransferPage() {
     };
 
     const handlePinSubmit = (pin: string) => {
-        if (!resolutionToken || !selectedBank) return;
+        // Only resolutionToken/bankCode/accountNumber actually matter for the
+        // transfer itself — bankName is cosmetic. Never silently no-op: a
+        // payment screen that does nothing when clicked, with no feedback,
+        // is exactly the bug this replaces (confirmed live 2026-11-20).
+        if (!resolutionToken || !bankCode || !accountNumber) {
+            toast.error("Something went wrong with this transfer. Please start over.");
+            setTxState("error");
+            return;
+        }
         setTxState("processing");
         initiateMutation.mutate(
             {
@@ -408,8 +425,8 @@ export default function TransferPage() {
                                                     type="button"
                                                     className="hidden h-12 w-full items-center justify-between rounded-md border border-border bg-white px-3 text-sm hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 md:flex"
                                                 >
-                                                    <span className={selectedBank ? "text-ink" : "text-muted"}>
-                                                        {selectedBank ? selectedBank.bankName : "Select a bank"}
+                                                    <span className={bankName ? "text-ink" : "text-muted"}>
+                                                        {bankName || "Select a bank"}
                                                     </span>
                                                     <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
                                                 </button>
@@ -440,6 +457,7 @@ export default function TransferPage() {
                                                                     )}
                                                                     onClick={() => {
                                                                         setBankCode(b.bankCode);
+                                                                        setBankName(b.bankName);
                                                                         setBankPickerOpen(false);
                                                                         setBankSearchQuery("");
                                                                     }}
@@ -458,8 +476,8 @@ export default function TransferPage() {
                                                     type="button"
                                                     className="flex h-12 w-full items-center justify-between rounded-md border border-border bg-white px-3 text-sm hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 md:hidden"
                                                 >
-                                                    <span className={selectedBank ? "text-ink" : "text-muted"}>
-                                                        {selectedBank ? selectedBank.bankName : "Select a bank"}
+                                                    <span className={bankName ? "text-ink" : "text-muted"}>
+                                                        {bankName || "Select a bank"}
                                                     </span>
                                                     <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
                                                 </button>
@@ -496,6 +514,7 @@ export default function TransferPage() {
                                                                 )}
                                                                 onClick={() => {
                                                                     setBankCode(b.bankCode);
+                                                                    setBankName(b.bankName);
                                                                     setBankPickerOpen(false);
                                                                     setBankSearchQuery("");
                                                                 }}
@@ -756,7 +775,7 @@ export default function TransferPage() {
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted">To</span>
                                 <span className="font-medium text-ink text-right">
-                                    {selectedBank?.bankName}<br/>
+                                    {bankName}<br/>
                                     <span className="text-xs text-body font-mono">{maskAccount(accountNumber)}</span>
                                 </span>
                             </div>
@@ -803,7 +822,7 @@ export default function TransferPage() {
                     <p>
                         We&apos;re sending <span className="font-bold">{formatNaira(watchAmount)}</span> to{" "}
                         <span className="font-bold">{resolvedName}</span>
-                        {selectedBank ? ` (${selectedBank.bankName})` : ""}. Most transfers arrive within a few minutes.
+                        {bankName ? ` (${bankName})` : ""}. Most transfers arrive within a few minutes.
                         We&apos;ll notify you when it lands, so you can safely close this.
                     </p>
                 }
